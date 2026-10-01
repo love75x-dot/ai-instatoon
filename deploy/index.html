@@ -202,6 +202,10 @@ details.more label.f:first-child{margin-top:0}
 .endpv .epls{display:grid;gap:3px;font-size:10px}.endpv .epb{padding:5px 13px;border-radius:99px;font-weight:800;font-size:10.5px}
 .endpr{margin-top:12px}.endpr summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--ink-2)}
 @media (max-width:640px){.endwrap{grid-template-columns:1fr}.endside{position:static;order:-1;max-width:240px}}
+.btn.copied{background:#e6f6ec;border-color:#2e9e5b;color:#17703c;font-weight:800}
+.guide li.copied-box{border-color:#2e9e5b;background:linear-gradient(0deg,rgba(46,158,91,.05),rgba(46,158,91,.05))}
+.guide li.copied-box .gh b::after{content:' · 복사함 ✓';color:#17703c;font-size:12px;font-weight:700}
+.tip.copied-box,.alt-row.copied-box{opacity:.85}
 .side-cap{font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--muted);text-align:center;margin:0 0 10px}
 .ig-top{display:flex;align-items:center;gap:8px;padding:2px 4px 10px}
 .ava{width:30px;height:30px;border-radius:50%;background:var(--ink);color:var(--surface);display:grid;place-items:center;font-size:13px;font-weight:800;flex:none}
@@ -537,6 +541,14 @@ function load(){
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toast.t); toast.t=setTimeout(()=>t.classList.remove('show'),2400); }
+const COPIED=(()=>{ try{ return new Set(JSON.parse(localStorage.getItem('instatoon.copied')||'[]')); }catch(_){ return new Set(); } })();
+function saveCopied(){ try{ localStorage.setItem('instatoon.copied',JSON.stringify([...COPIED])); }catch(_){} }
+function applyCopied(){ document.querySelectorAll('[data-copy]').forEach(b=>{ const on=COPIED.has(b.dataset.copy), has=b.classList.contains('copied'), box=b.closest('li,.tip,.alt-row');
+  if(on&&!has){ b.dataset.label=b.textContent; b.classList.add('copied'); b.textContent='✓ 복사함'; if(box) box.classList.add('copied-box'); }
+  else if(!on&&has){ b.classList.remove('copied'); b.textContent=b.dataset.label||'복사'; if(box) box.classList.remove('copied-box'); } }); }
+function markCopied(b){ COPIED.add(b.dataset.copy); saveCopied(); applyCopied(); }
+function resetCopied(){ COPIED.clear(); saveCopied(); applyCopied(); }
+{ let q=0; new MutationObserver(()=>{ if(q) return; q=setTimeout(()=>{ q=0; applyCopied(); },30); }).observe(document.body,{childList:true,subtree:true}); }
 async function copy(text){
   try{ await navigator.clipboard.writeText(text); toast('복사했어요'); }
   catch(_){ const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); toast('복사했어요'); }catch(__){ toast('복사가 막혀 있어요. 직접 선택해 주세요'); } ta.remove(); }
@@ -652,10 +664,10 @@ ${RULES_FN()}
   extras: 살릴 디테일 한 줄. 그림으로만 표현할 것(땀방울, 반짝이, 집중선)은 그냥 쓰고, 글자로 넣을 손글씨 의성어만 작은따옴표로 감싸기(예: 땀방울, 반짝이, 손글씨 '두근'). 없으면 ""
 - hooks: 1컷 제목 후보 3개(두 줄, \\n 구분). hooks[0]은 cuts[0].title과 같게
 - caption: 인스타 캡션. 첫 줄은 "더 보기"를 누르게 하는 한 줄, 이어서 3~4줄, 마지막 줄 행동 유도. 이모지 2~3개
-- hashtags: 해시태그 ${Math.max(2,5-tagList(prof().tags).length)}개(인스타는 게시물당 5개까지만 반영). 동네·업종·이번 편 주제에 딱 맞는 구체적인 것, 공백 구분${prof().tags.trim()?`. 가게 고정 해시태그(${prof().tags})와 겹치지 않게`:''}
+- hashtags: 해시태그 정확히 ${tagSlots()}개(인스타는 게시물당 5개까지만 반영돼요. 가게 고정 해시태그 ${fixedTags().length}개가 앞에 붙어 합계 5개가 되니, 더도 덜도 말고 ${tagSlots()}개만). 동네·업종·이번 편 주제에 딱 맞는 구체적인 것, 공백 구분${prof().tags.trim()?`. 가게 고정 해시태그(${prof().tags})와 겹치지 않게`:''}
 - comment: 댓글 유도 질문 1개와 사장님 고정 댓글 1개, 줄바꿈 구분
 - reelCaption: 같은 웹툰을 릴스 영상으로 올릴 때의 캡션. 게시물 caption과 다르게 새로. 첫 줄은 20자 이내 궁금증(결말 스포일러 금지), 2~3줄, 마지막 줄은 "전체 이야기는 프로필 게시물에서" 같은 안내. 이모지 1~2개
-- reelHashtags: 릴스용 해시태그 5개 이내, 공백 구분. 동네·업종 + 릴스 추천에 맞는 조금 넓은 주제 1~2개
+- reelHashtags: 릴스용 해시태그 정확히 ${tagSlots()}개(고정 해시태그 ${fixedTags().length}개와 합쳐 5개), 공백 구분. 동네·업종 + 릴스 추천에 맞는 조금 넓은 주제 1~2개
 - reelComment: 릴스 고정 댓글 1개(다음 편 예고나 가벼운 질문)
 - endHead: 웹툰 맨 뒤 가게 안내 카드의 큰 문구. 이번 편 이야기와 이어지게 두 줄(\n 구분), 한 줄 10자 이내, 광고 단어 금지
 - endBtn: 안내 카드 버튼 문구 12자 이내(손님이 할 행동, 예: 프로필 링크에서 예약)
@@ -665,7 +677,7 @@ JSON 하나로만 답해: {"title":"","tone":"","cuts":[{"role":"","shot":"","ti
   try{
     const r=await ask(prompt,st);
     S.toon={title:String(r.title||'이번 편'),tone:String(r.tone||''),cuts:(r.cuts||[]).slice(0,10).map(normCut),hooks:(r.hooks||[]).map(fixNL).filter(Boolean).slice(0,4),hookIdx:0,
-      caption:String(r.caption||''),hashtags:Array.isArray(r.hashtags)?r.hashtags.join(' '):String(r.hashtags||''),comment:String(r.comment||''),reel:{caption:String(r.reelCaption||''),hashtags:Array.isArray(r.reelHashtags)?r.reelHashtags.join(' '):String(r.reelHashtags||''),comment:String(r.reelComment||'')},endHead:fixNL(r.endHead||''),endBtn:String(r.endBtn||''),cast:String(r.cast||''),ideas:(r.ideas||[]).map(String).slice(0,3)};
+      caption:String(r.caption||''),hashtags:fitTags(r.hashtags),comment:String(r.comment||''),reel:{caption:String(r.reelCaption||''),hashtags:fitTags(r.reelHashtags||''),comment:String(r.reelComment||'')},endHead:fixNL(r.endHead||''),endBtn:String(r.endBtn||''),cast:String(r.cast||''),ideas:(r.ideas||[]).map(String).slice(0,3)};
     S.check=null; pv=0; openCut=0; S.step='edit'; save(); render(); window.scrollTo({top:0,behavior:'smooth'}); toast('완성! 오른쪽에서 넘겨 보세요');
   }catch(_){}
 }
@@ -1133,7 +1145,8 @@ function letterHTML(){
 function refreshLetter(full){ applyFontVars(); if(full){ const lb=$('#letterBox'); if(lb){ const g=$('#fgrid'), st=g?g.scrollTop:0; lb.innerHTML=letterHTML(); const g2=$('#fgrid'); if(g2) g2.scrollTop=st; } }
   else { document.querySelectorAll('[data-font]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.font===fontOf(fontTab))); document.querySelectorAll('[data-ftab]').forEach(x=>x.textContent=`${FONT_ROLES[x.dataset.ftab]} · ${fontOf(x.dataset.ftab)}`); }
   const gb=$('#guideBox'); if(gb) gb.innerHTML=guideHTML(); drawAll(); renderPhone(); }
-function guideHTML(){ const cs=cuts(); return `    <ol class="guide">
+function guideHTML(){ const cs=cuts(); return `    <div class="row" style="margin-bottom:8px"><span class="status">ChatGPT에 보낸 항목은 <b>✓ 복사함</b>으로 표시돼요</span><button class="btn sm ghost" data-act="copyReset" style="margin-left:auto">표시 지우기</button></div>
+    <ol class="guide">
       ${peopleIdx().map(k=>`<li><div class="gh"><b>${whoLabel(k)} 캐릭터 만들기</b><span class="tag">처음 한 번만</span><button class="btn sm" data-copy="sheet-${k}">복사</button></div>
         <p>${getPhoto(k)?`<b>1단계에서 올린 사진을 첨부</b>하고 보내세요. `:''}마음에 드는 결과가 나오면 <b>이미지를 저장</b>해 두세요. 이미 캐릭터 이미지가 있으면 건너뛰어요.</p>
         <pre>${esc(sheetPrompt(k))}</pre></li>`).join('')}
@@ -1143,14 +1156,7 @@ function guideHTML(){ const cs=cuts(); return `    <ol class="guide">
       ${cs.map((c,i)=>`<li><div class="gh"><b>${i+1}컷 그리기</b><span class="tag">${esc(c.role)}</span><button class="btn sm" data-copy="cut-${i}">복사</button></div><pre>${esc(cutPrompt(c,i))}</pre></li>`).join('')}
       ${endLi()}
     </ol>
-    <div class="tips">
-      <b>이럴 땐 이렇게 보내세요</b>
-      <div class="tip"><span>캐릭터 얼굴이나 옷이 달라졌을 때</span><button class="btn sm" data-copy="fixchar">복사</button></div>
-      <div class="tip"><span>비율이 다르게 나왔을 때 (그냥 올려도 사이트가 맞춰 줘요)</span><button class="btn sm" data-copy="fixratio">복사</button></div>
-      ${withText()?`<div class="tip"><span>글자가 틀리게 나왔을 때</span><button class="btn sm" data-copy="fixtypo">복사</button></div><div class="tip"><span>글자 모양이 1컷과 다를 때</span><button class="btn sm" data-copy="fixstyle">복사</button></div>`:`<div class="tip"><span>그림에 글자가 들어갔을 때</span><button class="btn sm" data-copy="fixtext">복사</button></div>`}
-      <div class="tip"><span>다른 문제가 생겼을 때</span><button class="btn sm" data-act="trouble">막힐 때 보기</button></div>
-      <p>한 메시지에 한 컷만 보내야 캐릭터가 덜 흔들려요. 대화가 길어져 캐릭터가 계속 바뀌면 새 대화창을 열고 규칙 알려주기부터 다시 시작하세요.</p>
-    </div>
+    <p class="sub" style="margin-top:12px">한 메시지에 한 컷만 보내세요. 그림이 이상하게 나오면 위쪽 <b>"막힐 때 보기"</b>에서 보낼 문장을 복사해 쓰세요.</p>
 
 `; }
 function vPost(){
@@ -1169,7 +1175,7 @@ function vPost(){
 
     ${kitHTML()}
 
-    <div class="actions"><button class="btn ghost" data-step="edit">← 대본 다듬기</button><span class="grow"></span><button class="btn acc" data-act="next">같은 가게로 다음 편 만들기</button></div>
+    <div class="actions"><button class="btn ghost" data-step="edit">← 대본 다듬기</button><span class="grow"></span><button class="btn acc" data-act="next">다음 편 만들기 (등장인물 유지)</button></div>
   </section>`;
   kitCounters();
 }
@@ -1188,6 +1194,11 @@ async function addPics(files,kind){ resetReel(); const L=listOf(kind); if(kind!=
 
 /* ================= 게시 준비 키트 ================= */
 const IG_CAP=2200, IG_TAGS=5;
+const fixedTags=()=>tagList(prof().tags);
+const tagSlots=()=>Math.max(0,IG_TAGS-fixedTags().length);
+function fitTags(v){ const fx=new Set(fixedTags()), k=tagSlots(); const own=tagList(Array.isArray(v)?v.join(' '):v).filter(t=>!fx.has(t));
+  const pad=[S.info.type,S.info.name,'인스타툰','웹툰','일상툰'].map(x=>String(x||'').replace(/[\s·.,#]+/g,'')).filter(Boolean).map(x=>'#'+x);
+  return [...new Set([...own,...pad])].filter(t=>!fx.has(t)).slice(0,k).join(' '); }
 const tagList=t=>[...new Set(String(t||'').split(/[\s,]+/).map(x=>x.trim().replace(/^#+/,'')).filter(Boolean).map(x=>'#'+x))];
 const allTags=()=>[...new Set([...tagList(prof().tags),...tagList(S.toon?.hashtags)])];
 function finalCaption(){ const cta=prof().cta.trim(); let c=String(S.toon?.caption||'').trim(); if(cta&&!c.includes(cta)) c+=(c?'\n\n':'')+cta; return c; }
@@ -1525,9 +1536,9 @@ async function makeReelText(){ const st=$('#st-rt');
   const prompt=`너는 동네 가게 인스타 담당이야. 이 인스타툰을 그림이 한 장씩 넘어가는 릴스 영상으로도 올려. 릴스에 붙일 글을 써 줘.
 ${infoBlock()}
 ${S.toon?`[웹툰 대본]\n${toonText()}\n[게시물 캡션 - 이것과 겹치지 않게]\n${S.toon.caption||'(없음)'}`:`[영상 제목] ${reelTitle()||'(없음)'}`}
-규칙: caption은 첫 줄 20자 이내 궁금증(결말 스포일러 금지), 모두 2~3줄, 마지막 줄은 "전체 이야기는 프로필 게시물에서" 같은 안내. 이모지 1~2개. hashtags는 5개 이내, 공백 구분, 동네·업종 + 릴스 추천에 맞는 조금 넓은 주제 1~2개. comment는 릴스 고정 댓글 1개(다음 편 예고나 가벼운 질문). 광고 단어·과장 표현 금지, 가게 정보에 없는 사실은 지어내지 않기.
+규칙: caption은 첫 줄 20자 이내 궁금증(결말 스포일러 금지), 모두 2~3줄, 마지막 줄은 "전체 이야기는 프로필 게시물에서" 같은 안내. 이모지 1~2개. hashtags는 정확히 ${tagSlots()}개(가게 고정 해시태그와 합쳐 5개), 공백 구분, 동네·업종 + 릴스 추천에 맞는 조금 넓은 주제 1~2개. comment는 릴스 고정 댓글 1개(다음 편 예고나 가벼운 질문). 광고 단어·과장 표현 금지, 가게 정보에 없는 사실은 지어내지 않기.
 JSON 하나로만 답해: {"caption":"","hashtags":"","comment":""}`;
-  try{ const r=await ask(prompt,st,'릴스 글 쓰는 중',null,'quick'); const R=rt(); R.caption=String(r.caption||''); R.hashtags=Array.isArray(r.hashtags)?r.hashtags.join(' '):String(r.hashtags||''); R.comment=String(r.comment||''); save(); vReels(); toast('릴스용 글을 만들었어요'); }catch(_){} }
+  try{ const r=await ask(prompt,st,'릴스 글 쓰는 중',null,'quick'); const R=rt(); R.caption=String(r.caption||''); R.hashtags=fitTags(r.hashtags); R.comment=String(r.comment||''); save(); vReels(); toast('릴스용 글을 만들었어요'); }catch(_){} }
 
 /* ================= 반응 기록 ================= */
 const SKEYS=[['reach','도달'],['like','좋아요'],['cmt','댓글'],['save','저장'],['share','공유']];
@@ -1647,7 +1658,7 @@ function goTodo(){ const t=todoInfo(); const el=t&&t.go&&document.querySelector(
 const FIX_LABEL='그림에 제가 드리지 않은 글자가 들어갔어요. 인물 옆 이름·나이·역할 글자, 영어, 간판·메뉴판·화면 속 지어낸 글자를 모두 지우고, 제가 따옴표로 드린 문구만 남긴 같은 장면으로 다시 그려 주세요.';
 const FIX_DRAW=()=>`설명 말고 이미지로 그려 주세요. 방금 드린 장면을 ${ratioText()} 그림 한 장으로 만들어 주세요.`;
 const TROUBLE=()=>[
-  {q:'캐릭터 얼굴·머리·옷이 컷마다 달라져요',why:'대화가 길어지면 AI가 처음 첨부한 캐릭터를 흐리게 기억해요. 캐릭터 이미지를 첨부하지 않았을 때도 그래요.',fix:['아래 문장을 보내서 그 컷만 다시 그리게 하세요.','그래도 계속 달라지면 새 대화창을 열고 "규칙 알려주기"부터 다시 해요. 이때 캐릭터 이미지와 잘 나온 1컷을 같이 첨부하세요.',STANDALONE?'파일 버전은 "주인공 기준 이미지"가 마음에 드는지 먼저 확인하세요. 모든 컷이 그 얼굴을 따라가요.':'한 메시지에 한 컷씩만 보내야 덜 흔들려요.'],copy:'fixchar'},
+  {q:'캐릭터 얼굴·머리·옷이 컷마다 달라져요',why:'대화가 길어지면 AI가 처음 첨부한 캐릭터를 흐리게 기억해요. 캐릭터 이미지를 첨부하지 않았을 때도 그래요.',fix:['아래 문장을 보내서 그 컷만 다시 그리게 하세요. (한 메시지에는 한 컷만 보내야 덜 흔들려요)','그래도 계속 달라지면 새 대화창을 열고 "규칙 알려주기"부터 다시 해요. 이때 캐릭터 이미지와 잘 나온 1컷을 같이 첨부하세요.',STANDALONE?'파일 버전은 "주인공 기준 이미지"가 마음에 드는지 먼저 확인하세요. 모든 컷이 그 얼굴을 따라가요.':'한 메시지에 한 컷씩만 보내야 덜 흔들려요.'],copy:'fixchar'},
   {q:'한글 글자가 틀리거나 깨져서 나와요',why:'이미지 AI는 긴 문장과 받침 많은 글자에 약해요.',fix:['아래 문장을 보내 글자만 다시 넣게 하세요.','"대본 다듬기"에서 한 줄을 12자 이하로 줄이면 훨씬 덜 틀려요.','그래도 한두 글자가 틀리면 같은 대화창에서 그 컷만 다시 그리게 하는 게 가장 빨라요.'],copy:'fixtypo'},
   {q:'그림 비율이 컷마다 다르거나 이상해요',why:'Gemini·ChatGPT가 가끔 비율을 무시하고 그려요.',fix:['그냥 올려도 괜찮아요. 올리는 순간 정해 둔 비율로 맞춰서 저장돼요.','가장자리가 잘리는 게 싫으면 "전체 보이기", 여백이 싫으면 "꽉 채우기"를 고르세요.','다시 그리게 하고 싶으면 아래 문장을 보내세요.'],copy:'fixratio'},
   {q:'글자 모양이 1컷과 달라요',why:'컷마다 새로 그리다 보니 글씨체·크기가 조금씩 바뀌어요.',fix:['아래 문장과 함께 완성된 1컷 그림을 첨부해서 보내세요.','글자 모양은 고른 테마에 맞게 모든 컷 프롬프트에 똑같이 들어가 있어요.'],copy:'fixstyle'},
@@ -1843,7 +1854,7 @@ document.addEventListener('click',async e=>{
   if(b.dataset.cuts){ S.info.cuts=+b.dataset.cuts; save(); document.querySelectorAll('[data-cuts]').forEach(c=>c.setAttribute('aria-pressed',+c.dataset.cuts===S.info.cuts)); return renderPhone(); }
   if(b.dataset.hook){ const k=+b.dataset.hook,c0=cuts()[0]; S.toon.hookIdx=k; c0.title=S.toon.hooks[k]; if(c0.highlight&&!c0.title.includes(c0.highlight)) c0.highlight=''; pv=0; openCut=0; save(); vEdit(); return renderPhone(); }
   if(b.dataset.fix){ const f=S.check.fixes[+b.dataset.fix],c=cuts()[(+f.cut)-1]; if(c&&['title','bubble','sub','sfx'].includes(f.field)){ c[f.field]=f.after; if(f.field==='title'&&c.highlight&&!f.after.includes(c.highlight)) c.highlight=''; f.applied=true; pv=(+f.cut)-1; save(); vEdit(); renderPhone(); toast(`${f.cut}컷에 반영했어요`); } return; }
-  if(b.dataset.copy){ const T=S.toon||{}; const k=b.dataset.copy; if(k.startsWith('sheet-')) return copy(sheetPrompt(+k.slice(6))); if(k.startsWith('alt-')){ const i=+k.slice(4); return copy(altOf(cuts()[i],i)); } if(k.startsWith('cut-')){ const i=+k.slice(4); return copy(cutPrompt(cuts()[i],i)); } return copy({caption:T.caption,hashtags:T.hashtags,comment:T.comment,script:toonText(),sheet:sheetPrompt(),setup:setupPrompt(),fixchar:FIX_CHAR,fixtext:FIX_TEXT,fixtypo:FIX_TYPO,fixratio:FIX_RATIO(),fixstyle:FIX_STYLE,fixlabel:FIX_LABEL,fixdraw:FIX_DRAW(),endp:endPrompt()}[k]||''); }
+  if(b.dataset.copy){ markCopied(b); const T=S.toon||{}; const k=b.dataset.copy; if(k.startsWith('sheet-')) return copy(sheetPrompt(+k.slice(6))); if(k.startsWith('alt-')){ const i=+k.slice(4); return copy(altOf(cuts()[i],i)); } if(k.startsWith('cut-')){ const i=+k.slice(4); return copy(cutPrompt(cuts()[i],i)); } return copy({caption:T.caption,hashtags:T.hashtags,comment:T.comment,script:toonText(),sheet:sheetPrompt(),setup:setupPrompt(),fixchar:FIX_CHAR,fixtext:FIX_TEXT,fixtypo:FIX_TYPO,fixratio:FIX_RATIO(),fixstyle:FIX_STYLE,fixlabel:FIX_LABEL,fixdraw:FIX_DRAW(),endp:endPrompt()}[k]||''); }
   if(b.dataset.mode2){ S.mode=b.dataset.mode2; if(b.dataset.src) ru().src=b.dataset.src; save(); render(); window.scrollTo({top:0,behavior:'smooth'}); return; }
   if(b.dataset.ym){ mo().ym=b.dataset.ym; save(); return vMonth(); }
   if(b.dataset.freq){ mo().freq=+b.dataset.freq; save(); return vMonth(); }
@@ -1874,11 +1885,12 @@ document.addEventListener('click',async e=>{
   const a=b.dataset.act; if(!a) return;
   if(a==='logoUp'){ const inp=document.createElement('input'); inp.type='file'; inp.accept='image/png,image/jpeg,image/webp'; inp.onchange=async()=>{ const fl=inp.files[0]; if(!fl) return; try{ prof().logo=await fileToLogo(fl); save(); render(); toast('로고를 저장했어요'); }catch(_){ toast('이미지를 읽지 못했어요. PNG나 JPG 파일을 골라 주세요'); } }; inp.click(); return; }
   if(a==='logoDel'){ prof().logo=''; save(); render(); return; }
-  if(a==='make') return run(b,()=>makeToon());
+  if(a==='copyReset'){ resetCopied(); toast('복사 표시를 지웠어요'); return; }
+  if(a==='make'){ resetCopied(); return run(b,()=>makeToon()); }
   if(a==='adMake') return run(b,()=>adMake());
   if(a==='adCopy') return copy(adS().table);
   if(a==='adToStory'){ const x=adS(), i=S.info; i.story=(i.story.trim()?i.story.trimEnd()+'\n\n':'')+'[광고 콘티 10P 참고]\n'+x.table; if(!i.target.trim()) i.target=x.target; if(!i.offer.trim()) i.offer=x.benefit; save(); toast('이야기 칸에 넣었어요'); return vInput(); }
-  if(a==='remake') return run(b,()=>makeToon());
+  if(a==='remake'){ resetCopied(); return run(b,()=>makeToon()); }
   if(a==='blank') return blankToon();
   if(a==='tReset'){ Object.assign(S.info,{titleScale:100,titleColor:'',tOutline:'',tShadow:undefined,tTilt:0,hl:'marker',hlColor:''}); save(); return refreshLetter(true); }
   if(a==='fontUp'){ return $('#fontIn').click(); }
@@ -1921,7 +1933,7 @@ document.addEventListener('click',async e=>{
   if(a==='zip') return run(b,async()=>{ const ok=await makeZip(); if(ok&&S.toon){ S.toon.zipped=true; await recordDone(); save(); renderTodo(); } });
   if(a==='rewrite') return run(b,()=>rewriteCut(+b.dataset.i));
   if(a==='review') return run(b,review);
-  if(a==='next'){ S.info.story=''; S.toon=null; S.check=null; S.planRef=null; pv=0; save(); go('input'); toast('다음 편 이야기를 적어 주세요'); }
+  if(a==='next'){ resetCopied(); S.info.story=''; S.toon=null; S.check=null; S.planRef=null; pv=0; save(); go('input'); toast('다음 편 이야기를 적어 주세요. 등장인물은 그대로이고, 바꾸거나 추가할 수 있어요'); }
 });
 document.addEventListener('toggle',e=>{ const d=e.target; if(d.classList?.contains('cut')&&d.open){ openCut=+d.dataset.cut; pv=openCut; renderPhone(); } },true);
 document.addEventListener('input',e=>{
