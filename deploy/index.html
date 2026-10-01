@@ -116,6 +116,10 @@ h2.sec{font-size:17px;font-weight:800;margin:30px 0 4px;letter-spacing:-.01em}
 .story label.f{margin-top:0;font-size:16px}
 .story p{margin:0 0 10px;color:var(--muted);font-size:13.5px}
 .story .in{background:var(--surface)}
+.who-in{margin-top:6px;padding:6px 10px;font-size:13px}
+.qa-guide{margin:0 0 10px;font-size:13.5px}.qa-guide summary{cursor:pointer;font-weight:700}
+.qa-ex{background:var(--surface);border-radius:8px;padding:12px;margin-top:8px;display:grid;gap:10px;line-height:1.55}
+.adtbl{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px}.adtbl th,.adtbl td{border:1px solid var(--line-2);padding:6px 8px;vertical-align:top;text-align:left}.adtbl th{background:var(--sunken)}
 details.more{margin-top:18px;border:1px solid var(--line);border-radius:12px;padding:0 16px}
 details.more summary{cursor:pointer;padding:13px 0;font-weight:800;font-size:14px;list-style:none;display:flex;justify-content:space-between}
 details.more summary::-webkit-details-marker{display:none}
@@ -425,17 +429,18 @@ details.more label.f:first-child{margin-top:0}
 <script>
 /* ================= 데이터 ================= */
 const STEPS=[
-  {id:'input', t:'가게 이야기 적기', d:'업종만 골라도 돼요'},
+  {id:'input', t:'내 이야기 적기', d:'분야만 골라도 돼요'},
   {id:'edit',  t:'대본 다듬기',     d:'AI가 만든 컷을 보고 고쳐요'},
   {id:'post',  t:'그림·저장·올리기', d:'그림 받아서 저장하고 올리기'},
 ];
-const INDUSTRIES=['카페','식당','미용실','네일·뷰티','사진관','꽃집','학원','운동·필라테스','병원·약국','공방·클래스','반려동물','부동산'];
+const INDUSTRIES=['카페','식당','미용실','네일·뷰티','사진관','꽃집','학원','운동·필라테스','병원·약국','공방·클래스','반려동물','부동산','프리랜서','디자인·영상','온라인 쇼핑몰','회사·브랜드','강사·코칭','앱·IT 서비스'];
 const QUESTIONS=[
-  '가장 기억에 남는 손님은 누구였나요?',
-  '손님에게 제일 많이 듣는 말이나 질문은?',
-  '가장 아찔했던 날은 언제였나요?',
-  '손님이 남긴 후기 중 기억나는 한마디는?',
-  '가게를 시작하게 된 계기는?',
+  {q:'언제, 어디서, 누구와 있었던 일인가요?',ex:'지난 금요일 밤 9시, 제 작업실에서 첫 의뢰 고객과 화상 미팅을 했어요.'},
+  {q:'그때 가장 당황했거나 아찔했던 순간은?',ex:'마감 하루 전날, 고객이 "전부 처음부터 다시요"라고 했어요.'},
+  {q:'어떻게 해결했나요? (한두 문장이면 충분해요)',ex:'백업해 둔 시안을 꺼내 밤새 고쳐서 아침 7시에 보냈어요.'},
+  {q:'그 사람(고객·동료·가족)이 한 말 중 기억나는 한마디는?',ex:'"이렇게 빨리 될 줄 몰랐어요. 다음에도 부탁드려요."'},
+  {q:'이 일 이후 달라진 점이나 결과는? (실제 있었던 것만)',ex:'그 고객이 단골이 돼서 지금은 한 달에 두세 건씩 맡겨 주세요.'},
+  {q:'이 일(가게·브랜드·서비스)을 시작하게 된 계기는?',ex:'회사 다니며 부업으로 그리다가, 친구 로고를 그려 준 게 시작이었어요.'},
 ];
 const TONES={
   auto:{name:'AI가 골라줘요',rule:'이야기에 가장 어울리는 톤을 스스로 골라. 실제 사건이 있으면 실화 스릴러나 뭉클 감동, 없으면 공감 일상이나 코믹을 우선.'},
@@ -444,9 +449,9 @@ const TONES={
   touching:{name:'뭉클한 감동',rule:'뭉클 감동 톤. 담담한 대사와 작은 디테일로 감정을 쌓고 끝에서 두 번째 컷에서 터지게. 효과음 최소.'},
   daily:{name:'공감 일상',rule:'공감 일상 톤. 손님이 겪는 흔한 상황을 구체적으로, "완전 내 얘기" 포인트를 살려서.'},
 };
-const ROLES=['사장님','직원','알바생','매니저'];
-const GENDERS=['여성','남성'];
-const AGES=['20대','30대','40대','50대','60대 이상'];
+const ROLES=['사장님','대표','직원','알바생','프리랜서','1인 사업자','담당자'];
+const GENDERS=['여성','남성','상관없음'];
+const AGES=['10대','20대','30대','40대','50대','60대 이상'];
 const ARTS={
   chibi:{name:'귀여운 2~3등신',letter:{title:'굵고 둥근 검은 고딕 제목체에 두꺼운 흰 외곽선',bubble:'흰 둥근 말풍선, 검은 테두리, 검은 둥근 고딕체',sfx:'빨간 굵은 글씨, 흰 외곽선, 살짝 기울임',hl:'강조 단어 아래 부드러운 노란 형광펜'},desc:'큰 머리·작은 몸, 굵은 외곽선, 부드러운 단색. 가장 무난한 인스타툰',prompt:'한국 인스타툰 치비 그림체. 머리가 크고 몸이 작은 2~3등신, 굵고 깔끔한 검은 외곽선, 부드러운 단색 채색, 볼터치, 과장되고 귀여운 표정.',bg:'배경은 연한 회색 톤으로 단순하게, 인물과 중요한 소품만 컬러로.'},
   mono:{name:'흑백 + 포인트 컬러',letter:{title:'검은 굵은 고딕 제목체, 위쪽 흰 여백에 깔끔하게',bubble:'흰 타원 말풍선, 가는 검은 테두리, 깔끔한 고딕체',sfx:'크고 거친 검은 붓글씨 효과음, 기울임',hl:'강조 단어만 굵게'},desc:'회색 톤 만화에 옷 하나만 파스텔 색. 감정 연출이 진해요',prompt:'흑백 한국 웹툰 그림체에 포인트 컬러 하나(주인공 옷만 연한 파스텔 색). 깔끔한 펜 선, 회색 톤과 스크린톤 음영, 4~5등신의 자연스러운 비율, 긴장하면 얼굴 그늘·세로 빗금, 놀라면 집중선. 표정 변화가 풍부하고 극적.',bg:'배경은 회색 톤 펜화로 자세히, 주인공 옷의 포인트 색만 컬러로.'},
@@ -539,13 +544,13 @@ const STORY_FLOW=`[잘 팔린 인스타툰의 흐름 - 컷 수에 맞게 줄이�
 - 마지막 컷: 들뜬 반응("얼마야!!!")과 쿨한 펀치라인("무료임;") + 화면이나 소품 속에 알릴 소식. 행동 유도는 여기서만.
 - 대사 톤: 짧은 구어체, 말줄임표, 반말 친구 대화 가능(가게 손님과는 존댓말). 속마음은 작은 손글씨로 따로.`;
 const RULES_FN=()=>`[인스타툰 원칙]
-1. 사실은 지키고 연출은 과감하게: 사장님이 적은 사실(시간, 장소, 대사, 숫자, 결과)은 그대로 살린다. 적지 않은 사실(후기, 수치, 특정 손님 사연, 결과)은 절대 지어내지 않는다. 사장님이 적은 이야기가 없으면 실화처럼 꾸미지 말고, 이 업종 손님들이 흔히 겪는 고민이나 궁금증을 주제로 공감형으로 쓴다.
+1. 사실은 지키고 연출은 과감하게: 작성자가 적은 사실(시간, 장소, 대사, 숫자, 결과)은 그대로 살린다. 적지 않은 사실(후기, 수치, 특정 손님 사연, 결과)은 절대 지어내지 않는다. 작성자가 적은 이야기가 없으면 실화처럼 꾸미지 말고, 이 분야 사람들이 흔히 겪는 고민이나 궁금증을 주제로 공감형으로 쓴다.
 2. 1컷은 설명이 아니라 한 장면. 가장 긴박하거나 궁금한 순간을 먼저. 상호명·가격·할인·이벤트 같은 광고 단어는 1컷 금지.
 3. 흐름은 아래 [잘 팔린 인스타툰의 흐름]을 기본으로, 가게 이야기에 맞게 바꾼다. 반전이나 해결은 가게의 진짜 강점이 드러나는 순간.
 3-1. 모든 컷의 마지막 대사나 장면은 다음 장이 궁금하게 끝낸다(질문, 말줄임, 표정 클로즈업).
 3-2. 컷과 컷 사이에 원인과 결과가 이어지게. 앞 컷의 대사를 다음 컷이 받아서 시작한다. 뜬금없는 장면 전환 금지.
 4. 한 컷에 메시지 하나. 제목(내레이션)은 표지와 꼭 필요한 컷에만, 두 줄·한 줄 14자 이내. 나머지 컷은 말풍선 대사 중심. 말풍선은 한 컷에 1~3개, 한 개당 18자 이내 실제 말투. 효과음 1~4자.
-5. 이야기는 아래 [주인공]의 1인칭 시점. 역할(사장님/직원/알바생)과 나이·성별에 맞는 자연스러운 말투로 "~했어요/~거든요". 직원·알바생이면 사장님이 아니라 그 사람이 겪은 일로 쓴다. 주인공이 여러 명이면 함께 겪는 이야기로 쓰고, 대사의 인물 이름은 역할(예: 사장님, 직원, 알바생)로 구분한다. 같은 역할이 둘이면 외모로 구분(예: 안경 직원). 다른 주인공이 조력자 역할을 맡아도 된다. 업계 용어 금지. 손님이 얻는 것 중심.
+5. 이야기는 아래 [주인공]의 1인칭 시점. 입력된 역할(사장님·대표·직원·프리랜서·담당자 등 무엇이든)과 나이·성별에 맞는 자연스러운 말투로 "~했어요/~거든요". 역할이 직원·알바생이면 대표가 아니라 그 사람이 겪은 일로, 가게가 없는 프리랜서·회사원이면 가게 얘기 없이 그 사람의 일상·업무 이야기로 쓴다. 주인공이 여러 명이면 함께 겪는 이야기로 쓰고, 대사의 인물 이름은 역할(예: 사장님, 직원, 알바생)로 구분한다. 같은 역할이 둘이면 외모로 구분(예: 안경 직원). 다른 주인공이 조력자 역할을 맡아도 된다. 업계 용어 금지. 고객(독자)이 얻는 것 중심.
 6. 행동 유도는 마지막 컷 하나에 방법 하나만.
 7. 7컷 이상이면 장면 전환을 늘려 전개를 촘촘하게 하고, 중간에 작은 반전을 하나 더 넣는다. 같은 말을 반복하지 않는다.
 8. 컷마다 표정·손짓·소품 같은 작은 디테일을 하나 이상 넣어 살아 있는 장면으로 만든다.
@@ -579,13 +584,13 @@ function profileHTML(){ const p=prof(), n=['voice','banned','tags','cta','loc','
       <div><label class="f" for="pf-collab">함께 태그할 계정 <small>선택</small></label><input class="in" id="pf-collab" data-prof="collab" value="${v('collab')}" placeholder="예: @dam_studio_2nd"></div>
     </div></div></details>`; }
 function infoBlock(){ return infoBlock0()+profBlock(); }
-function infoBlock0(){ const i=S.info; return `[가게 정보]
-업종: ${i.type||'-'} / 가게 이름: ${i.name||'-'}
+function infoBlock0(){ const i=S.info; return `[사업·브랜드 정보]
+업종·분야: ${i.type||'-'} / 이름: ${i.name||'-'}
 [주인공] ${i.role||'사장님'} / 성별: ${i.gender||'정하지 않음'} / 나이: ${i.age||'정하지 않음'}${i.looks?` / 외모: ${i.looks}`:''}${peopleIdx().slice(1).map(k=>{ const x=person(k); return `\n[${whoLabel(k)}] ${x.role||'직원'} / 성별: ${x.gender||'정하지 않음'} / 나이: ${x.age||'정하지 않음'}${x.looks?` / 외모: ${x.looks}`:''}`; }).join('')}
-사장님이 적은 이야기: ${i.story||'(없음)'}
+작성자가 적은 이야기(Q&A 형식일 수 있음): ${i.story||'(없음)'}
 이번에 알리고 싶은 것: ${i.offer||'(없음)'}
-읽었으면 하는 손님: ${i.target||'(AI가 업종에 맞게 판단)'}
-손님이 할 행동: ${i.action||'(업종에 맞게 자연스럽게, 예: 프로필 링크에서 예약)'}
+읽었으면 하는 사람(고객): ${i.target||'(AI가 업종에 맞게 판단)'}
+독자가 할 행동: ${i.action||'(업종에 맞게 자연스럽게, 예: 프로필 링크에서 예약)'}
 분위기: ${TONES[i.tone]?.name} - ${TONES[i.tone]?.rule}
 ${artBlock()}`; }
 function toonText(){ return cuts().map((c,i)=>`${i+1}컷 (${c.role}) [${c.shot||'-'}]\n제목: ${c.title.replace(/\n/g,' / ')}${c.sub?`\n보조: ${c.sub}`:''}${c.bubble?`\n대사:\n${c.bubble}`:''}${c.sfx?`\n효과음: ${c.sfx}`:''}${c.caption?`\n자막 박스: ${c.caption}`:''}\n장면: ${c.direction}${c.panels?`\n칸 나누기: ${c.panels}`:''}${c.extras?`\n디테일: ${c.extras}`:''}`).join('\n\n'); }
@@ -723,30 +728,30 @@ function renderPhone(){
 function vInput(){
   const i=S.info;
   $('#main').innerHTML=`<section class="panel">
-    <div class="ph"><div><h1 class="hero-h">가게 이야기를 적으면<br><em>인스타툰 한 편</em>이 나와요</h1><p>업종만 골라도 만들 수 있어요. 실제로 있었던 일을 적어 주면 훨씬 재밌어져요.</p>${S.demo?'':`<div class="hero-act"><button class="btn sm" data-act="demo">예시 가게로 먼저 체험해 보기</button><button class="btn sm ghost" data-act="tour">30초 둘러보기</button></div>`}</div></div>
+    <div class="ph"><div><h1 class="hero-h">내 이야기를 적으면<br><em>인스타툰 한 편</em>이 나와요</h1><p>가게가 없어도 괜찮아요. 프리랜서·회사·1인 사업 모두 분야만 골라도 만들 수 있고, 실제로 있었던 일을 적어 주면 훨씬 재밌어져요.</p>${S.demo?'':`<div class="hero-act"><button class="btn sm" data-act="demo">예시 가게로 먼저 체험해 보기</button><button class="btn sm ghost" data-act="tour">30초 둘러보기</button></div>`}</div></div>
 
     <label class="f" style="margin-top:0">① 웹툰 테마 <small>전체 그림체예요 · 모든 컷과 캐릭터에 똑같이 적용돼요</small></label>
     <div class="arts">${Object.entries(ARTS).map(([k,v])=>{ const sm=sampleOf(k); return `<button class="pick art-${k}" data-art="${k}" aria-pressed="${(i.art||'chibi')===k}">${sm?`<img class="smp-img" src="${sm}" alt="${v.name} 샘플">`:`<span class="sw" aria-hidden="true"></span>`}<span class="ttl" style="font-size:15px">${v.name}</span><span class="dsc">${v.desc}</span></button>`; }).join('')}</div>
     ${STANDALONE?`<div class="row" style="margin-top:8px"><button class="btn sm" data-act="sampleMake">선택한 테마로 내 캐릭터 샘플 그려보기</button><span class="status" id="st-sample"></span></div>`:`<p class="sub" style="margin-top:8px">샘플 그림이 없는 테마는 파일 버전에서 "샘플 그려보기"로 내 캐릭터를 그 테마로 미리 볼 수 있어요.</p>`}
 
-    <label class="f">② 업종<span class="req">*</span></label>
+    <label class="f">② 업종·분야<span class="req">*</span> <small>가게가 아니어도 돼요 · 프리랜서, 회사, 온라인 사업 모두 OK</small></label>
     <div class="chips" id="indChips">${INDUSTRIES.map(k=>`<button class="chip" data-ind="${k}" aria-pressed="${i.type===k}">${k}</button>`).join('')}</div>
     <div class="g2">
-      <div><label class="f" for="i-type">목록에 없으면 직접 입력</label><input class="in" id="i-type" data-info="type" value="${esc(i.type)}" placeholder="예: 수제 베이글 가게"></div>
-      <div><label class="f" for="i-name">가게 이름 <small>선택</small></label><input class="in" id="i-name" data-info="name" value="${esc(i.name)}" placeholder="예: 담 사진관"></div>
+      <div><label class="f" for="i-type">목록에 없으면 직접 입력</label><input class="in" id="i-type" data-info="type" value="${esc(i.type)}" placeholder="예: 수제 베이글 가게, 웹소설 작가, 1인 마케팅 대행"></div>
+      <div><label class="f" for="i-name">가게·브랜드·내 이름 <small>선택</small></label><input class="in" id="i-name" data-info="name" value="${esc(i.name)}" placeholder="예: 담 사진관, 하늘 디자인, OO컴퍼니"></div>
     </div>
 
     <label class="f">이야기하는 사람 <small>인스타툰 주인공이 돼요 · 말투와 캐릭터 그림에 쓰여요</small></label>
     <div class="who">
-      <div><span class="status">역할</span><div class="chips">${ROLES.map(k=>`<button class="chip" data-who="role" data-v="${k}" aria-pressed="${i.role===k}">${k}</button>`).join('')}</div></div>
-      <div><span class="status">성별</span><div class="chips">${GENDERS.map(k=>`<button class="chip" data-who="gender" data-v="${k}" aria-pressed="${i.gender===k}">${k}</button>`).join('')}</div></div>
-      <div><span class="status">나이</span><div class="chips">${AGES.map(k=>`<button class="chip" data-who="age" data-v="${k}" aria-pressed="${i.age===k}">${k}</button>`).join('')}</div></div>
+      <div><span class="status">역할 <small>(예: 웹디자이너, 팀장)</small></span><div class="chips">${ROLES.map(k=>`<button class="chip" data-who="role" data-v="${k}" aria-pressed="${i.role===k}">${k}</button>`).join('')}</div><input class="in who-in" data-whoin="role" value="${ROLES.includes(i.role)?'':esc(i.role||'')}" placeholder="직접 입력"></div>
+      <div><span class="status">성별</span><div class="chips">${GENDERS.map(k=>`<button class="chip" data-who="gender" data-v="${k}" aria-pressed="${i.gender===k}">${k}</button>`).join('')}</div><input class="in who-in" data-whoin="gender" value="${GENDERS.includes(i.gender)?'':esc(i.gender||'')}" placeholder="직접 입력"></div>
+      <div><span class="status">나이 <small>(예: 35살)</small></span><div class="chips">${AGES.map(k=>`<button class="chip" data-who="age" data-v="${k}" aria-pressed="${i.age===k}">${k}</button>`).join('')}</div><input class="in who-in" data-whoin="age" value="${AGES.includes(i.age)?'':esc(i.age||'')}" placeholder="직접 입력"></div>
     </div>
     <label class="f" for="i-looks">외모 한 줄 <small>선택 · 예: 단발머리, 동그란 안경, 검은 앞치마</small></label>
     <input class="in" id="i-looks" data-info="looks" value="${esc(i.looks||'')}" placeholder="예: 긴 웨이브 머리, 갈색 앞치마">
     ${photoSlot(0)}
     ${peopleIdx().slice(1).map(k=>personBlock(k)).join('')}
-    ${peopleIdx().length<3?`<button class="btn sm" data-act="padd" style="margin-top:12px">+ 주인공 한 명 더 (최대 3명 · 예: 사장님 + 직원 + 알바생)</button>`:''}
+    ${peopleIdx().length<3?`<button class="btn sm" data-act="padd" style="margin-top:12px">+ 등장인물 한 명 더 (최대 3명 · 예: 나 + 동료 + 고객)</button>`:''}
 
     <label class="f">컷 수 <small>인스타는 한 게시물에 20장까지 되지만, 인스타툰은 10컷 이내가 끝까지 잘 읽혀요</small></label>
     <div class="chips">${[4,5,6,7,8,9,10].map(n=>`<button class="chip" data-cuts="${n}" aria-pressed="${i.cuts===n}">${n}컷</button>`).join('')}</div>
@@ -755,15 +760,19 @@ function vInput(){
     <p class="sub" style="margin-top:6px">피드에서 크게 보이는 건 세로 4:5, 3:4예요. 처음이면 1:1이 가장 무난해요.</p>
 
     <div class="story">
-      <label class="f" for="i-story">있었던 일 <small>선택 · 적을수록 재밌어져요</small></label>
-      <p>아래 질문을 눌러 답을 적어 보세요. 비워 두면 AI가 이 업종 손님들이 공감할 이야기로 만들어요. 없는 일을 지어내지는 않아요.</p>
-      <div class="chips" style="margin-bottom:10px">${QUESTIONS.map((q,k)=>`<button class="qchip" data-q="${k}">${esc(q)}</button>`).join('')}</div>
-      <textarea class="in" id="i-story" data-info="story" rows="6" placeholder="예) 입대 전날 밤 9시, 문 닫은 사진관에 가족 넷이 찾아왔어요. 불을 다시 켜고 찍어드렸는데, 두 달 뒤 휴가 나온 아들이 그 사진을 들고 다시 왔어요.">${esc(i.story)}</textarea>
+      <label class="f" for="i-story">있었던 일 <small>선택 · 적을수록 재밌어져요 · 한두 문장도 괜찮아요</small></label>
+      <p>실제로 겪은 일을 <b>육하원칙(언제·어디서·누가·무엇을·어떻게·왜)</b> 중 생각나는 것만 적어도 돼요. 아래 질문을 누르면 Q&A 칸이 생기니 A. 뒤에 답만 적으세요. 비워 두면 AI가 이 분야 사람들이 공감할 이야기로 만들고, 없는 일을 지어내지는 않아요.</p>
+      <div class="chips" style="margin-bottom:10px">${QUESTIONS.map((q,k)=>`<button class="qchip" data-q="${k}">${esc(q.q)}</button>`).join('')}</div>
+      <details class="qa-guide"><summary>이렇게 쓰면 돼요 · Q&A 작성 예시 보기</summary>
+        <div class="qa-ex">${QUESTIONS.map(q=>`<div><b>Q. ${esc(q.q)}</b><br>A. ${esc(q.ex)}</div>`).join('')}
+          <p class="sub" style="margin:8px 0 0"><b>쓰는 요령</b> ① 시간·장소·숫자·실제로 들은 말을 넣으면 생생해져요. ② 일어난 일만 적고 결과나 후기는 지어내지 마세요. ③ 6개 다 쓸 필요 없어요. 1~3개만 답해도 충분해요.</p></div></details>
+      <textarea class="in" id="i-story" data-info="story" rows="6" placeholder="예)&#10;Q. 언제, 어디서, 누구와 있었던 일인가요?&#10;A. 지난 금요일 밤 9시, 제 작업실에서 첫 의뢰 고객과 화상 미팅을 했어요.&#10;Q. 그때 가장 당황했던 순간은?&#10;A. 마감 하루 전날 고객이 &quot;전부 처음부터 다시요&quot;라고 했어요.">${esc(i.story)}</textarea>
     </div>
 
     <label class="f" for="i-offer">이번에 알리고 싶은 것 <small>선택 · 마지막 컷에 자연스럽게 들어가요</small></label>
     <input class="in" id="i-offer" data-info="offer" value="${esc(i.offer)}" placeholder="예: 10월 한정 가족사진 20% 할인, 네이버 예약">
 
+    ${adBoxHTML()}
     ${profileHTML()}
     <details class="more">
       <summary>더 자세히 설정하기</summary>
@@ -876,9 +885,9 @@ function vEdit(){
 function personBlock(k){ const x=person(k);
   return `<div class="p2box"><div class="row"><b style="flex:1">${whoLabel(k)}</b><button class="btn sm ghost" data-poff="${k}">빼기</button></div>
     <div class="who">
-      <div><span class="status">역할</span><div class="chips">${ROLES.map(v=>`<button class="chip" data-pw="${k}" data-pf="role" data-v="${v}" aria-pressed="${x.role===v}">${v}</button>`).join('')}</div></div>
-      <div><span class="status">성별</span><div class="chips">${GENDERS.map(v=>`<button class="chip" data-pw="${k}" data-pf="gender" data-v="${v}" aria-pressed="${x.gender===v}">${v}</button>`).join('')}</div></div>
-      <div><span class="status">나이</span><div class="chips">${AGES.map(v=>`<button class="chip" data-pw="${k}" data-pf="age" data-v="${v}" aria-pressed="${x.age===v}">${v}</button>`).join('')}</div></div>
+      <div><span class="status">역할</span><div class="chips">${ROLES.map(v=>`<button class="chip" data-pw="${k}" data-pf="role" data-v="${v}" aria-pressed="${x.role===v}">${v}</button>`).join('')}</div><input class="in who-in" data-pwin="${k}:role" value="${ROLES.includes(x.role)?'':esc(x.role||'')}" placeholder="직접 입력"></div>
+      <div><span class="status">성별</span><div class="chips">${GENDERS.map(v=>`<button class="chip" data-pw="${k}" data-pf="gender" data-v="${v}" aria-pressed="${x.gender===v}">${v}</button>`).join('')}</div><input class="in who-in" data-pwin="${k}:gender" value="${GENDERS.includes(x.gender)?'':esc(x.gender||'')}" placeholder="직접 입력"></div>
+      <div><span class="status">나이</span><div class="chips">${AGES.map(v=>`<button class="chip" data-pw="${k}" data-pf="age" data-v="${v}" aria-pressed="${x.age===v}">${v}</button>`).join('')}</div><input class="in who-in" data-pwin="${k}:age" value="${AGES.includes(x.age)?'':esc(x.age||'')}" placeholder="직접 입력"></div>
     </div>
     <label class="f" for="i-looks-${k}">외모 한 줄 <small>선택</small></label>
     <input class="in" id="i-looks-${k}" data-pl="${k}" value="${esc(x.looks||'')}" placeholder="예: 단발머리, 동그란 안경, 검은 앞치마">
@@ -1618,7 +1627,7 @@ function toggleTrouble(force){ const h=$('#trouble'); const show=force??h.hidden
 
 function helpHTML(){
   const ai = STANDALONE
-    ? `<b>이 파일 버전은 Gemini API 키로 AI를 써요.</b> 위쪽 <b>"API 키 설정"</b>을 열고 키를 붙여 넣은 뒤 저장하면 오른쪽 위에 초록 점과 "Gemini 연결됨"이 떠요.<br>키 받는 법: aistudio.google.com 접속 → 구글 로그인 → "Get API key" → "Create API key" → 복사. 대본은 무료 한도 안에서 거의 무료이고, 그림 자동 생성은 한 장마다 요금이 들어요.`
+    ? `<b>이 파일 버전은 Gemini API 키로 AI를 써요.</b> 위쪽 <b>"API 키 설정"</b>을 열고 키를 붙여 넣은 뒤 저장하면 오른쪽 위에 초록 점과 "Gemini 연결됨"이 떠요.<br>키 받는 법: <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> 접속 → 구글 로그인 → "Create API key" → 복사. 대본은 무료 한도 안에서 거의 무료이고, 그림 자동 생성은 한 장마다 요금이 들어요.`
     : `<b>이 페이지는 따로 입력할 게 없어요.</b> 지금 로그인한 Claude 계정으로 AI가 돌아가요. 처음 "만들기" 버튼을 누르면 AI 사용을 허용할지 묻는 창이 뜨는데, 허용을 누르면 돼요. 오른쪽 위에 초록 점과 "AI 연결됨"이 보이면 준비된 거예요.<br>그림까지 버튼 한 번으로 자동으로 그리려면 함께 드린 <b>HTML 파일 버전</b>을 열고 Gemini API 키를 넣어 주세요.`;
   return `<div class="help-in">
     <div class="row"><h2 style="flex:1;margin:0;font-size:20px;font-weight:900">사용 방법</h2><button class="btn sm" data-act="tour">30초 둘러보기</button>${S.demo?'':'<button class="btn sm" data-act="demo">예시 가게로 체험</button>'}<button class="btn sm ghost" data-act="help">닫기</button></div>
@@ -1783,7 +1792,7 @@ document.addEventListener('click',async e=>{
   if(b.dataset.pst){ const [k,s2]=b.dataset.pst.split('|'), x=mo().items[+k]; if(x){ x.status=s2; x.made=s2!=='plan'; if(s2==='posted'&&!x.postedAt) x.postedAt=todayStr(); if(s2!=='posted') x.postedAt=''; save(); vMonth(); renderTodo(); } return; }
   if(b.dataset.step){ if(b.disabled) return; return go(b.dataset.step); }
   if(b.dataset.ind){ S.info.type=b.dataset.ind; save(); document.querySelectorAll('[data-ind]').forEach(c=>c.setAttribute('aria-pressed',c.dataset.ind===S.info.type)); $('#i-type').value=S.info.type; updateMake(); return renderPhone(); }
-  if(b.dataset.q){ const ta=$('#i-story'); const q=QUESTIONS[+b.dataset.q]; ta.value=(ta.value.trim()?ta.value.trimEnd()+'\n\n':'')+`Q. ${q}\nA. `; S.info.story=ta.value; save(); ta.focus(); ta.setSelectionRange(ta.value.length,ta.value.length); return; }
+  if(b.dataset.q){ const ta=$('#i-story'); const q=QUESTIONS[+b.dataset.q].q; ta.value=(ta.value.trim()?ta.value.trimEnd()+'\n\n':'')+`Q. ${q}\nA. `; S.info.story=ta.value; save(); ta.focus(); ta.setSelectionRange(ta.value.length,ta.value.length); return; }
   if(b.dataset.tone){ S.info.tone=b.dataset.tone; save(); document.querySelectorAll('[data-tone]').forEach(c=>c.setAttribute('aria-pressed',c.dataset.tone===S.info.tone)); return; }
   if(b.dataset.art){ S.info.art=b.dataset.art; save(); document.querySelectorAll('[data-art]').forEach(c=>c.setAttribute('aria-pressed',c.dataset.art===S.info.art)); return; }
   if(b.dataset.mode){ S.info.mode=b.dataset.mode; save(); document.querySelectorAll('[data-mode]').forEach(c=>c.setAttribute('aria-pressed',c.dataset.mode===S.info.mode)); return; }
@@ -1801,7 +1810,7 @@ document.addEventListener('click',async e=>{
   if(b.dataset.fit){ S.info.fit=b.dataset.fit; save(); document.querySelectorAll('[data-fit]').forEach(c=>c.setAttribute('aria-pressed',c.dataset.fit===S.info.fit)); drawAll(); return renderPhone(); }
   if(b.dataset.tidea) return run(b,()=>titleIdeas(+b.dataset.tidea));
   if(b.dataset.tpick){ const [i,k]=b.dataset.tpick.split('|').map(Number), x=ideaCache[i]?.[k], c=cuts()[i]; if(x&&c){ c.title=x.title; c.highlight=x.title.includes(x.highlight)?x.highlight:''; if(i===0&&S.toon.hooks.length) S.toon.hooks[S.toon.hookIdx]=c.title; pv=i; openCut=i; save(); vEdit(); renderPhone(); toast('제목을 바꿨어요'); } return; }
-  if(b.dataset.pw){ const k=+b.dataset.pw, f=b.dataset.pf, cur=person(k)[f]; setPerson(k,{[f]:cur===b.dataset.v&&f!=='role'?'':b.dataset.v}); save(); document.querySelectorAll(`[data-pw="${k}"][data-pf="${f}"]`).forEach(c=>c.setAttribute('aria-pressed',c.dataset.v===person(k)[f])); return; }
+  if(b.dataset.pw){ const wi=document.querySelector(`[data-pwin="${b.dataset.pw}:${b.dataset.pf}"]`); if(wi) wi.value=''; const k=+b.dataset.pw, f=b.dataset.pf, cur=person(k)[f]; setPerson(k,{[f]:cur===b.dataset.v&&f!=='role'?'':b.dataset.v}); save(); document.querySelectorAll(`[data-pw="${k}"][data-pf="${f}"]`).forEach(c=>c.setAttribute('aria-pressed',c.dataset.v===person(k)[f])); return; }
   if(b.dataset.poff){ setPerson(+b.dataset.poff,{on:false}); save(); return vInput(); }
   if(b.dataset.photo){ photoPick=+b.dataset.photo; refPick=null; const f=$('#fileIn'); f.multiple=false; f.value=''; return f.click(); }
   if(b.dataset.photodel){ setPhoto(+b.dataset.photodel,''); return vInput(); }
@@ -1809,7 +1818,7 @@ document.addEventListener('click',async e=>{
   if(b.dataset.refup){ refPick=+b.dataset.refup; photoPick=null; const f=$('#fileIn'); f.multiple=false; f.value=''; return f.click(); }
   if(b.dataset.refmake) return run(b,()=>makeCharRef(+b.dataset.refmake));
   if(b.dataset.refdel){ setRef(+b.dataset.refdel,null); return vPost(); }
-  if(b.dataset.who){ S.info[b.dataset.who]=S.info[b.dataset.who]===b.dataset.v&&b.dataset.who!=='role'?'':b.dataset.v; save(); document.querySelectorAll(`[data-who="${b.dataset.who}"]`).forEach(c=>c.setAttribute('aria-pressed',c.dataset.v===S.info[b.dataset.who])); return; }
+  if(b.dataset.who){ const wi=document.querySelector(`[data-whoin="${b.dataset.who}"]`); if(wi) wi.value=''; S.info[b.dataset.who]=S.info[b.dataset.who]===b.dataset.v&&b.dataset.who!=='role'?'':b.dataset.v; save(); document.querySelectorAll(`[data-who="${b.dataset.who}"]`).forEach(c=>c.setAttribute('aria-pressed',c.dataset.v===S.info[b.dataset.who])); return; }
   if(b.dataset.style){ S.info.style=b.dataset.style; S.info.titleColor=''; S.info.tOutline=''; S.info.tShadow=undefined; save(); return refreshLetter(true); }
   if(b.dataset.up){ refPick=null; photoPick=null; upTarget=+b.dataset.up; upMany=false; return pickFile(false); }
   if(b.dataset.dl){ const i=+b.dataset.dl; return saveFile(`${(S.info.name||'instatoon').replace(/\s+/g,'_')}_${i+1}.png`, await composedBlob(i)); }
@@ -1822,6 +1831,9 @@ document.addEventListener('click',async e=>{
   if(b.dataset.idea){ const d=S.toon.ideas[+b.dataset.idea]; return run(b,()=>makeToon(d)); }
   const a=b.dataset.act; if(!a) return;
   if(a==='make') return run(b,()=>makeToon());
+  if(a==='adMake') return run(b,()=>adMake());
+  if(a==='adCopy') return copy(adS().table);
+  if(a==='adToStory'){ const x=adS(), i=S.info; i.story=(i.story.trim()?i.story.trimEnd()+'\n\n':'')+'[광고 콘티 10P 참고]\n'+x.table; if(!i.target.trim()) i.target=x.target; if(!i.offer.trim()) i.offer=x.benefit; save(); toast('이야기 칸에 넣었어요'); return vInput(); }
   if(a==='remake') return run(b,()=>makeToon());
   if(a==='blank') return blankToon();
   if(a==='tReset'){ Object.assign(S.info,{titleScale:100,titleColor:'',tOutline:'',tShadow:undefined,tTilt:0,hl:'marker',hlColor:''}); save(); return refreshLetter(true); }
@@ -1882,6 +1894,9 @@ document.addEventListener('input',e=>{
   if(el.dataset.kitck){ const T=S.toon; T.kit={...(T.kit||{}),[el.dataset.kitck]:el.checked}; save(); return kitCounters(); }
   if(el.dataset.kitv){ const T=S.toon, k=el.dataset.kitv; if(k.startsWith('alt-')){ T.alts=T.alts||[]; T.alts[+k.slice(4)]=el.value; } else if(k==='link'){ T.link=el.value.trim(); const x=planItem(); if(x) x.link=T.link; const h=hist().find(h=>h.hid===T.hid); if(h) h.link=T.link; } else T[k]=el.value;
     save(); kitCounters(); if(k==='caption'){ clearTimeout(window._kc); window._kc=setTimeout(renderPhone,300); } return; }
+  if(el.dataset.ad){ adS()[el.dataset.ad]=el.value; return save(); }
+  if(el.dataset.whoin){ const f=el.dataset.whoin; S.info[f]=el.value.trim(); save(); document.querySelectorAll(`[data-who="${f}"]`).forEach(c=>c.setAttribute('aria-pressed',c.dataset.v===S.info[f])); return; }
+  if(el.dataset.pwin){ const [k,f]=el.dataset.pwin.split(':'); setPerson(+k,{[f]:el.value.trim()}); save(); document.querySelectorAll(`[data-pw="${k}"][data-pf="${f}"]`).forEach(c=>c.setAttribute('aria-pressed',c.dataset.v===person(+k)[f])); return; }
   if(el.dataset.pl){ setPerson(+el.dataset.pl,{looks:el.value}); return save(); }
   if(el.dataset.info){ S.info[el.dataset.info]=el.value; save(); if(el.dataset.info==='type'){ const mb=document.querySelector('[data-act="monthMake"]'); if(mb) mb.disabled=!el.value.trim(); document.querySelectorAll('[data-ind]').forEach(c=>c.setAttribute('aria-pressed',c.dataset.ind===el.value)); updateMake(); } if(['name','type'].includes(el.dataset.info)) renderPhone(); return; }
   if(['tScale','tTilt','tColor','tOutline','hlColor','tShadow'].includes(el.id)){ const k={tScale:'titleScale',tTilt:'tTilt',tColor:'titleColor',tOutline:'tOutline',hlColor:'hlColor',tShadow:'tShadow'}[el.id];
@@ -1930,14 +1945,67 @@ async function makeZip(){
   await saveFile(`${base}_인스타툰.zip`,blob); return true;
 }
 
+/* ================= 광고 콘티 10P 표 (제품·소구점·타겟·혜택) ================= */
+const AD_SYSTEM=`당신은 SNS(인스타그램, 페이스북 등) AI 웹툰 광고 콘티를 기획하는 10년 차 전문 카피라이터이자 스토리보드 작가입니다.
+사용자가 제공하는 [제품, 소구점, 타겟, 혜택] 정보를 분석하여, 독자의 시선을 끄는 10페이지 분량의 웹툰 콘티를 마크다운 표(Table) 형식으로만 출력하세요.
+
+### 📝 [출력 형식 및 필수 규칙]
+1. 반드시 1페이지(1P)부터 10페이지(10P)까지 총 10개의 행을 작성해야 합니다.
+2. 표의 컬럼은 정확히 다음 4개로 구성합니다: | 페이지수 | 나레이션 1 | 나레이션 2 | 대사 |
+3. [대사] 열의 모든 내용은 반드시 큰따옴표(" ")로 묶어서 캐릭터가 직접 말하거나 생각하는 것처럼 표현합니다.
+4. 나레이션과 대사를 명확히 분리하며, 특정 열에 들어갈 내용이 비어있다면 빈칸 대신 '-' 기호를 기입합니다.
+5. 설명, 인사말, 맺음말 등 불필요한 텍스트는 절대 작성하지 말고, 사용자의 입력이 들어오면 오직 '표(Table)' 결과물만 즉시 출력합니다.
+
+### 📖 [10페이지 스토리보드 전개 공식]
+- 1P ~ 3P (공감 및 문제 제기): 타겟 고객이 일상에서 겪는 페인포인트(불편함)와 고민을 묘사하여 멈춰서 보게 만드는 공감대(Hook)를 형성합니다.
+- 4P ~ 5P (해결책 제시): 고민하는 주인공 앞에 제품/서비스가 등장하며 제시된 '소구점(핵심 강점)'을 바탕으로 해결책을 제안합니다.
+- 6P ~ 8P (구체적 장점 및 변화): 제품을 사용했을 때 얻는 구체적인 변화나 다른 제품과의 차별화 포인트를 독자가 이해하기 쉽게 풀어냅니다.
+- 9P (결단 및 안심): 구매나 방문을 망설이는 고객의 마음을 안심시키거나 기대감을 끌어올립니다.
+- 10P (행동 유도 - CTA): 브랜드(제품)명을 한 번 더 강조하고, 사용자가 입력한 '광고에서 줄 수 있는 혜택'을 명시하며 즉각적인 행동을 유도합니다.`;
+const adS=()=>S.ad=S.ad||{product:'',point:'',target:'',benefit:'',table:''};
+function adTableHTML(md){ const rows=String(md||'').split('\n').map(l=>l.trim()).filter(l=>l.startsWith('|')&&!/^\|[\s:|-]+\|?$/.test(l)).map(l=>l.replace(/^\||\|$/g,'').split('|').map(c=>c.trim()));
+  if(rows.length<2) return ''; return `<div style="overflow-x:auto"><table class="adtbl"><thead><tr>${rows[0].map(c=>`<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>${rows.slice(1).map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`; }
+function adBoxHTML(){ const a=adS();
+  return `<details class="more" id="adBox" ${a.table?'open':''}><summary>광고 콘티 10P 표 만들기 <small>제품·소구점·타겟·혜택만 적으면 10페이지 콘티 표가 나와요 (선택)</small></summary><div class="inner">
+    <p class="sub" style="margin-top:0">광고용 인스타툰을 기획할 때 먼저 써 보세요. 나온 표는 복사하거나, 아래 버튼으로 이야기 칸에 넣어 인스타툰 대본의 바탕으로 쓸 수 있어요.</p>
+    <div class="g2">
+      <div><label class="f" for="ad-product" style="margin-top:0">제품·서비스 <span class="req">*</span></label><input class="in" id="ad-product" data-ad="product" value="${esc(a.product)}" placeholder="예: 수제 비건 쿠키 정기구독"></div>
+      <div><label class="f" for="ad-target" style="margin-top:0">타겟</label><input class="in" id="ad-target" data-ad="target" value="${esc(a.target)}" placeholder="예: 야근 많은 30대 직장인"></div>
+    </div>
+    <label class="f" for="ad-point">소구점 (핵심 강점)</label><input class="in" id="ad-point" data-ad="point" value="${esc(a.point)}" placeholder="예: 설탕 0%, 매주 금요일 아침 도착, 한 입에 쏙">
+    <label class="f" for="ad-benefit">혜택</label><input class="in" id="ad-benefit" data-ad="benefit" value="${esc(a.benefit)}" placeholder="예: 첫 달 30% 할인, 무료배송">
+    <div class="row" style="margin-top:12px"><button class="btn pri sm" data-act="adMake">${a.table?'콘티 표 다시 만들기':'콘티 표 만들기'}</button><span class="status" id="st-ad"></span></div>
+    <div id="adOut">${a.table?adOutHTML():''}</div>
+  </div></details>`; }
+function adOutHTML(){ const a=adS(); return `${adTableHTML(a.table)||'<pre style="white-space:pre-wrap;font-size:13px">'+esc(a.table)+'</pre>'}<div class="row" style="margin-top:10px"><button class="btn sm" data-act="adCopy">표 복사</button><button class="btn sm" data-act="adToStory">이 콘티를 이야기 칸에 넣기</button></div>`; }
+async function adMake(){
+  const a=adS(), st=$('#st-ad');
+  if(!a.product.trim()){ st.className='status err'; st.textContent='제품·서비스를 먼저 적어 주세요.'; return; }
+  if(!sample){ st.className='status err'; st.textContent='AI 연결이 없어요.'; return; }
+  if(STANDALONE&&!API.key){ $('#keyBox').open=true; toast('Gemini API 키를 먼저 넣어 주세요'); return; }
+  const user=`[제품] ${a.product}\n[소구점] ${a.point||'(AI가 제품에 맞게 판단)'}\n[타겟] ${a.target||'(AI가 제품에 맞게 판단)'}\n[혜택] ${a.benefit||'(없음 - 10P에 혜택 대신 방문·문의 유도)'}`;
+  const ctl=new AbortController(); busy=ctl; renderPhone();
+  st.className='status'; st.innerHTML='<span class="spin"></span> 콘티 표를 만들고 있어요 · 20~40초';
+  try{
+    let t;
+    if(STANDALONE){ const j=await gcall(API.text,[{text:user}],{temperature:0.8},ctl.signal,AD_SYSTEM); t=(j.candidates?.[0]?.content?.parts||[]).map(p=>p.text||'').join(''); }
+    else { const r=await sample.json(AD_SYSTEM+'\n\n---\n[사용자 입력]\n'+user+'\n\n응답은 JSON {"table":"마크다운 표 전체 문자열"} 형태로만 출력하세요.',{signal:ctl.signal,cache:false}); t=r.table||''; }
+    t=String(t).replace(/```(?:markdown)?/g,'').trim();
+    if(!t.includes('|')) throw {code:'invalid_json'};
+    a.table=t; save(); st.textContent=''; const o=$('#adOut'); if(o) o.innerHTML=adOutHTML();
+  }catch(e){ st.className='status err'; st.textContent=e?.name==='AbortError'||e?.code==='cancelled'?'멈췄어요.':(e?.code==='api'?e.message:(ERR[e?.code]||'잠깐 문제가 생겼어요. 다시 눌러 주세요.')); }
+  finally{ busy=null; renderPhone(); }
+}
+
 /* ================= 파일 버전: Gemini API 연결 ================= */
 const STANDALONE=!window.claude;
 const API={ get key(){ try{ return localStorage.getItem('instatoon.key')||''; }catch(_){ return ''; } },
   get text(){ try{ return localStorage.getItem('instatoon.textModel')||'gemini-3.5-flash'; }catch(_){ return 'gemini-3.5-flash'; } },
   get image(){ try{ return localStorage.getItem('instatoon.imageModel')||'gemini-3.1-flash-image'; }catch(_){ return 'gemini-3.1-flash-image'; } } };
 const GURL=m=>`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(m)}:generateContent`;
-async function gcall(model,parts,generationConfig,signal){
-  const r=await fetch(GURL(model),{method:'POST',signal,headers:{'Content-Type':'application/json','x-goog-api-key':API.key},body:JSON.stringify({contents:[{role:'user',parts}],generationConfig})});
+async function gcall(model,parts,generationConfig,signal,system){
+  const body={contents:[{role:'user',parts}],generationConfig}; if(system) body.system_instruction={parts:[{text:system}]};
+  const r=await fetch(GURL(model),{method:'POST',signal,headers:{'Content-Type':'application/json','x-goog-api-key':API.key},body:JSON.stringify(body)});
   const j=await r.json().catch(()=>({}));
   if(!r.ok){ const m=j.error?.message||`HTTP ${r.status}`; throw {code:'api',status:r.status,message:m}; }
   return j;
@@ -2044,7 +2112,7 @@ function autoSection(){
   </div>`;
 }
 function keyBoxHTML(){ return `<details class="more keybox" id="keyBox" ${API.key?'':'open'}><summary>API 키 설정 ${API.key?'· 연결됨':'· 필요해요'}</summary><div class="inner">
-  <p class="sub">Google AI Studio(aistudio.google.com)에서 무료로 발급받을 수 있어요. 키는 이 컴퓨터 브라우저에만 저장돼요. 다른 사람과 이 파일을 공유할 땐 키가 따라가지 않아요.</p>
+  <p class="sub"><a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener"><b>👉 여기서 Gemini API 키 받기 (Google AI Studio)</b></a><br>구글 로그인 → "API 키 만들기(Create API key)" → 복사해서 아래 칸에 붙여 넣으세요. 무료로 발급받을 수 있어요. 키는 이 컴퓨터 브라우저에만 저장돼요. 다른 사람과 이 파일을 공유할 땐 키가 따라가지 않아요.</p>
   <label class="f" for="k-key" style="margin-top:0">Gemini API 키</label><input class="in" id="k-key" type="password" value="${esc(API.key)}" placeholder="AIza...">
   <div class="g2"><div><label class="f" for="k-text">대본 모델</label><input class="in" id="k-text" value="${esc(API.text)}"></div><div><label class="f" for="k-img">그림 모델</label><input class="in" id="k-img" value="${esc(API.image)}"></div></div>
   <div class="row" style="margin-top:12px"><button class="btn pri sm" data-act="keySave">저장</button><span class="status">모델 이름은 기본값 그대로 쓰면 돼요. 오류가 나면 AI Studio에 보이는 이름으로 바꿔 주세요.</span></div>
