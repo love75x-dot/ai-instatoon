@@ -14,9 +14,9 @@ const head = [
   '<meta name="viewport" content="width=device-width,initial-scale=1">',
   '<meta name="description" content="업종과 가게 이야기만 입력하면 인스타툰 기획·대본·컷 구성까지 정리해 주는 도구. 인스타툰 제작 가이드도 함께 제공합니다.">',
   '<meta name="robots" content="index,follow">',
-  '<link rel="canonical" href="https://ai-instatoon.vercel.app/">',
+  '<link rel="canonical" href="https://www.ai-instatoon.com/">',
   '<meta property="og:type" content="website"><meta property="og:site_name" content="인스타툰 연재실"><meta property="og:locale" content="ko_KR">',
-  '<meta property="og:title" content="인스타툰 연재실"><meta property="og:description" content="업종과 가게 이야기만 입력하면 인스타툰 기획·대본·컷 구성까지 정리해 주는 도구."><meta property="og:url" content="https://ai-instatoon.vercel.app/">',
+  '<meta property="og:title" content="인스타툰 연재실"><meta property="og:description" content="업종과 가게 이야기만 입력하면 인스타툰 기획·대본·컷 구성까지 정리해 주는 도구."><meta property="og:url" content="https://www.ai-instatoon.com/">',
 ].join(NL) + NL;
 const out = head + src + '\n</body>\n</html>\n';
 

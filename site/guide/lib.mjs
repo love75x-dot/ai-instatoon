@@ -1,7 +1,7 @@
 // 가이드 콘텐츠 작성용 헬퍼 + 페이지 렌더러. 콘텐츠는 articles-*.mjs, 실행은 build-guide.mjs.
-export const ORIGIN = 'https://ai-instatoon.vercel.app';
+export const ORIGIN = 'https://www.ai-instatoon.com';
 export const SITE = '인스타툰 연재실';
-export const DATE = '2026-10-01';
+export const DATE = '2026-10-01'; // 글에 published/modified가 없을 때의 기본값 (글별로 articles-*.mjs에서 지정)
 
 export const CATS = {
   toon: { name: '인스타툰 가이드', desc: '인스타툰의 개념, 구성, 스토리 만드는 법' },
@@ -165,6 +165,7 @@ ${extra}
 const ld = (o) => `<script type="application/ld+json">${JSON.stringify(o).replace(/</g, '\\u003c')}</script>`;
 
 export function renderArticle(a, all, i) {
+  const pub = a.published || DATE, mod = a.modified || pub;
   const u = url(a.slug);
   const cat = CATS[a.cat].name;
   const title = `${a.metaTitle} | ${SITE}`;
@@ -172,7 +173,7 @@ export function renderArticle(a, all, i) {
   const rel = a.related.map((s) => all.find((x) => x.slug === s));
   const article = {
     '@context': 'https://schema.org', '@type': 'Article', headline: a.title, description: a.desc, inLanguage: 'ko',
-    datePublished: DATE, dateModified: DATE, mainEntityOfPage: { '@type': 'WebPage', '@id': u }, url: u,
+    datePublished: pub, dateModified: mod, mainEntityOfPage: { '@type': 'WebPage', '@id': u }, url: u,
     author: { '@type': 'Organization', name: SITE, url: ORIGIN + '/' },
     publisher: { '@type': 'Organization', name: SITE, url: ORIGIN + '/' },
   };
@@ -191,7 +192,7 @@ export function renderArticle(a, all, i) {
     ? `<a class="nx" href="/guide/${next.slug}/" rel="next"><small>다음 글 →</small>${esc(next.title)}</a>`
     : `<a class="nx" href="/guide/" rel="up"><small>콘텐츠 가이드 →</small>가이드 전체 글 보기</a>`;
   return head({ title, desc: a.desc, canonical: u, type: 'article',
-      extra: `<meta property="article:published_time" content="${DATE}"><meta property="article:modified_time" content="${DATE}">${ld(article)}${ld(crumbs)}` })
+      extra: `<meta property="article:published_time" content="${pub}"><meta property="article:modified_time" content="${mod}">${ld(article)}${ld(crumbs)}` })
     + header('guide') + `
 <main id="main" class="wrap">
 <nav class="crumb" aria-label="현재 위치"><ol><li><a href="/">홈</a></li><li><a href="/guide/">콘텐츠 가이드</a></li><li aria-current="page">${esc(a.title)}</li></ol></nav>
@@ -199,7 +200,7 @@ export function renderArticle(a, all, i) {
 <a class="cat" href="/guide/#${a.cat}">${cat}</a>
 <h1>${esc(a.title)}</h1>
 <p class="lead">${inline(a.lead)}</p>
-<p class="meta">작성일 <time datetime="${DATE}">${DATE}</time> · 최종 업데이트 <time datetime="${DATE}">${DATE}</time></p>
+<p class="meta">작성일 <time datetime="${pub}">${pub}</time> · 최종 업데이트 <time datetime="${mod}">${mod}</time></p>
 <nav class="toc" aria-label="목차"><b>이 글의 순서</b><ol>${toc}</ol></nav>
 ${body}
 <section class="summary"><h2>이 글에서 기억할 내용</h2><ul>${a.summary.map((x) => `<li>${inline(x)}</li>`).join('')}</ul></section>

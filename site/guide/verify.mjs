@@ -5,7 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { articles } from './build-guide.mjs';
 const dep = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..', 'deploy');
-const ORIGIN = 'https://ai-instatoon.vercel.app';
+const ORIGIN = 'https://www.ai-instatoon.com';
 const types = { '.html': 'text/html', '.xml': 'application/xml', '.txt': 'text/plain', '.svg': 'image/svg+xml' };
 const srv = http.createServer((req, res) => {
   let p = decodeURIComponent(req.url.split('?')[0]);
