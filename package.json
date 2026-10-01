@@ -1,0 +1,6 @@
+{
+  "name": "ai-instatoon",
+  "private": true,
+  "type": "module",
+  "scripts": { "build": "node site/build.mjs" }
+}
