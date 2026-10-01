@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>매장 홍보 인스타툰 메이커</title>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Do+Hyeon&family=Gaegu:wght@700&family=Jua&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f6f4ef;--card:#fff;--ink:#1d1d1f;--muted:#6b6b70;--line:#e3e0d8;--accent:#ffcf33;--accent-ink:#1d1d1f;--danger:#d64545}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans KR",system-ui,sans-serif;font-size:15px;line-height:1.5}
+  header{padding:28px 16px 8px;max-width:1100px;margin:0 auto}
+  header h1{font-family:"Black Han Sans";font-weight:400;font-size:30px;margin:0}
+  header h1 mark{background:linear-gradient(transparent 55%,var(--accent) 55%);color:inherit}
+  header p{margin:4px 0 0;color:var(--muted)}
+  main{max-width:1100px;margin:0 auto;padding:8px 16px 80px}
+  section{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-top:16px}
+  h2{font-size:17px;margin:0 0 12px;display:flex;align-items:center;gap:8px}
+  h2 .n{background:var(--ink);color:#fff;border-radius:50%;width:24px;height:24px;display:inline-grid;place-items:center;font-size:13px}
+  label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+  input,textarea,select{width:100%;font:inherit;padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:#fcfbf8;color:var(--ink)}
+  textarea{resize:vertical}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+  @media(max-width:640px){.grid2{grid-template-columns:1fr}}
+  button{font:inherit;font-weight:700;border:0;border-radius:10px;padding:10px 14px;cursor:pointer;background:#ece9e1;color:var(--ink)}
+  button.primary{background:var(--ink);color:#fff}
+  button.accent{background:var(--accent);color:var(--accent-ink)}
+  button.danger{background:#fbe9e9;color:var(--danger)}
+  button:disabled{opacity:.5;cursor:default}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .hint{font-size:12.5px;color:var(--muted);margin-top:6px}
+  .refs{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+  .ref{position:relative;width:96px;height:96px;border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+  .ref img{width:100%;height:100%;object-fit:cover}
+  .ref button{position:absolute;top:4px;right:4px;padding:2px 7px;font-size:12px;border-radius:8px;background:rgba(0,0,0,.6);color:#fff}
+  .dropzone{width:96px;height:96px;border:2px dashed var(--line);border-radius:12px;display:grid;place-items:center;color:var(--muted);cursor:pointer;font-size:13px;text-align:center}
+  .cuts{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+  .card{border:1px solid var(--line);border-radius:14px;padding:12px;background:#fdfcf9}
+  .card .head{display:flex;justify-content:space-between;align-items:center;font-weight:700;margin-bottom:8px}
+  .card canvas{width:100%;aspect-ratio:1;border-radius:10px;display:block;background:#eee}
+  .card .btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+  .card .btns button{padding:7px 10px;font-size:13px}
+  .spin{display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:s .8s linear infinite;vertical-align:-2px}
+  @keyframes s{to{transform:rotate(360deg)}}
+  #collagePreview{max-width:360px;width:100%;border-radius:14px;margin-top:12px;display:none}
+  details summary{cursor:pointer;font-weight:700}
+  .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;transition:.25s;pointer-events:none;max-width:90vw}
+  .toast.show{opacity:1}
+</style>
+</head>
+<body>
+<header>
+  <h1>매장 홍보 <mark>인스타툰</mark> 메이커</h1>
+  <p>캐릭터는 고정하고, 스토리와 장면만 바꿔서 홍보툰을 만들어요.</p>
+</header>
+<main>
+
+<section>
+  <details id="apiBox">
+    <summary>⚙️ API 설정 (Gemini)</summary>
+    <label>Gemini API 키</label>
+    <input id="apiKey" type="password" placeholder="AIza... (Google AI Studio에서 발급)">
+    <div class="grid2">
+      <div><label>스토리(텍스트) 모델</label><input id="textModel"></div>
+      <div><label>이미지 모델</label><input id="imageModel"></div>
+    </div>
+    <p class="hint">키는 이 브라우저에만 저장돼요. 키 없이도 데모 스토리로 레이아웃은 테스트할 수 있어요. 외부에 공개 배포할 땐 키를 서버로 옮겨야 해요.</p>
+  </details>
+</section>
+
+<section>
+  <h2><span class="n">1</span>캐릭터 고정</h2>
+  <label>레퍼런스 이미지 (같은 캐릭터 2~5장 권장: 정면·측면·표정)</label>
+  <div class="refs" id="refs"></div>
+  <input type="file" id="refInput" accept="image/*" multiple hidden>
+  <label>캐릭터 고정 프롬프트 (매 컷 자동 삽입)</label>
+  <textarea id="charPrompt" rows="7"></textarea>
+  <label>배경 스타일</label>
+  <input id="bgPrompt">
+</section>
+
+<section>
+  <h2><span class="n">2</span>매장 정보</h2>
+  <div class="grid2">
+    <div><label>업종</label><input id="sType" placeholder="예: 헬스장, 사진관, 카페"></div>
+    <div><label>상호명</label><input id="sName" placeholder="예: 담 사진관"></div>
+  </div>
+  <label>홍보할 내용 / 이벤트 / 혜택</label>
+  <textarea id="sEvent" rows="3" placeholder="예: 10월 한정 군 장병 가족사진 20% 할인, 가족 이야기 기록집 증정"></textarea>
+  <div class="grid2">
+    <div><label>타깃 고객</label><input id="sTarget" placeholder="예: 운동 처음인 직장인"></div>
+    <div><label>행동 유도 (예약 방법)</label><input id="sAction" placeholder="예: 네이버플레이스 예약"></div>
+  </div>
+  <div class="grid2">
+    <div><label>컷 수</label><select id="sCount"><option value="4">4컷</option><option value="6" selected>6컷</option><option value="8">8컷</option></select></div>
+    <div><label>글씨체</label><select id="font"></select></div>
+  </div>
+  <div class="row" style="margin-top:14px">
+    <button class="primary" id="btnStory">✨ 스토리 만들기</button>
+    <button id="btnAddCut">+ 빈 컷 추가</button>
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">3</span>컷 편집 · 이미지 생성</h2>
+  <div class="row" style="margin-bottom:14px">
+    <button class="accent" id="btnGenAll">🎨 빈 컷 전체 이미지 생성</button>
+    <button id="btnDlAll">⬇️ 전체 PNG 저장</button>
+  </div>
+  <div class="cuts" id="cuts"></div>
+  <p class="hint" id="emptyHint">스토리를 만들거나 빈 컷을 추가해 주세요.</p>
+</section>
+
+<section>
+  <h2><span class="n">4</span>스토리용 모음 이미지</h2>
+  <label>하단 버튼 문구</label>
+  <input id="cta" placeholder="예: 🔗 더 알아보기">
+  <div class="row" style="margin-top:12px">
+    <button class="primary" id="btnCollage">모음 이미지 만들기 (1080×1920)</button>
+  </div>
+  <img id="collagePreview" alt="모음 미리보기">
+</section>
+
+</main>
+<div class="toast" id="toast"></div>
+<input type="file" id="cutImgInput" accept="image/*" hidden>
+
+<script>
+/* ---------- 기본값 ---------- */
+const FONTS = {
+  blackhan:{label:'블랙한산스 (굵은 제목)', fam:'"Black Han Sans"', w:400},
+  dohyeon:{label:'도현체', fam:'"Do Hyeon"', w:400},
+  jua:{label:'주아체 (귀여움)', fam:'"Jua"', w:400},
+  gaegu:{label:'개구체 (손글씨)', fam:'"Gaegu"', w:700},
+};
+const DEFAULT_CHAR = `Korean webtoon style, thick black outlines, soft flat colors, chibi proportions (big head, small body), rosy cheeks.
+Young man, fluffy wavy black hair covering the forehead, big round dark eyes, wide cheerful expressive smile.
+Outfit: black short-sleeve t-shirt with a small white dumbbell logo on the chest, black pants.
+Keep the face, hair, body proportions and outfit IDENTICAL to the reference images.`;
+const DEFAULT_BG = 'Grayscale sketch-style gym interior (dumbbells, racks, big windows); only the character and key props are in full color.';
+
+const state = {
+  apiKey:'', textModel:'gemini-3.5-flash', imageModel:'gemini-3.1-flash-image',
+  charPrompt:DEFAULT_CHAR, bgPrompt:DEFAULT_BG, refs:[], font:'blackhan', cta:'🔗 더 알아보기',
+  store:{type:'',name:'',event:'',target:'',action:'',count:'6'},
+  cuts:[]
+};
+
+/* ---------- 저장/불러오기 ---------- */
+function save(){
+  const data = {...state, cuts: state.cuts.map(c=>({...c, img:null, imgEl:undefined, loading:false}))};
+  try{ localStorage.setItem('instatoon', JSON.stringify(data)); }
+  catch(e){ try{ localStorage.setItem('instatoon', JSON.stringify({...data, refs:[]})); toast('레퍼런스 이미지가 커서 저장은 생략했어요'); }catch(_){} }
+}
+function load(){
+  try{ const d = JSON.parse(localStorage.getItem('instatoon')||'null'); if(d) Object.assign(state, d, {store:{...state.store,...d.store}}); }catch(_){}
+  state.cuts = (state.cuts||[]).map(normCut);
+}
+function normCut(c){ return {title:'',highlight:'',sub:'',bubble:'',bubblePos:'left',scene:'',img:null,imgEl:null,loading:false,...c}; }
+
+/* ---------- 유틸 ---------- */
+const $ = s => document.querySelector(s);
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('show'),2600); }
+function loadImg(src){ return new Promise((res,rej)=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=src; }); }
+async function downscale(src, max=1024){
+  const img = await loadImg(src); const s = Math.min(1, max/Math.max(img.width,img.height));
+  const c = document.createElement('canvas'); c.width=Math.round(img.width*s); c.height=Math.round(img.height*s);
+  c.getContext('2d').drawImage(img,0,0,c.width,c.height); return c.toDataURL('image/jpeg',0.9);
+}
+function fileToDataURL(f){ return new Promise(r=>{ const fr=new FileReader(); fr.onload=()=>r(fr.result); fr.readAsDataURL(f); }); }
+function toInline(d){ const [h,b]=d.split(','); return {inline_data:{mime_type:h.match(/data:(.*?);/)[1], data:b}}; }
+function downloadCanvas(cv, name){ cv.toBlob(b=>{ const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000); },'image/png'); }
+
+/* ---------- Gemini 호출 ---------- */
+async function gemini(model, parts, generationConfig){
+  const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,{
+    method:'POST', headers:{'Content-Type':'application/json','x-goog-api-key':state.apiKey},
+    body: JSON.stringify({contents:[{role:'user',parts}], generationConfig})
+  });
+  const j = await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(j.error?.message || `HTTP ${r.status}`);
+  return j;
+}
+
+/* ---------- 스토리 생성 ---------- */
+function demoStory(s){
+  const type = s.type || '매장', act = s.action || '예약';
+  return [
+    {title:`손님 없던 동네 ${type},\n요즘 바빠진 비결`, highlight:'바빠진 비결', sub:'', bubble:'', scene:'Character grinning and doing a fist pump, holding a clipboard, busy happy customers in the background'},
+    {title:`홍보는 열심히 했는데\n문의가 별로 없었어요`, highlight:'문의', sub:'조회수는 나오는데…', bubble:'뭐가 문제지…?', scene:'Character looking worried at a smartphone, sweat drop, hand on chin'},
+    {title:`생각해보니 손님은\n고민이 궁금했던 거예요`, highlight:'고민', sub:'', bubble:'', scene:'Character with a lightbulb moment, pointing up, two thought clouds with curious customers'},
+    {title:`그래서 준비했어요!\n${(s.event||'특별 혜택').slice(0,16)}`, highlight:'준비했어요', sub:'', bubble:'이거 진짜 좋아요!', scene:'Character proudly presenting a gift box with both hands, sparkles around'},
+    {title:`${act}으로\n간편하게 신청하세요`, highlight:act.slice(0,8), sub:'', bubble:'', scene:'Character holding a smartphone toward the viewer and pointing at it, blank phone screen'},
+    {title:`이번 달 한정!\n마감 임박이에요`, highlight:'마감 임박', sub:'', bubble:'서두르세요!', scene:'Character in a hurry pointing at a wall calendar with many days crossed out, clock on the wall'},
+    {title:`처음 오셔도\n걱정 없어요`, highlight:'걱정 없어요', sub:'', bubble:'', scene:'Character smiling warmly, open-arm welcoming pose at the entrance'},
+    {title:`${s.name||'저희 매장'}에서\n기다릴게요!`, highlight:'기다릴게요', sub:'', bubble:'', scene:'Character waving goodbye with a big smile in front of the shop entrance'},
+  ].slice(0, +s.count);
+}
+
+async function makeStory(){
+  const s = state.store;
+  if(!state.apiKey){ state.cuts = demoStory(s).map(normCut); renderCuts(); save(); toast('API 키가 없어서 데모 스토리로 채웠어요'); return; }
+  const btn=$('#btnStory'); btn.disabled=true; btn.innerHTML='<span class="spin"></span> 스토리 쓰는 중…';
+  const prompt = `너는 동네 매장 홍보용 인스타툰 작가야. 아래 매장 정보로 ${s.count}컷 인스타툰 스토리를 만들어.
+[매장] 업종: ${s.type||'-'} / 상호: ${s.name||'-'}
+[홍보 내용] ${s.event||'-'}
+[타깃] ${s.target||'-'}
+[행동 유도] ${s.action||'-'}
+
+규칙:
+- 주인공은 매장 사장님 캐릭터 한 명. 1인칭 "~했어요/~하세요" 말투.
+- 흐름: 궁금증 후킹 → 공감되는 문제/고민 → 전환 → 매장의 해결·강점 → 혜택 → 마감·행동 유도.
+- 광고 티보다 이야기처럼, 짧고 쉽게.
+- 각 컷 필드:
+  title: 두 줄 제목, 줄바꿈은 \\n, 한 줄 16자 이내
+  highlight: title 안에 글자 그대로 들어있는 강조어(2~7자)
+  sub: 보조 문구 20자 이내, 필요 없으면 ""
+  bubble: 캐릭터 말풍선 14자 이내, 필요 없으면 ""
+  scene: 영어 장면 묘사(캐릭터 동작·표정·소품·배경). 글자, 간판, 화면 속 텍스트, 말풍선은 절대 묘사하지 말 것. 다른 인물은 최소화.
+- JSON 배열만 출력: [{"title":"","highlight":"","sub":"","bubble":"","scene":""}]`;
+  try{
+    const j = await gemini(state.textModel, [{text:prompt}], {responseMimeType:'application/json', temperature:0.9});
+    let txt = (j.candidates?.[0]?.content?.parts||[]).map(p=>p.text||'').join('').replace(/```json|```/g,'').trim();
+    let arr = JSON.parse(txt); if(!Array.isArray(arr)) arr = arr.cuts || [];
+    state.cuts = arr.map(c=>normCut({...c, title:(c.title||'').replace(/\\n/g,'\n'), highlight:(c.title||'').includes(c.highlight)?c.highlight:''}));
+    renderCuts(); save(); toast('스토리 완성! 문구를 다듬고 이미지를 생성하세요');
+  }catch(e){ alert('스토리 생성 실패: '+e.message); }
+  finally{ btn.disabled=false; btn.textContent='✨ 스토리 만들기'; }
+}
+
+/* ---------- 이미지 생성 ---------- */
+function buildImagePrompt(cut){
+  return [
+    'The attached images are reference images of ONE character. Draw exactly this same character (same face, hair, proportions, outfit).',
+    state.charPrompt,
+    'Background / setting: ' + state.bgPrompt,
+    'Composition: square 1:1. Keep the top 25% of the image as a plain, light, empty background area (a title will be added later). Place the character and the scene in the lower 75%. Leave some empty space on the lower left and lower right.',
+    'Scene: ' + (cut.scene || 'Character smiling and waving at the viewer'),
+    'IMPORTANT: Do NOT draw any text, letters, words, numbers, captions, signs with writing, or speech bubbles anywhere in the image.'
+  ].join('\n\n');
+}
+async function genImage(i){
+  const cut = state.cuts[i];
+  if(!state.apiKey){ $('#apiBox').open=true; toast('API 키를 먼저 입력해 주세요'); return false; }
+  if(!state.refs.length && !confirm('레퍼런스 이미지 없이 생성할까요? 캐릭터가 매번 달라질 수 있어요.')) return false;
+  cut.loading = true; refreshCard(i);
+  try{
+    const parts = [...state.refs.map(toInline), {text: buildImagePrompt(cut)}];
+    const j = await gemini(state.imageModel, parts, {responseModalities:['TEXT','IMAGE'], imageConfig:{aspectRatio:'1:1'}});
+    const p = (j.candidates?.[0]?.content?.parts||[]).find(p=>p.inlineData||p.inline_data);
+    if(!p) throw new Error('이미지가 오지 않았어요 ('+(j.candidates?.[0]?.finishReason || j.promptFeedback?.blockReason || '알 수 없음')+')');
+    const d = p.inlineData || p.inline_data;
+    cut.img = `data:${d.mimeType||d.mime_type||'image/png'};base64,${d.data}`;
+    cut.imgEl = await loadImg(cut.img);
+    return true;
+  }catch(e){ toast(`컷 ${i+1} 실패: ${e.message}`); return false; }
+  finally{ cut.loading=false; refreshCard(i); }
+}
+
+/* ---------- 캔버스 합성 ---------- */
+async function drawCut(cv, cut){
+  const W=1080, ctx=cv.getContext('2d'); cv.width=W; cv.height=W;
+  const F = FONTS[state.font] || FONTS.blackhan;
+  try{ await document.fonts.load(`${F.w} 60px ${F.fam}`, '가나다'); }catch(_){}
+  ctx.fillStyle='#f3f0e8'; ctx.fillRect(0,0,W,W);
+  if(cut.imgEl){
+    const im=cut.imgEl, s=Math.max(W/im.width, W/im.height);
+    ctx.drawImage(im,(W-im.width*s)/2,(W-im.height*s)/2,im.width*s,im.height*s);
+  }else{
+    ctx.fillStyle='#c9c4b8'; ctx.font='700 44px "Noto Sans KR"'; ctx.textAlign='center';
+    ctx.fillText(cut.loading?'그리는 중…':'이미지 생성 전', W/2, W*0.62);
+  }
+  const setF = sz => ctx.font = `${F.w} ${sz}px ${F.fam}`;
+  const outlined = (txt,x,y,sz,color='#111') => {
+    ctx.lineJoin='round'; ctx.strokeStyle='#fff'; ctx.lineWidth=sz*0.2; ctx.strokeText(txt,x,y);
+    ctx.fillStyle=color; ctx.fillText(txt,x,y);
+  };
+  ctx.textAlign='left'; ctx.textBaseline='alphabetic';
+
+  // 제목
+  const lines = (cut.title||'').split('\n').filter(l=>l.trim());
+  let size = 88; setF(size);
+  while(size>40 && Math.max(0,...lines.map(l=>ctx.measureText(l).width)) > W-110){ size-=4; setF(size); }
+  let y = 50 + size;
+  for(const line of lines){
+    const lw = ctx.measureText(line).width, x = (W-lw)/2;
+    const hi = cut.highlight ? line.indexOf(cut.highlight) : -1;
+    if(hi >= 0){
+      const px = ctx.measureText(line.slice(0,hi)).width, hw = ctx.measureText(cut.highlight).width;
+      ctx.save(); ctx.fillStyle='rgba(255,206,51,.9)';
+      ctx.beginPath(); ctx.moveTo(x+px-10, y-size*0.42); ctx.lineTo(x+px+hw+12, y-size*0.47);
+      ctx.lineTo(x+px+hw+8, y+size*0.1); ctx.lineTo(x+px-12, y+size*0.14); ctx.closePath(); ctx.fill(); ctx.restore();
+      setF(size);
+    }
+    outlined(line, x, y, size);
+    y += size*1.22;
+  }
+  // 보조 문구
+  if(cut.sub){
+    const ss = Math.round(size*0.48); setF(ss);
+    const sw = ctx.measureText(cut.sub).width; outlined(cut.sub,(W-sw)/2, y - size*0.35 + ss, ss, '#333');
+  }
+  // 말풍선
+  if(cut.bubble) drawBubble(ctx, cut.bubble, cut.bubblePos, F);
+}
+function drawBubble(ctx, text, pos, F){
+  const W=1080, s=44, lines=text.split('\n');
+  ctx.font = `${F.w} ${s}px ${F.fam}`;
+  const tw = Math.max(...lines.map(l=>ctx.measureText(l).width));
+  const bw = tw+70, bh = lines.length*s*1.3+44;
+  const bx = pos==='right' ? W-bw-40 : 40, by = W-bh-110;
+  const tx = pos==='right' ? bx+bw*0.25 : bx+bw*0.75, tip = [tx + (pos==='right'?-40:40), by+bh+50];
+  ctx.fillStyle='#fff'; ctx.strokeStyle='#111'; ctx.lineWidth=5; ctx.lineJoin='round';
+  ctx.beginPath(); ctx.roundRect(bx,by,bw,bh,Math.min(44,bh/2)); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(tx-20,by+bh-4); ctx.lineTo(...tip); ctx.lineTo(tx+20,by+bh-4); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(tx-20,by+bh); ctx.lineTo(...tip); ctx.lineTo(tx+20,by+bh); ctx.stroke();
+  ctx.fillStyle='#111'; ctx.textAlign='center';
+  lines.forEach((l,k)=>ctx.fillText(l, bx+bw/2, by+22+s*0.95+k*s*1.3));
+  ctx.textAlign='left';
+}
+
+/* ---------- 컷 카드 UI ---------- */
+const FIELDS = [
+  ['title','제목 (엔터로 줄바꿈)','textarea',2],
+  ['highlight','형광펜 강조 단어 (제목 안의 글자)','input'],
+  ['sub','보조 문구 (선택)','input'],
+  ['bubble','말풍선 (선택)','input'],
+  ['bubblePos','말풍선 위치','select'],
+  ['scene','장면 설명 (영어 권장, 글자 묘사 X)','textarea',3],
+];
+function renderCuts(){
+  const box = $('#cuts'); box.innerHTML='';
+  $('#emptyHint').style.display = state.cuts.length ? 'none' : 'block';
+  state.cuts.forEach((cut,i)=>{
+    const card = document.createElement('div'); card.className='card'; card.dataset.i=i;
+    card.innerHTML = `<div class="head"><span>컷 ${i+1}</span><span class="st"></span></div><canvas></canvas>`;
+    for(const [k,lab,type,rows] of FIELDS){
+      const l=document.createElement('label'); l.textContent=lab; card.appendChild(l);
+      let el;
+      if(type==='textarea'){ el=document.createElement('textarea'); el.rows=rows; }
+      else if(type==='select'){ el=document.createElement('select'); el.innerHTML='<option value="left">왼쪽 아래</option><option value="right">오른쪽 아래</option>'; }
+      else el=document.createElement('input');
+      el.dataset.k=k; el.value=cut[k]||''; card.appendChild(el);
+    }
+    const b=document.createElement('div'); b.className='btns';
+    b.innerHTML = `<button class="accent" data-a="gen">🎨 이미지 생성</button>
+      <button data-a="up">🖼 내 이미지</button><button data-a="ref">⭐ 레퍼런스 등록</button>
+      <button data-a="dl">⬇️ PNG</button><button data-a="up1">↑</button><button data-a="down">↓</button>
+      <button class="danger" data-a="del">삭제</button>`;
+    card.appendChild(b); box.appendChild(card);
+    refreshCard(i);
+  });
+}
+function refreshCard(i){
+  const card = document.querySelector(`.card[data-i="${i}"]`); if(!card) return;
+  const cut = state.cuts[i];
+  drawCut(card.querySelector('canvas'), cut);
+  const g = card.querySelector('[data-a="gen"]');
+  g.disabled = cut.loading;
+  g.innerHTML = cut.loading ? '<span class="spin"></span> 생성 중' : (cut.img ? '🔄 다시 생성' : '🎨 이미지 생성');
+}
+let pendingUpload = null;
+$('#cuts').addEventListener('input', e=>{
+  const k=e.target.dataset.k, card=e.target.closest('.card'); if(!k||!card) return;
+  const i=+card.dataset.i; state.cuts[i][k]=e.target.value; refreshCard(i); save();
+});
+$('#cuts').addEventListener('click', async e=>{
+  const a=e.target.closest('button')?.dataset.a, card=e.target.closest('.card'); if(!a||!card) return;
+  const i=+card.dataset.i, cut=state.cuts[i], cs=state.cuts;
+  if(a==='gen') genImage(i);
+  if(a==='dl') downloadCanvas(card.querySelector('canvas'), `cut_${i+1}.png`);
+  if(a==='up'){ pendingUpload=i; $('#cutImgInput').click(); }
+  if(a==='ref'){
+    if(!cut.img) return toast('이미지가 있는 컷만 등록할 수 있어요');
+    if(state.refs.length>=6) return toast('레퍼런스는 최대 6장이에요. 하나 지우고 등록해 주세요');
+    state.refs.push(await downscale(cut.img)); renderRefs(); save(); toast('레퍼런스에 추가했어요 (그림만, 글자 없이)');
+  }
+  if(a==='del' && confirm(`컷 ${i+1}을 삭제할까요?`)){ cs.splice(i,1); renderCuts(); save(); }
+  if(a==='up1' && i>0){ [cs[i-1],cs[i]]=[cs[i],cs[i-1]]; renderCuts(); save(); }
+  if(a==='down' && i<cs.length-1){ [cs[i+1],cs[i]]=[cs[i],cs[i+1]]; renderCuts(); save(); }
+});
+$('#cutImgInput').addEventListener('change', async e=>{
+  const f=e.target.files[0]; e.target.value=''; if(!f||pendingUpload===null) return;
+  const cut=state.cuts[pendingUpload]; cut.img=await fileToDataURL(f); cut.imgEl=await loadImg(cut.img);
+  refreshCard(pendingUpload); pendingUpload=null;
+});
+
+/* ---------- 레퍼런스 ---------- */
+function renderRefs(){
+  const box=$('#refs'); box.innerHTML='';
+  state.refs.forEach((src,i)=>{
+    const d=document.createElement('div'); d.className='ref';
+    d.innerHTML=`<img src="${src}" alt="레퍼런스 ${i+1}"><button data-i="${i}">✕</button>`; box.appendChild(d);
+  });
+  if(state.refs.length<6){ const z=document.createElement('div'); z.className='dropzone'; z.innerHTML='＋<br>이미지 추가'; z.onclick=()=>$('#refInput').click(); box.appendChild(z); }
+}
+$('#refs').addEventListener('click', e=>{ const b=e.target.closest('button'); if(!b) return; state.refs.splice(+b.dataset.i,1); renderRefs(); save(); });
+$('#refInput').addEventListener('change', async e=>{
+  for(const f of [...e.target.files].slice(0, 6-state.refs.length)) state.refs.push(await downscale(await fileToDataURL(f)));
+  e.target.value=''; renderRefs(); save();
+});
+
+/* ---------- 일괄 작업 ---------- */
+$('#btnGenAll').onclick = async ()=>{
+  const todo = state.cuts.map((c,i)=>i).filter(i=>!state.cuts[i].img);
+  if(!todo.length) return toast('모든 컷에 이미지가 있어요. 개별로 다시 생성해 보세요');
+  const btn=$('#btnGenAll'); btn.disabled=true;
+  for(const [n,i] of todo.entries()){ btn.innerHTML=`<span class="spin"></span> ${n+1}/${todo.length} 생성 중`; if(await genImage(i)===false && !state.apiKey) break; }
+  btn.disabled=false; btn.textContent='🎨 빈 컷 전체 이미지 생성';
+};
+$('#btnDlAll').onclick = ()=>{
+  document.querySelectorAll('.card canvas').forEach((cv,i)=>setTimeout(()=>downloadCanvas(cv,`cut_${i+1}.png`), i*400));
+};
+$('#btnCollage').onclick = async ()=>{
+  if(!state.cuts.length) return toast('컷이 없어요');
+  const W=1080,H=1920,cv=document.createElement('canvas'); cv.width=W; cv.height=H; const ctx=cv.getContext('2d');
+  const g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,'#2b2b2e'); g.addColorStop(.5,'#8e8e93'); g.addColorStop(1,'#3a3a3d');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  const cuts=state.cuts.slice(0,8), rows=Math.ceil(cuts.length/2), gap=28;
+  const cell=Math.min(470, Math.floor((H-420-(rows-1)*gap)/rows));
+  const left=(W-(cell*2+gap))/2, top=(H-260-(rows*cell+(rows-1)*gap))/2 + 40;
+  for(const [k,cut] of cuts.entries()){
+    const off=document.createElement('canvas'); await drawCut(off,cut);
+    const x=left+(k%2)*(cell+gap), y=top+Math.floor(k/2)*(cell+gap);
+    ctx.save(); ctx.beginPath(); ctx.roundRect(x,y,cell,cell,22); ctx.clip(); ctx.drawImage(off,x,y,cell,cell); ctx.restore();
+  }
+  if(state.cta){
+    const F=FONTS[state.font]; ctx.font=`${F.w} 54px ${F.fam}`; const tw=ctx.measureText(state.cta).width;
+    const bw=tw+120,bh=110,bx=(W-bw)/2,by=H-230;
+    ctx.fillStyle='#fff'; ctx.beginPath(); ctx.roundRect(bx,by,bw,bh,28); ctx.fill();
+    ctx.fillStyle='#111'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(state.cta,W/2,by+bh/2+2);
+  }
+  const img=$('#collagePreview'); img.src=cv.toDataURL('image/png'); img.style.display='block';
+  downloadCanvas(cv,'story_collage.png');
+};
+
+/* ---------- 폼 바인딩 ---------- */
+function bind(){
+  const map = {apiKey:'apiKey',textModel:'textModel',imageModel:'imageModel',charPrompt:'charPrompt',bgPrompt:'bgPrompt',cta:'cta',font:'font'};
+  $('#font').innerHTML = Object.entries(FONTS).map(([k,f])=>`<option value="${k}">${f.label}</option>`).join('');
+  for(const [id,key] of Object.entries(map)){
+    const el=$('#'+id); el.value=state[key];
+    el.addEventListener('input',()=>{ state[key]=el.value.trim()===''&&key.endsWith('Model')?state[key]:el.value; save(); if(key==='font') state.cuts.forEach((_,i)=>refreshCard(i)); });
+  }
+  const smap={sType:'type',sName:'name',sEvent:'event',sTarget:'target',sAction:'action',sCount:'count'};
+  for(const [id,key] of Object.entries(smap)){ const el=$('#'+id); el.value=state.store[key]; el.addEventListener('input',()=>{ state.store[key]=el.value; save(); }); }
+  $('#btnStory').onclick = makeStory;
+  $('#btnAddCut').onclick = ()=>{ state.cuts.push(normCut({title:'새 컷 제목\n두 번째 줄'})); renderCuts(); save(); };
+  if(!state.apiKey) $('#apiBox').open = true;
+}
+
+load(); bind(); renderRefs(); renderCuts();
+document.fonts.ready.then(()=>state.cuts.forEach((_,i)=>refreshCard(i)));
+</script>
+</body>
+</html>

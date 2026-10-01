@@ -1,0 +1,15 @@
+const { chromium } = require('playwright');
+const toon={title:'t',hooks:['a\nb'],cuts:Array.from({length:4},(_,i)=>({role:'r',shot:'미디엄샷',title:i?'':'손님이\n사라졌다',highlight:'',sub:'',bubble:'사장님: 좋아',bubbleSide:'l',sfx:'',direction:'d',panels:'',caption:'',extras:''})),caption:'c',hashtags:'#a',comment:'x',reelCaption:'r',reelHashtags:'#r',reelComment:'rc',endHead:'내일도\n문 열어요',endBtn:'네이버 예약',cast:'',ideas:[]};
+(async()=>{ const b=await chromium.launch(); const p=await b.newPage({viewport:{width:1300,height:1000}}); const errs=[]; p.on('pageerror',e=>errs.push(e.message));
+await p.route('**/fonts.googleapis.com/**',r=>r.fulfill({status:200,body:''}));
+await p.route('**generativelanguage.googleapis.com/**',r=>r.fulfill({json:{candidates:[{content:{parts:[{text:JSON.stringify(toon)}]}}]}}));
+await p.addInitScript(()=>{ if(!sessionStorage.getItem('x')){ sessionStorage.setItem('x',1); localStorage.clear(); localStorage.setItem('instatoon.key','TEST'); localStorage.setItem('instatoon.helpSeen','1'); }});
+await p.goto(require('url').pathToFileURL(require('path').resolve(__dirname,'../../site/instatoon.html')).href); await p.waitForTimeout(700);
+await p.click('[data-ind="카페"]'); await p.click('.prof summary'); await p.fill('#pf-cta','📍 예약은 프로필 링크 → 네이버 예약'); await p.fill('#i-offer','10월 한정 라떼 1+1');
+await p.click('#makeBtn'); await p.waitForTimeout(1200); await p.click('.actions [data-step="post"]'); await p.waitForTimeout(400);
+await p.click('[data-endon="1"]'); await p.waitForTimeout(200);
+console.log('fields',await p.$eval('#e-head',e=>e.value),'|',await p.$eval('#e-lines',e=>e.value),'|',await p.$eval('#e-btn',e=>e.value));
+console.log(await p.$eval('#endPre',e=>e.textContent));
+await p.fill('#e-btn','전화 예약'); console.log('tag',await p.$eval('#ea-btn',e=>e.innerText),'saved',await p.evaluate(()=>ec().btn));
+await p.$eval('.endli',e=>e.scrollIntoView()); await p.screenshot({path:'/tmp/claude-0/y1.png'});
+console.log('errors',errs); await b.close(); })();
