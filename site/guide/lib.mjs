@@ -26,10 +26,11 @@ export const ex = (title, ...lines) => ({ t: 'ex', title, v: lines });
 export const table = (head, ...rows) => ({ t: 'table', head, rows });
 export const sec = (h, ...blocks) => ({ h, blocks });
 
-const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+export const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 // 본문 인라인: **굵게**, [[slug|텍스트]] 내부 링크
-const inline = (s) => esc(s)
+export const inline = (s) => esc(s)
   .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+  .replace(/\[\[(\/[a-z0-9/-]*)\|(.+?)\]\]/g, (_, href, t) => `<a href="${href}">${t}</a>`)
   .replace(/\[\[([a-z0-9-]+)\|(.+?)\]\]/g, (_, slug, t) => `<a href="/guide/${slug}/">${t}</a>`);
 
 export const url = (slug) => `${ORIGIN}/guide/${slug}/`;
@@ -129,16 +130,16 @@ footer p{margin:10px 0 0;font-size:13px}
 
 const FONTS = '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;700;900&display=swap" rel="stylesheet">';
 
-const header = (cur) => `<a class="skip" href="#main">본문 바로가기</a>
+export const header = (cur) => `<a class="skip" href="#main">본문 바로가기</a>
 <div class="wrap"><header class="topbar">
 <a class="brand" href="/" aria-label="${SITE} 메인으로"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><b>${SITE}</b></a>
 <nav class="nav" aria-label="주요 메뉴"><a class="btn" href="/">메인으로</a><a class="btn acc" href="/" data-track="cta" data-loc="header">인스타툰 만들기</a><a class="btn"${cur === 'guide' ? ' aria-current="page"' : ''} href="/guide/">콘텐츠 가이드</a></nav>
 </header></div>`;
 
-const footer = `<footer><div class="wrap"><nav class="nav" aria-label="푸터 메뉴"><a href="/guide/">콘텐츠 가이드</a><a href="/" data-track="cta" data-loc="footer">인스타툰 만들기</a><a href="/sitemap.xml">사이트맵</a></nav>
+export const footer = `<footer><div class="wrap"><nav class="nav" aria-label="푸터 메뉴"><a href="/guide/">콘텐츠 가이드</a><a href="/" data-track="cta" data-loc="footer">인스타툰 만들기</a><a href="/about/">소개</a><a href="/privacy/">개인정보처리방침</a><a href="/terms/">이용안내</a><a href="/sitemap.xml">사이트맵</a></nav>
 <p>© ${SITE} · 이 사이트의 가이드는 일반적인 정보 제공을 위한 것이며, 서비스 기능과 정책은 각 서비스의 공식 안내에서 확인해 주세요.</p></div></footer>`;
 
-function head({ title, desc, canonical, type, extra = '', body = '', ga = {} }) {
+export function head({ title, desc, canonical, type, extra = '', body = '', ga = {} }) {
   return `<!doctype html>
 <html lang="ko">
 <head>
@@ -166,10 +167,10 @@ ${gaSnippet(cfg.ga, ga)}
 <body${body}>`;
 }
 
-const ld = (o) => `<script type="application/ld+json">${JSON.stringify(o).replace(/</g, '\\u003c')}</script>`;
+export const ld = (o) => `<script type="application/ld+json">${JSON.stringify(o).replace(/</g, '\\u003c')}</script>`;
 
-const trackJs = '<script src="/guide-track.js" defer></script>';
-const bodyAttr = (type, slug, cat) => ` data-page-type="${type}"${slug ? ` data-slug="${slug}"` : ''}${cat ? ` data-category="${cat}"` : ''}`;
+export const trackJs = '<script src="/guide-track.js" defer></script>';
+export const bodyAttr = (type, slug, cat) => ` data-page-type="${type}"${slug ? ` data-slug="${slug}"` : ''}${cat ? ` data-category="${cat}"` : ''}`;
 
 export function renderArticle(a, all, i) {
   const pub = a.published || DATE, mod = a.modified || pub;
@@ -217,6 +218,7 @@ ${body}
 <section class="summary"><h2>이 글에서 기억할 내용</h2><ul>${a.summary.map((x) => `<li>${inline(x)}</li>`).join('')}</ul></section>
 <section class="cta"><h2>인스타툰을 직접 만들어보고 싶다면?</h2><p>인스타툰 연재실에서 실제 매장 이야기를 인스타툰 콘텐츠로 만들어보세요.</p><a class="btn big" href="/" data-track="cta" data-loc="article_bottom">인스타툰 만들기</a></section>
 </article>
+<p class="note">편집 안내: 이 글은 AI 도구의 도움을 받아 작성한 초안을 바탕으로 합니다. 서비스 기능과 정책은 바뀔 수 있으니 공식 안내를 함께 확인해 주세요. <a href="/about/#editorial">편집 방침 보기</a></p>
 <section class="related" aria-labelledby="rel"><h2 id="rel">함께 읽으면 좋은 글</h2><ul class="cards">${rel.map(card).join('')}</ul>${more}</section>
 <nav class="pn" aria-label="이전 글과 다음 글">${prevHtml}${nextHtml}</nav>
 </main>

@@ -44,21 +44,30 @@ for (const [i, u] of pages.entries()) {
   }
   console.log(`[${status === 200 ? 'PASS' : 'FAIL'}] ${u}  (${title?.length}자 title, ${h.replace(/<style[\s\S]*?<\/style>|<script[\s\S]*?<\/script>|<[^>]+>/g, '').length}자)`);
 }
-// 허브 → 20개 글 링크
+// 소개/개인정보/이용안내 페이지
+for (const u of ['/about/', '/privacy/', '/terms/']) {
+  const { status, text: h } = await get(u);
+  ok(status === 200, `${u} HTTP ${status}`);
+  ok(h.includes(`<link rel="canonical" href="${ORIGIN}${u}">`) && (h.match(/<h1[ >]/g) || []).length === 1, `${u} canonical/H1`);
+  ok(h.includes('content="index,follow"') && h.includes('<title>'), `${u} robots/title`);
+  ok(h.includes('href="/privacy/"') && h.includes('href="/terms/"') && h.includes('href="/about/"'), `${u} 푸터 링크`);
+  console.log(`[PASS] ${u}`);
+}
+// 허브 → 모든 글 링크
 const hub = (await get('/guide/')).text;
 for (const a of articles) ok(hub.includes(`href="/guide/${a.slug}/"`), `허브에 ${a.slug} 링크 없음`);
 // 메인 → /guide/
 ok((await get('/')).text.includes('href="/guide/"'), '메인에 /guide/ 링크 없음');
 // sitemap
 const sm = (await get('/sitemap.xml')).text; const locs = [...sm.matchAll(/<loc>(.*?)<\/loc>/g)].map((m) => m[1]);
-for (const u of ['/', ...pages]) ok(locs.includes(ORIGIN + u), `sitemap 누락 ${u}`);
+for (const u of ['/', ...pages, '/about/', '/privacy/', '/terms/']) ok(locs.includes(ORIGIN + u), `sitemap 누락 ${u}`);
 for (const l of locs) ok((await get(l.replace(ORIGIN, ''))).status === 200, `sitemap URL 응답 이상 ${l}`);
 console.log(`sitemap: ${locs.length}개 URL`);
 // robots
 const rb = (await get('/robots.txt')).text; ok(/Allow: \//.test(rb) && !/Disallow: \//.test(rb) && rb.includes(`Sitemap: ${ORIGIN}/sitemap.xml`), 'robots.txt'); console.log(rb);
 // 모든 내부 링크
 const seen = new Set(); let n = 0;
-for (const u of ['/', '/404.html', ...pages]) { const h = u === '/404.html' ? fs.readFileSync(path.join(dep, '404.html'), 'utf8') : (await get(u)).text;
+for (const u of ['/', '/404.html', ...pages, '/about/', '/privacy/', '/terms/']) { const h = u === '/404.html' ? fs.readFileSync(path.join(dep, '404.html'), 'utf8') : (await get(u)).text;
   for (const [, href] of h.matchAll(/<a [^>]*href="(\/[^"#]*)(?:#[^"]*)?"/g)) { if (seen.has(href)) continue; seen.add(href); n++; const r = await get(href); ok(r.status === 200, `깨진 내부 링크 ${href} (${r.status}) in ${u}`); } }
 console.log(`내부 링크 ${n}종 검사`);
 ok((await get('/guide/없는-글/')).status === 404, '404 응답'); ok((await get('/guide/없는-글/')).text.includes('href="/guide/"'), '404에서 /guide/ 링크');

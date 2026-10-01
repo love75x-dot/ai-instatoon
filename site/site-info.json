@@ -1,0 +1,6 @@
+{
+  "_설명": "운영자가 확인된 실제 정보만 채워 넣으세요. 비어 있으면 해당 항목은 사이트에 표시되지 않고, 가짜 값은 절대 넣지 않습니다. 수정 후 npm run build.",
+  "operatorName": "",
+  "contactEmail": "",
+  "adsensePublisherId": ""
+}

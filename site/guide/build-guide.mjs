@@ -5,6 +5,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { ORIGIN, DATE, cfg, url, renderArticle, renderHub, render404 } from './lib.mjs';
 import { validate } from './validate.mjs';
 import { gaId } from '../analytics.mjs';
+import { pages, siteInfo } from './pages.mjs';
 import a1 from './articles-1.mjs';
 import a2 from './articles-2.mjs';
 import a3 from './articles-3.mjs';
@@ -36,12 +37,17 @@ const write = (rel, s) => { const f = path.join(dep, rel); fs.mkdirSync(path.dir
 fs.rmSync(path.join(dep, 'guide'), { recursive: true, force: true });
 write('guide/index.html', renderHub(articles));
 articles.forEach((a, i) => write(`guide/${a.slug}/index.html`, renderArticle(a, articles, i)));
+for (const pg of pages) write(`${pg.slug}/index.html`, pg.build());
+// ads.txt: 실제 게시자 ID(site-info.json)가 있을 때만 생성한다. 없으면 만들지 않는다(가짜 ID 금지).
+fs.rmSync(path.join(dep, 'ads.txt'), { force: true });
+if (siteInfo.adsensePublisherId) write('ads.txt', `google.com, ${siteInfo.adsensePublisherId}, DIRECT, f08c47fec0942fa0
+`);
 fs.copyFileSync(path.join(here, 'track.js'), path.join(dep, 'guide-track.js'));
 write('404.html', render404());
 write('robots.txt', `User-agent: *\nAllow: /\n\nSitemap: ${ORIGIN}/sitemap.xml\n`);
 const lastmod = Object.fromEntries(articles.map((a) => [url(a.slug), a.modified || a.published || DATE]));
 const newest = articles.map((a) => a.modified || a.published || DATE).sort().pop();
-const urls = [ORIGIN + '/', ORIGIN + '/guide/', ...articles.map((a) => url(a.slug))];
+const urls = [ORIGIN + '/', ORIGIN + '/guide/', ...articles.map((a) => url(a.slug)), ...pages.map((pg) => `${ORIGIN}/${pg.slug}/`)];
 write('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u) => `  <url><loc>${u}</loc><lastmod>${lastmod[u] || newest}</lastmod></url>`).join('\n')}\n</urlset>\n`);
 console.log(`GA4: ${cfg.ga || '미설정(측정 ID 없음 - 스크립트 미삽입)'}`);
 console.log(`가이드 생성 완료: 허브 1 + 글 ${articles.length} + sitemap(${urls.length}) + robots + 404`);
