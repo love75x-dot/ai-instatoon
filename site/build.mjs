@@ -18,4 +18,5 @@ fs.writeFileSync(path.join(here, 'instatoon.html'), out);
 const dep = path.join(here, '..', 'deploy');
 fs.mkdirSync(dep, { recursive: true });
 fs.writeFileSync(path.join(dep, 'index.html'), out);
-console.log('instatoon.html, deploy/index.html 생성 완료');
+fs.copyFileSync(path.join(here, 'favicon.svg'), path.join(dep, 'favicon.svg'));
+console.log('instatoon.html, deploy/index.html, deploy/favicon.svg 생성 완료');
