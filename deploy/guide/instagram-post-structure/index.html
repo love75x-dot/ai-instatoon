@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>인스타그램 게시물 구성법: 첫 이미지, 제목, 본문, 캡션, CTA | 인스타툰 연재실</title>
+<meta name="description" content="인스타그램 게시물의 첫 이미지, 제목, 본문, 이미지와 텍스트 배치, 캡션, CTA, 해시태그를 어떻게 구성하면 좋은지와 게시 전 체크리스트를 정리했습니다.">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://ai-instatoon.vercel.app/guide/instagram-post-structure/">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<meta property="og:site_name" content="인스타툰 연재실">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:type" content="article">
+<meta property="og:title" content="인스타그램 게시물 구성법: 첫 이미지, 제목, 본문, 캡션, CTA | 인스타툰 연재실">
+<meta property="og:description" content="인스타그램 게시물의 첫 이미지, 제목, 본문, 이미지와 텍스트 배치, 캡션, CTA, 해시태그를 어떻게 구성하면 좋은지와 게시 전 체크리스트를 정리했습니다.">
+<meta property="og:url" content="https://ai-instatoon.vercel.app/guide/instagram-post-structure/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="인스타그램 게시물 구성법: 첫 이미지, 제목, 본문, 캡션, CTA | 인스타툰 연재실">
+<meta name="twitter:description" content="인스타그램 게시물의 첫 이미지, 제목, 본문, 이미지와 텍스트 배치, 캡션, CTA, 해시태그를 어떻게 구성하면 좋은지와 게시 전 체크리스트를 정리했습니다.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F4F4F2;--surface:#fff;--sunken:#F0F0EE;--ink:#121214;--ink-2:#3A3A3F;--muted:#6B6B72;--line:#E3E3E0;--line-2:#CFCFCB;--accent:#FFD53D;--accent-ink:#121214;--accent-soft:#FFF6CF;--warn:#9A5B00;--warn-bg:#FFF1D2;--ok:#17804A;--ok-bg:#E3F4EA;--sans:"Gothic A1","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;--r:14px}
+@media (prefers-color-scheme:dark){:root{color-scheme:dark;--bg:#0E0E10;--surface:#18181B;--sunken:#1F1F23;--ink:#F2F2F3;--ink-2:#CFCFD4;--muted:#A0A0A8;--line:#2A2A2F;--line-2:#3A3A40;--accent-soft:#3A3212;--warn:#F2B75A;--warn-bg:#35280F;--ok:#5CCB8C;--ok-bg:#15301F}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased;overflow-wrap:anywhere;word-break:keep-all}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.skip{position:absolute;left:-999px}.skip:focus{left:8px;top:8px;background:var(--surface);padding:8px 12px;z-index:9}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-block:16px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+.mark{width:28px;height:28px;display:grid;grid-template-columns:1fr 1fr;gap:3px}
+.mark i{background:var(--ink);border-radius:3px}.mark i:nth-child(2){background:var(--accent)}
+.brand b{font-weight:900;font-size:19px;letter-spacing:-.02em;white-space:nowrap}
+.nav{display:flex;flex-wrap:wrap;gap:8px}
+.btn{border:1px solid var(--line-2);background:var(--surface);border-radius:999px;padding:8px 16px;min-height:40px;font-weight:700;font-size:14px;display:inline-flex;align-items:center;text-decoration:none;white-space:nowrap}
+.btn:hover{border-color:var(--ink)}
+.btn.pri{background:var(--ink);border-color:var(--ink);color:var(--surface)}
+.btn.acc{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.big{padding:13px 26px;font-size:16px;font-weight:800;min-height:48px}
+.btn[aria-current="page"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+main{padding-bottom:56px}
+.crumb{font-size:13.5px;color:var(--muted);margin:8px 0 18px;line-height:1.5}
+.crumb ol{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:4px}
+.crumb li+li::before{content:"›";margin-right:4px}
+.crumb a{color:var(--muted)}
+.article{max-width:820px;margin:0 auto;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:36px 40px}
+@media (max-width:640px){.article{padding:22px 18px}}
+.cat{display:inline-block;font-size:13px;font-weight:800;background:var(--accent-soft);border-radius:999px;padding:3px 12px;text-decoration:none;line-height:1.7}
+.article h1{font-size:clamp(26px,4vw,34px);line-height:1.35;letter-spacing:-.03em;font-weight:900;margin:14px 0 12px;text-wrap:balance}
+.lead{font-size:17.5px;color:var(--ink-2);margin:0 0 12px}
+.meta{font-size:13px;color:var(--muted);margin:0 0 24px;padding-bottom:20px;border-bottom:1px solid var(--line)}
+.toc{background:var(--sunken);border-radius:12px;padding:14px 20px;margin:0 0 28px;font-size:14.5px;line-height:1.7}
+.toc b{display:block;margin-bottom:4px}.toc ol{margin:0;padding-left:20px}
+.toc a{text-decoration:none}.toc a:hover{text-decoration:underline}
+.article h2{font-size:clamp(21px,3vw,25px);line-height:1.4;letter-spacing:-.02em;font-weight:900;margin:44px 0 12px;scroll-margin-top:16px}
+.article h3{font-size:18px;font-weight:800;margin:26px 0 6px}
+.article p{margin:0 0 16px}
+.article ul,.article ol{margin:0 0 18px;padding-left:22px}.article li{margin:4px 0}
+.article ul.chk{list-style:none;padding-left:0}
+.article ul.chk li{position:relative;padding-left:30px}
+.article ul.chk li::before{content:"";position:absolute;left:2px;top:.55em;width:15px;height:15px;border:2px solid var(--ink);border-radius:4px}
+.article a{text-decoration-thickness:1px;text-underline-offset:3px}
+.callout{border-radius:12px;padding:12px 18px;margin:0 0 20px;font-size:15.5px;line-height:1.7}
+.callout b{display:block;font-size:13.5px;margin-bottom:2px}.callout p{margin:0}
+.callout.tip{background:var(--ok-bg)}.callout.warn{background:var(--warn-bg)}
+.example{border:1px dashed var(--line-2);border-radius:12px;padding:14px 18px 4px;margin:0 0 20px;font-size:15.5px;line-height:1.75}
+.example>b{display:block;font-size:13.5px;color:var(--muted);margin-bottom:6px}
+.tbl{overflow-x:auto;margin:0 0 20px;-webkit-overflow-scrolling:touch}
+.tbl table{border-collapse:collapse;width:100%;min-width:480px;font-size:14.5px;line-height:1.6}
+.tbl th,.tbl td{border:1px solid var(--line-2);padding:8px 10px;text-align:left;vertical-align:top}.tbl th{background:var(--sunken)}
+.summary{background:var(--accent-soft);border-radius:var(--r);padding:20px 24px;margin:44px 0 0}
+.summary h2{margin:0 0 8px!important;font-size:19px!important}.summary ul{margin:0}
+.cta{margin:32px 0 0;background:var(--ink);color:var(--surface);border-radius:var(--r);padding:26px 28px}
+.cta h2{margin:0 0 6px!important;font-size:21px!important;color:inherit}
+.cta p{margin:0 0 16px!important;opacity:.88}
+.cta .btn{background:var(--accent);border-color:var(--accent);color:#121214}
+.related{max-width:820px;margin:32px auto 0}
+.related h2,.hubsec h2{font-size:20px;font-weight:900;margin:0 0 12px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;list-style:none;margin:0;padding:0}
+.card{display:block;height:100%;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;text-decoration:none;line-height:1.5}
+.card:hover{border-color:var(--ink)}
+.card small{display:block;color:var(--muted);font-size:12.5px;font-weight:700;margin-bottom:4px}
+.card b{display:block;font-size:16px;line-height:1.45}
+.pn{max-width:820px;margin:28px auto 0;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pn a{display:block;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 18px;text-decoration:none;line-height:1.5;min-height:64px}
+.pn a:hover{border-color:var(--ink)}.pn small{display:block;color:var(--muted);font-size:12.5px;font-weight:700}.pn .nx{text-align:right}
+@media (max-width:560px){.pn{grid-template-columns:1fr}.pn .nx{text-align:left}}
+.hero{padding:28px 0 8px}.hero h1{font-size:clamp(28px,4.6vw,40px);line-height:1.3;letter-spacing:-.03em;font-weight:900;margin:0 0 12px;text-wrap:balance}
+.hero p{color:var(--ink-2);max-width:60ch;margin:0 0 20px;font-size:17px}
+.hubsec{margin:36px 0 0}.hubsec>p{margin:-6px 0 12px;color:var(--muted);font-size:14.5px}
+.note{max-width:820px;margin:20px auto 0;font-size:13.5px;color:var(--muted);line-height:1.7}
+footer{border-top:1px solid var(--line);padding:26px 0 40px;font-size:14px;color:var(--muted)}
+footer .nav a{color:var(--ink-2);text-decoration:none;padding:6px 4px;min-height:40px;display:inline-flex;align-items:center}
+footer .nav a:hover{text-decoration:underline}
+footer p{margin:10px 0 0;font-size:13px}
+</style>
+<meta property="article:published_time" content="2026-10-01"><meta property="article:modified_time" content="2026-10-01"><script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"인스타그램 게시물은 어떻게 구성해야 할까?","description":"인스타그램 게시물의 첫 이미지, 제목, 본문, 이미지와 텍스트 배치, 캡션, CTA, 해시태그를 어떻게 구성하면 좋은지와 게시 전 체크리스트를 정리했습니다.","inLanguage":"ko","datePublished":"2026-10-01","dateModified":"2026-10-01","mainEntityOfPage":{"@type":"WebPage","@id":"https://ai-instatoon.vercel.app/guide/instagram-post-structure/"},"url":"https://ai-instatoon.vercel.app/guide/instagram-post-structure/","author":{"@type":"Organization","name":"인스타툰 연재실","url":"https://ai-instatoon.vercel.app/"},"publisher":{"@type":"Organization","name":"인스타툰 연재실","url":"https://ai-instatoon.vercel.app/"}}</script><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://ai-instatoon.vercel.app/"},{"@type":"ListItem","position":2,"name":"콘텐츠 가이드","item":"https://ai-instatoon.vercel.app/guide/"},{"@type":"ListItem","position":3,"name":"인스타그램 게시물은 어떻게 구성해야 할까?","item":"https://ai-instatoon.vercel.app/guide/instagram-post-structure/"}]}</script>
+</head>
+<body><a class="skip" href="#main">본문 바로가기</a>
+<div class="wrap"><header class="topbar">
+<a class="brand" href="/" aria-label="인스타툰 연재실 메인으로"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><b>인스타툰 연재실</b></a>
+<nav class="nav" aria-label="주요 메뉴"><a class="btn" href="/">메인으로</a><a class="btn acc" href="/">인스타툰 만들기</a><a class="btn" aria-current="page" href="/guide/">콘텐츠 가이드</a></nav>
+</header></div>
+<main id="main" class="wrap">
+<nav class="crumb" aria-label="현재 위치"><ol><li><a href="/">홈</a></li><li><a href="/guide/">콘텐츠 가이드</a></li><li aria-current="page">인스타그램 게시물은 어떻게 구성해야 할까?</li></ol></nav>
+<article class="article">
+<a class="cat" href="/guide/#insta">Instagram 콘텐츠</a>
+<h1>인스타그램 게시물은 어떻게 구성해야 할까?</h1>
+<p class="lead">게시물 하나는 &quot;첫 이미지 → 본문 이미지 → 캡션&quot;의 세 부분으로 읽힙니다. 각 부분이 맡을 역할을 나눠 두면 무엇을 어디에 써야 할지 고민이 줄어요.</p>
+<p class="meta">작성일 <time datetime="2026-10-01">2026-10-01</time> · 최종 업데이트 <time datetime="2026-10-01">2026-10-01</time></p>
+<nav class="toc" aria-label="목차"><b>이 글의 순서</b><ol><li><a href="#s1">첫 이미지의 역할</a></li><li><a href="#s2">제목</a></li><li><a href="#s3">본문</a></li><li><a href="#s4">이미지와 텍스트</a></li><li><a href="#s5">캡션</a></li><li><a href="#s6">CTA란?</a></li><li><a href="#s7">해시태그</a></li><li><a href="#s8">게시 전 체크리스트</a></li></ol></nav>
+<section><h2 id="s1">첫 이미지의 역할</h2><p>피드에서 첫 이미지는 대부분 한 번만 스치듯 보입니다. 이 한 장에서 주제가 짐작되어야 합니다. 예쁜 사진보다 &quot;무엇에 대한 게시물인지&quot;가 드러나는 문구나 장면이 먼저입니다.</p></section>
+<section><h2 id="s2">제목</h2><p>제목은 읽는 사람이 얻을 것을 약속합니다. &quot;신메뉴 출시&quot;보다 &quot;오후 3시에 가면 대기 없이 앉는 법&quot;처럼 구체적으로 쓰면 이해가 빠릅니다. 한 줄에 열다섯 자 안팎이면 모바일에서도 큼직하게 보입니다.</p></section>
+<section><h2 id="s3">본문</h2><p>여러 장으로 구성할 때는 한 장에 한 가지만 담습니다. 전달할 내용이 세 가지면 세 장으로 나누고, 마지막 장에 한 줄 요약을 둡니다.</p></section>
+<section><h2 id="s4">이미지와 텍스트</h2><ul><li>글자는 배경과 충분히 대비되게 (밝은 사진 위 흰 글씨는 읽기 어렵다)</li><li>작은 글씨 여러 줄 대신 큰 글씨 두세 줄</li><li>모든 장의 글꼴·색·위치를 통일해서 한 시리즈처럼 보이게</li></ul><aside class="callout tip"><b>실전 팁</b><p>휴대폰에서 팔 길이만큼 떼어놓고 봤을 때 읽히는지 확인하세요.</p></aside></section>
+<section><h2 id="s5">캡션</h2><p>캡션은 이미지에 다 담지 못한 설명, 맥락, 안내를 넣는 공간입니다. 첫 두 줄에서 읽을 이유를 주고, 필요한 정보는 줄바꿈으로 나눠 쓰세요. 더 자세한 방법은 <a href="/guide/instagram-caption-writing/">캡션 작성법</a>에서 다룹니다.</p></section>
+<section><h2 id="s6">CTA란?</h2><p>CTA(Call To Action)는 읽은 사람이 다음에 하면 좋을 행동을 안내하는 문장입니다. &quot;프로필 링크에서 예약하기&quot;, &quot;궁금한 점은 댓글로 남겨 주세요&quot;처럼 한 번에 하나만 제안합니다. 저장, 방문, 문의, 댓글을 한꺼번에 요청하면 오히려 아무것도 하지 않게 됩니다.</p></section>
+<section><h2 id="s7">해시태그</h2><p>해시태그는 게시물의 주제를 설명하는 단어입니다. 업종, 지역, 주제를 섞어 몇 개만 고르고, 내용과 무관한 인기 태그를 끼워 넣는 일은 피하세요. 어떤 개수가 효과적인지는 단정하기 어려우므로 우리 계정에서 직접 비교해 보는 것이 좋습니다.</p></section>
+<section><h2 id="s8">게시 전 체크리스트</h2><ul class="chk"><li>첫 이미지만 봐도 주제가 보이는가</li><li>글자가 휴대폰에서 읽히는가</li><li>장 순서가 자연스러운가</li><li>가격·시간·주소가 정확한가</li><li>CTA가 한 가지인가</li><li>허락 없이 쓴 사진이나 이름이 없는가</li></ul></section>
+<section class="summary"><h2>이 글에서 기억할 내용</h2><ul><li>첫 이미지는 &quot;이 게시물이 나에게 필요한지&quot;를 알려주는 역할이다.</li><li>이미지에는 핵심만, 설명과 정보는 캡션에 나눠 담는다.</li><li>CTA는 한 게시물에 한 가지 행동만 요청한다.</li><li>게시 전에 오탈자·정보·이미지 순서를 확인한다.</li></ul></section>
+<section class="cta"><h2>인스타툰을 직접 만들어보고 싶다면?</h2><p>인스타툰 연재실에서 실제 매장 이야기를 인스타툰 콘텐츠로 만들어보세요.</p><a class="btn big" href="/">인스타툰 만들기</a></section>
+</article>
+<section class="related" aria-labelledby="rel"><h2 id="rel">함께 읽으면 좋은 글</h2><ul class="cards"><li><a class="card" href="/guide/instagram-caption-writing/"><small>Instagram 콘텐츠</small><b>인스타그램 캡션 작성법: 가게 홍보 글을 자연스럽게 만드는 방법</b></a></li><li><a class="card" href="/guide/instagram-reels-vs-feed/"><small>Instagram 콘텐츠</small><b>인스타그램 릴스와 피드 콘텐츠는 어떻게 다를까?</b></a></li><li><a class="card" href="/guide/small-business-instagram-content/"><small>소상공인 SNS 마케팅</small><b>소상공인 인스타그램 콘텐츠 아이디어 20가지</b></a></li><li><a class="card" href="/guide/how-to-make-instatoon/"><small>인스타툰 가이드</small><b>인스타툰 만드는 방법: 아이디어부터 게시까지</b></a></li></ul></section>
+<nav class="pn" aria-label="이전 글과 다음 글"><a href="/guide/small-business-instagram-content/" rel="prev"><small>← 이전 글</small>소상공인 인스타그램 콘텐츠 아이디어 20가지</a><a class="nx" href="/guide/instagram-caption-writing/" rel="next"><small>다음 글 →</small>인스타그램 캡션 작성법: 가게 홍보 글을 자연스럽게 만드는 방법</a></nav>
+</main>
+<footer><div class="wrap"><nav class="nav" aria-label="푸터 메뉴"><a href="/guide/">콘텐츠 가이드</a><a href="/">인스타툰 만들기</a><a href="/sitemap.xml">사이트맵</a></nav>
+<p>© 인스타툰 연재실 · 이 사이트의 가이드는 일반적인 정보 제공을 위한 것이며, 서비스 기능과 정책은 각 서비스의 공식 안내에서 확인해 주세요.</p></div></footer>
+</body>
+</html>

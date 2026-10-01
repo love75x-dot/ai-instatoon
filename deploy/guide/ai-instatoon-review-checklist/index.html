@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI로 인스타툰 만들 때 사람이 직접 확인할 것: 게시 전 체크리스트 | 인스타툰 연재실</title>
+<meta name="description" content="AI가 만든 인스타툰도 사람이 최종 검토해야 합니다. 사실관계, 상호명, 가격, 이미지 속 글자, 저작권, 광고 표현까지 게시 전 확인할 항목을 정리했습니다.">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://ai-instatoon.vercel.app/guide/ai-instatoon-review-checklist/">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<meta property="og:site_name" content="인스타툰 연재실">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AI로 인스타툰 만들 때 사람이 직접 확인할 것: 게시 전 체크리스트 | 인스타툰 연재실">
+<meta property="og:description" content="AI가 만든 인스타툰도 사람이 최종 검토해야 합니다. 사실관계, 상호명, 가격, 이미지 속 글자, 저작권, 광고 표현까지 게시 전 확인할 항목을 정리했습니다.">
+<meta property="og:url" content="https://ai-instatoon.vercel.app/guide/ai-instatoon-review-checklist/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="AI로 인스타툰 만들 때 사람이 직접 확인할 것: 게시 전 체크리스트 | 인스타툰 연재실">
+<meta name="twitter:description" content="AI가 만든 인스타툰도 사람이 최종 검토해야 합니다. 사실관계, 상호명, 가격, 이미지 속 글자, 저작권, 광고 표현까지 게시 전 확인할 항목을 정리했습니다.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F4F4F2;--surface:#fff;--sunken:#F0F0EE;--ink:#121214;--ink-2:#3A3A3F;--muted:#6B6B72;--line:#E3E3E0;--line-2:#CFCFCB;--accent:#FFD53D;--accent-ink:#121214;--accent-soft:#FFF6CF;--warn:#9A5B00;--warn-bg:#FFF1D2;--ok:#17804A;--ok-bg:#E3F4EA;--sans:"Gothic A1","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;--r:14px}
+@media (prefers-color-scheme:dark){:root{color-scheme:dark;--bg:#0E0E10;--surface:#18181B;--sunken:#1F1F23;--ink:#F2F2F3;--ink-2:#CFCFD4;--muted:#A0A0A8;--line:#2A2A2F;--line-2:#3A3A40;--accent-soft:#3A3212;--warn:#F2B75A;--warn-bg:#35280F;--ok:#5CCB8C;--ok-bg:#15301F}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased;overflow-wrap:anywhere;word-break:keep-all}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.skip{position:absolute;left:-999px}.skip:focus{left:8px;top:8px;background:var(--surface);padding:8px 12px;z-index:9}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-block:16px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+.mark{width:28px;height:28px;display:grid;grid-template-columns:1fr 1fr;gap:3px}
+.mark i{background:var(--ink);border-radius:3px}.mark i:nth-child(2){background:var(--accent)}
+.brand b{font-weight:900;font-size:19px;letter-spacing:-.02em;white-space:nowrap}
+.nav{display:flex;flex-wrap:wrap;gap:8px}
+.btn{border:1px solid var(--line-2);background:var(--surface);border-radius:999px;padding:8px 16px;min-height:40px;font-weight:700;font-size:14px;display:inline-flex;align-items:center;text-decoration:none;white-space:nowrap}
+.btn:hover{border-color:var(--ink)}
+.btn.pri{background:var(--ink);border-color:var(--ink);color:var(--surface)}
+.btn.acc{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.big{padding:13px 26px;font-size:16px;font-weight:800;min-height:48px}
+.btn[aria-current="page"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+main{padding-bottom:56px}
+.crumb{font-size:13.5px;color:var(--muted);margin:8px 0 18px;line-height:1.5}
+.crumb ol{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:4px}
+.crumb li+li::before{content:"›";margin-right:4px}
+.crumb a{color:var(--muted)}
+.article{max-width:820px;margin:0 auto;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:36px 40px}
+@media (max-width:640px){.article{padding:22px 18px}}
+.cat{display:inline-block;font-size:13px;font-weight:800;background:var(--accent-soft);border-radius:999px;padding:3px 12px;text-decoration:none;line-height:1.7}
+.article h1{font-size:clamp(26px,4vw,34px);line-height:1.35;letter-spacing:-.03em;font-weight:900;margin:14px 0 12px;text-wrap:balance}
+.lead{font-size:17.5px;color:var(--ink-2);margin:0 0 12px}
+.meta{font-size:13px;color:var(--muted);margin:0 0 24px;padding-bottom:20px;border-bottom:1px solid var(--line)}
+.toc{background:var(--sunken);border-radius:12px;padding:14px 20px;margin:0 0 28px;font-size:14.5px;line-height:1.7}
+.toc b{display:block;margin-bottom:4px}.toc ol{margin:0;padding-left:20px}
+.toc a{text-decoration:none}.toc a:hover{text-decoration:underline}
+.article h2{font-size:clamp(21px,3vw,25px);line-height:1.4;letter-spacing:-.02em;font-weight:900;margin:44px 0 12px;scroll-margin-top:16px}
+.article h3{font-size:18px;font-weight:800;margin:26px 0 6px}
+.article p{margin:0 0 16px}
+.article ul,.article ol{margin:0 0 18px;padding-left:22px}.article li{margin:4px 0}
+.article ul.chk{list-style:none;padding-left:0}
+.article ul.chk li{position:relative;padding-left:30px}
+.article ul.chk li::before{content:"";position:absolute;left:2px;top:.55em;width:15px;height:15px;border:2px solid var(--ink);border-radius:4px}
+.article a{text-decoration-thickness:1px;text-underline-offset:3px}
+.callout{border-radius:12px;padding:12px 18px;margin:0 0 20px;font-size:15.5px;line-height:1.7}
+.callout b{display:block;font-size:13.5px;margin-bottom:2px}.callout p{margin:0}
+.callout.tip{background:var(--ok-bg)}.callout.warn{background:var(--warn-bg)}
+.example{border:1px dashed var(--line-2);border-radius:12px;padding:14px 18px 4px;margin:0 0 20px;font-size:15.5px;line-height:1.75}
+.example>b{display:block;font-size:13.5px;color:var(--muted);margin-bottom:6px}
+.tbl{overflow-x:auto;margin:0 0 20px;-webkit-overflow-scrolling:touch}
+.tbl table{border-collapse:collapse;width:100%;min-width:480px;font-size:14.5px;line-height:1.6}
+.tbl th,.tbl td{border:1px solid var(--line-2);padding:8px 10px;text-align:left;vertical-align:top}.tbl th{background:var(--sunken)}
+.summary{background:var(--accent-soft);border-radius:var(--r);padding:20px 24px;margin:44px 0 0}
+.summary h2{margin:0 0 8px!important;font-size:19px!important}.summary ul{margin:0}
+.cta{margin:32px 0 0;background:var(--ink);color:var(--surface);border-radius:var(--r);padding:26px 28px}
+.cta h2{margin:0 0 6px!important;font-size:21px!important;color:inherit}
+.cta p{margin:0 0 16px!important;opacity:.88}
+.cta .btn{background:var(--accent);border-color:var(--accent);color:#121214}
+.related{max-width:820px;margin:32px auto 0}
+.related h2,.hubsec h2{font-size:20px;font-weight:900;margin:0 0 12px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;list-style:none;margin:0;padding:0}
+.card{display:block;height:100%;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;text-decoration:none;line-height:1.5}
+.card:hover{border-color:var(--ink)}
+.card small{display:block;color:var(--muted);font-size:12.5px;font-weight:700;margin-bottom:4px}
+.card b{display:block;font-size:16px;line-height:1.45}
+.pn{max-width:820px;margin:28px auto 0;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pn a{display:block;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 18px;text-decoration:none;line-height:1.5;min-height:64px}
+.pn a:hover{border-color:var(--ink)}.pn small{display:block;color:var(--muted);font-size:12.5px;font-weight:700}.pn .nx{text-align:right}
+@media (max-width:560px){.pn{grid-template-columns:1fr}.pn .nx{text-align:left}}
+.hero{padding:28px 0 8px}.hero h1{font-size:clamp(28px,4.6vw,40px);line-height:1.3;letter-spacing:-.03em;font-weight:900;margin:0 0 12px;text-wrap:balance}
+.hero p{color:var(--ink-2);max-width:60ch;margin:0 0 20px;font-size:17px}
+.hubsec{margin:36px 0 0}.hubsec>p{margin:-6px 0 12px;color:var(--muted);font-size:14.5px}
+.note{max-width:820px;margin:20px auto 0;font-size:13.5px;color:var(--muted);line-height:1.7}
+footer{border-top:1px solid var(--line);padding:26px 0 40px;font-size:14px;color:var(--muted)}
+footer .nav a{color:var(--ink-2);text-decoration:none;padding:6px 4px;min-height:40px;display:inline-flex;align-items:center}
+footer .nav a:hover{text-decoration:underline}
+footer p{margin:10px 0 0;font-size:13px}
+</style>
+<meta property="article:published_time" content="2026-10-01"><meta property="article:modified_time" content="2026-10-01"><script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"AI로 인스타툰을 만들 때 사람이 직접 확인해야 하는 것","description":"AI가 만든 인스타툰도 사람이 최종 검토해야 합니다. 사실관계, 상호명, 가격, 이미지 속 글자, 저작권, 광고 표현까지 게시 전 확인할 항목을 정리했습니다.","inLanguage":"ko","datePublished":"2026-10-01","dateModified":"2026-10-01","mainEntityOfPage":{"@type":"WebPage","@id":"https://ai-instatoon.vercel.app/guide/ai-instatoon-review-checklist/"},"url":"https://ai-instatoon.vercel.app/guide/ai-instatoon-review-checklist/","author":{"@type":"Organization","name":"인스타툰 연재실","url":"https://ai-instatoon.vercel.app/"},"publisher":{"@type":"Organization","name":"인스타툰 연재실","url":"https://ai-instatoon.vercel.app/"}}</script><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://ai-instatoon.vercel.app/"},{"@type":"ListItem","position":2,"name":"콘텐츠 가이드","item":"https://ai-instatoon.vercel.app/guide/"},{"@type":"ListItem","position":3,"name":"AI로 인스타툰을 만들 때 사람이 직접 확인해야 하는 것","item":"https://ai-instatoon.vercel.app/guide/ai-instatoon-review-checklist/"}]}</script>
+</head>
+<body><a class="skip" href="#main">본문 바로가기</a>
+<div class="wrap"><header class="topbar">
+<a class="brand" href="/" aria-label="인스타툰 연재실 메인으로"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><b>인스타툰 연재실</b></a>
+<nav class="nav" aria-label="주요 메뉴"><a class="btn" href="/">메인으로</a><a class="btn acc" href="/">인스타툰 만들기</a><a class="btn" aria-current="page" href="/guide/">콘텐츠 가이드</a></nav>
+</header></div>
+<main id="main" class="wrap">
+<nav class="crumb" aria-label="현재 위치"><ol><li><a href="/">홈</a></li><li><a href="/guide/">콘텐츠 가이드</a></li><li aria-current="page">AI로 인스타툰을 만들 때 사람이 직접 확인해야 하는 것</li></ol></nav>
+<article class="article">
+<a class="cat" href="/guide/#ai">AI 콘텐츠 제작</a>
+<h1>AI로 인스타툰을 만들 때 사람이 직접 확인해야 하는 것</h1>
+<p class="lead">AI는 초안을 빠르게 만들어 주지만, 그 결과를 책임지는 것은 게시하는 사람입니다. AI가 생성한 결과도 사람이 최종 검토해야 해요. 특히 아래 일곱 가지는 눈으로 직접 확인하는 습관을 들이세요.</p>
+<p class="meta">작성일 <time datetime="2026-10-01">2026-10-01</time> · 최종 업데이트 <time datetime="2026-10-01">2026-10-01</time></p>
+<nav class="toc" aria-label="목차"><b>이 글의 순서</b><ol><li><a href="#s1">AI 결과를 그대로 사용하면 안 되는 이유</a></li><li><a href="#s2">사실관계 확인</a></li><li><a href="#s3">인물/상호명 확인</a></li><li><a href="#s4">숫자와 가격 확인</a></li><li><a href="#s5">이미지 속 글자 확인</a></li><li><a href="#s6">저작권 확인</a></li><li><a href="#s7">광고 표현 확인</a></li><li><a href="#s8">최종 게시 전 체크</a></li></ol></nav>
+<section><h2 id="s1">AI 결과를 그대로 사용하면 안 되는 이유</h2><p>AI는 그럴듯한 문장을 만들지만 사실인지 확인하지는 못합니다. 존재하지 않는 메뉴, 틀린 가격, 어색한 한글을 아무렇지 않게 섞어 낼 수 있어요. 그래서 &quot;생성되었다&quot;와 &quot;게시해도 된다&quot;는 별개의 문제입니다.</p></section>
+<section><h2 id="s2">사실관계 확인</h2><ul><li>영업시간, 위치, 휴무일</li><li>메뉴 설명과 재료</li><li>&quot;수상&quot;, &quot;원조&quot;, &quot;최초&quot; 같은 표현이 사실인지</li></ul><aside class="callout warn"><b>주의</b><p>근거 없이 단정적으로 들어간 문구가 있으면 삭제하세요.</p></aside></section>
+<section><h2 id="s3">인물/상호명 확인</h2><ul><li>가게 이름, 지점 이름의 오탈자</li><li>실존하는 다른 가게·사람과 겹치지 않는지</li><li>직원이나 손님 실명이 들어가지 않았는지</li></ul></section>
+<section><h2 id="s4">숫자와 가격 확인</h2><p>가격, 용량, 기간, 할인율을 모두 원본과 하나씩 맞춰 보세요. AI가 임의로 만든 숫자는 특히 눈에 띄지 않을 수 있습니다.</p></section>
+<section><h2 id="s5">이미지 속 글자 확인</h2><p>AI가 그린 그림 속 글자는 한글이 깨지거나 비슷한 다른 글자로 바뀌는 경우가 있습니다. 간판, 메뉴판, 말풍선을 확대해서 한 글자씩 읽어 보세요.</p></section>
+<section><h2 id="s6">저작권 확인</h2><p>AI 결과물이 기존 작품이나 캐릭터와 닮았을 수 있습니다. 유명 캐릭터를 연상시키는 결과가 나오면 사용하지 않는 편이 안전합니다. 자세한 내용은 <a href="/guide/instagram-content-copyright/">저작권 확인 가이드</a>를 참고하세요.</p></section>
+<section><h2 id="s7">광고 표현 확인</h2><ul><li>&quot;최고&quot;, &quot;100%&quot; 같은 과장 표현이 근거 있는지</li><li>효능·효과를 단정하는 표현이 들어갔는지</li><li>협찬·광고라면 표시 여부</li></ul><p>광고 표현과 관련된 기준은 업종과 시기에 따라 다를 수 있으므로 공식 안내를 확인하세요.</p></section>
+<section><h2 id="s8">최종 게시 전 체크</h2><ul class="chk"><li>텍스트·가격·상호명을 원본과 대조했다</li><li>이미지 속 글자를 확대해서 확인했다</li><li>실존 인물·유명 캐릭터를 닮지 않았다</li><li>손님 사진·이름을 허락 없이 쓰지 않았다</li><li>과장·단정 표현을 정리했다</li><li>컷 순서대로 읽어 봤다</li></ul><aside class="callout tip"><b>실전 팁</b><p>다른 사람에게 한 번 보여 주세요. 만든 사람은 오류를 놓치기 쉽습니다.</p></aside></section>
+<section class="summary"><h2>이 글에서 기억할 내용</h2><ul><li>AI 결과는 초안이며 게시 책임은 사람에게 있다.</li><li>사실, 상호명, 가격, 이미지 속 글자는 원본과 직접 대조한다.</li><li>저작권·광고 표현은 확실하지 않으면 쓰지 않는다.</li><li>최종 게시 전 체크리스트를 매번 같은 순서로 확인한다.</li></ul></section>
+<section class="cta"><h2>인스타툰을 직접 만들어보고 싶다면?</h2><p>인스타툰 연재실에서 실제 매장 이야기를 인스타툰 콘텐츠로 만들어보세요.</p><a class="btn big" href="/">인스타툰 만들기</a></section>
+</article>
+<section class="related" aria-labelledby="rel"><h2 id="rel">함께 읽으면 좋은 글</h2><ul class="cards"><li><a class="card" href="/guide/instagram-content-copyright/"><small>AI 콘텐츠 제작</small><b>인스타그램 콘텐츠를 만들 때 이미지와 문구의 저작권 확인하기</b></a></li><li><a class="card" href="/guide/instatoon-character-consistency/"><small>AI 콘텐츠 제작</small><b>인스타툰 캐릭터를 일관되게 유지하는 방법</b></a></li><li><a class="card" href="/guide/store-story-to-instatoon/"><small>소상공인 SNS 마케팅</small><b>매장 이야기를 인스타툰으로 홍보 콘텐츠로 만드는 방법</b></a></li><li><a class="card" href="/guide/how-to-make-instatoon/"><small>인스타툰 가이드</small><b>인스타툰 만드는 방법: 아이디어부터 게시까지</b></a></li></ul></section>
+<nav class="pn" aria-label="이전 글과 다음 글"><a href="/guide/instatoon-character-consistency/" rel="prev"><small>← 이전 글</small>인스타툰 캐릭터를 일관되게 유지하는 방법</a><a class="nx" href="/guide/instagram-content-copyright/" rel="next"><small>다음 글 →</small>인스타그램 콘텐츠를 만들 때 이미지와 문구의 저작권 확인하기</a></nav>
+</main>
+<footer><div class="wrap"><nav class="nav" aria-label="푸터 메뉴"><a href="/guide/">콘텐츠 가이드</a><a href="/">인스타툰 만들기</a><a href="/sitemap.xml">사이트맵</a></nav>
+<p>© 인스타툰 연재실 · 이 사이트의 가이드는 일반적인 정보 제공을 위한 것이며, 서비스 기능과 정책은 각 서비스의 공식 안내에서 확인해 주세요.</p></div></footer>
+</body>
+</html>
