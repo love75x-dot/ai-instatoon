@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
+import { gaId, gaSnippet } from './analytics.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const src = fs.readFileSync(path.join(here, 'index.html'), 'utf8');
@@ -17,7 +18,8 @@ const head = [
   '<link rel="canonical" href="https://www.ai-instatoon.com/">',
   '<meta property="og:type" content="website"><meta property="og:site_name" content="인스타툰 연재실"><meta property="og:locale" content="ko_KR">',
   '<meta property="og:title" content="인스타툰 연재실"><meta property="og:description" content="업종과 가게 이야기만 입력하면 인스타툰 기획·대본·컷 구성까지 정리해 주는 도구."><meta property="og:url" content="https://www.ai-instatoon.com/">',
-].join(NL) + NL;
+  gaSnippet(gaId(), { content_group: '인스타툰 제작 도구' }), // 측정 ID가 설정돼 있을 때만 삽입
+].filter(Boolean).join(NL) + NL;
 const out = head + src + '\n</body>\n</html>\n';
 
 const js = [...src.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m => m[1]).join('\n');

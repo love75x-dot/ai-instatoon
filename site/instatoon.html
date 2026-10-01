@@ -563,6 +563,8 @@ function load(){
 /* ================= 유틸 ================= */
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+/* src/href에 넣는 값은 이미지 data/blob/http(s)/상대경로만 허용하고 속성 깨짐을 막는다(백업 파일 불러오기 등으로 들어온 값 방어) */
+const safeUrl=u=>/^(data:image\/|blob:|https?:\/\/|\/)/i.test(String(u||''))?esc(u):'';
 function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toast.t); toast.t=setTimeout(()=>t.classList.remove('show'),2400); }
 const COPIED=(()=>{ try{ return new Set(JSON.parse(localStorage.getItem('instatoon.copied')||'[]')); }catch(_){ return new Set(); } })();
 function saveCopied(){ try{ localStorage.setItem('instatoon.copied',JSON.stringify([...COPIED])); }catch(_){} }
@@ -632,9 +634,9 @@ function profileHTML(){ const p=prof(), n=['logo','bio','voice','banned','tags',
   return `<details class="more prof"><summary>가게 프로필 <small>${n?`${n}/8칸 채움 · 모든 편에 자동 적용 중`:'한 번만 적어 두면 모든 편에 자동으로 들어가요'}</small></summary><div class="inner">
     <p class="sub" style="margin-top:0">직원이 바뀌어도 같은 말투, 같은 해시태그로 올라가요. 대본·캡션·한 달 기획을 만들 때 AI가 이 내용을 지키고, 그림 그리기 전 확인에도 쓰여요.</p>
     <div class="logo-row">
-      <div class="logo-box">${p.logo?`<img src="${p.logo}" alt="로고">`:'<span>로고<br>PNG</span>'}</div>
+      <div class="logo-box">${p.logo?`<img src="${safeUrl(p.logo)}" alt="로고">`:'<span>로고<br>PNG</span>'}</div>
       <div style="flex:1;min-width:0"><b style="font-size:14px">프로필 로고</b> <small class="status">PNG·JPG · 인스타 프로필 사진처럼 쓰여요</small>
-        <div class="row" style="margin-top:6px"><button class="btn sm" data-act="logoUp">${p.logo?'로고 바꾸기':'로고 올리기'}</button>${p.logo?`<a class="btn sm" href="${p.logo}" download="logo.png">내려받기</a><button class="btn sm ghost" data-act="logoDel">지우기</button>`:''}</div>
+        <div class="row" style="margin-top:6px"><button class="btn sm" data-act="logoUp">${p.logo?'로고 바꾸기':'로고 올리기'}</button>${p.logo?`<a class="btn sm" href="${safeUrl(p.logo)}" download="logo.png">내려받기</a><button class="btn sm ghost" data-act="logoDel">지우기</button>`:''}</div>
         <p class="sub" style="margin:6px 0 0">오른쪽 미리보기 프로필 사진, 마지막 장 안내 카드에 들어가요.</p></div>
     </div>
     <label class="f" for="pf-bio">프로필 소개 한 줄 <small>인스타 소개란에 쓰는 문구 · 선택</small></label><input class="in" id="pf-bio" data-prof="bio" value="${v('bio')}" placeholder="예: 망원동 작은 사진관 · 가족사진 전문 · 예약제">
@@ -775,7 +777,7 @@ function renderPhone(){
       <div class="dots">${Array.from({length:n},(_,k)=>`<i class="${k===pv?'on':''}"></i>`).join('')}</div>`
     :`<div class="cover-empty"><b>${busy?'만드는 중…':'여기에 완성된\n인스타툰이 떠요'}</b><span>${busy?'잠시만 기다려 주세요':'왼쪽에 업종을 고르고\n"인스타툰 만들기"를 눌러 보세요'}</span></div><div class="dots">${Array.from({length:S.info.cuts},(_,k)=>`<i class="${k?'':'on'}"></i>`).join('')}</div>`;
   const cap=S.toon?.caption||'';
-  $('#phone').innerHTML=`<div class="ig-top"><span class="ava${prof().logo?' has-logo':''}">${prof().logo?`<img src="${prof().logo}" alt="로고">`:esc([...name][0]||'가')}</span><div><b>${esc(name)}</b><small>${esc(S.info.type||'업종')}</small></div></div>
+  $('#phone').innerHTML=`<div class="ig-top"><span class="ava${prof().logo?' has-logo':''}">${prof().logo?`<img src="${safeUrl(prof().logo)}" alt="로고">`:esc([...name][0]||'가')}</span><div><b>${esc(name)}</b><small>${esc(S.info.type||'업종')}</small></div></div>
     ${body}
     <div class="ig-icons" aria-hidden="true">
       <svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>
@@ -796,7 +798,7 @@ function vInput(){
     <div class="ph"><div><h1 class="hero-h">내 이야기를 적으면<br><em>인스타툰 한 편</em>이 나와요</h1><p>가게가 없어도 괜찮아요. 프리랜서·회사·1인 사업 모두 분야만 골라도 만들 수 있고, 실제로 있었던 일을 적어 주면 훨씬 재밌어져요.</p>${S.demo?'':`<div class="hero-act"><button class="btn sm" data-act="demo">예시 가게로 먼저 체험해 보기</button><button class="btn sm ghost" data-act="tour">30초 둘러보기</button></div>`}</div></div>
 
     <label class="f" style="margin-top:0">① 웹툰 테마 <small>전체 그림체예요 · 모든 컷과 캐릭터에 똑같이 적용돼요</small></label>
-    <div class="arts">${Object.entries(ARTS).map(([k,v])=>{ const sm=sampleOf(k); return `<button class="pick art-${k}" data-art="${k}" aria-pressed="${(i.art||'chibi')===k}">${sm?`<img class="smp-img" src="${sm}" alt="${v.name} 샘플">`:`<span class="sw" aria-hidden="true"></span>`}<span class="ttl" style="font-size:15px">${v.name}</span><span class="dsc">${v.desc}</span></button>`; }).join('')}</div>
+    <div class="arts">${Object.entries(ARTS).map(([k,v])=>{ const sm=sampleOf(k); return `<button class="pick art-${k}" data-art="${k}" aria-pressed="${(i.art||'chibi')===k}">${sm?`<img class="smp-img" src="${safeUrl(sm)}" alt="${v.name} 샘플">`:`<span class="sw" aria-hidden="true"></span>`}<span class="ttl" style="font-size:15px">${v.name}</span><span class="dsc">${v.desc}</span></button>`; }).join('')}</div>
     
 
     <label class="f">② 업종·분야<span class="req">*</span> <small>가게가 아니어도 돼요 · 프리랜서, 회사, 온라인 사업 모두 OK</small></label>
@@ -950,8 +952,8 @@ function vEdit(){
 /* ---------- 3. 그림·글자·올리기 ---------- */
 function charLock(k){ const L=(S.info.locks=S.info.locks||{}), r=refOf(k);
   return `<div class="lock"><label class="f" style="margin-top:12px">고정 캐릭터 보관함 <small>그림 단계에서 ChatGPT에 첨부해 같은 얼굴로 그릴 때 써요</small></label>
-    <div class="ref-row"><div class="ref">${r?`<img src="${r}" alt="${whoLabel(k)} 고정 캐릭터">`:`<span>고정 캐릭터<br>이미지</span>`}</div>
-    <div><div class="row"><button class="btn sm" data-refup="${k}">${r?'이미지 바꾸기':'캐릭터 이미지 올리기'}</button>${r?`<a class="btn sm" href="${r}" download="character-${k+1}.png">내려받기</a><button class="btn sm ghost" data-refdel="${k}">지우기</button>`:''}</div>
+    <div class="ref-row"><div class="ref">${r?`<img src="${safeUrl(r)}" alt="${whoLabel(k)} 고정 캐릭터">`:`<span>고정 캐릭터<br>이미지</span>`}</div>
+    <div><div class="row"><button class="btn sm" data-refup="${k}">${r?'이미지 바꾸기':'캐릭터 이미지 올리기'}</button>${r?`<a class="btn sm" href="${safeUrl(r)}" download="character-${k+1}.png">내려받기</a><button class="btn sm ghost" data-refdel="${k}">지우기</button>`:''}</div>
     <p class="sub" style="margin:6px 0 0">ChatGPT에서 처음 만든 캐릭터 이미지를 올려 두면 다음 편에도 다시 쓸 수 있어요.</p></div></div>
     <input class="in" data-lock="${k}" value="${esc(L[k]||'')}" placeholder="고정 문구 예: 짧은 단발, 동그란 안경, 노란 후드 / 선 굵기 일정하게" style="margin-top:8px"></div>`; }
 function personBlock(k){ const x=person(k);
@@ -966,7 +968,7 @@ function personBlock(k){ const x=person(k);
     ${photoSlot(k)}
     ${charLock(k)}</div>`; }
 function photoSlot(k){ const ph=getPhoto(k);
-  return `<div class="photo-row"><div class="ref">${ph?`<img src="${ph}" alt="${whoLabel(k)} 사진">`:'<span>사진<br>(선택)</span>'}</div>
+  return `<div class="photo-row"><div class="ref">${ph?`<img src="${safeUrl(ph)}" alt="${whoLabel(k)} 사진">`:'<span>사진<br>(선택)</span>'}</div>
     <div style="flex:1;min-width:200px"><div class="row"><button class="btn sm" data-photo="${k}">${ph?'사진 바꾸기':'사진으로 캐릭터 만들기'}</button>${ph?`<button class="btn sm" data-describe="${k}">사진 보고 외모 채우기</button><button class="btn sm ghost" data-photodel="${k}">지우기</button>`:''}</div>
     <p class="sub" style="margin:6px 0 0">말로 설명하기 어려우면 증명사진이나 프로필 사진을 올려 주세요. 얼굴 특징을 살려 테마 그림체의 캐릭터로 바꿔 그려요. 사진은 이 브라우저에만 저장되고, 캐릭터를 만들 때만 AI에 보내요. 본인이 동의한 사진만 써 주세요.</p>
     <span class="status" id="st-photo-${k}"></span></div></div>`; }
@@ -1284,7 +1286,7 @@ function endFieldHTML(k){ const e=ec(), d=END_FIELDS.find(x=>x[0]===k); if(!d) r
 function endPreviewHTML(){ const e=ec(), P=END_STYLES[e.style]||END_STYLES.light, lg=prof().logo, head=lines(e.head).slice(0,2), ls=endLines();
   const empty=!lg&&!e.name.trim()&&!head.length&&!ls.length&&!e.btn.trim()&&!e.foot.trim();
   return `<div class="endpv" id="endPv" style="aspect-ratio:1080/${ratio().h};background:${P.bg};color:${P.ink}">${empty?`<span style="color:${P.sub}">문구를 적으면<br>여기에 배치돼요</span>`:`
-    ${lg?`<img class="epl" src="${lg}" alt="">`:''}${e.name.trim()?`<small style="color:${P.sub}">${esc(e.name)}</small>`:''}
+    ${lg?`<img class="epl" src="${safeUrl(lg)}" alt="">`:''}${e.name.trim()?`<small style="color:${P.sub}">${esc(e.name)}</small>`:''}
     ${head.length?`<b class="eph">${head.map(esc).join('<br>')}</b>`:''}
     ${ls.length?`<div class="epls" style="color:${P.sub}">${ls.map(l=>`<span>${esc(l)}</span>`).join('')}</div>`:''}
     ${e.btn.trim()?`<span class="epb" style="background:${P.pill};color:${P.pillInk}">${esc(e.btn)}</span>`:''}
@@ -1301,7 +1303,7 @@ function endLi(){ const e=ec(), lg=prof().logo;
         ${endFieldHTML('head')}${endFieldHTML('lines')}${endFieldHTML('foot')}
         <label class="f">배경 느낌</label>
         <div class="swatches">${Object.entries(END_STYLES).map(([k,x])=>`<button class="chip endsw" data-endst="${k}" aria-pressed="${e.style===k}"><i style="background:${x.bg}"></i>${x.name}</button>`).join('')}</div>
-        <p class="sub" style="margin:8px 0 0">${lg?'가게 프로필의 로고가 카드 위쪽에 들어가요. 프롬프트를 보낼 때 <a href="'+lg+'" download="logo.png"><b>로고 이미지를 내려받아</b></a> 함께 첨부하세요.':'가게 프로필에 로고를 올려 두면 카드 위쪽에 들어가요.'}</p>
+        <p class="sub" style="margin:8px 0 0">${lg?'가게 프로필의 로고가 카드 위쪽에 들어가요. 프롬프트를 보낼 때 <a href="'+safeUrl(lg)+'" download="logo.png"><b>로고 이미지를 내려받아</b></a> 함께 첨부하세요.':'가게 프로필에 로고를 올려 두면 카드 위쪽에 들어가요.'}</p>
       </div>
       <div class="endside"><div class="endcap">미리보기 <small>대략적인 배치예요</small></div>${endPreviewHTML()}</div>
     </div>
@@ -1363,10 +1365,10 @@ async function coverThumb(){ let c; if(pics().length) c=await fitCanvas(pics()[0
 async function drawFeedCur(){ const t=$('#feedCur'); if(!t||!cuts().length) return; const c=document.createElement('canvas'); await compose(c,cuts()[0]); t.getContext('2d').drawImage(cropThumb(c),0,0); }
 function feedHTML(){ const T=S.toon, H=hist(), name=S.info.name||'우리가게', cur=!T.postedAt;
   const tiles=[...(cur?[`<div class="ftile"><canvas id="feedCur" width="270" height="360" aria-label="이번 편 표지"></canvas><span class="now">이번 편</span></div>`]:[]),
-    ...H.map(h=>`<div class="ftile">${h.thumb?`<img src="${h.thumb}" alt="${esc(h.title)} 표지">`:''}<span class="cap">${esc((h.date?h.date+' ':'')+h.title)}</span>${h.hid===T.hid?'<span class="now">이번 편</span>':''}<button class="x" data-fdel="${h.hid}" aria-label="격자에서 빼기">×</button></div>`)];
+    ...H.map(h=>`<div class="ftile">${h.thumb?`<img src="${safeUrl(h.thumb)}" alt="${esc(h.title)} 표지">`:''}<span class="cap">${esc((h.date?h.date+' ':'')+h.title)}</span>${h.hid===T.hid?'<span class="now">이번 편</span>':''}<button class="x" data-fdel="${h.hid}" aria-label="격자에서 빼기">×</button></div>`)];
   while(tiles.length<6) tiles.push('<div class="ftile fph"><span>지난<br>게시물</span></div>');
   return `<div class="lab-row" style="margin-top:6px"><label class="f">피드 격자 미리보기 <small>프로필에 들어온 손님이 보는 모습</small></label><button class="btn sm" data-act="feedAdd">예전 게시물 표지 추가</button></div>
-  <div class="feed"><div class="feed-top"><span class="fava${prof().logo?' has-logo':''}">${prof().logo?`<img src="${prof().logo}" alt="로고">`:esc([...name][0]||'가')}</span><div><b>${esc(name)}</b><small>게시물 ${H.length+(cur?1:0)}</small></div></div><div class="fgridi">${tiles.slice(0,12).join('')}</div></div>
+  <div class="feed"><div class="feed-top"><span class="fava${prof().logo?' has-logo':''}">${prof().logo?`<img src="${safeUrl(prof().logo)}" alt="로고">`:esc([...name][0]||'가')}</span><div><b>${esc(name)}</b><small>게시물 ${H.length+(cur?1:0)}</small></div></div><div class="fgridi">${tiles.slice(0,12).join('')}</div></div>
   <p class="sub" style="margin-top:6px">인스타 프로필 격자는 세로 3:4로 잘려 보여요.${ratio().h!==1440?` 지금 비율(${ratio().name})은 양옆이 조금 잘리니 표지 제목은 가운데에 두세요.`:''} "인스타에 올렸어요"를 누르면 이번 편 표지가 여기 쌓여서, 다음 편 표지 색과 느낌을 비교할 수 있어요. 예전에 올린 게시물은 화면을 캡처해서 추가하면 돼요.</p>`; }
 
 /* ================= 올리기 전 점검 ================= */
@@ -1486,11 +1488,11 @@ function vReels(){ const r=ru(), useT=r.src!=='own'&&pics().length>0, L=mediaLis
     <div class="chips" id="rsrc"><button class="chip" data-rsrc="toon" aria-pressed="${useT}" ${pics().length?'':'disabled'}>이번 편 완성 그림 ${pics().length}장</button><button class="chip" data-rsrc="own" aria-pressed="${!useT}">그림 직접 올리기${r.own.length?` (${r.own.length}장)`:''}</button></div>
     ${useT?`<p class="sub" style="margin-top:8px">"한 편 만들기" ② 에 올린 그림을 그 순서 그대로 써요. 순서를 바꾸려면 그곳에서 바꿔 주세요.</p>`
       :`<div class="drop" id="rdrop" style="margin-top:10px"><span>그림 파일을 여기로 끌어다 놓거나</span><button class="btn pri" data-act="rup">그림 고르기 (여러 장 가능)</button><span class="status">${r.own.length?`${r.own.length}장 올라가 있어요`:'파일 이름 순서대로 들어가요'}</span></div>`}
-    ${L.length?`<div class="pgrid">${L.map((src,i)=>`<figure class="pth"><img src="${src}" alt="${i+1}번째 그림" style="object-fit:cover"><figcaption><b>${i+1}</b><span class="grow"></span>${useT?'':`<button class="ib" data-pmove="${i}|-1" data-list="own" ${i?'':'disabled'} aria-label="${i+1}번 앞으로">‹</button><button class="ib" data-pmove="${i}|1" data-list="own" ${i<L.length-1?'':'disabled'} aria-label="${i+1}번 뒤로">›</button><button class="ib" data-pdel="${i}" data-list="own" aria-label="${i+1}번 빼기">×</button>`}</figcaption></figure>`).join('')}</div>`:''}
+    ${L.length?`<div class="pgrid">${L.map((src,i)=>`<figure class="pth"><img src="${safeUrl(src)}" alt="${i+1}번째 그림" style="object-fit:cover"><figcaption><b>${i+1}</b><span class="grow"></span>${useT?'':`<button class="ib" data-pmove="${i}|-1" data-list="own" ${i?'':'disabled'} aria-label="${i+1}번 앞으로">‹</button><button class="ib" data-pmove="${i}|1" data-list="own" ${i<L.length-1?'':'disabled'} aria-label="${i+1}번 뒤로">›</button><button class="ib" data-pdel="${i}" data-list="own" aria-label="${i+1}번 빼기">×</button>`}</figcaption></figure>`).join('')}</div>`:''}
     <label class="f" for="rs-title">② 영상 위에 보일 제목 <small>비우면 이번 편 제목</small></label>
     <input class="in" id="rs-title" data-reuse="title" value="${esc(r.title)}" placeholder="${esc(S.toon?.title||'예: 오후 3시, 빵이 다 사라졌다')}">
     <div class="reuse">
-      <div class="rcard"><canvas id="reelCv" width="1080" height="1920" aria-label="릴스 영상 미리보기"></canvas><video id="reelVid" controls playsinline ${reelUrl?'':'hidden'} ${reelUrl?`src="${reelUrl}"`:''}></video><b>릴스 영상</b>
+      <div class="rcard"><canvas id="reelCv" width="1080" height="1920" aria-label="릴스 영상 미리보기"></canvas><video id="reelVid" controls playsinline ${reelUrl?'':'hidden'} ${reelUrl?`src="${safeUrl(reelUrl)}"`:''}></video><b>릴스 영상</b>
         <p>한 장씩 밀려 들어오며 살짝 확대돼요. 소리는 없으니 인스타에서 올릴 때 <b>음악</b>을 붙여 주세요.</p>
         <div class="chips">${[2,3,4].map(k=>`<button class="chip" data-rsec="${k}" aria-pressed="${r.sec===k}">한 장에 ${k}초</button>`).join('')}</div>
         <div class="row"><button class="btn pri" data-act="reelMake" ${L.length?'':'disabled'}>릴스 영상 만들기</button><button class="btn" data-act="reelDl" ${reelBlob?'':'hidden'}>영상 저장</button></div>
@@ -1619,7 +1621,7 @@ function vStats(){ const H=hist();
   $('#main').innerHTML=`<section class="panel">
     <div class="ph"><div><h1>반응 기록 · 댓글 도우미</h1><p>올린 편의 반응을 적어 두면 무엇이 잘 먹혔는지 보이고, 다음 달 기획에 자동으로 반영돼요.</p></div></div>
     <div class="callout">숫자는 인스타 앱에서 게시물 아래 <b>"인사이트 보기"</b>를 누르면 나와요 (프로페셔널 계정이어야 보여요). 올리고 <b>2~3일 뒤</b>에 적는 게 정확해요. 모르는 칸은 비워 두세요.</div>
-    ${H.length?`<div class="srows">${H.map(h=>`<div class="srow">${h.thumb?`<img src="${h.thumb}" alt="">`:'<span class="noth"></span>'}<div><div class="st">${esc(h.title)}</div><div class="sm2">${esc([h.date&&h.date+' 올림',h.type,ARTS[h.art]?.name].filter(Boolean).join(' · '))}${h.link&&/^https?:\/\//.test(h.link)?` · <a href="${esc(h.link)}" target="_blank" rel="noopener">게시물 열기</a>`:''}</div>
+    ${H.length?`<div class="srows">${H.map(h=>`<div class="srow">${h.thumb?`<img src="${safeUrl(h.thumb)}" alt="">`:'<span class="noth"></span>'}<div><div class="st">${esc(h.title)}</div><div class="sm2">${esc([h.date&&h.date+' 올림',h.type,ARTS[h.art]?.name].filter(Boolean).join(' · '))}${h.link&&/^https?:\/\//.test(h.link)?` · <a href="${esc(h.link)}" target="_blank" rel="noopener">게시물 열기</a>`:''}</div>
       <div class="snum">${SKEYS.map(([k,n])=>`<label>${n}<input type="number" min="0" inputmode="numeric" data-stat="${h.hid}|${k}" value="${h.stats?.[k]??''}"></label>`).join('')}</div></div></div>`).join('')}</div>`
       :`<div class="empty" style="margin-top:12px">아직 완성한 편이 없어요.<br>"한 편 만들기"에서 <b>"완성 이미지 전체 저장"</b>을 누르면 그 편이 여기에 자동으로 쌓여요.<br><br><button class="btn" data-mode2="one">한 편 만들기로</button></div>`}
     <div id="statsIns">${H.length?insHTML():''}</div>
@@ -2182,7 +2184,7 @@ async function makeSample(){
   catch(e){ st.className='status err'; st.textContent=e.message||'샘플을 그리지 못했어요'; }
 }
 function autoSection(){
-  const th=peopleIdx().map(k=>refOf(k)?`<div class="ref-row" style="margin-top:8px"><div class="ref"><img src="${refOf(k)}" alt="${whoLabel(k)} 고정 캐릭터"></div><div><b style="font-size:13.5px">${whoLabel(k)}</b><div class="row" style="margin-top:6px"><a class="btn sm" href="${refOf(k)}" download="character-${k+1}.png">이미지 내려받기</a></div></div></div>`:'').join('');
+  const th=peopleIdx().map(k=>refOf(k)?`<div class="ref-row" style="margin-top:8px"><div class="ref"><img src="${safeUrl(refOf(k))}" alt="${whoLabel(k)} 고정 캐릭터"></div><div><b style="font-size:13.5px">${whoLabel(k)}</b><div class="row" style="margin-top:6px"><a class="btn sm" href="${safeUrl(refOf(k))}" download="character-${k+1}.png">이미지 내려받기</a></div></div></div>`:'').join('');
   return `<div class="auto">
     <div class="auto-h"><b>그림은 ChatGPT에서 그려요</b><a class="btn pri sm" href="https://chatgpt.com/" target="_blank" rel="noopener">ChatGPT 열기 ↗</a></div>
     <p class="sub" style="margin:4px 0 8px">이 사이트의 AI(Gemini)는 대본·기획·글만 만들어요. 그림은 ChatGPT에서 <b>새 대화창 하나</b>를 열고, 아래 목록을 1번부터 한 번에 하나씩 붙여 넣어 그려요.</p>
@@ -2191,7 +2193,7 @@ function autoSection(){
 }
 function keyBoxHTML(){ return `<details class="more keybox" id="keyBox" ${API.key?'':'open'}><summary>API 키 설정 ${API.key?'· 연결됨':'· 필요해요'}</summary><div class="inner">
   <p class="sub"><a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener"><b>👉 여기서 Gemini API 키 받기 (Google AI Studio)</b></a><br>구글 로그인 → "API 키 만들기(Create API key)" → 복사해서 아래 칸에 붙여 넣으세요. 무료로 발급받을 수 있어요. <b>Gemini는 대본·기획·글 만들기에만 쓰이고, 그림은 ChatGPT에서 그려요.</b> 키는 이 컴퓨터 브라우저에만 저장돼요. 다른 사람과 이 파일을 공유할 땐 키가 따라가지 않아요.</p>
-  <label class="f" for="k-key" style="margin-top:0">Gemini API 키</label><input class="in" id="k-key" type="password" value="${esc(API.key)}" placeholder="AIza...">
+  <label class="f" for="k-key" style="margin-top:0">Gemini API 키</label><input class="in" id="k-key" type="password" autocomplete="off" spellcheck="false" value="${esc(API.key)}" placeholder="AIza...">
   <label class="f" for="k-text">대본·기획 모델</label><input class="in" id="k-text" value="${esc(API.text)}">
   <div class="row" style="margin-top:12px"><button class="btn pri sm" data-act="keySave">저장</button><span class="status">모델 이름은 기본값 그대로 쓰면 돼요. 오류가 나면 AI Studio에 보이는 이름으로 바꿔 주세요.</span></div>
 </div></details>`; }

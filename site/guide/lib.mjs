@@ -1,7 +1,10 @@
 // 가이드 콘텐츠 작성용 헬퍼 + 페이지 렌더러. 콘텐츠는 articles-*.mjs, 실행은 build-guide.mjs.
 export const ORIGIN = 'https://www.ai-instatoon.com';
 export const SITE = '인스타툰 연재실';
+export const cfg = { ga: '' }; // build-guide.mjs가 설정 (GA4 측정 ID, 없으면 빈 문자열)
 export const DATE = '2026-10-01'; // 글에 published/modified가 없을 때의 기본값 (글별로 articles-*.mjs에서 지정)
+
+import { gaSnippet } from '../analytics.mjs';
 
 export const CATS = {
   toon: { name: '인스타툰 가이드', desc: '인스타툰의 개념, 구성, 스토리 만드는 법' },
@@ -129,13 +132,13 @@ const FONTS = '<link rel="preconnect" href="https://fonts.googleapis.com"><link 
 const header = (cur) => `<a class="skip" href="#main">본문 바로가기</a>
 <div class="wrap"><header class="topbar">
 <a class="brand" href="/" aria-label="${SITE} 메인으로"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><b>${SITE}</b></a>
-<nav class="nav" aria-label="주요 메뉴"><a class="btn" href="/">메인으로</a><a class="btn acc" href="/">인스타툰 만들기</a><a class="btn"${cur === 'guide' ? ' aria-current="page"' : ''} href="/guide/">콘텐츠 가이드</a></nav>
+<nav class="nav" aria-label="주요 메뉴"><a class="btn" href="/">메인으로</a><a class="btn acc" href="/" data-track="cta" data-loc="header">인스타툰 만들기</a><a class="btn"${cur === 'guide' ? ' aria-current="page"' : ''} href="/guide/">콘텐츠 가이드</a></nav>
 </header></div>`;
 
-const footer = `<footer><div class="wrap"><nav class="nav" aria-label="푸터 메뉴"><a href="/guide/">콘텐츠 가이드</a><a href="/">인스타툰 만들기</a><a href="/sitemap.xml">사이트맵</a></nav>
+const footer = `<footer><div class="wrap"><nav class="nav" aria-label="푸터 메뉴"><a href="/guide/">콘텐츠 가이드</a><a href="/" data-track="cta" data-loc="footer">인스타툰 만들기</a><a href="/sitemap.xml">사이트맵</a></nav>
 <p>© ${SITE} · 이 사이트의 가이드는 일반적인 정보 제공을 위한 것이며, 서비스 기능과 정책은 각 서비스의 공식 안내에서 확인해 주세요.</p></div></footer>`;
 
-function head({ title, desc, canonical, type, extra = '' }) {
+function head({ title, desc, canonical, type, extra = '', body = '', ga = {} }) {
   return `<!doctype html>
 <html lang="ko">
 <head>
@@ -158,11 +161,15 @@ function head({ title, desc, canonical, type, extra = '' }) {
 ${FONTS}
 <style>${CSS}</style>
 ${extra}
+${gaSnippet(cfg.ga, ga)}
 </head>
-<body>`;
+<body${body}>`;
 }
 
 const ld = (o) => `<script type="application/ld+json">${JSON.stringify(o).replace(/</g, '\\u003c')}</script>`;
+
+const trackJs = '<script src="/guide-track.js" defer></script>';
+const bodyAttr = (type, slug, cat) => ` data-page-type="${type}"${slug ? ` data-slug="${slug}"` : ''}${cat ? ` data-category="${cat}"` : ''}`;
 
 export function renderArticle(a, all, i) {
   const pub = a.published || DATE, mod = a.modified || pub;
@@ -184,14 +191,18 @@ export function renderArticle(a, all, i) {
       { '@type': 'ListItem', position: 3, name: a.title, item: u }] };
   const toc = a.sections.map((s, k) => `<li><a href="#s${k + 1}">${esc(s.h)}</a></li>`).join('');
   const body = a.sections.map((s, k) => `<section><h2 id="s${k + 1}">${esc(s.h)}</h2>${s.blocks.map(block).join('')}</section>`).join('\n');
-  const card = (x) => `<li><a class="card" href="/guide/${x.slug}/"><small>${CATS[x.cat].name}</small><b>${esc(x.title)}</b></a></li>`;
+  const card = (x, k) => `<li><a class="card" href="/guide/${x.slug}/" data-track="related" data-pos="${k + 1}"><small>${CATS[x.cat].name}</small><b>${esc(x.title)}</b></a></li>`;
+  // 같은 카테고리의 다른 글(이미 위에 나온 글 제외, 최신순 최대 3개): 새 글이 추가되면 자동으로 연결된다
+  const shown = new Set([a.slug, ...a.related]);
+  const extra = all.filter((x) => x.cat === a.cat && !shown.has(x.slug)).sort((x, y) => (y.published || '').localeCompare(x.published || '')).slice(0, 3);
+  const more = extra.length ? `<h3 style="font-size:15px;margin:22px 0 10px">${cat} 더 보기</h3><ul class="cards">${extra.map((x, k) => card(x, rel.length + k)).join('')}</ul>` : '';
   const prevHtml = prev
-    ? `<a href="/guide/${prev.slug}/" rel="prev"><small>← 이전 글</small>${esc(prev.title)}</a>`
-    : `<a href="/guide/" rel="up"><small>← 콘텐츠 가이드</small>가이드 전체 글 보기</a>`;
+    ? `<a href="/guide/${prev.slug}/" rel="prev" data-track="prevnext" data-loc="prev"><small>← 이전 글</small>${esc(prev.title)}</a>`
+    : `<a href="/guide/" rel="up" data-track="prevnext" data-loc="prev"><small>← 콘텐츠 가이드</small>가이드 전체 글 보기</a>`;
   const nextHtml = next
-    ? `<a class="nx" href="/guide/${next.slug}/" rel="next"><small>다음 글 →</small>${esc(next.title)}</a>`
-    : `<a class="nx" href="/guide/" rel="up"><small>콘텐츠 가이드 →</small>가이드 전체 글 보기</a>`;
-  return head({ title, desc: a.desc, canonical: u, type: 'article',
+    ? `<a class="nx" href="/guide/${next.slug}/" rel="next" data-track="prevnext" data-loc="next"><small>다음 글 →</small>${esc(next.title)}</a>`
+    : `<a class="nx" href="/guide/" rel="up" data-track="prevnext" data-loc="next"><small>콘텐츠 가이드 →</small>가이드 전체 글 보기</a>`;
+  return head({ title, desc: a.desc, canonical: u, type: 'article', body: bodyAttr('article', a.slug, a.cat), ga: { content_group: cat, content_id: a.slug },
       extra: `<meta property="article:published_time" content="${pub}"><meta property="article:modified_time" content="${mod}">${ld(article)}${ld(crumbs)}` })
     + header('guide') + `
 <main id="main" class="wrap">
@@ -204,12 +215,13 @@ export function renderArticle(a, all, i) {
 <nav class="toc" aria-label="목차"><b>이 글의 순서</b><ol>${toc}</ol></nav>
 ${body}
 <section class="summary"><h2>이 글에서 기억할 내용</h2><ul>${a.summary.map((x) => `<li>${inline(x)}</li>`).join('')}</ul></section>
-<section class="cta"><h2>인스타툰을 직접 만들어보고 싶다면?</h2><p>인스타툰 연재실에서 실제 매장 이야기를 인스타툰 콘텐츠로 만들어보세요.</p><a class="btn big" href="/">인스타툰 만들기</a></section>
+<section class="cta"><h2>인스타툰을 직접 만들어보고 싶다면?</h2><p>인스타툰 연재실에서 실제 매장 이야기를 인스타툰 콘텐츠로 만들어보세요.</p><a class="btn big" href="/" data-track="cta" data-loc="article_bottom">인스타툰 만들기</a></section>
 </article>
-<section class="related" aria-labelledby="rel"><h2 id="rel">함께 읽으면 좋은 글</h2><ul class="cards">${rel.map(card).join('')}</ul></section>
+<section class="related" aria-labelledby="rel"><h2 id="rel">함께 읽으면 좋은 글</h2><ul class="cards">${rel.map(card).join('')}</ul>${more}</section>
 <nav class="pn" aria-label="이전 글과 다음 글">${prevHtml}${nextHtml}</nav>
 </main>
 ` + footer + `
+${trackJs}
 </body>
 </html>
 `;
@@ -225,17 +237,18 @@ export function renderHub(all) {
   const list = { '@context': 'https://schema.org', '@type': 'CollectionPage', name: title, url: u, description: desc, inLanguage: 'ko' };
   const sections = Object.entries(CATS).map(([k, c]) => {
     const items = all.filter((x) => x.cat === k);
-    return `<section class="hubsec" id="${k}" aria-labelledby="h-${k}"><h2 id="h-${k}">${c.name}</h2><p>${c.desc}</p><ul class="cards">${items.map((x) => `<li><a class="card" href="/guide/${x.slug}/"><small>${c.name}</small><b>${esc(x.title)}</b><span style="display:block;color:var(--muted);font-size:13.5px;margin-top:6px">${esc(x.card)}</span></a></li>`).join('')}</ul></section>`;
+    return `<section class="hubsec" id="${k}" aria-labelledby="h-${k}"><h2 id="h-${k}">${c.name}</h2><p>${c.desc}</p><ul class="cards">${items.map((x) => `<li><a class="card" href="/guide/${x.slug}/" data-track="guide_card" data-loc="hub_${k}"><small>${c.name}</small><b>${esc(x.title)}</b><span style="display:block;color:var(--muted);font-size:13.5px;margin-top:6px">${esc(x.card)}</span></a></li>`).join('')}</ul></section>`;
   }).join('\n');
-  return head({ title, desc, canonical: u, type: 'website', extra: ld(list) + ld(crumbs) }) + header('guide') + `
+  return head({ title, desc, canonical: u, type: 'website', body: bodyAttr('hub'), ga: { content_group: '콘텐츠 가이드 허브' }, extra: ld(list) + ld(crumbs) }) + header('guide') + `
 <main id="main" class="wrap">
 <nav class="crumb" aria-label="현재 위치"><ol><li><a href="/">홈</a></li><li aria-current="page">콘텐츠 가이드</li></ol></nav>
 <section class="hero"><h1>인스타툰과 SNS 콘텐츠를 쉽게 시작하는 방법</h1>
 <p>인스타툰 제작부터 Instagram 콘텐츠 구성, 소상공인 SNS 활용 방법까지 실제 콘텐츠를 만들 때 도움이 되는 정보를 정리했습니다.</p>
-<a class="btn pri big" href="/">인스타툰 만들어보기</a></section>
+<a class="btn pri big" href="/" data-track="cta" data-loc="hub_hero">인스타툰 만들어보기</a></section>
 ${sections}
 </main>
 ` + footer + `
+${trackJs}
 </body>
 </html>
 `;
@@ -249,6 +262,7 @@ export function render404() {
 <main id="main" class="wrap"><section class="hero"><h1>페이지를 찾을 수 없어요</h1><p>주소가 바뀌었거나 없는 페이지예요. 아래에서 원하는 곳으로 이동해 주세요.</p>
 <div class="nav"><a class="btn pri big" href="/guide/">콘텐츠 가이드로 돌아가기</a><a class="btn big" href="/">인스타툰 만들기</a></div></section></main>
 ` + footer + `
+${trackJs}
 </body>
 </html>
 `;

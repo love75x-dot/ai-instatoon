@@ -1,2 +1,11 @@
 node_modules/
 *.log
+
+# 비밀값/로컬 설정은 저장소에 올리지 않는다
+.env
+.env.*
+!.env.example
+.vercel
+*.pem
+*.key
+.DS_Store
