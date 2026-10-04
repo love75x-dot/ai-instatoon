@@ -489,7 +489,7 @@ a.btn{text-decoration:none;color:inherit}a.btn.pri{color:var(--surface)}
       <li><a href="/guide/store-story-to-instatoon/">매장 이야기를 인스타툰으로 만드는 방법</a></li>
       <li><a href="/guide/ai-instatoon-review-checklist/">AI로 인스타툰을 만들 때 직접 확인할 것</a></li>
     </ul>
-    <nav class="gnav" aria-label="가이드 링크"><a href="/guide/">콘텐츠 가이드 전체 보기</a><a href="/about/">소개</a><a href="/privacy/">개인정보처리방침</a><a href="/terms/">이용안내</a><a href="#admin" data-admin>관리자</a><a href="/sitemap.xml">사이트맵</a></nav>
+    <nav class="gnav" aria-label="가이드 링크"><a href="/guide/">콘텐츠 가이드 전체 보기</a><a href="/about/">소개</a><a href="/privacy/">개인정보처리방침</a><a href="/terms/">이용안내</a><a href="/sitemap.xml">사이트맵</a></nav>
   </footer>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -2131,7 +2131,8 @@ function refreshAi(){ const on=STANDALONE?!!API.key:!!sample; $('#aiDot').classN
 /* ================= 관리자: 프롬프트 편집실 ================= */
 /* 앱이 Gemini에 보내는 프롬프트 틀을 관리자가 수정·저장하고(API 키 사용 시 즉시 반영),
    빈칸을 ( )로 둔 채 완성된 프롬프트를 만들어 유료 Gemini(웹/앱)에 직접 붙여 넣을 수 있게 한다.
-   저장 위치는 이 브라우저(localStorage)뿐이다. 관리자 화면 열기: 주소 끝에 #admin 또는 맨 아래 "관리자" 링크. */
+   저장 위치는 이 브라우저(localStorage)뿐이다. 관리자 화면 열기: 주소 끝에 #room-x7k2q9wm4p8d (아래 ADM_HASH). 화면에 링크는 없다. */
+const ADM_HASH='#room-x7k2q9wm4p8d';
 const ADM_KEY='instatoon.admin.prompts', ADM_MAN='instatoon.admin.manual', BLANK='( )';
 const admRead=k=>{ try{ return JSON.parse(localStorage.getItem(k)||'{}')||{}; }catch(_){ return {}; } };
 const admWrite=(k,o)=>{ try{ localStorage.setItem(k,JSON.stringify(o)); return true; }catch(_){ toast('저장 공간이 가득 차서 저장하지 못했어요'); return false; } };
@@ -2310,7 +2311,7 @@ function admPreview(id){ try{ return admBuild(id,{...appInfoVals(),...(PROMPTS[i
 const ADM={tab:'one',pid:'make'};
 function admEl(){ let el=$('#admin'); if(!el){ el=document.createElement('div'); el.id='admin'; el.className='adm'; el.setAttribute('role','dialog'); el.setAttribute('aria-label','관리자 프롬프트 편집실'); el.hidden=true; document.body.appendChild(el); el.addEventListener('click',admClick); el.addEventListener('input',admInput); } return el; }
 function admOpen(){ const el=admEl(); el.hidden=false; document.body.style.overflow='hidden'; admRender(); }
-function admClose(){ const el=$('#admin'); if(el) el.hidden=true; document.body.style.overflow=''; if(location.hash==='#admin') history.replaceState(null,'',location.pathname+location.search); }
+function admClose(){ const el=$('#admin'); if(el) el.hidden=true; document.body.style.overflow=''; if(location.hash===ADM_HASH) history.replaceState(null,'',location.pathname+location.search); }
 /* ----- 비밀번호 잠금 (이 브라우저 안에서만 작동하는 잠금이에요. 서버가 없어 완전한 보안은 아니에요) ----- */
 const ADM_PW='instatoon.admin.pw', ADM_SES='instatoon.admin.ok';
 const admPwData=()=>{ try{ return JSON.parse(localStorage.getItem(ADM_PW)||'null'); }catch(_){ return null; } };
@@ -2402,7 +2403,7 @@ function admClick(e){ const b=e.target.closest('button,a'); if(!b) return;
 }
 document.addEventListener('click',e=>{ const a=e.target.closest('[data-admin]'); if(a){ e.preventDefault(); admOpen(); } });
 document.addEventListener('keydown',e=>{ const g=$('#admin')?.dataset.gate; if(e.key==='Enter'&&e.target.closest?.('.adm-gate')&&e.target.tagName==='INPUT'){ const m={create:'pwcreate',login:'pwlogin',change:'pwchange'}[g]; if(m) admPw(m); } if(e.key==='Escape'&&$('#admin')&&!$('#admin').hidden) admClose(); });
-const admHash=()=>{ if(location.hash==='#admin') admOpen(); };
+const admHash=()=>{ if(location.hash===ADM_HASH) admOpen(); };
 window.addEventListener('hashchange',admHash); admHash();
 
 /* ================= 시작 ================= */
