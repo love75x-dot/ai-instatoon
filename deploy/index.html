@@ -435,6 +435,27 @@ details.more label.f:first-child{margin-top:0}
 .gcards a:hover{border-color:var(--ink)}
 a.btn{text-decoration:none;color:inherit}a.btn.pri{color:var(--surface)}
 .gnav{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:18px;font-size:13.5px}.gnav a{color:var(--muted);padding:8px 0;min-height:40px;display:inline-flex;align-items:center}
+.adm{position:fixed;inset:0;z-index:200;background:var(--bg);overflow:auto;-webkit-overflow-scrolling:touch}
+.adm[hidden]{display:none}
+.adm-in{max-width:980px;margin:0 auto;padding:18px 16px 60px}
+.adm-top{display:flex;gap:12px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap}
+.adm-h{font-size:20px;font-weight:800}
+.adm-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:16px}
+.adm-tabs .mode{border:1px solid var(--line-2);background:var(--surface);border-radius:12px;padding:12px 8px;cursor:pointer;text-align:center}
+.adm-tabs .mode[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.adm-pick{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 4px}
+.adm-pick .chip[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.adm-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:14px}
+.adm-card h3{margin:0 0 8px;font-size:16px}.adm-card h3 small{font-weight:600;color:var(--muted);font-size:12.5px;margin-left:6px}
+.adm-vars{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.adm-vars .chip{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px}
+.adm-ta{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;line-height:1.55;width:100%;min-height:120px;resize:vertical}
+.adm-rad{display:inline-flex;gap:6px;align-items:center;font-size:14px;cursor:pointer}
+.adm,.adm *{box-sizing:border-box}.adm-in>*,.adm-card>*{min-width:0;max-width:100%}
+.adm-tabs .mode,.adm-tabs .mode b{color:var(--ink)}
+.adm-card .g2>div{min-width:0}.adm .in{max-width:100%}
+@media(max-width:640px){.adm-tabs{grid-template-columns:repeat(2,1fr)}.adm .g2{grid-template-columns:1fr}.adm-in{padding:14px 12px 50px}}
+
 </style>
 
 <div class="wrap">
@@ -468,7 +489,7 @@ a.btn{text-decoration:none;color:inherit}a.btn.pri{color:var(--surface)}
       <li><a href="/guide/store-story-to-instatoon/">매장 이야기를 인스타툰으로 만드는 방법</a></li>
       <li><a href="/guide/ai-instatoon-review-checklist/">AI로 인스타툰을 만들 때 직접 확인할 것</a></li>
     </ul>
-    <nav class="gnav" aria-label="가이드 링크"><a href="/guide/">콘텐츠 가이드 전체 보기</a><a href="/about/">소개</a><a href="/privacy/">개인정보처리방침</a><a href="/terms/">이용안내</a><a href="/sitemap.xml">사이트맵</a></nav>
+    <nav class="gnav" aria-label="가이드 링크"><a href="/guide/">콘텐츠 가이드 전체 보기</a><a href="/about/">소개</a><a href="/privacy/">개인정보처리방침</a><a href="/terms/">이용안내</a><a href="#admin" data-admin>관리자</a><a href="/sitemap.xml">사이트맵</a></nav>
   </footer>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -605,20 +626,7 @@ const STORY_FLOW=`[잘 팔린 인스타툰의 흐름 - 컷 수에 맞게 줄이�
 - 한 번 더 조이기: 조력자의 팩트 한마디("그건 네가 잘해야지")로 방심을 깨고, 주인공의 질문으로 다음 장을 넘기게 한다("그걸 어떻게 아는데?").
 - 마지막 컷: 들뜬 반응("얼마야!!!")과 쿨한 펀치라인("무료임;") + 화면이나 소품 속에 알릴 소식. 행동 유도는 여기서만.
 - 대사 톤: 짧은 구어체, 말줄임표, 반말 친구 대화 가능(가게 손님과는 존댓말). 속마음은 작은 손글씨로 따로.`;
-const RULES_FN=()=>`[인스타툰 원칙]
-1. 사실은 지키고 연출은 과감하게: 작성자가 적은 사실(시간, 장소, 대사, 숫자, 결과)은 그대로 살린다. 적지 않은 사실(후기, 수치, 특정 손님 사연, 결과)은 절대 지어내지 않는다. 작성자가 적은 이야기가 없으면 실화처럼 꾸미지 말고, 이 분야 사람들이 흔히 겪는 고민이나 궁금증을 주제로 공감형으로 쓴다.
-2. 1컷은 설명이 아니라 한 장면. 가장 긴박하거나 궁금한 순간을 먼저. 상호명·가격·할인·이벤트 같은 광고 단어는 1컷 금지.
-3. 흐름은 아래 [잘 팔린 인스타툰의 흐름]을 기본으로, 가게 이야기에 맞게 바꾼다. 반전이나 해결은 가게의 진짜 강점이 드러나는 순간.
-3-1. 모든 컷의 마지막 대사나 장면은 다음 장이 궁금하게 끝낸다(질문, 말줄임, 표정 클로즈업).
-3-2. 컷과 컷 사이에 원인과 결과가 이어지게. 앞 컷의 대사를 다음 컷이 받아서 시작한다. 뜬금없는 장면 전환 금지.
-4. 한 컷에 메시지 하나. 제목(내레이션)은 표지와 꼭 필요한 컷에만, 두 줄·한 줄 14자 이내. 나머지 컷은 말풍선 대사 중심. 말풍선은 한 컷에 1~3개, 한 개당 18자 이내 실제 말투. 효과음 1~4자.
-5. 이야기는 아래 [주인공]의 1인칭 시점. 입력된 역할(사장님·대표·직원·프리랜서·담당자 등 무엇이든)과 나이·성별에 맞는 자연스러운 말투로 "~했어요/~거든요". 역할이 직원·알바생이면 대표가 아니라 그 사람이 겪은 일로, 가게가 없는 프리랜서·회사원이면 가게 얘기 없이 그 사람의 일상·업무 이야기로 쓴다. 주인공이 여러 명이면 함께 겪는 이야기로 쓰고, 대사의 인물 이름은 역할(예: 사장님, 직원, 알바생)로 구분한다. 같은 역할이 둘이면 외모로 구분(예: 안경 직원). 다른 주인공이 조력자 역할을 맡아도 된다. 업계 용어 금지. 고객(독자)이 얻는 것 중심.
-6. 행동 유도는 마지막 컷 하나에 방법 하나만.
-7. 7컷 이상이면 장면 전환을 늘려 전개를 촘촘하게 하고, 중간에 작은 반전을 하나 더 넣는다. 같은 말을 반복하지 않는다.
-8. 컷마다 표정·손짓·소품 같은 작은 디테일을 하나 이상 넣어 살아 있는 장면으로 만든다.
-9. 이야기 방식: ${S.info.mode==='solo'?'주인공 혼자 내레이션으로 끌고 간다.':S.info.mode==='duo'?'주인공과 조력자 두 사람의 티키타카 대화로 끌고 간다.':'6컷 이상이면 주인공과 조력자의 대화형, 5컷 이하면 내레이션형이 기본. 이야기에 더 맞는 쪽으로.'}
-
-${STORY_FLOW}`;
+const RULES_FN=()=>pFill('rules',{storymode:S.info.mode==='solo'?'주인공 혼자 내레이션으로 끌고 간다.':S.info.mode==='duo'?'주인공과 조력자 두 사람의 티키타카 대화로 끌고 간다.':'6컷 이상이면 주인공과 조력자의 대화형, 5컷 이하면 내레이션형이 기본. 이야기에 더 맞는 쪽으로.',flow:pTpl('flow')});
 async function ask(prompt,statusEl,msg='AI가 인스타툰을 쓰고 있어요 · 보통 30초~1분',imgs,tier){
   if(!sample) throw {code:'no_ai'};
   const ctl=new AbortController(); busy=ctl; renderPhone();
@@ -665,46 +673,17 @@ ${artBlock()}`; }
 function toonText(){ return cuts().map((c,i)=>`${i+1}컷 (${c.role}) [${c.shot||'-'}]\n제목: ${c.title.replace(/\n/g,' / ')}${c.sub?`\n보조: ${c.sub}`:''}${c.bubble?`\n대사:\n${c.bubble}`:''}${c.sfx?`\n효과음: ${c.sfx}`:''}${c.caption?`\n자막 박스: ${c.caption}`:''}\n장면: ${c.direction}${c.panels?`\n칸 나누기: ${c.panels}`:''}${c.extras?`\n디테일: ${c.extras}`:''}`).join('\n\n'); }
 function normCut(c,k){ return {role:String(c.role||`${k+1}컷`),shot:SHOTS.includes(c.shot)?c.shot:'미디엄샷',title:fixNL(c.title),highlight:String(c.highlight||''),sub:String(c.sub||''),bubble:String(c.bubble||''),bubbleSide:c.bubbleSide==='r'?'r':'l',sfx:String(c.sfx||''),direction:String(c.direction||''),panels:String(c.panels||''),caption:String(c.caption||''),extras:String(c.extras||'')}; }
 
+function applyToon(r){
+  S.toon={title:String(r.title||'이번 편'),tone:String(r.tone||''),cuts:(r.cuts||[]).slice(0,10).map(normCut),hooks:(r.hooks||[]).map(fixNL).filter(Boolean).slice(0,4),hookIdx:0,
+      caption:String(r.caption||''),hashtags:fitTags(r.hashtags),comment:String(r.comment||''),reel:{caption:String(r.reelCaption||''),hashtags:fitTags(r.reelHashtags||''),comment:String(r.reelComment||'')},endHead:fixNL(r.endHead||''),endBtn:String(r.endBtn||''),cast:String(r.cast||''),ideas:(r.ideas||[]).map(String).slice(0,3)};
+}
 async function makeToon(theme){
   const st=$('#st-make');
   const n=S.info.cuts;
-  const prompt=`너는 동네 가게 홍보용 인스타툰 작가야. 아래 정보로 ${n}컷 인스타툰 한 편을 완성해.
-${infoBlock()}
-${theme?`\n[이번 편 주제] ${theme}\n`:''}
-${RULES_FN()}
-
-출력 필드:
-- title: 이번 편 제목(웹툰 회차 제목처럼, 25자 이내)
-- tone: 실제로 쓴 분위기 이름
-- cuts: ${n}개. 각 컷은
-  role: 이 컷의 역할(예: 궁금증, 위기, 반전, 행동 유도)
-  shot: ${SHOTS.join(', ')} 중 하나
-  title: 컷 위 큰 제목(내레이션). 표지·마지막 컷·꼭 필요한 컷만, 두 줄(\\n 구분). 대사 중심 컷은 ""
-  highlight: title 안에 글자 그대로 있는 강조어 2~8자, title이 없으면 ""
-  sub: 보조 문구, 없으면 ""
-  bubble: 대사. 한 줄에 하나씩 "인물: 대사" 형식, 최대 3줄(\\n 구분). 속마음은 "인물(속마음): …", 외침은 "인물(외침): …", 속삭임은 "인물(속삭임): …", 당황·떨림은 "인물(떨림): …". 없으면 ""
-  bubbleSide: 첫 대사 말풍선 위치 "l" 또는 "r"
-  sfx: 효과음, 없으면 ""
-  direction: 한국어 장면 연출 한두 문장(표정·동작·소품·배경). 그림 속 글자 금지
-  panels: 한 장을 2~3칸으로 나눌 때 칸별 내용(예: "위 큰 칸: …, 오른쪽 아래 작은 칸: 놀란 얼굴 클로즈업"). 한 장면이면 ""
-  caption: 시간·장소 자막 박스 문구(예: "오전 10시 제품 촬영"), 없으면 ""
-  extras: 살릴 디테일 한 줄. 그림으로만 표현할 것(땀방울, 반짝이, 집중선)은 그냥 쓰고, 글자로 넣을 손글씨 의성어만 작은따옴표로 감싸기(예: 땀방울, 반짝이, 손글씨 '두근'). 없으면 ""
-- hooks: 1컷 제목 후보 3개(두 줄, \\n 구분). hooks[0]은 cuts[0].title과 같게
-- caption: 인스타 캡션. 첫 줄은 "더 보기"를 누르게 하는 한 줄, 이어서 3~4줄, 마지막 줄 행동 유도. 이모지 2~3개
-- hashtags: 해시태그 정확히 ${tagSlots()}개(인스타는 게시물당 5개까지만 반영돼요. 가게 고정 해시태그 ${fixedTags().length}개가 앞에 붙어 합계 5개가 되니, 더도 덜도 말고 ${tagSlots()}개만). 동네·업종·이번 편 주제에 딱 맞는 구체적인 것, 공백 구분${prof().tags.trim()?`. 가게 고정 해시태그(${prof().tags})와 겹치지 않게`:''}
-- comment: 댓글 유도 질문 1개와 사장님 고정 댓글 1개, 줄바꿈 구분
-- reelCaption: 같은 웹툰을 릴스 영상으로 올릴 때의 캡션. 게시물 caption과 다르게 새로. 첫 줄은 20자 이내 궁금증(결말 스포일러 금지), 2~3줄, 마지막 줄은 "전체 이야기는 프로필 게시물에서" 같은 안내. 이모지 1~2개
-- reelHashtags: 릴스용 해시태그 정확히 ${tagSlots()}개(고정 해시태그 ${fixedTags().length}개와 합쳐 5개), 공백 구분. 동네·업종 + 릴스 추천에 맞는 조금 넓은 주제 1~2개
-- reelComment: 릴스 고정 댓글 1개(다음 편 예고나 가벼운 질문)
-- endHead: 웹툰 맨 뒤 가게 안내 카드의 큰 문구. 이번 편 이야기와 이어지게 두 줄(\n 구분), 한 줄 10자 이내, 광고 단어 금지
-- endBtn: 안내 카드 버튼 문구 12자 이내(손님이 할 행동, 예: 프로필 링크에서 예약)
-- cast: 주인공 말고 등장하는 인물들의 고정 외모 한 줄(예: 군 장병 5명 - 디지털 무늬 전투복, 짧은 머리, 모자 없음, 가슴에 빨간 명찰). 없으면 ""
-- ideas: 같은 가게로 다음에 만들 수 있는 다른 편 주제 3개(각 20자 이내)
-JSON 하나로만 답해: {"title":"","tone":"","cuts":[{"role":"","shot":"","title":"","highlight":"","sub":"","bubble":"","bubbleSide":"l","sfx":"","direction":"","panels":"","caption":"","extras":""}],"hooks":["","",""],"caption":"","hashtags":"","comment":"","reelCaption":"","reelHashtags":"","reelComment":"","endHead":"","endBtn":"","cast":"","ideas":["","",""]}`;
+  const prompt=pFill('make',{n,info:infoBlock(),theme:theme?`\n[이번 편 주제] ${theme}\n`:'',rules:RULES_FN(),shots:SHOTS.join(', '),tagSlots:tagSlots(),fixedCount:fixedTags().length,tagsNote:prof().tags.trim()?`. 가게 고정 해시태그(${prof().tags})와 겹치지 않게`:''});
   try{
     const r=await ask(prompt,st);
-    S.toon={title:String(r.title||'이번 편'),tone:String(r.tone||''),cuts:(r.cuts||[]).slice(0,10).map(normCut),hooks:(r.hooks||[]).map(fixNL).filter(Boolean).slice(0,4),hookIdx:0,
-      caption:String(r.caption||''),hashtags:fitTags(r.hashtags),comment:String(r.comment||''),reel:{caption:String(r.reelCaption||''),hashtags:fitTags(r.reelHashtags||''),comment:String(r.reelComment||'')},endHead:fixNL(r.endHead||''),endBtn:String(r.endBtn||''),cast:String(r.cast||''),ideas:(r.ideas||[]).map(String).slice(0,3)};
+    applyToon(r);
     S.check=null; pv=0; openCut=0; S.step='edit'; save(); render(); window.scrollTo({top:0,behavior:'smooth'}); toast('완성! 오른쪽에서 넘겨 보세요');
   }catch(_){}
 }
@@ -715,14 +694,7 @@ function blankToon(){
 }
 async function rewriteCut(i){
   const st=$('#st-cut-'+i),how=$('#rw-'+i).value.trim()||'더 짧고 더 궁금하게',c=cuts()[i];
-  const prompt=`인스타툰의 ${i+1}컷만 다시 써. 요청: ${how}
-${infoBlock()}
-[전체 대본]
-${toonText()}
-
-${RULES_FN()}
-이 컷의 역할: ${c.role}
-JSON 하나로만 답해: {"shot":"${SHOTS.join('|')} 중 하나","title":"두 줄, \\n 구분","highlight":"","sub":"","bubble":"","sfx":"","direction":"","panels":"","caption":"","extras":""}`;
+  const prompt=pFill('rewrite',{cutNo:i+1,how,info:infoBlock(),toon:toonText(),rules:RULES_FN(),role:c.role,shots:SHOTS.join('|')});
   try{ const r=await ask(prompt,st,'이 컷을 고치는 중');
     Object.assign(c,{shot:SHOTS.includes(r.shot)?r.shot:c.shot,title:fixNL(r.title)||c.title,highlight:String(r.highlight??c.highlight),sub:String(r.sub??c.sub),bubble:String(r.bubble??c.bubble),sfx:String(r.sfx??c.sfx),direction:String(r.direction||c.direction),panels:String(r.panels??c.panels??''),caption:String(r.caption??c.caption??''),extras:String(r.extras??c.extras??'')});
     if(i===0&&S.toon.hooks.length) S.toon.hooks[S.toon.hookIdx]=c.title;
@@ -730,16 +702,7 @@ JSON 하나로만 답해: {"shot":"${SHOTS.join('|')} 중 하나","title":"두 �
 }
 async function review(){
   const st=$('#st-review');
-  const prompt=`너는 깐깐한 인스타툰 편집자이자, 피드를 넘기는 손님 "${S.info.target||'동네 손님'}"이야. 아래 원고를 냉정하게 검토해.
-${infoBlock()}
-[원고]
-${toonText()}
-
-${RULES_FN()}
-점수(1~5): 첫 장의 힘, 끝까지 읽힘, 공감·실감, 광고 느낌 없음, 행동 유도.
-comment는 한 문장. summary는 가장 먼저 고칠 점 한 문장.
-fixes는 효과 큰 순서로 최대 4개. cut은 컷 번호(1부터), field는 title/bubble/sub/sfx 중 하나, before는 현재 문구 그대로, after는 바꿀 문구(제목은 \\n으로 두 줄), reason은 한 문장. 없는 사실을 넣지 말 것.
-JSON 하나로만 답해: {"scores":[{"name":"","score":4,"comment":""}],"summary":"","fixes":[{"cut":1,"field":"title","before":"","after":"","reason":""}]}`;
+  const prompt=pFill('review',{target:S.info.target||'동네 손님',info:infoBlock(),toon:toonText(),rules:RULES_FN()});
   try{ const r=await ask(prompt,st,'편집자가 읽는 중'); S.check={scores:r.scores||[],summary:String(r.summary||''),fixes:(r.fixes||[]).map(f=>({...f,after:fixNL(f.after)}))}; save(); vEdit(); }catch(_){}
 }
 
@@ -1560,11 +1523,7 @@ async function makeReel(){ const st=$('#st-reel');
   }catch(e){ const s3=$('#st-reel'); if(s3){ s3.className='status err'; s3.textContent='영상을 만들지 못했어요. 페이지를 새로고침하고 다시 해 주세요.'; } }
   finally{ reelBusy=false; } }
 async function makeReelText(){ const st=$('#st-rt');
-  const prompt=`너는 동네 가게 인스타 담당이야. 이 인스타툰을 그림이 한 장씩 넘어가는 릴스 영상으로도 올려. 릴스에 붙일 글을 써 줘.
-${infoBlock()}
-${S.toon?`[웹툰 대본]\n${toonText()}\n[게시물 캡션 - 이것과 겹치지 않게]\n${S.toon.caption||'(없음)'}`:`[영상 제목] ${reelTitle()||'(없음)'}`}
-규칙: caption은 첫 줄 20자 이내 궁금증(결말 스포일러 금지), 모두 2~3줄, 마지막 줄은 "전체 이야기는 프로필 게시물에서" 같은 안내. 이모지 1~2개. hashtags는 정확히 ${tagSlots()}개(가게 고정 해시태그와 합쳐 5개), 공백 구분, 동네·업종 + 릴스 추천에 맞는 조금 넓은 주제 1~2개. comment는 릴스 고정 댓글 1개(다음 편 예고나 가벼운 질문). 광고 단어·과장 표현 금지, 가게 정보에 없는 사실은 지어내지 않기.
-JSON 하나로만 답해: {"caption":"","hashtags":"","comment":""}`;
+  const prompt=pFill('reelText',{info:infoBlock(),source:S.toon?`[웹툰 대본]\n${toonText()}\n[게시물 캡션 - 이것과 겹치지 않게]\n${S.toon.caption||'(없음)'}`:`[영상 제목] ${reelTitle()||'(없음)'}`,tagSlots:tagSlots()});
   try{ const r=await ask(prompt,st,'릴스 글 쓰는 중',null,'quick'); const R=rt(); R.caption=String(r.caption||''); R.hashtags=fitTags(r.hashtags); R.comment=String(r.comment||''); save(); vReels(); toast('릴스용 글을 만들었어요'); }catch(_){} }
 
 /* ================= 반응 기록 ================= */
@@ -1589,32 +1548,14 @@ function insHTML(){ const H=hist(), R=H.filter(hasStats); if(!R.length) return `
   <p class="sub" style="margin:8px 0 0">막대는 편별 저장+공유 수예요. 한 달 기획을 새로 만들면 이 기록이 AI에게 함께 전달돼요.</p>
   ${S.statsAI?`<div style="margin-top:12px"><b>AI 분석</b><ul>${(S.statsAI.insights||[]).map(x=>`<li>${esc(x)}</li>`).join('')}</ul>${(S.statsAI.next||[]).length?`<b>다음 달에 해 볼 것</b><ul>${S.statsAI.next.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}</div>`:''}</div>`; }
 async function statsAI(){ const H=hist().filter(hasStats); const st=$('#st-sai'); if(H.length<2){ toast('두 편 이상 반응을 적으면 분석할 수 있어요'); return; }
-  const prompt=`너는 동네 가게 인스타툰 운영 코치야. 아래 반응 기록을 보고 무엇이 잘 먹혔는지 사장님이 바로 이해할 말로 분석해.
-${infoBlock0()}
-[올린 편 반응]
-${H.map(h=>`- ${h.title} / 첫 장 제목: ${h.hook||'-'} / 유형: ${h.type||'-'} / 목적: ${h.goal||'-'} / 테마: ${ARTS[h.art]?.name||'-'} / 컷 ${h.cuts||'-'} / 도달 ${sv(h,'reach')} 좋아요 ${sv(h,'like')} 댓글 ${sv(h,'cmt')} 저장 ${sv(h,'save')} 공유 ${sv(h,'share')}`).join('\n')}
-규칙: 숫자에 근거해서만 말하고 편 수가 적으면 "아직 편 수가 적어 참고용"이라고 밝혀. 저장·공유를 가장 중요하게, 그다음 댓글, 좋아요 순으로 봐. 어려운 마케팅 용어 금지. insights 3개(각 60자 이내), next 3개(다음 달에 해 볼 구체적인 것, 각 50자 이내).
-JSON 하나로만 답해: {"insights":["","",""],"next":["","",""]}`;
+  const prompt=pFill('stats',{info:infoBlock0(),records:H.map(h=>`- ${h.title} / 첫 장 제목: ${h.hook||'-'} / 유형: ${h.type||'-'} / 목적: ${h.goal||'-'} / 테마: ${ARTS[h.art]?.name||'-'} / 컷 ${h.cuts||'-'} / 도달 ${sv(h,'reach')} 좋아요 ${sv(h,'like')} 댓글 ${sv(h,'cmt')} 저장 ${sv(h,'save')} 공유 ${sv(h,'share')}`).join('\n')});
   try{ const r=await ask(prompt,st,'반응 분석 중',null,'quick'); S.statsAI={insights:(r.insights||[]).map(String).slice(0,4),next:(r.next||[]).map(String).slice(0,4)}; save(); $('#statsIns').innerHTML=insHTML(); }catch(_){} }
 
 /* ================= 댓글 답글 도우미 ================= */
 let replyOut=null;
 async function makeReply(){ const txt=($('#r-in')?.value||'').trim(), st=$('#st-reply'); if(!txt){ toast('손님 댓글을 먼저 붙여 넣어 주세요'); return; }
   const h=hist().find(x=>String(x.hid)===($('#r-ep')?.value||''));
-  const prompt=`너는 동네 가게 인스타 계정의 댓글 담당이야. 손님 댓글에 달 답글 3개를 써 줘.
-${infoBlock()}
-[이 댓글이 달린 편] ${h?h.title+(h.hook?` (첫 장: ${h.hook})`:''):'모름'}
-[손님 댓글]
-${txt}
-규칙:
-- 먼저 댓글 종류를 판단: 칭찬, 질문, 불만, 장난, 광고·스팸 중 하나.
-- 답글 3개는 방식을 다르게: "짧고 다정하게", "정보 담아서", "재치 있게". 불만이면 세 번째 대신 "정중한 사과 + DM 안내".
-- 가게 프로필 말투를 따르고, 답글 하나 80자 이내, 이모지 0~2개. 사장님(가게) 입장에서.
-- 가게 정보에 없는 사실(가격, 주차, 영업시간, 재고 등)은 지어내지 말고 "DM 주시면 바로 알려 드릴게요"처럼 확인을 약속해.
-- @아이디는 쓰지 마(앱에서 답글 달기를 누르면 자동으로 붙어요).
-- 광고·스팸이면 replies는 빈 배열, note에 답글 대신 숨기기·신고를 권해.
-- note: 이 댓글을 다룰 때 한 줄 조언(예: 불만이면 공개 답글은 짧게, 자세한 건 DM으로).
-JSON 하나로만 답해: {"kind":"","note":"","replies":[{"style":"","text":""}]}`;
+  const prompt=pFill('reply',{info:infoBlock(),episode:h?h.title+(h.hook?` (첫 장: ${h.hook})`:''):'모름',comment:txt});
   try{ const r=await ask(prompt,st,'답글 쓰는 중',null,'quick'); replyOut={kind:String(r.kind||''),note:String(r.note||''),replies:(r.replies||[]).map(x=>({style:String(x.style||''),text:String(x.text||'')})).filter(x=>x.text).slice(0,3)}; renderReply(); }catch(_){} }
 function renderReply(){ const el=$('#replyOut'); if(!el||!replyOut) return; const R=replyOut;
   el.innerHTML=`${R.kind?`<div class="row" style="gap:6px"><span class="tag">${esc(R.kind)}</span>${R.note?`<span class="status">${esc(R.note)}</span>`:''}</div>`:''}<div class="rout">${R.replies.map((x,k)=>`<div class="rline"><div><small>${esc(x.style)}</small>${esc(x.text)}</div><button class="btn sm" data-rcopy="${k}">복사</button></div>`).join('')||'<p class="sub">답글을 다는 것보다 숨기거나 신고하는 게 좋아요.</p>'}</div>`; }
@@ -1769,29 +1710,15 @@ function vMonth(){
       </article>`).join('')}</div>`:''}
   </section>`;
 }
+function applyMonth(r,dates){
+  const M=mo();
+  M.concept=String(r.concept||''); M.items=(r.items||[]).slice(0,dates.length).map((x,k)=>({date:dates[k]||String(x.date||''),type:String(x.type||''),title:String(x.title||''),story:String(x.story||''),goal:String(x.goal||''),cuts:Math.min(10,Math.max(4,Number(x.cuts)||6)),made:false}));
+}
 async function makeMonth(){
   const M=mo(), st=$('#st-month'), dates=planDates(M.ym,M.freq), [y,m]=M.ym.split('-').map(Number);
-  const prompt=`너는 동네 가게 인스타툰 연재 기획자야. ${y}년 ${m}월 한 달 동안 올릴 인스타툰 ${dates.length}편을 기획해.
-${infoBlock()}
-
-[사장님 소재 메모]
-${M.memo||'(없음)'}
-${statsBlock()}
-[올리는 날짜] ${dates.join(', ')}
-
-규칙:
-- 날짜 하나에 한 편. 위 날짜를 순서대로 그대로 쓴다.
-- 한 달 흐름: 1주차는 가게와 주인공 소개·공감, 2주차는 손님 고민 해결·정보, 3주차는 비하인드·실화·손님 이야기, 4주차는 소식·이벤트와 마감. 알릴 소식이 있으면 2~3편에 자연스럽게 녹이고 광고만 하는 편은 1편 이하.
-- 유형을 골고루 섞기: 실화 사건, 손님 미스터리, 고객 고민, 자주 묻는 질문, 비하인드, 첫 방문 안내, 계절·기념일, 소식·이벤트.
-- 그 달에 실제로 있는 한국 기념일이나 계절 이슈(명절, 공휴일, 날씨 등)를 아는 것만 활용. 확실하지 않으면 쓰지 않기.
-- 소재 메모의 에피소드는 실화 편으로 쓰고, 메모에 없는 실제 사건·후기·수치는 지어내지 않는다. 메모 밖의 편은 이 업종 손님들이 흔히 겪는 상황으로.
-- title: 회차 제목처럼 궁금하게, 25자 이내, 광고 단어 금지.
-- story: 이 편의 줄거리 3~4문장. 첫 장면, 전개, 반전이나 해결, 마지막 한마디까지.
-- goal: 공감, 정보, 신뢰, 홍보 중 하나. cuts: 4~10 중 추천 컷 수.
-- concept: 이번 달 연재 콘셉트 한 줄.
-JSON 하나로만 답해: {"concept":"","items":[{"date":"","type":"","title":"","story":"","goal":"","cuts":6}]}`;
+  const prompt=pFill('month',{year:y,month:m,count:dates.length,info:infoBlock(),memo:M.memo||'(없음)',stats:statsBlock(),dates:dates.join(', ')});
   try{ const r=await ask(prompt,st,`${dates.length}편 기획 중이에요 · 1분 정도 걸려요`);
-    M.concept=String(r.concept||''); M.items=(r.items||[]).slice(0,dates.length).map((x,k)=>({date:dates[k]||String(x.date||''),type:String(x.type||''),title:String(x.title||''),story:String(x.story||''),goal:String(x.goal||''),cuts:Math.min(10,Math.max(4,Number(x.cuts)||6)),made:false}));
+    applyMonth(r,dates);
     save(); vMonth(); toast('한 달 연재표를 만들었어요'); }catch(_){}
 }
 async function makeFromPlan(k){
@@ -2201,6 +2128,256 @@ function keyBoxHTML(){ return `<details class="more keybox" id="keyBox" ${API.ke
 </div></details>`; }
 
 function refreshAi(){ const on=STANDALONE?!!API.key:!!sample; $('#aiDot').className='dot '+(on?'on':'off'); $('#aiText').textContent=STANDALONE?(on?'Gemini 연결됨':'API 키 필요'):(on?'AI 연결됨':'AI 연결 없음 · 직접 쓰기 가능'); }
+/* ================= 관리자: 프롬프트 편집실 ================= */
+/* 앱이 Gemini에 보내는 프롬프트 틀을 관리자가 수정·저장하고(API 키 사용 시 즉시 반영),
+   빈칸을 ( )로 둔 채 완성된 프롬프트를 만들어 유료 Gemini(웹/앱)에 직접 붙여 넣을 수 있게 한다.
+   저장 위치는 이 브라우저(localStorage)뿐이다. 관리자 화면 열기: 주소 끝에 #admin 또는 맨 아래 "관리자" 링크. */
+const ADM_KEY='instatoon.admin.prompts', ADM_MAN='instatoon.admin.manual', BLANK='( )';
+const admRead=k=>{ try{ return JSON.parse(localStorage.getItem(k)||'{}')||{}; }catch(_){ return {}; } };
+const admWrite=(k,o)=>{ try{ localStorage.setItem(k,JSON.stringify(o)); return true; }catch(_){ toast('저장 공간이 가득 차서 저장하지 못했어요'); return false; } };
+const INFO_FIELDS=[['type','업종·분야','예: 사진관'],['name','가게·브랜드 이름',''],['role','주인공 역할','예: 사장님'],['gender','주인공 성별',''],['age','주인공 나이',''],['looks','주인공 외모',''],
+  ['story','작성자가 적은 이야기','실제 있었던 일, 에피소드 (Q&A 형식 가능)','ta'],['offer','이번에 알리고 싶은 것',''],['target','읽었으면 하는 사람(고객)',''],['action','독자가 할 행동','예: 프로필 링크에서 예약'],['tone','분위기',''],['art','그림체·테마 설명','선택','ta']];
+const INFO_TPL=`[사업·브랜드 정보]
+업종·분야: {{type}} / 이름: {{name}}
+[주인공] {{role}} / 성별: {{gender}} / 나이: {{age}} / 외모: {{looks}}
+작성자가 적은 이야기(Q&A 형식일 수 있음): {{story}}
+이번에 알리고 싶은 것: {{offer}}
+읽었으면 하는 사람(고객): {{target}}
+독자가 할 행동: {{action}}
+분위기: {{tone}}
+{{art}}`;
+const STORY_MODE_AUTO='6컷 이상이면 주인공과 조력자의 대화형, 5컷 이하면 내레이션형이 기본. 이야기에 더 맞는 쪽으로.';
+const appInfoVals=()=>{ const i=S.info, p=person(0); let art=''; try{ art=artBlock(); }catch(_){}
+  return {type:i.type,name:i.name,role:p.role,gender:p.gender,age:p.age,looks:p.looks,story:i.story,offer:i.offer,target:i.target,action:i.action,tone:TONES[i.tone]?`${TONES[i.tone].name} - ${TONES[i.tone].rule}`:'',art}; };
+const MANUAL_BASE=[...INFO_FIELDS.map(([k])=>k)];
+
+/* 프롬프트 목록. def=기본 틀, vars=틀 안에서 쓰는 {{이름}} 설명, manual=직접 입력 칸, auto=직접 입력에서 고정으로 들어가는 값, app()=앱의 현재 값 */
+const PROMPTS={
+  make:{tab:'one',name:'대본 한 편 쓰기',use:'info rules',def:`너는 동네 가게 홍보용 인스타툰 작가야. 아래 정보로 {{n}}컷 인스타툰 한 편을 완성해.
+{{info}}
+{{theme}}
+{{rules}}
+
+출력 필드:
+- title: 이번 편 제목(웹툰 회차 제목처럼, 25자 이내)
+- tone: 실제로 쓴 분위기 이름
+- cuts: {{n}}개. 각 컷은
+  role: 이 컷의 역할(예: 궁금증, 위기, 반전, 행동 유도)
+  shot: {{shots}} 중 하나
+  title: 컷 위 큰 제목(내레이션). 표지·마지막 컷·꼭 필요한 컷만, 두 줄(\\n 구분). 대사 중심 컷은 ""
+  highlight: title 안에 글자 그대로 있는 강조어 2~8자, title이 없으면 ""
+  sub: 보조 문구, 없으면 ""
+  bubble: 대사. 한 줄에 하나씩 "인물: 대사" 형식, 최대 3줄(\\n 구분). 속마음은 "인물(속마음): …", 외침은 "인물(외침): …", 속삭임은 "인물(속삭임): …", 당황·떨림은 "인물(떨림): …". 없으면 ""
+  bubbleSide: 첫 대사 말풍선 위치 "l" 또는 "r"
+  sfx: 효과음, 없으면 ""
+  direction: 한국어 장면 연출 한두 문장(표정·동작·소품·배경). 그림 속 글자 금지
+  panels: 한 장을 2~3칸으로 나눌 때 칸별 내용(예: "위 큰 칸: …, 오른쪽 아래 작은 칸: 놀란 얼굴 클로즈업"). 한 장면이면 ""
+  caption: 시간·장소 자막 박스 문구(예: "오전 10시 제품 촬영"), 없으면 ""
+  extras: 살릴 디테일 한 줄. 그림으로만 표현할 것(땀방울, 반짝이, 집중선)은 그냥 쓰고, 글자로 넣을 손글씨 의성어만 작은따옴표로 감싸기(예: 땀방울, 반짝이, 손글씨 '두근'). 없으면 ""
+- hooks: 1컷 제목 후보 3개(두 줄, \\n 구분). hooks[0]은 cuts[0].title과 같게
+- caption: 인스타 캡션. 첫 줄은 "더 보기"를 누르게 하는 한 줄, 이어서 3~4줄, 마지막 줄 행동 유도. 이모지 2~3개
+- hashtags: 해시태그 정확히 {{tagSlots}}개(인스타는 게시물당 5개까지만 반영돼요. 가게 고정 해시태그 {{fixedCount}}개가 앞에 붙어 합계 5개가 되니, 더도 덜도 말고 {{tagSlots}}개만). 동네·업종·이번 편 주제에 딱 맞는 구체적인 것, 공백 구분{{tagsNote}}
+- comment: 댓글 유도 질문 1개와 사장님 고정 댓글 1개, 줄바꿈 구분
+- reelCaption: 같은 웹툰을 릴스 영상으로 올릴 때의 캡션. 게시물 caption과 다르게 새로. 첫 줄은 20자 이내 궁금증(결말 스포일러 금지), 2~3줄, 마지막 줄은 "전체 이야기는 프로필 게시물에서" 같은 안내. 이모지 1~2개
+- reelHashtags: 릴스용 해시태그 정확히 {{tagSlots}}개(고정 해시태그 {{fixedCount}}개와 합쳐 5개), 공백 구분. 동네·업종 + 릴스 추천에 맞는 조금 넓은 주제 1~2개
+- reelComment: 릴스 고정 댓글 1개(다음 편 예고나 가벼운 질문)
+- endHead: 웹툰 맨 뒤 가게 안내 카드의 큰 문구. 이번 편 이야기와 이어지게 두 줄(\n 구분), 한 줄 10자 이내, 광고 단어 금지
+- endBtn: 안내 카드 버튼 문구 12자 이내(손님이 할 행동, 예: 프로필 링크에서 예약)
+- cast: 주인공 말고 등장하는 인물들의 고정 외모 한 줄(예: 군 장병 5명 - 디지털 무늬 전투복, 짧은 머리, 모자 없음, 가슴에 빨간 명찰). 없으면 ""
+- ideas: 같은 가게로 다음에 만들 수 있는 다른 편 주제 3개(각 20자 이내)
+JSON 하나로만 답해: {"title":"","tone":"","cuts":[{"role":"","shot":"","title":"","highlight":"","sub":"","bubble":"","bubbleSide":"l","sfx":"","direction":"","panels":"","caption":"","extras":""}],"hooks":["","",""],"caption":"","hashtags":"","comment":"","reelCaption":"","reelHashtags":"","reelComment":"","endHead":"","endBtn":"","cast":"","ideas":["","",""]}`,
+    vars:{n:'컷 수',info:'사업·주인공·이야기 정보 묶음',theme:'이번 편 주제 줄(없으면 빈칸)',rules:'아래 "공통 원칙" 틀',shots:'샷 종류 목록',tagSlots:'해시태그 개수',fixedCount:'가게 고정 해시태그 수',tagsNote:'고정 해시태그와 겹치지 않게 하는 문구'},
+    manual:[['n','컷 수','예: 7'],['theme','이번 편 주제','선택']],auto:{shots:SHOTS.join(', '),tagSlots:'5',fixedCount:'0',tagsNote:''},
+    json:true,app:()=>({n:S.info.cuts,theme:''}),
+    toLine:{theme:v=>`\n[이번 편 주제] ${v}\n`}},
+  rewrite:{tab:'one',name:'컷 하나만 다시 쓰기',use:'info rules',def:`인스타툰의 {{cutNo}}컷만 다시 써. 요청: {{how}}
+{{info}}
+[전체 대본]
+{{toon}}
+
+{{rules}}
+이 컷의 역할: {{role}}
+JSON 하나로만 답해: {"shot":"{{shots}} 중 하나","title":"두 줄, \\n 구분","highlight":"","sub":"","bubble":"","sfx":"","direction":"","panels":"","caption":"","extras":""}`,
+    vars:{cutNo:'컷 번호',how:'고치는 방향 요청',info:'사업·주인공·이야기 정보 묶음',toon:'전체 대본',rules:'공통 원칙',role:'이 컷의 역할',shots:'샷 종류 목록(|로 구분)'},
+    manual:[['cutNo','컷 번호','예: 3'],['how','요청','예: 더 짧고 더 궁금하게'],['role','이 컷의 역할','예: 반전'],['toon','전체 대본','이미 쓴 대본을 붙여 넣기','ta']],auto:{shots:SHOTS.join('|')},
+    json:true,app:()=>({cutNo:1,how:'더 짧고 더 궁금하게',role:cuts()[0]?.role||'',toon:S.toon?toonText():''})},
+  review:{tab:'one',name:'원고 냉정하게 검토하기',use:'info rules',def:`너는 깐깐한 인스타툰 편집자이자, 피드를 넘기는 손님 "{{target}}"이야. 아래 원고를 냉정하게 검토해.
+{{info}}
+[원고]
+{{toon}}
+
+{{rules}}
+점수(1~5): 첫 장의 힘, 끝까지 읽힘, 공감·실감, 광고 느낌 없음, 행동 유도.
+comment는 한 문장. summary는 가장 먼저 고칠 점 한 문장.
+fixes는 효과 큰 순서로 최대 4개. cut은 컷 번호(1부터), field는 title/bubble/sub/sfx 중 하나, before는 현재 문구 그대로, after는 바꿀 문구(제목은 \\n으로 두 줄), reason은 한 문장. 없는 사실을 넣지 말 것.
+JSON 하나로만 답해: {"scores":[{"name":"","score":4,"comment":""}],"summary":"","fixes":[{"cut":1,"field":"title","before":"","after":"","reason":""}]}`,
+    vars:{target:'읽는 손님(타겟)',info:'사업·주인공·이야기 정보 묶음',toon:'원고(대본 전체)',rules:'공통 원칙'},
+    manual:[['target','읽는 손님','예: 동네 손님'],['toon','원고','검토할 대본을 붙여 넣기','ta']],auto:{},
+    json:true,app:()=>({target:S.info.target||'동네 손님',toon:S.toon?toonText():''})},
+  rules:{tab:'one',name:'공통 원칙 (대본·검토 공통)',use:'',def:`[인스타툰 원칙]
+1. 사실은 지키고 연출은 과감하게: 작성자가 적은 사실(시간, 장소, 대사, 숫자, 결과)은 그대로 살린다. 적지 않은 사실(후기, 수치, 특정 손님 사연, 결과)은 절대 지어내지 않는다. 작성자가 적은 이야기가 없으면 실화처럼 꾸미지 말고, 이 분야 사람들이 흔히 겪는 고민이나 궁금증을 주제로 공감형으로 쓴다.
+2. 1컷은 설명이 아니라 한 장면. 가장 긴박하거나 궁금한 순간을 먼저. 상호명·가격·할인·이벤트 같은 광고 단어는 1컷 금지.
+3. 흐름은 아래 [잘 팔린 인스타툰의 흐름]을 기본으로, 가게 이야기에 맞게 바꾼다. 반전이나 해결은 가게의 진짜 강점이 드러나는 순간.
+3-1. 모든 컷의 마지막 대사나 장면은 다음 장이 궁금하게 끝낸다(질문, 말줄임, 표정 클로즈업).
+3-2. 컷과 컷 사이에 원인과 결과가 이어지게. 앞 컷의 대사를 다음 컷이 받아서 시작한다. 뜬금없는 장면 전환 금지.
+4. 한 컷에 메시지 하나. 제목(내레이션)은 표지와 꼭 필요한 컷에만, 두 줄·한 줄 14자 이내. 나머지 컷은 말풍선 대사 중심. 말풍선은 한 컷에 1~3개, 한 개당 18자 이내 실제 말투. 효과음 1~4자.
+5. 이야기는 아래 [주인공]의 1인칭 시점. 입력된 역할(사장님·대표·직원·프리랜서·담당자 등 무엇이든)과 나이·성별에 맞는 자연스러운 말투로 "~했어요/~거든요". 역할이 직원·알바생이면 대표가 아니라 그 사람이 겪은 일로, 가게가 없는 프리랜서·회사원이면 가게 얘기 없이 그 사람의 일상·업무 이야기로 쓴다. 주인공이 여러 명이면 함께 겪는 이야기로 쓰고, 대사의 인물 이름은 역할(예: 사장님, 직원, 알바생)로 구분한다. 같은 역할이 둘이면 외모로 구분(예: 안경 직원). 다른 주인공이 조력자 역할을 맡아도 된다. 업계 용어 금지. 고객(독자)이 얻는 것 중심.
+6. 행동 유도는 마지막 컷 하나에 방법 하나만.
+7. 7컷 이상이면 장면 전환을 늘려 전개를 촘촘하게 하고, 중간에 작은 반전을 하나 더 넣는다. 같은 말을 반복하지 않는다.
+8. 컷마다 표정·손짓·소품 같은 작은 디테일을 하나 이상 넣어 살아 있는 장면으로 만든다.
+9. 이야기 방식: {{storymode}}
+
+{{flow}}`,
+    vars:{storymode:'이야기 방식 문장(혼자/둘이/자동)',flow:'아래 "잘 팔린 흐름" 틀'},manual:[],auto:{},shared:true},
+  flow:{tab:'one',name:'잘 팔린 인스타툰의 흐름',use:'',def:STORY_FLOW,vars:{},manual:[],auto:{},shared:true},
+  month:{tab:'month',name:'한 달 연재 기획',use:'info',def:`너는 동네 가게 인스타툰 연재 기획자야. {{year}}년 {{month}}월 한 달 동안 올릴 인스타툰 {{count}}편을 기획해.
+{{info}}
+
+[사장님 소재 메모]
+{{memo}}
+{{stats}}
+[올리는 날짜] {{dates}}
+
+규칙:
+- 날짜 하나에 한 편. 위 날짜를 순서대로 그대로 쓴다.
+- 한 달 흐름: 1주차는 가게와 주인공 소개·공감, 2주차는 손님 고민 해결·정보, 3주차는 비하인드·실화·손님 이야기, 4주차는 소식·이벤트와 마감. 알릴 소식이 있으면 2~3편에 자연스럽게 녹이고 광고만 하는 편은 1편 이하.
+- 유형을 골고루 섞기: 실화 사건, 손님 미스터리, 고객 고민, 자주 묻는 질문, 비하인드, 첫 방문 안내, 계절·기념일, 소식·이벤트.
+- 그 달에 실제로 있는 한국 기념일이나 계절 이슈(명절, 공휴일, 날씨 등)를 아는 것만 활용. 확실하지 않으면 쓰지 않기.
+- 소재 메모의 에피소드는 실화 편으로 쓰고, 메모에 없는 실제 사건·후기·수치는 지어내지 않는다. 메모 밖의 편은 이 업종 손님들이 흔히 겪는 상황으로.
+- title: 회차 제목처럼 궁금하게, 25자 이내, 광고 단어 금지.
+- story: 이 편의 줄거리 3~4문장. 첫 장면, 전개, 반전이나 해결, 마지막 한마디까지.
+- goal: 공감, 정보, 신뢰, 홍보 중 하나. cuts: 4~10 중 추천 컷 수.
+- concept: 이번 달 연재 콘셉트 한 줄.
+JSON 하나로만 답해: {"concept":"","items":[{"date":"","type":"","title":"","story":"","goal":"","cuts":6}]}`,
+    vars:{year:'연도',month:'월',count:'편 수',info:'사업·주인공·이야기 정보 묶음',memo:'사장님 소재 메모',stats:'지난 반응 기록(있을 때만)',dates:'올리는 날짜들'},
+    manual:[['year','연도','예: 2026'],['month','월','예: 11'],['count','편 수','예: 8'],['dates','올리는 날짜','예: 11/3, 11/6, 11/10 …'],['memo','소재 메모','선택','ta'],['stats','지난 반응 기록','선택','ta']],auto:{},
+    json:true,app:()=>{ const M=mo(), d=planDates(M.ym,M.freq), [y,m]=M.ym.split('-').map(Number); return {year:y,month:m,count:d.length,dates:d.join(', '),memo:M.memo,stats:statsBlock()}; }},
+  reelText:{tab:'reels',name:'릴스 캡션·해시태그·고정 댓글',use:'info',def:`너는 동네 가게 인스타 담당이야. 이 인스타툰을 그림이 한 장씩 넘어가는 릴스 영상으로도 올려. 릴스에 붙일 글을 써 줘.
+{{info}}
+{{source}}
+규칙: caption은 첫 줄 20자 이내 궁금증(결말 스포일러 금지), 모두 2~3줄, 마지막 줄은 "전체 이야기는 프로필 게시물에서" 같은 안내. 이모지 1~2개. hashtags는 정확히 {{tagSlots}}개(가게 고정 해시태그와 합쳐 5개), 공백 구분, 동네·업종 + 릴스 추천에 맞는 조금 넓은 주제 1~2개. comment는 릴스 고정 댓글 1개(다음 편 예고나 가벼운 질문). 광고 단어·과장 표현 금지, 가게 정보에 없는 사실은 지어내지 않기.
+JSON 하나로만 답해: {"caption":"","hashtags":"","comment":""}`,
+    vars:{info:'사업·주인공·이야기 정보 묶음',source:'웹툰 대본+게시물 캡션 또는 영상 제목',tagSlots:'해시태그 개수'},
+    manual:[['source','웹툰 대본 또는 영상 제목','대본·캡션 또는 영상 제목','ta']],auto:{tagSlots:'5'},
+    json:false,app:()=>({source:S.toon?`[웹툰 대본]\n${toonText()}\n[게시물 캡션 - 이것과 겹치지 않게]\n${S.toon.caption||'(없음)'}`:(reelTitle()?`[영상 제목] ${reelTitle()}`:'')})},
+  stats:{tab:'stats',name:'반응 분석 (운영 코치)',use:'info',def:`너는 동네 가게 인스타툰 운영 코치야. 아래 반응 기록을 보고 무엇이 잘 먹혔는지 사장님이 바로 이해할 말로 분석해.
+{{info}}
+[올린 편 반응]
+{{records}}
+규칙: 숫자에 근거해서만 말하고 편 수가 적으면 "아직 편 수가 적어 참고용"이라고 밝혀. 저장·공유를 가장 중요하게, 그다음 댓글, 좋아요 순으로 봐. 어려운 마케팅 용어 금지. insights 3개(각 60자 이내), next 3개(다음 달에 해 볼 구체적인 것, 각 50자 이내).
+JSON 하나로만 답해: {"insights":["","",""],"next":["","",""]}`,
+    vars:{info:'사업·주인공 정보 묶음',records:'올린 편별 반응 기록'},
+    manual:[['records','올린 편 반응 기록','편별 제목·도달·좋아요·댓글·저장·공유','ta']],auto:{},
+    json:false,app:()=>({records:hist().filter(hasStats).map(h=>`- ${h.title} / 첫 장 제목: ${h.hook||'-'} / 유형: ${h.type||'-'} / 목적: ${h.goal||'-'} / 테마: ${ARTS[h.art]?.name||'-'} / 컷 ${h.cuts||'-'} / 도달 ${sv(h,'reach')} 좋아요 ${sv(h,'like')} 댓글 ${sv(h,'cmt')} 저장 ${sv(h,'save')} 공유 ${sv(h,'share')}`).join('\n')})},
+  reply:{tab:'stats',name:'댓글 답글 3개 쓰기',use:'info',def:`너는 동네 가게 인스타 계정의 댓글 담당이야. 손님 댓글에 달 답글 3개를 써 줘.
+{{info}}
+[이 댓글이 달린 편] {{episode}}
+[손님 댓글]
+{{comment}}
+규칙:
+- 먼저 댓글 종류를 판단: 칭찬, 질문, 불만, 장난, 광고·스팸 중 하나.
+- 답글 3개는 방식을 다르게: "짧고 다정하게", "정보 담아서", "재치 있게". 불만이면 세 번째 대신 "정중한 사과 + DM 안내".
+- 가게 프로필 말투를 따르고, 답글 하나 80자 이내, 이모지 0~2개. 사장님(가게) 입장에서.
+- 가게 정보에 없는 사실(가격, 주차, 영업시간, 재고 등)은 지어내지 말고 "DM 주시면 바로 알려 드릴게요"처럼 확인을 약속해.
+- @아이디는 쓰지 마(앱에서 답글 달기를 누르면 자동으로 붙어요).
+- 광고·스팸이면 replies는 빈 배열, note에 답글 대신 숨기기·신고를 권해.
+- note: 이 댓글을 다룰 때 한 줄 조언(예: 불만이면 공개 답글은 짧게, 자세한 건 DM으로).
+JSON 하나로만 답해: {"kind":"","note":"","replies":[{"style":"","text":""}]}`,
+    vars:{info:'사업·주인공·이야기 정보 묶음',episode:'댓글이 달린 편',comment:'손님 댓글'},
+    manual:[['episode','댓글이 달린 편','선택 · 편 제목'],['comment','손님 댓글','댓글 내용을 붙여 넣기','ta']],auto:{},
+    json:false,app:()=>({episode:hist()[0]?.title||'',comment:''})},
+};
+const ADM_TABS=[['one','한 편 만들기'],['month','한 달 기획'],['reels','스토리·릴스'],['stats','반응·댓글']];
+/* 같은 틀을 {{이름}}에 값을 끼워 완성한다. 값 안의 {{...}}는 다시 풀지 않는다 */
+function pTpl(id){ const t=admRead(ADM_KEY)[id]; return typeof t==='string'&&t.trim()?t:PROMPTS[id].def; }
+function pFill(id,vars){ return pTpl(id).replace(/\{\{(\w+)\}\}/g,(m,k)=>k in vars?String(vars[k]):m); }
+const admEdited=id=>{ const t=admRead(ADM_KEY)[id]; return typeof t==='string'&&t.trim()&&t!==PROMPTS[id].def; };
+const JSON_TAIL=/JSON 하나로만 답해:[\s\S]*$/;
+/* 직접 입력: 빈칸은 ( )로 남기고 완성 프롬프트를 만든다 */
+function admBuild(id,vals,readable){
+  const P=PROMPTS[id], g=k=>{ const s=String(vals[k]??'').trim(); return s||BLANK; }, vars={...P.auto};
+  P.manual.forEach(([k])=>{ const v=g(k); vars[k]=P.toLine?.[k]?P.toLine[k](v):v; });
+  if(P.use.includes('info')) vars.info=INFO_TPL.replace(/\{\{(\w+)\}\}/g,(m,k)=>g(k));
+  if(P.use.includes('rules')) vars.rules=pFill('rules',{storymode:STORY_MODE_AUTO,flow:pTpl('flow')});
+  let t=pFill(id,vars);
+  if(readable) t=t.replace(JSON_TAIL,'위 출력 필드들을 항목별로 소제목을 붙여 읽기 좋게 정리해서 답해줘. JSON 형식은 쓰지 말고, 바로 복사해 쓸 수 있는 문장으로.');
+  return t;
+}
+/* 앱에서 실제로 쓰는 완성 프롬프트(현재 입력값 기준) 미리보기 */
+function admPreview(id){ try{ return admBuild(id,{...appInfoVals(),...(PROMPTS[id].app?.()||{})},false); }catch(e){ return '(미리보기를 만들 수 없어요: '+e.message+')'; } }
+
+/* ----- 화면 ----- */
+const ADM={tab:'one',pid:'make'};
+function admEl(){ let el=$('#admin'); if(!el){ el=document.createElement('div'); el.id='admin'; el.className='adm'; el.setAttribute('role','dialog'); el.setAttribute('aria-label','관리자 프롬프트 편집실'); el.hidden=true; document.body.appendChild(el); el.addEventListener('click',admClick); el.addEventListener('input',admInput); } return el; }
+function admOpen(){ const el=admEl(); el.hidden=false; document.body.style.overflow='hidden'; admRender(); }
+function admClose(){ const el=$('#admin'); if(el) el.hidden=true; document.body.style.overflow=''; if(location.hash==='#admin') history.replaceState(null,'',location.pathname+location.search); }
+function admRender(){
+  const el=admEl(), list=Object.entries(PROMPTS).filter(([,p])=>p.tab===ADM.tab), P=PROMPTS[ADM.pid];
+  const mv=admRead(ADM_MAN)[ADM.pid]||{}, tpl=pTpl(ADM.pid), m=P.manual, fields=P.use.includes('info')?INFO_FIELDS:[];
+  const inp=([k,l,ph,ta])=>`<div><label class="f" for="am-${k}">${esc(l)}</label>${ta?`<textarea class="in" id="am-${k}" data-am="${k}" rows="3" placeholder="${esc(ph||'')}">${esc(mv[k]||'')}</textarea>`:`<input class="in" id="am-${k}" data-am="${k}" value="${esc(mv[k]||'')}" placeholder="${esc(ph||'')}">`}</div>`;
+  el.innerHTML=`<div class="adm-in">
+  <div class="adm-top"><div><b class="adm-h">관리자 · 프롬프트 편집실</b><p class="sub" style="margin:2px 0 0">AI에게 보내는 지시문을 고치고 저장하거나, 칸을 비운 채로 유료 Gemini에 직접 붙여 넣을 프롬프트를 만들어요. 이 브라우저에만 저장돼요.</p></div>
+    <div class="row" style="gap:6px"><button class="btn sm" data-aa="export">전체 내보내기</button><button class="btn sm" data-aa="import">가져오기</button><button class="btn pri sm" data-aa="close">닫기</button></div></div>
+  <nav class="adm-tabs" aria-label="탭">${ADM_TABS.map(([k,t])=>`<button class="mode" data-atab="${k}" aria-pressed="${ADM.tab===k}"><b>${t}</b></button>`).join('')}</nav>
+  <div class="adm-pick">${list.map(([k,p])=>`<button class="chip ${ADM.pid===k?'on':''}" data-apid="${k}" aria-pressed="${ADM.pid===k}">${esc(p.name)}${admEdited(k)?' ✎':''}</button>`).join('')}</div>
+  <section class="adm-card"><h3>① 프롬프트 틀 편집 <small>${admEdited(ADM.pid)?'수정됨 · API 키 사용 시 이 틀이 적용돼요':'기본값'}</small></h3>
+    <p class="sub" style="margin-top:0">{{이름}} 자리는 앱이 실제 값으로 채워요. 아래 버튼을 눌러 커서 위치에 넣을 수 있어요.${P.shared?' 이 틀은 다른 프롬프트에서 {{rules}}처럼 가져다 써요.':''}</p>
+    ${Object.keys(P.vars).length?`<div class="adm-vars">${Object.entries(P.vars).map(([k,d])=>`<button class="chip" data-avar="${k}" title="${esc(d)}">{{${k}}}</button>`).join('')}</div>`:''}
+    <textarea class="in adm-ta" id="adm-tpl" rows="18" spellcheck="false">${esc(tpl)}</textarea>
+    <div class="status" id="adm-warn"></div>
+    <div class="row" style="margin-top:10px"><button class="btn pri sm" data-aa="save">저장</button><button class="btn sm" data-aa="reset">기본값으로 되돌리기</button>${P.shared?'':'<button class="btn sm" data-aa="preview">앱 현재 값으로 채워 보기</button>'}<span class="status" id="adm-st"></span></div>
+    ${P.shared?'':'<div id="adm-pv" hidden><label class="f">앱이 지금 보낼 프롬프트 (읽기 전용)</label><textarea class="in adm-ta" id="adm-pvt" rows="10" readonly></textarea></div>'}
+  </section>
+  ${P.shared?'':`<section class="adm-card"><h3>② 직접 입력용 (유료 Gemini에 붙여 넣기) <small>API 키 없이 사용</small></h3>
+    <p class="sub" style="margin-top:0">비워 둔 칸은 <b>${BLANK}</b>로 남아요. 프롬프트를 복사해 Gemini에 붙여 넣은 뒤 ${BLANK} 자리만 채워도 돼요.</p>
+    <div class="row" style="margin-bottom:6px"><button class="btn sm" data-aa="fill">앱의 현재 입력값 가져오기</button><button class="btn sm ghost" data-aa="clear">모두 비우기</button></div>
+    <div class="g2">${[...m,...fields].map(inp).join('')}</div>
+    ${P.json?'<div class="row" style="margin-top:10px;gap:14px"><label class="adm-rad"><input type="radio" name="am-fmt" value="json" checked> 앱에 반영할 수 있는 JSON 답변</label><label class="adm-rad"><input type="radio" name="am-fmt" value="read"> 사람이 읽기 좋은 답변</label></div>':'<p class="sub" style="margin-top:8px">이 프롬프트는 앱에서 JSON으로 받지만, 직접 쓸 때는 바로 읽을 수 있는 형식으로 만들어 드려요.</p>'}
+    <label class="f">완성된 프롬프트 <small>여기서 직접 더 고쳐도 돼요</small></label>
+    <textarea class="in adm-ta" id="adm-out" rows="14"></textarea>
+    <div class="row" style="margin-top:8px"><button class="btn pri sm" data-aa="copy">복사하기</button><a class="btn sm" href="https://gemini.google.com/app" target="_blank" rel="noopener">Gemini 열기</a><span class="status" id="adm-len"></span></div>
+    ${P.json&&(ADM.pid==='make'||ADM.pid==='month')?`<label class="f">Gemini 답변 붙여 넣기 <small>JSON 답변이면 앱에 바로 반영할 수 있어요</small></label>
+      <textarea class="in adm-ta" id="adm-resp" rows="6" placeholder="Gemini가 준 JSON을 여기에 붙여 넣으세요"></textarea>
+      <div class="row" style="margin-top:8px"><button class="btn sm" data-aa="apply">앱에 반영하기</button><span class="status" id="adm-ap"></span></div>`:''}
+  </section>`}
+  </div>`;
+  admWarn(); admOut();
+}
+function admWarn(){ const ta=$('#adm-tpl'), w=$('#adm-warn'); if(!ta||!w) return; const P=PROMPTS[ADM.pid], t=ta.value, bad=[...new Set([...t.matchAll(/\{\{(\w+)\}\}/g)].map(x=>x[1]))].filter(k=>!(k in P.vars)), msg=[];
+  if(bad.length) msg.push('알 수 없는 자리표시: '+bad.map(k=>`{{${k}}}`).join(' ')+' (그대로 글자로 전달돼요)');
+  if(!P.shared&&!JSON_TAIL.test(t)) msg.push('"JSON 하나로만 답해:" 줄이 없어요. 앱이 답을 읽지 못할 수 있어요.');
+  w.className='status'+(msg.length?' err':''); w.textContent=msg.join(' / '); }
+function admVals(){ const o={}; document.querySelectorAll('#admin [data-am]').forEach(e=>o[e.dataset.am]=e.value); return o; }
+function admOut(){ const out=$('#adm-out'); if(!out) return; const f=document.querySelector('#admin input[name="am-fmt"]:checked'), readable=PROMPTS[ADM.pid].json===false||f?.value==='read';
+  out.value=admBuild(ADM.pid,admVals(),readable); const l=$('#adm-len'); if(l) l.textContent=out.value.length.toLocaleString()+'자'; }
+function admSaveManual(){ const all=admRead(ADM_MAN); all[ADM.pid]=admVals(); admWrite(ADM_MAN,all); }
+function admInput(e){ const t=e.target;
+  if(t.id==='adm-tpl'){ admWarn(); const s=$('#adm-st'); if(s){ s.className='status'; s.textContent='저장 전'; } }
+  else if(t.dataset.am!==undefined){ admOut(); admSaveManual(); }
+  else if(t.name==='am-fmt') admOut(); }
+function admAdoptParse(txt){ let t=String(txt).replace(/```json|```/g,'').trim(); try{ return JSON.parse(t); }catch(_){ const a=t.search(/[\[{]/), b=Math.max(t.lastIndexOf('}'),t.lastIndexOf(']')); if(a>=0&&b>a) return JSON.parse(t.slice(a,b+1)); throw new Error('JSON을 찾지 못했어요'); } }
+function admClick(e){ const b=e.target.closest('button,a'); if(!b) return;
+  if(b.dataset.atab){ ADM.tab=b.dataset.atab; ADM.pid=Object.keys(PROMPTS).find(k=>PROMPTS[k].tab===ADM.tab); return admRender(); }
+  if(b.dataset.apid){ ADM.pid=b.dataset.apid; return admRender(); }
+  if(b.dataset.avar){ const ta=$('#adm-tpl'), s=ta.selectionStart, tok=`{{${b.dataset.avar}}}`; ta.setRangeText(tok,s,ta.selectionEnd,'end'); ta.focus(); return admInput({target:ta}); }
+  const a=b.dataset.aa; if(!a) return; const P=PROMPTS[ADM.pid], st=$('#adm-st');
+  if(a==='close') return admClose();
+  if(a==='save'){ const v=$('#adm-tpl').value, all=admRead(ADM_KEY); if(!v.trim()){ if(st){ st.className='status err'; st.textContent='비어 있어요. 기본값으로 되돌리려면 "기본값으로 되돌리기"를 누르세요'; } return; }
+    if(v===P.def) delete all[ADM.pid]; else all[ADM.pid]=v; if(admWrite(ADM_KEY,all)){ toast('저장했어요. 다음 AI 요청부터 적용돼요'); admRender(); const s2=$('#adm-st'); if(s2) s2.textContent='저장됨 ✓'; } return; }
+  if(a==='reset'){ if(!confirm('이 프롬프트를 기본값으로 되돌릴까요? 수정한 내용은 사라져요.')) return; const all=admRead(ADM_KEY); delete all[ADM.pid]; admWrite(ADM_KEY,all); toast('기본값으로 되돌렸어요'); return admRender(); }
+  if(a==='preview'){ const pv=$('#adm-pv'); $('#adm-pvt').value=admPreview(ADM.pid); pv.hidden=false; return; }
+  if(a==='fill'){ const v={...appInfoVals(),...(P.app?.()||{})}; document.querySelectorAll('#admin [data-am]').forEach(e=>{ if(e.dataset.am in v) e.value=v[e.dataset.am]??''; }); admOut(); admSaveManual(); return toast('앱의 현재 입력값을 가져왔어요'); }
+  if(a==='clear'){ document.querySelectorAll('#admin [data-am]').forEach(e=>e.value=''); admOut(); admSaveManual(); return; }
+  if(a==='copy'){ const t=$('#adm-out').value; copy(t); return; }
+  if(a==='apply'){ const ap=$('#adm-ap'); try{ const r=admAdoptParse($('#adm-resp').value); if(ADM.pid==='make'){ applyToon(r); S.mode='one'; S.check=null; pv=0; openCut=0; S.step='edit'; } else { const M=mo(), d=planDates(M.ym,M.freq); applyMonth(r,d); S.mode='month'; } save(); admClose(); render(); window.scrollTo({top:0,behavior:'smooth'}); toast('앱에 반영했어요'); }catch(err){ if(ap){ ap.className='status err'; ap.textContent='반영하지 못했어요: '+(err.message||'형식 오류'); } } return; }
+  if(a==='export'){ const blob=new Blob([JSON.stringify({prompts:admRead(ADM_KEY),manual:admRead(ADM_MAN)},null,1)],{type:'application/json'}), u=URL.createObjectURL(blob), l=document.createElement('a'); l.href=u; l.download='instatoon-prompts.json'; l.click(); setTimeout(()=>URL.revokeObjectURL(u),1000); return; }
+  if(a==='import'){ const f=document.createElement('input'); f.type='file'; f.accept='.json,application/json'; f.onchange=async()=>{ try{ const d=JSON.parse(await f.files[0].text()); if(d.prompts&&typeof d.prompts==='object'){ const ok={}; Object.keys(PROMPTS).forEach(k=>{ if(typeof d.prompts[k]==='string') ok[k]=d.prompts[k]; }); admWrite(ADM_KEY,ok); } if(d.manual&&typeof d.manual==='object') admWrite(ADM_MAN,d.manual); toast('가져왔어요'); admRender(); }catch(_){ toast('파일을 읽지 못했어요'); } }; f.click(); return; }
+}
+document.addEventListener('click',e=>{ const a=e.target.closest('[data-admin]'); if(a){ e.preventDefault(); admOpen(); } });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&$('#admin')&&!$('#admin').hidden) admClose(); });
+const admHash=()=>{ if(location.hash==='#admin') admOpen(); };
+window.addEventListener('hashchange',admHash); admHash();
+
 /* ================= 시작 ================= */
 applyFontVars();
 applyRatio();
