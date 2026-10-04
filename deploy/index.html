@@ -2290,9 +2290,15 @@ JSON 하나로만 답해: {"kind":"","note":"","replies":[{"style":"","text":""}
 };
 const ADM_TABS=[['one','한 편 만들기'],['month','한 달 기획'],['reels','스토리·릴스'],['stats','반응·댓글']];
 /* 같은 틀을 {{이름}}에 값을 끼워 완성한다. 값 안의 {{...}}는 다시 풀지 않는다 */
-function pTpl(id){ const t=admRead(ADM_KEY)[id]; return typeof t==='string'&&t.trim()?t:PROMPTS[id].def; }
+/* 서버(/api/prompts)가 연결돼 있으면 관리자가 서버에 저장한 틀을 모든 방문자가 받는다. 없으면 이 브라우저에 저장한 틀을 쓴다 */
+const SRV={configured:false}, REMOTE={}, ADM_SPW='instatoon.admin.spw';
+SRV.ready=(async()=>{ try{ const r=await fetch('/api/prompts',{cache:'no-store'}); if(!r.ok) return; const j=await r.json(); if(j&&j.configured){ SRV.configured=true; Object.keys(REMOTE).forEach(k=>delete REMOTE[k]); Object.assign(REMOTE,j.prompts||{}); } }catch(_){} })();
+const admCustom=()=>SRV.configured?REMOTE:admRead(ADM_KEY);
+async function srvCall(body){ try{ const r=await fetch('/api/prompts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}); const j=await r.json().catch(()=>({})); return {ok:r.ok,status:r.status,j}; }catch(_){ return {ok:false,status:0,j:{}}; } }
+const srvPw=()=>{ try{ return sessionStorage.getItem(ADM_SPW)||''; }catch(_){ return ''; } };
+function pTpl(id){ const t=admCustom()[id]; return typeof t==='string'&&t.trim()?t:PROMPTS[id].def; }
 function pFill(id,vars){ return pTpl(id).replace(/\{\{(\w+)\}\}/g,(m,k)=>k in vars?String(vars[k]):m); }
-const admEdited=id=>{ const t=admRead(ADM_KEY)[id]; return typeof t==='string'&&t.trim()&&t!==PROMPTS[id].def; };
+const admEdited=id=>{ const t=admCustom()[id]; return typeof t==='string'&&t.trim()&&t!==PROMPTS[id].def; };
 const JSON_TAIL=/JSON 하나로만 답해:[\s\S]*$/;
 /* 직접 입력: 빈칸은 ( )로 남기고 완성 프롬프트를 만든다 */
 function admBuild(id,vals,readable){
@@ -2307,29 +2313,42 @@ function admBuild(id,vals,readable){
 /* 앱에서 실제로 쓰는 완성 프롬프트(현재 입력값 기준) 미리보기 */
 function admPreview(id){ try{ return admBuild(id,{...appInfoVals(),...(PROMPTS[id].app?.()||{})},false); }catch(e){ return '(미리보기를 만들 수 없어요: '+e.message+')'; } }
 
+/* 틀 저장/삭제(text=null). 서버 연결 시 서버에, 아니면 이 브라우저에 저장 */
+async function admPut(id,text){
+  if(SRV.configured){ const r=await srvCall(text==null?{action:'reset',id,password:srvPw()}:{action:'save',id,text,password:srvPw()}); if(!r.ok) return false; if(text==null) delete REMOTE[id]; else REMOTE[id]=text; return true; }
+  const all=admRead(ADM_KEY); if(text==null) delete all[id]; else all[id]=text; return admWrite(ADM_KEY,all); }
 /* ----- 화면 ----- */
 const ADM={tab:'one',pid:'make'};
 function admEl(){ let el=$('#admin'); if(!el){ el=document.createElement('div'); el.id='admin'; el.className='adm'; el.setAttribute('role','dialog'); el.setAttribute('aria-label','관리자 프롬프트 편집실'); el.hidden=true; document.body.appendChild(el); el.addEventListener('click',admClick); el.addEventListener('input',admInput); } return el; }
-function admOpen(){ const el=admEl(); el.hidden=false; document.body.style.overflow='hidden'; admRender(); }
+async function admOpen(){ const el=admEl(); el.hidden=false; document.body.style.overflow='hidden'; await SRV.ready; admRender(); }
 function admClose(){ const el=$('#admin'); if(el) el.hidden=true; document.body.style.overflow=''; if(location.hash===ADM_HASH) history.replaceState(null,'',location.pathname+location.search); }
 /* ----- 비밀번호 잠금 (이 브라우저 안에서만 작동하는 잠금이에요. 서버가 없어 완전한 보안은 아니에요) ----- */
 const ADM_PW='instatoon.admin.pw', ADM_SES='instatoon.admin.ok';
 const admPwData=()=>{ try{ return JSON.parse(localStorage.getItem(ADM_PW)||'null'); }catch(_){ return null; } };
-const admUnlocked=()=>{ try{ return !!admPwData()&&sessionStorage.getItem(ADM_SES)==='1'; }catch(_){ return false; } };
+const admUnlocked=()=>{ try{ return SRV.configured?!!srvPw():(!!admPwData()&&sessionStorage.getItem(ADM_SES)==='1'); }catch(_){ return false; } };
 async function pwHash(pw,salt){ const d=salt+':'+pw;
   try{ const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(d)); return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join(''); }
   catch(_){ let h=5381; for(const c of d) h=((h*33)^c.codePointAt(0))>>>0; return 'x'+h; } }
-function admGate(mode){ const el=admEl(), has=!!admPwData(), m=mode||(has?'login':'create');
+function admGate(mode){ const el=admEl(), has=SRV.configured||!!admPwData(), m=mode||(has?'login':'create');
   const fld=(id,l,ac)=>`<label class="f" for="${id}">${l}</label><input class="in" id="${id}" type="password" autocomplete="${ac||'off'}">`;
   const body={create:`<h3>관리자 비밀번호 만들기</h3><p class="sub">처음 한 번만 정하면 돼요. 이 브라우저에 저장돼요.</p>${fld('pw-new','새 비밀번호 (4자 이상)','new-password')}${fld('pw-new2','한 번 더','new-password')}<div class="row" style="margin-top:12px"><button class="btn pri" data-aa="pwcreate">만들고 들어가기</button><button class="btn ghost" data-aa="close">닫기</button></div>`,
     login:`<h3>관리자 비밀번호</h3>${fld('pw-cur','비밀번호','current-password')}<div class="row" style="margin-top:12px"><button class="btn pri" data-aa="pwlogin">들어가기</button><button class="btn ghost" data-aa="close">닫기</button></div><p class="sub" style="margin-top:14px"><a href="#" data-aa="pwforgot">비밀번호를 잊었어요</a></p>`,
     change:`<h3>비밀번호 변경</h3>${fld('pw-cur','현재 비밀번호','current-password')}${fld('pw-new','새 비밀번호 (4자 이상)','new-password')}${fld('pw-new2','새 비밀번호 한 번 더','new-password')}<div class="row" style="margin-top:12px"><button class="btn pri" data-aa="pwchange">변경하기</button><button class="btn ghost" data-aa="pwback">취소</button></div>`,
-    forgot:`<h3>비밀번호를 잊었어요</h3><p class="sub">서버가 없어서 비밀번호를 되찾을 수는 없어요. 대신 <b>비밀번호와 저장한 프롬프트를 모두 지우고</b> 새로 시작할 수 있어요. 미리 "전체 내보내기"로 받아 둔 파일이 있으면 다시 가져올 수 있어요.</p><div class="row" style="margin-top:12px"><button class="btn pri" data-aa="pwreset">모두 지우고 새로 시작</button><button class="btn ghost" data-aa="pwback">취소</button></div>`}[m];
+    forgot:SRV.configured?`<h3>비밀번호를 잊었어요</h3><p class="sub">비밀번호는 서버에 저장돼 있어요. Vercel 프로젝트의 환경변수 <b>ADMIN_PASSWORD</b> 값이 처음 비밀번호예요. 비밀번호를 바꾼 뒤 잊었다면 Upstash 데이터에서 <b>instatoon:adminpw</b> 키를 지우면 ADMIN_PASSWORD 값으로 돌아가요.</p><div class="row" style="margin-top:12px"><button class="btn" data-aa="pwback">돌아가기</button></div>`:`<h3>비밀번호를 잊었어요</h3><p class="sub">서버가 없어서 비밀번호를 되찾을 수는 없어요. 대신 <b>비밀번호와 저장한 프롬프트를 모두 지우고</b> 새로 시작할 수 있어요. 미리 "전체 내보내기"로 받아 둔 파일이 있으면 다시 가져올 수 있어요.</p><div class="row" style="margin-top:12px"><button class="btn pri" data-aa="pwreset">모두 지우고 새로 시작</button><button class="btn ghost" data-aa="pwback">취소</button></div>`}[m];
   el.innerHTML=`<div class="adm-in"><div class="adm-card adm-gate">${body}<div class="status" id="pw-st" role="alert"></div></div></div>`; el.dataset.gate=m; setTimeout(()=>el.querySelector('input')?.focus(),30); }
 async function admPw(a){ const el=admEl(), v=id=>$('#'+id)?.value||'', err=t=>{ const s=$('#pw-st'); if(s){ s.className='status err'; s.textContent=t; } }, d=admPwData();
   const save=async p=>{ const salt=Math.random().toString(36).slice(2)+Date.now().toString(36); if(!admWrite(ADM_PW,{salt,hash:await pwHash(p,salt)})) return false; return true; };
   const okNew=()=>{ if(v('pw-new').length<4){ err('4자 이상으로 정해 주세요'); return false; } if(v('pw-new')!==v('pw-new2')){ err('두 번 입력한 비밀번호가 달라요'); return false; } return true; };
   const ses=()=>{ try{ sessionStorage.setItem(ADM_SES,'1'); }catch(_){} };
+  if(SRV.configured){
+    if(a==='pwlogin'){ const pw=v('pw-cur'), r=await srvCall({action:'login',password:pw}); if(r.ok){ try{ sessionStorage.setItem(ADM_SPW,pw); }catch(_){} return admRender(); } return err(r.status===401?'비밀번호가 맞지 않아요':'서버에 연결하지 못했어요'); }
+    if(a==='pwform') return admGate('change');
+    if(a==='pwchange'){ if(!okNew()) return; const r=await srvCall({action:'changePw',password:v('pw-cur'),newPassword:v('pw-new')}); if(!r.ok) return err(r.status===401?'현재 비밀번호가 맞지 않아요':'변경하지 못했어요'); try{ sessionStorage.setItem(ADM_SPW,v('pw-new')); }catch(_){} toast('비밀번호를 바꿨어요'); return admRender(); }
+    if(a==='pwback') return admRender();
+    if(a==='pwforgot') return admGate('forgot');
+    if(a==='lock'){ try{ sessionStorage.removeItem(ADM_SPW); }catch(_){} admClose(); return toast('잠갔어요'); }
+    return;
+  }
   if(a==='pwcreate'){ if(!okNew()||!await save(v('pw-new'))) return; ses(); toast('비밀번호를 만들었어요'); return admRender(); }
   if(a==='pwlogin'){ if(d&&await pwHash(v('pw-cur'),d.salt)===d.hash){ ses(); return admRender(); } return err('비밀번호가 맞지 않아요'); }
   if(a==='pwform') return admGate('change');
@@ -2344,7 +2363,7 @@ function admRender(){
   const mv=admRead(ADM_MAN)[ADM.pid]||{}, tpl=pTpl(ADM.pid), m=P.manual, fields=P.use.includes('info')?INFO_FIELDS:[];
   const inp=([k,l,ph,ta])=>`<div><label class="f" for="am-${k}">${esc(l)}</label>${ta?`<textarea class="in" id="am-${k}" data-am="${k}" rows="3" placeholder="${esc(ph||'')}">${esc(mv[k]||'')}</textarea>`:`<input class="in" id="am-${k}" data-am="${k}" value="${esc(mv[k]||'')}" placeholder="${esc(ph||'')}">`}</div>`;
   el.innerHTML=`<div class="adm-in">
-  <div class="adm-top"><div><b class="adm-h">관리자 · 프롬프트 편집실</b><p class="sub" style="margin:2px 0 0">AI에게 보내는 지시문을 고치고 저장하거나, 칸을 비운 채로 유료 Gemini에 직접 붙여 넣을 프롬프트를 만들어요. 이 브라우저에만 저장돼요.</p></div>
+  <div class="adm-top"><div><b class="adm-h">관리자 · 프롬프트 편집실</b><p class="sub" style="margin:2px 0 0">AI에게 보내는 지시문을 고치고 저장하거나, 칸을 비운 채로 유료 Gemini에 직접 붙여 넣을 프롬프트를 만들어요. ${SRV.configured?'<b>서버에 저장돼서 모든 방문자에게 반영돼요.</b>':'서버가 연결되지 않아 <b>이 브라우저에만</b> 저장돼요.'}</p></div>
     <div class="row" style="gap:6px"><button class="btn sm" data-aa="pwform">비밀번호 변경</button><button class="btn sm" data-aa="lock">잠그기</button><button class="btn sm" data-aa="export">전체 내보내기</button><button class="btn sm" data-aa="import">가져오기</button><button class="btn pri sm" data-aa="close">닫기</button></div></div>
   <nav class="adm-tabs" aria-label="탭">${ADM_TABS.map(([k,t])=>`<button class="mode" data-atab="${k}" aria-pressed="${ADM.tab===k}"><b>${t}</b></button>`).join('')}</nav>
   <div class="adm-pick">${list.map(([k,p])=>`<button class="chip ${ADM.pid===k?'on':''}" data-apid="${k}" aria-pressed="${ADM.pid===k}">${esc(p.name)}${admEdited(k)?' ✎':''}</button>`).join('')}</div>
@@ -2384,22 +2403,23 @@ function admInput(e){ const t=e.target;
   else if(t.dataset.am!==undefined){ admOut(); admSaveManual(); }
   else if(t.name==='am-fmt') admOut(); }
 function admAdoptParse(txt){ let t=String(txt).replace(/```json|```/g,'').trim(); try{ return JSON.parse(t); }catch(_){ const a=t.search(/[\[{]/), b=Math.max(t.lastIndexOf('}'),t.lastIndexOf(']')); if(a>=0&&b>a) return JSON.parse(t.slice(a,b+1)); throw new Error('JSON을 찾지 못했어요'); } }
-function admClick(e){ const b=e.target.closest('button,a'); if(!b) return;
+async function admClick(e){ const b=e.target.closest('button,a'); if(!b) return;
   if(b.dataset.atab){ ADM.tab=b.dataset.atab; ADM.pid=Object.keys(PROMPTS).find(k=>PROMPTS[k].tab===ADM.tab); return admRender(); }
   if(b.dataset.apid){ ADM.pid=b.dataset.apid; return admRender(); }
   if(b.dataset.avar){ const ta=$('#adm-tpl'), s=ta.selectionStart, tok=`{{${b.dataset.avar}}}`; ta.setRangeText(tok,s,ta.selectionEnd,'end'); ta.focus(); return admInput({target:ta}); }
   const a=b.dataset.aa; if(!a) return; if(a==='close'){ e.preventDefault(); return admClose(); } if(/^pw|^lock$/.test(a)){ e.preventDefault(); return admPw(a); } const P=PROMPTS[ADM.pid], st=$('#adm-st');
   if(a==='close') return admClose();
-  if(a==='save'){ const v=$('#adm-tpl').value, all=admRead(ADM_KEY); if(!v.trim()){ if(st){ st.className='status err'; st.textContent='비어 있어요. 기본값으로 되돌리려면 "기본값으로 되돌리기"를 누르세요'; } return; }
-    if(v===P.def) delete all[ADM.pid]; else all[ADM.pid]=v; if(admWrite(ADM_KEY,all)){ toast('저장했어요. 다음 AI 요청부터 적용돼요'); admRender(); const s2=$('#adm-st'); if(s2) s2.textContent='저장됨 ✓'; } return; }
-  if(a==='reset'){ if(!confirm('이 프롬프트를 기본값으로 되돌릴까요? 수정한 내용은 사라져요.')) return; const all=admRead(ADM_KEY); delete all[ADM.pid]; admWrite(ADM_KEY,all); toast('기본값으로 되돌렸어요'); return admRender(); }
+  if(a==='save'){ const v=$('#adm-tpl').value; if(!v.trim()){ if(st){ st.className='status err'; st.textContent='비어 있어요. 기본값으로 되돌리려면 "기본값으로 되돌리기"를 누르세요'; } return; }
+    if(!await admPut(ADM.pid,v===P.def?null:v)){ if(st){ st.className='status err'; st.textContent='저장하지 못했어요. 다시 로그인하거나 잠시 뒤 다시 눌러 주세요'; } return; }
+    toast(SRV.configured?'저장했어요. 모든 방문자에게 곧 반영돼요':'저장했어요. 다음 AI 요청부터 적용돼요'); admRender(); const s2=$('#adm-st'); if(s2) s2.textContent='저장됨 ✓'; return; }
+  if(a==='reset'){ if(!confirm('이 프롬프트를 기본값으로 되돌릴까요? 수정한 내용은 사라져요.'+(SRV.configured?' 모든 방문자에게 적용돼요.':''))) return; if(!await admPut(ADM.pid,null)){ toast('되돌리지 못했어요'); return; } toast('기본값으로 되돌렸어요'); return admRender(); }
   if(a==='preview'){ const pv=$('#adm-pv'); $('#adm-pvt').value=admPreview(ADM.pid); pv.hidden=false; return; }
   if(a==='fill'){ const v={...appInfoVals(),...(P.app?.()||{})}; document.querySelectorAll('#admin [data-am]').forEach(e=>{ if(e.dataset.am in v) e.value=v[e.dataset.am]??''; }); admOut(); admSaveManual(); return toast('앱의 현재 입력값을 가져왔어요'); }
   if(a==='clear'){ document.querySelectorAll('#admin [data-am]').forEach(e=>e.value=''); admOut(); admSaveManual(); return; }
   if(a==='copy'){ const t=$('#adm-out').value; copy(t); return; }
   if(a==='apply'){ const ap=$('#adm-ap'); try{ const r=admAdoptParse($('#adm-resp').value); if(ADM.pid==='make'){ applyToon(r); S.mode='one'; S.check=null; pv=0; openCut=0; S.step='edit'; } else { const M=mo(), d=planDates(M.ym,M.freq); applyMonth(r,d); S.mode='month'; } save(); admClose(); render(); window.scrollTo({top:0,behavior:'smooth'}); toast('앱에 반영했어요'); }catch(err){ if(ap){ ap.className='status err'; ap.textContent='반영하지 못했어요: '+(err.message||'형식 오류'); } } return; }
-  if(a==='export'){ const blob=new Blob([JSON.stringify({prompts:admRead(ADM_KEY),manual:admRead(ADM_MAN)},null,1)],{type:'application/json'}), u=URL.createObjectURL(blob), l=document.createElement('a'); l.href=u; l.download='instatoon-prompts.json'; l.click(); setTimeout(()=>URL.revokeObjectURL(u),1000); return; }
-  if(a==='import'){ const f=document.createElement('input'); f.type='file'; f.accept='.json,application/json'; f.onchange=async()=>{ try{ const d=JSON.parse(await f.files[0].text()); if(d.prompts&&typeof d.prompts==='object'){ const ok={}; Object.keys(PROMPTS).forEach(k=>{ if(typeof d.prompts[k]==='string') ok[k]=d.prompts[k]; }); admWrite(ADM_KEY,ok); } if(d.manual&&typeof d.manual==='object') admWrite(ADM_MAN,d.manual); toast('가져왔어요'); admRender(); }catch(_){ toast('파일을 읽지 못했어요'); } }; f.click(); return; }
+  if(a==='export'){ const blob=new Blob([JSON.stringify({prompts:admCustom(),manual:admRead(ADM_MAN)},null,1)],{type:'application/json'}), u=URL.createObjectURL(blob), l=document.createElement('a'); l.href=u; l.download='instatoon-prompts.json'; l.click(); setTimeout(()=>URL.revokeObjectURL(u),1000); return; }
+  if(a==='import'){ const f=document.createElement('input'); f.type='file'; f.accept='.json,application/json'; f.onchange=async()=>{ try{ const d=JSON.parse(await f.files[0].text()); if(d.prompts&&typeof d.prompts==='object'){ let bad=0; for(const k of Object.keys(PROMPTS)){ if(typeof d.prompts[k]==='string'&&d.prompts[k].trim()&&!await admPut(k,d.prompts[k])) bad++; } if(bad) toast('일부를 저장하지 못했어요'); } if(d.manual&&typeof d.manual==='object') admWrite(ADM_MAN,d.manual); toast('가져왔어요'); admRender(); }catch(_){ toast('파일을 읽지 못했어요'); } }; f.click(); return; }
 }
 document.addEventListener('click',e=>{ const a=e.target.closest('[data-admin]'); if(a){ e.preventDefault(); admOpen(); } });
 document.addEventListener('keydown',e=>{ const g=$('#admin')?.dataset.gate; if(e.key==='Enter'&&e.target.closest?.('.adm-gate')&&e.target.tagName==='INPUT'){ const m={create:'pwcreate',login:'pwlogin',change:'pwchange'}[g]; if(m) admPw(m); } if(e.key==='Escape'&&$('#admin')&&!$('#admin').hidden) admClose(); });
