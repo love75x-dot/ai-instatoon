@@ -7,7 +7,10 @@
 <meta name="description" content="인스타툰 연재실이 브라우저에 저장하는 정보, AI 기능을 쓸 때 Google Gemini로 전송되는 정보, 글꼴·스크립트 요청, 방문 통계와 향후 광고 도입 시 처리 방식을 안내합니다.">
 <meta name="robots" content="index,follow">
 <link rel="canonical" href="https://www.ai-instatoon.com/privacy/">
-<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <meta property="og:site_name" content="인스타툰 연재실">
 <meta property="og:locale" content="ko_KR">
 <meta property="og:type" content="website">
@@ -110,15 +113,15 @@ footer p{margin:10px 0 0;font-size:13px}
 <p class="lead">이 방침은 인스타툰 연재실(이하 &quot;사이트&quot;)의 실제 동작을 기준으로, 어떤 정보가 어디에 저장되고 어디로 전송되는지를 설명합니다.</p>
 <p class="meta">최종 업데이트 <time datetime="2026-10-01">2026-10-01</time></p>
 <section><h2 id="summary">한눈에 보기</h2><ul><li>사이트 운영자는 사용자가 입력한 내용, 사진, 이미지, API 키를 <strong>자체 서버에 저장하지 않습니다.</strong> 이 사이트에는 별도의 회원가입과 로그인이 없습니다.</li><li>작업 내용은 사용자의 <strong>브라우저 저장 공간</strong>에 보관됩니다.</li><li>AI 기능을 쓰면 사용자의 브라우저가 입력 내용을 <strong>Google Gemini API로 직접 전송</strong>합니다.</li><li>방문 통계와 광고는 아래 해당 항목의 &quot;현재 상태&quot;를 확인하세요.</li></ul></section>
-<section><h2 id="local">1. 브라우저에 저장되는 정보</h2><p>다음 정보는 사용자가 사용하는 브라우저의 localStorage, IndexedDB에 저장되며 운영자에게 전송되지 않습니다.</p><div class="tbl"><table><thead><tr><th scope="col">항목</th><th scope="col">용도</th></tr></thead><tbody><tr><td>작성 중인 이야기, 가게 정보, 대본, 연재표, 반응 기록</td><td>작업을 이어서 하기 위해</td></tr><tr><td>가게 프로필(말투, 해시태그, 문의 안내 등)</td><td>모든 편에 자동 적용</td></tr><tr><td>주인공 사진, 캐릭터 기준 이미지, 완성 그림, 로고</td><td>캐릭터 설명 생성, 저장, 미리보기</td></tr><tr><td>Gemini API 키와 모델 이름</td><td>AI 기능 호출</td></tr><tr><td>첫 방문 안내를 봤는지 등 화면 설정</td><td>화면 동작</td></tr></tbody></table></div><p>브라우저 설정에서 사이트 데이터를 삭제하면 이 정보도 삭제됩니다. 공용 컴퓨터에서는 사용 후 API 키를 지우고 사이트 데이터를 삭제하세요. &quot;백업 저장&quot;으로 받은 파일은 사용자의 기기에 저장되며 파일 관리 책임은 사용자에게 있습니다.</p></section>
-<section><h2 id="gemini">2. AI 기능과 Google Gemini</h2><p>대본, 캡션, 한 달 기획, 맞춤법 검사, 댓글 답글 등 AI 기능을 쓰면, 사용자가 입력한 <strong>업종, 가게 이름, 가게 이야기, 가게 프로필, 선택 입력 내용</strong>이 사용자의 브라우저에서 Google의 Gemini API로 직접 전송됩니다. 주인공 사진으로 외모 설명을 만드는 기능을 쓰면 <strong>해당 사진도 함께 전송</strong>됩니다. 이때 사용자가 입력한 API 키가 요청 헤더로 사용됩니다.</p><p>전송된 정보의 처리와 보관에는 Google의 약관과 개인정보 처리 조건이 적용되며, 키의 요금제에 따라 달라질 수 있습니다. 해당 내용은 Google의 현재 안내를 확인해 주세요. 운영자는 이 전송 내용을 받거나 저장하지 않습니다.</p><p><strong>타인의 사진, 고객의 이름·연락처 같은 개인정보는 입력하지 마세요.</strong> 사진은 본인이 동의한 경우에만 사용해야 합니다.</p></section>
+<section><h2 id="local">1. 브라우저에 저장되는 정보</h2><p>다음 정보는 사용자가 사용하는 브라우저의 localStorage, IndexedDB에 저장되며 운영자에게 전송되지 않습니다.</p><div class="tbl"><table><thead><tr><th scope="col">항목</th><th scope="col">용도</th></tr></thead><tbody><tr><td>작성 중인 이야기, 브랜드 정보, 대본, 연재표, 반응 기록</td><td>작업을 이어서 하기 위해</td></tr><tr><td>브랜드 프로필(말투, 해시태그, 문의 안내 등)</td><td>모든 편에 자동 적용</td></tr><tr><td>주인공 사진, 캐릭터 기준 이미지, 완성 그림, 로고</td><td>캐릭터 설명 생성, 저장, 미리보기</td></tr><tr><td>Gemini API 키와 모델 이름</td><td>AI 기능 호출</td></tr><tr><td>첫 방문 안내를 봤는지 등 화면 설정</td><td>화면 동작</td></tr></tbody></table></div><p>브라우저 설정에서 사이트 데이터를 삭제하면 이 정보도 삭제됩니다. 공용 컴퓨터에서는 사용 후 API 키를 지우고 사이트 데이터를 삭제하세요. &quot;백업 저장&quot;으로 받은 파일은 사용자의 기기에 저장되며 파일 관리 책임은 사용자에게 있습니다.</p></section>
+<section><h2 id="gemini">2. AI 기능과 Google Gemini</h2><p>대본, 캡션, 한 달 기획, 맞춤법 검사, 댓글 답글 등 AI 기능을 쓰면, 사용자가 입력한 <strong>분야, 브랜드·이름, 내 이야기, 브랜드 프로필, 선택 입력 내용</strong>이 사용자의 브라우저에서 Google의 Gemini API로 직접 전송됩니다. 주인공 사진으로 외모 설명을 만드는 기능을 쓰면 <strong>해당 사진도 함께 전송</strong>됩니다. 이때 사용자가 입력한 API 키가 요청 헤더로 사용됩니다.</p><p>전송된 정보의 처리와 보관에는 Google의 약관과 개인정보 처리 조건이 적용되며, 키의 요금제에 따라 달라질 수 있습니다. 해당 내용은 Google의 현재 안내를 확인해 주세요. 운영자는 이 전송 내용을 받거나 저장하지 않습니다.</p><p><strong>타인의 사진, 고객의 이름·연락처 같은 개인정보는 입력하지 마세요.</strong> 사진은 본인이 동의한 경우에만 사용해야 합니다.</p></section>
 <section><h2 id="image">3. 이미지 생성</h2><p>이 사이트는 그림을 직접 생성하지 않습니다. 사용자가 프롬프트를 복사해 ChatGPT 등 외부 서비스에 붙여 넣는 경우 그 서비스의 개인정보 처리 방침이 적용됩니다.</p></section>
 <section><h2 id="external">4. 외부 리소스 요청</h2><p>페이지를 열면 브라우저가 다음 외부 서버에서 글꼴과 스크립트를 불러옵니다. 이 과정에서 사용자의 IP 주소, 브라우저 정보 등이 해당 서비스 제공자에게 전달될 수 있습니다.</p><ul><li>Google Fonts(fonts.googleapis.com, fonts.gstatic.com): 글꼴</li><li>cdnjs.cloudflare.com: 압축 파일 생성(JSZip) 스크립트</li></ul></section>
 <section><h2 id="hosting">5. 호스팅과 접속 기록</h2><p>이 사이트는 Vercel을 통해 제공됩니다. 호스팅 서비스는 서비스 제공과 보안을 위해 접속 로그(IP 주소, 요청 시각, 브라우저 정보 등)를 처리할 수 있으며, 운영자는 이 로그를 사용자 식별 목적으로 사용하지 않습니다. 구체적인 처리 방식은 호스팅 제공자의 정책을 따릅니다.</p></section>
 <section><h2 id="analytics">방문 통계</h2><p>현재(2026-10-01 기준) 이 사이트에는 방문 통계 도구가 활성화되어 있지 않습니다. 도입하는 경우 이 방침에 사용 목적과 수집 항목을 먼저 반영합니다.</p></section>
 <section><h2 id="ads">6. 광고</h2><p>현재(2026-10-01 기준) 이 사이트에는 광고가 게재되어 있지 않습니다.</p><p>향후 Google AdSense 등 광고를 게재하게 되면 이 방침을 먼저 갱신합니다. Google을 포함한 제3자 광고 공급업체는 쿠키를 사용해 사용자의 이 사이트 및 다른 사이트 방문 기록을 바탕으로 광고를 게재할 수 있고, 사용자는 Google 광고 설정에서 개인 맞춤 광고를 해제할 수 있습니다. 지역에 따라 필요한 동의 절차를 함께 제공합니다.</p></section>
 <section><h2 id="rights">7. 이용자의 선택</h2><ul><li>브라우저의 사이트 데이터 삭제로 저장된 작업 내용과 키를 지울 수 있습니다.</li><li>쿠키 사용은 브라우저 설정으로 제한할 수 있습니다.</li><li>AI 기능을 쓰지 않으면 입력 내용이 Gemini로 전송되지 않습니다.</li></ul></section>
-<section><h2 id="children">8. 아동</h2><p>이 사이트는 가게를 운영하거나 홍보하는 성인을 위한 도구이며 아동을 대상으로 하지 않습니다.</p></section>
+<section><h2 id="children">8. 아동</h2><p>이 사이트는 브랜드를 운영하거나 콘텐츠를 홍보하는 성인을 위한 도구이며 아동을 대상으로 하지 않습니다.</p></section>
 <section><h2 id="change">9. 방침의 변경</h2><p>이 방침은 사이트 기능이나 사용하는 외부 서비스가 바뀌면 개정합니다. 최종 업데이트: 2026-10-01.</p></section>
 <section><h2 id="contact">10. 문의</h2><p>문의 수단은 운영자가 확정되는 대로 이 페이지에 게시합니다. 아직 게시되지 않았으므로 현재는 이 사이트를 통한 문의 접수 경로가 없습니다.</p></section>
 </article>

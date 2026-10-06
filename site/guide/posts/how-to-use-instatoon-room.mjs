@@ -10,7 +10,7 @@ export default {
   desc: '인스타툰 연재실에서 업종과 가게 이야기를 입력해 대본을 만들고, 그림 프롬프트와 캡션을 정리해 저장하는 전체 순서와 도구가 해 주는 일, 직접 해야 하는 일을 설명합니다.',
   card: '3단계 사용 순서와 도구가 하는 일·내가 하는 일',
   lead: '인스타툰 연재실은 가게 이야기를 4~10컷 인스타툰의 대본, 그림 프롬프트, 게시물 글로 정리해 주는 도구입니다. 그림 자체를 대신 그려 주지는 않습니다. 어디까지가 도구의 일이고 어디부터가 내 일인지 먼저 알면 첫 한 편이 훨씬 빨라져요.',
-  related: ['what-is-instatoon', 'gemini-api-key-setup-guide', 'ai-instatoon-review-checklist', 'store-story-to-instatoon'],
+  related: ['what-is-instatoon', 'gemini-api-key-setup-guide', 'ai-instatoon-review-checklist', 'instatoon-troubleshooting'],
   summary: ['필수 입력은 업종 하나이고, 이야기·주인공·가게 프로필은 적을수록 대본이 우리 가게답게 나온다.', '글(대본, 캡션, 해시태그)은 Gemini가 만들고, 그림은 사용자가 ChatGPT 같은 외부 이미지 도구에 프롬프트를 붙여 넣어 만든다.', '가격·시간 같은 숫자와 과장 표현은 "그림 그리기 전에 확인"에서 한 번 더 사람이 확인한다.', '작업 내용은 내 브라우저에만 저장되므로 백업 저장으로 파일을 받아 두는 것이 안전하다.'],
   sections: [
     sec('먼저 알아둘 것: 도구가 하는 일과 내가 하는 일',

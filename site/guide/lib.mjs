@@ -149,7 +149,10 @@ export function head({ title, desc, canonical, type, extra = '', body = '', ga =
 <meta name="description" content="${esc(desc)}">
 <meta name="robots" content="index,follow">
 <link rel="canonical" href="${canonical}">
-<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <meta property="og:site_name" content="${SITE}">
 <meta property="og:locale" content="ko_KR">
 <meta property="og:type" content="${type}">
@@ -216,7 +219,7 @@ export function renderArticle(a, all, i) {
 <nav class="toc" aria-label="목차"><b>이 글의 순서</b><ol>${toc}</ol></nav>
 ${body}
 <section class="summary"><h2>이 글에서 기억할 내용</h2><ul>${a.summary.map((x) => `<li>${inline(x)}</li>`).join('')}</ul></section>
-<section class="cta"><h2>인스타툰을 직접 만들어보고 싶다면?</h2><p>인스타툰 연재실에서 실제 매장 이야기를 인스타툰 콘텐츠로 만들어보세요.</p><a class="btn big" href="/" data-track="cta" data-loc="article_bottom">인스타툰 만들기</a></section>
+<section class="cta"><h2>인스타툰을 직접 만들어보고 싶다면?</h2><p>인스타툰 연재실에서 내가 겪은 이야기를 인스타툰 콘텐츠로 만들어보세요.</p><a class="btn big" href="/" data-track="cta" data-loc="article_bottom">인스타툰 만들기</a></section>
 </article>
 <p class="note">편집 안내: 이 글은 AI 도구의 도움을 받아 작성한 초안을 바탕으로 합니다. 서비스 기능과 정책은 바뀔 수 있으니 공식 안내를 함께 확인해 주세요. <a href="/about/#editorial">편집 방침 보기</a></p>
 <section class="related" aria-labelledby="rel"><h2 id="rel">함께 읽으면 좋은 글</h2><ul class="cards">${rel.map(card).join('')}</ul>${more}</section>
