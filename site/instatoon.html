@@ -60,6 +60,7 @@ button.brand:active{transform:translateY(1px)}
 .btn.save{background:var(--save);border-color:var(--save);color:var(--save-ink)} .btn.save:hover{border-color:var(--save);opacity:.88}
 .btn.load{background:var(--load-bg);border-color:var(--load-line);color:var(--load-ink)} .btn.load:hover{border-color:var(--load-ink)}
 .hero-lb{align-self:center;font-weight:800;font-size:13px;color:var(--ink-2);margin-right:2px}
+.nb.opt{background:var(--sunken);color:var(--ink-2);border:1px solid var(--line-2)}
 .nb{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;border-radius:99px;background:var(--accent);color:var(--accent-ink);font-style:normal;font-size:12px;font-weight:900;margin-right:6px;vertical-align:1px}
 .stepno{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;font-size:13px;font-weight:800;color:var(--ink-2);margin:0 0 10px;width:100%}
 .stepno .nb{height:24px;min-width:24px;font-size:13px;margin:0}.stepno small{font-weight:600;color:var(--muted);font-size:12.5px}
@@ -838,7 +839,7 @@ function helpGo(k){
     if(k!=='input'&&!cuts().length){ toast('먼저 1단계에서 "인스타툰 만들기"를 눌러 대본을 만들어 주세요'); k='input'; }
     S.mode='one'; S.step=k; } else S.mode=k;
   save(); render(); window.scrollTo({top:0,behavior:'smooth'}); }
-function renderModes(){ const m=S.mode||'one'; $('#modes').innerHTML=[['one','한 편 만들기','내 이야기로 인스타툰 한 편'],['month','한 달 기획','한 달치 연재 주제를 한 번에'],['reels','스토리·릴스','완성 그림으로 영상·스토리'],['stats','반응·댓글','올린 편 반응 기록 · 답글 도우미']].map(([k,t,d])=>`<button class="mode" data-mode2="${k}" aria-pressed="${m===k}"><b><i class="nb">${k==='one'?'1–3':'4'}</i>${t}</b><span>${d}</span></button>`).join(''); $('#steps').hidden=m!=='one'; }
+function renderModes(){ const m=S.mode||'one'; $('#modes').innerHTML=[['one','한 편 만들기','내 이야기로 인스타툰 한 편'],['month','한 달 기획','한 달치 연재 주제를 한 번에'],['reels','스토리·릴스','완성 그림으로 영상·스토리'],['stats','반응·댓글','올린 편 반응 기록 · 답글 도우미']].map(([k,t,d])=>`<button class="mode" data-mode2="${k}" aria-pressed="${m===k}"><b>${k==='one'?'<i class="nb">1–3</i>':'<i class="nb opt">선택</i>'}${t}</b><span>${d}</span></button>`).join(''); $('#steps').hidden=m!=='one'; }
 function render(){ renderDemo(); renderModes(); if((S.mode||'one')==='month'){ vMonth(); renderPhone(); return; } if(S.mode==='stats'){ vStats(); renderPhone(); return; } if(S.mode==='reels'){ vReels(); renderPhone(); return; } renderSteps(); ({input:vInput,edit:vEdit,post:vPost})[S.step](); renderPhone(); renderSpell(); }
 
 function talk(c){ return lines(c.bubble).slice(0,3).map(l=>{ const m=l.match(/^([^:：]{1,14})[:：]\s*(.+)$/); let who=m?m[1].trim():'', text=m?m[2].trim():l, kind='say';
@@ -1295,7 +1296,7 @@ function vPost(){
   const P=pics(), need=n+(ec().on?1:0), fit=S.info.fit==='contain'?'contain':'cover';
   const px=planItem(); if(px&&P.length>=n&&['plan','script'].includes(stOf(px))){ px.status='art'; save(); }
   $('#main').innerHTML=`<section class="panel">
-    <div class="ph"><div><span class="stepno"><i class="nb">3</i>3단계 · 그림·저장·올리기 <small>→ 올렸으면 한 편 완성! 이어서 만들려면 4단계</small></span><h1>그림 만들고 올리기</h1><p>대사·제목·효과음은 고른 테마(${esc(artOf().name)})에 맞는 웹툰 글씨로 그림 안에 함께 그려져요. 아래 순서대로 하면 돼요.</p></div></div>
+    <div class="ph"><div><span class="stepno"><i class="nb">3</i>3단계 · 그림·저장·올리기 <small>→ 올렸으면 한 편 완성! 더 하려면 위쪽 선택 탭</small></span><h1>그림 만들고 올리기</h1><p>대사·제목·효과음은 고른 테마(${esc(artOf().name)})에 맞는 웹툰 글씨로 그림 안에 함께 그려져요. 아래 순서대로 하면 돼요.</p></div></div>
     <div class="jump" role="navigation" aria-label="바로 가기">${[['#sec-draw','① 그림 그리기'],['#kit','② 게시물 글']].map(([h,t])=>`<button class="chip" data-jump="${h}">${t}</button>`).join('')}<button class="chip" data-mode2="reels" data-src="toon">스토리·릴스 탭 →</button></div>
 
     <h2 class="sec" id="sec-draw" style="margin-top:0">① 그림 그리기</h2>
@@ -1629,7 +1630,7 @@ function reelPostText(){ const r=rt(), cta=prof().cta.trim(); let c=r.caption.tr
 let reelBlob=null, reelExt='mp4', reelUrl='', reelBusy=false;
 function vReels(){ const r=ru(), useT=r.src!=='own'&&pics().length>0, L=mediaList(), R=rt();
   $('#main').innerHTML=`<section class="panel">
-    <div class="ph"><div><span class="stepno"><i class="nb">4</i>4단계(선택) · 스토리·릴스 <small>← 3단계 이후 필요할 때</small></span><h1>스토리·릴스 만들기</h1><p>완성된 그림만 있으면 돼요. 올린 순서대로 한 장씩 넘어가는 <b>릴스 영상</b>과, 새 편을 알리는 <b>스토리 이미지</b>를 만들어요.</p></div></div>
+    <div class="ph"><div><span class="stepno"><i class="nb opt">선택</i>스토리·릴스 <small>← 3단계 이후 필요할 때</small></span><h1>스토리·릴스 만들기</h1><p>완성된 그림만 있으면 돼요. 올린 순서대로 한 장씩 넘어가는 <b>릴스 영상</b>과, 새 편을 알리는 <b>스토리 이미지</b>를 만들어요.</p></div></div>
     <label class="f" style="margin-top:0">① 어떤 그림으로 만들까요?</label>
     <div id="rsrc">${ddHTML('',`<button class="chip" data-rsrc="toon" aria-pressed="${useT}" ${pics().length?'':'disabled'}>이번 편 완성 그림 ${pics().length}장</button><button class="chip" data-rsrc="own" aria-pressed="${!useT}">그림 직접 올리기${r.own.length?` (${r.own.length}장)`:''}</button>`,{label:'그림 출처'})}</div>
     ${useT?`<p class="sub" style="margin-top:8px">"한 편 만들기" ② 에 올린 그림을 그 순서 그대로 써요. 순서를 바꾸려면 그곳에서 바꿔 주세요.</p>`
@@ -1743,7 +1744,7 @@ function renderReply(){ const el=$('#replyOut'); if(!el||!replyOut) return; cons
 
 function vStats(){ const H=hist();
   $('#main').innerHTML=`<section class="panel">
-    <div class="ph"><div><span class="stepno"><i class="nb">4</i>4단계(선택) · 반응·댓글 <small>← 올린 뒤 2~3일 지나서</small></span><h1>반응 기록 · 댓글 도우미</h1><p>올린 편의 반응을 적어 두면 무엇이 잘 먹혔는지 보이고, 다음 달 기획에 자동으로 반영돼요.</p></div></div>
+    <div class="ph"><div><span class="stepno"><i class="nb opt">선택</i>반응·댓글 <small>← 올린 뒤 2~3일 지나서</small></span><h1>반응 기록 · 댓글 도우미</h1><p>올린 편의 반응을 적어 두면 무엇이 잘 먹혔는지 보이고, 다음 달 기획에 자동으로 반영돼요.</p></div></div>
     <div class="callout">숫자는 인스타 앱에서 게시물 아래 <b>"인사이트 보기"</b>를 누르면 나와요 (프로페셔널 계정이어야 보여요). 올리고 <b>2~3일 뒤</b>에 적는 게 정확해요. 모르는 칸은 비워 두세요.</div>
     ${H.length?`<div class="srows">${H.map(h=>`<div class="srow">${h.thumb?`<img src="${safeUrl(h.thumb)}" alt="">`:'<span class="noth"></span>'}<div><div class="st">${esc(h.title)}</div><div class="sm2">${esc([h.date&&h.date+' 올림',h.type,ARTS[h.art]?.name].filter(Boolean).join(' · '))}${h.link&&/^https?:\/\//.test(h.link)?` · <a href="${esc(h.link)}" target="_blank" rel="noopener">게시물 열기</a>`:''}</div>
       <div class="snum">${SKEYS.map(([k,n])=>`<label>${n}<input type="number" min="0" inputmode="numeric" data-stat="${h.hid}|${k}" value="${h.stats?.[k]??''}"></label>`).join('')}</div></div></div>`).join('')}</div>`
@@ -1815,7 +1816,7 @@ function helpHTML(){
   return `<div class="help-in">
     <div class="row"><h2 style="flex:1;margin:0;font-size:20px;font-weight:900">사용 방법</h2><button class="btn sm" data-act="tour">30초 둘러보기</button><button class="btn sm ghost" data-act="help">닫기</button></div>
     <p class="sub" style="margin:6px 0 0">위에서 아래로 <b>1 → 2 → 3</b> 순서만 따라가면 한 편이 끝나요. 화면에도 같은 번호가 붙어 있어요. 버튼을 누르면 그 위치로 바로 이동해요.</p>
-    <div class="hmini" aria-label="전체 흐름"><span class="c"><i class="nb">1</i>내 이야기</span><span class="ar" aria-hidden="true">→</span><span class="c"><i class="nb">2</i>대본 다듬기</span><span class="ar" aria-hidden="true">→</span><span class="c"><i class="nb">3</i>그림·저장·올리기</span><span class="ar" aria-hidden="true">→</span><span class="c opt"><i class="nb">4</i>이어가기(선택)</span></div>
+    <div class="hmini" aria-label="전체 흐름"><span class="c"><i class="nb">1</i>내 이야기</span><span class="ar" aria-hidden="true">→</span><span class="c"><i class="nb">2</i>대본 다듬기</span><span class="ar" aria-hidden="true">→</span><span class="c"><i class="nb">3</i>그림·저장·올리기</span><span class="ar" aria-hidden="true">→</span><span class="c opt"><i class="nb opt">선택</i>그 밖의 기능</span></div>
     <div class="hcard" style="margin-top:12px"><span class="hn">시작 전 준비</span><p>${ai}</p></div>
     <ol class="hflow">
       <li class="hstep"><span class="hnum" aria-hidden="true">1</span><div><h3>내 이야기 적기 <small>화면 번호 1</small></h3><dl>
@@ -1833,7 +1834,7 @@ function helpHTML(){
         <div><dt>다음 단계로 넘어가는 조건</dt><dd>모든 컷 그림을 올려 저장하고, 인스타에 올린 뒤 <b>"올렸어요"</b>를 누르면 한 편이 완성돼요. 다음 편은 "다음 편 만들기"로 이어가요.</dd></div>
         <div><dt>이동할 위치</dt><dd><button class="btn sm" data-helpgo="post">한 편 만들기 탭 → 3단계로 이동</button></dd></div></dl></div></li>
       <li class="harrow" aria-hidden="true">↓ <small style="font-size:12px;font-weight:700">필요할 때만</small></li>
-      <li class="hstep opt"><span class="hnum" aria-hidden="true">4</span><div><h3>이어가기 <small>선택 · 화면 번호 4</small></h3><dl>
+      <li class="hstep opt"><span class="hnum" aria-hidden="true">＋</span><div><h3>그 밖의 기능 <small>선택 · 번호 없음</small></h3><dl>
         <div><dt>이 단계에서 할 일</dt><dd>한 편이 끝난 뒤 필요한 것만 골라 써요. 한 달 치 주제를 미리 짜거나, 완성 그림으로 릴스·스토리를 만들거나, 올린 편의 반응을 기록해요.</dd></div>
         <div><dt>다음 단계로 넘어가는 조건</dt><dd>1~3단계로 한 편을 올린 뒤에 해요. 반응 기록은 올리고 2~3일 지난 뒤가 좋아요. 끝나면 다시 1단계로 돌아가요.</dd></div>
         <div><dt>이동할 위치</dt><dd><button class="btn sm" data-helpgo="month">한 달 기획 탭</button><button class="btn sm" data-helpgo="reels">스토리·릴스 탭</button><button class="btn sm" data-helpgo="stats">반응·댓글 탭</button></dd></div></dl></div></li>
@@ -1858,7 +1859,7 @@ function mo(){ S.month=S.month||{ym:monthOptions()[1]||monthOptions()[0],freq:8,
 function vMonth(){
   const M=mo(), i=S.info;
   $('#main').innerHTML=`<section class="panel">
-    <div class="ph"><div><span class="stepno"><i class="nb">4</i>4단계(선택) · 한 달 기획 <small>← 다음 편 주제를 미리 짤 때</small></span><h1>한 달 연재 기획</h1><p>매번 이야기를 새로 적지 않아도 돼요. 분야와 소재만 있으면 한 달 동안 올릴 인스타툰 주제와 줄거리를 날짜별로 짜 드려요.</p></div></div>
+    <div class="ph"><div><span class="stepno"><i class="nb opt">선택</i>한 달 기획 <small>← 다음 편 주제를 미리 짤 때</small></span><h1>한 달 연재 기획</h1><p>매번 이야기를 새로 적지 않아도 돼요. 분야와 소재만 있으면 한 달 동안 올릴 인스타툰 주제와 줄거리를 날짜별로 짜 드려요.</p></div></div>
     <div class="g2">
       <div><label class="f" for="m-type" style="margin-top:0">업종<span class="req">*</span></label><input class="in" id="m-type" data-info="type" value="${esc(i.type)}" placeholder="예: 카페, 사진관"></div>
       <div><label class="f" for="m-name" style="margin-top:0">브랜드 이름</label><input class="in" id="m-name" data-info="name" value="${esc(i.name)}" placeholder="예: 담 사진관"></div>
