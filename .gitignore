@@ -12,3 +12,8 @@ node_modules/
 
 .vercel
 .env*
+
+# AI 도구용 스킬 문서
+.agents/
+.claude/
+skills-lock.json
