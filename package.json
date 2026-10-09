@@ -6,5 +6,8 @@
     "build": "node site/build.mjs",
     "guide:new": "node site/guide/new-post.mjs",
     "check": "node site/guide/verify.mjs && node site/guide/track.test.mjs && node site/scan-secrets.mjs"
+  },
+  "devDependencies": {
+    "wrangler": "^4.149.0"
   }
 }
