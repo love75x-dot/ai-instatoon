@@ -1,6 +1,8 @@
 {
   "name": "ai-instatoon",
   "compatibility_date": "2026-10-01",
+  "workers_dev": false,
+  "preview_urls": true,
   "routes": [
     { "pattern": "www.ai-instatoon.com", "custom_domain": true }
   ],

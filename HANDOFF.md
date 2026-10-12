@@ -6,6 +6,38 @@
 
 ---
 
+## 0-1. 호스팅·도메인 이전 기록 (2026-10-12, 최신 — 아래 본문의 "도메인 없음·서버 없음" 설명보다 이 절이 우선)
+
+**현재 운영 구조**
+- 호스팅: **Cloudflare Workers**(정적 에셋). 운영 주소 `https://www.ai-instatoon.com/`. GitHub `love75x-dot/ai-instatoon`의 `main`에 병합되면 Cloudflare Workers Builds가 자동 배포.
+- 도메인·DNS: 가비아에서 구입 → **가비아 네임서버를 Cloudflare로 변경**(네임서버 `lia`/`drake.ns.cloudflare.com`). DNS는 Cloudflare에서만 관리.
+- **Custom domain:** `www.ai-instatoon.com`을 Worker에 연결(인증서는 Cloudflare 자동 발급·갱신). [wrangler.jsonc](wrangler.jsonc)의 `routes`(`custom_domain: true`)에도 명시해, `wrangler deploy`가 도메인을 바꾸거나 지우지 않게 함.
+- **루트 → www 리디렉트:** DNS에 `A @ 192.0.2.1`(더미 IP, **Proxied/주황 구름**) + Redirect Rule. 조건 `(http.host eq "ai-instatoon.com")`, 동작 Dynamic `concat("https://www.ai-instatoon.com", http.request.uri.path)`, **301**, Preserve query string. (템플릿의 `https://…/*` 방식은 http 요청을 놓쳐 522가 나서 호스트 기준으로 바꿈.)
+- **Always Use HTTPS:** SSL/TLS → Edge Certificates에서 켬. `http://www…`도 301로 https로 이동.
+- **운영 workers.dev 주소는 일부러 끔**(`workers_dev: false`). `routes`를 쓰면 기본값이 꺼짐이기도 함.
+- **브랜치 미리보기(Worker Previews):** `preview_urls: true`로 켬. 주소 형식 `<브랜치>-ai-instatoon.love75x.workers.dev`. 운영 workers.dev와는 따로 설정됨(공식 문서: "Production and Preview workers.dev URLs are configured separately"). 켜졌는지는 이 설정이 main에 병합·배포된 뒤 테스트 브랜치로 확인할 것.
+
+**빌드 설정(Cloudflare Workers Builds)**
+- Build command: `npm run build`(= `node site/build.mjs`: `site/index.html` → `deploy/`, 가이드·sitemap·robots·404 생성). Production, Previews 둘 다 동일.
+- 배포 명령: main → `npx wrangler deploy`, 그 외 브랜치 → `npx wrangler preview`(`wrangler.jsonc`의 `previews: {}` 블록 필요). `wrangler`는 devDependency.
+- 정적 에셋: `deploy/`, `html_handling: auto-trailing-slash`, `not_found_handling: 404-page`(커스텀 404 사용).
+- 보안 헤더 4개(nosniff, Referrer-Policy, X-Frame-Options DENY, Permissions-Policy)는 `deploy/_headers`(Vercel 시절 `vercel.json`과 동일).
+
+**관리자 서버 기능 제거**
+- 서버 저장(`/api/prompts`)과 관리자 서버 기능을 제거. 사이트는 서버·DB 없이 브라우저(localStorage)만 사용. #room 화면에 서버 문구 없음.
+
+**확인된 동작과 허용한 차이**
+- `/guide`(슬래시 없음)는 307으로 `/guide/`에 이동 → 허용. 사이트 내부 링크·sitemap·canonical·og:url은 모두 끝에 `/`가 붙은 형태.
+- 없는 주소는 커스텀 404 페이지 + 404 상태.
+- **X-Robots-Tag(noindex)는 어디에도 붙어 있으면 안 됨.** 전환 직후 홈·`/guide/`·404에서 없음을 확인했음. 이후 Cloudflare 설정을 바꾼 뒤에도 `curl -sI`로 재확인.
+
+**남은 할 일**
+1. **Vercel 정리(며칠 안정 확인 뒤):** ① Vercel 프로젝트 Domains에서 `www.ai-instatoon.com`·`ai-instatoon.com` 제거 → ② Settings → Git에서 Disconnect(GitHub의 Vercel 앱 권한도 정리) → ③ Environment Variables 삭제(Cloudflare에서 필요한 값이 없는지 확인 후). 그 뒤 `vercel.json`, `.vercel/` 정리 PR.
+2. 롤백이 필요하면: Cloudflare에서 Worker Custom domain 제거 → `www` CNAME을 Vercel 값으로 복원(Vercel을 지우기 전까지만 가능).
+3. Search Console: 소유권 확인 TXT가 Cloudflare DNS에 있는지, sitemap 재제출.
+
+---
+
 ## 0. 빠른 시작 (다음 세션이 제일 먼저 할 일)
 
 1. 원본은 **`site/index.html` 하나**예요. HTML·CSS·JS가 한 파일에 들어 있어요(약 895KB, 2,061줄). 이 중 약 640KB는 테마 샘플 그림 13장의 base64 데이터(`BUILTIN_SAMPLES` 한 줄)예요.
@@ -386,7 +418,7 @@ S = {
 - **목표 플랫폼:**
   1. claude.ai 아티팩트(현재 운영): `https://claude.ai/artifact/HhihJh1iUfbbJbaGHn3n8i`, 비공개(소유자만). 공유는 페이지의 공유 메뉴에서 사용자가 직접. 런타임 기능 선언: `sample`, `downloads`(게시 때 생략하면 기존 선언 유지).
   2. 파일 버전 `instatoon.html`: 사용자가 내려받아 브라우저로 직접 엶(`file://`). 별도 호스팅 없음.
-- **도메인:** 없음(확인 필요 — 자체 도메인 계획이 언급된 적 없음).
+- **도메인:** `www.ai-instatoon.com`(Cloudflare Workers 호스팅, 위 0-1절 참조). *(이 절의 나머지는 2026-10-01 시점 기록)*
 - **빌드:** `bash site/build.sh` (index.html → instatoon.html + 문법 검사).
 - **주의사항:**
   - 아티팩트 안에서는 보안 정책상 외부 API(Gemini 등) 직접 호출이 막혀 있음 → 아티팩트는 Claude `sample`, 파일 버전은 Gemini.
