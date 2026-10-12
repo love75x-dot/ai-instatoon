@@ -1,6 +1,9 @@
 {
   "name": "ai-instatoon",
   "compatibility_date": "2026-10-01",
+  "routes": [
+    { "pattern": "www.ai-instatoon.com", "custom_domain": true }
+  ],
   "assets": {
     "directory": "./deploy",
     "html_handling": "auto-trailing-slash",
