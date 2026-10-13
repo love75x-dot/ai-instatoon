@@ -1,0 +1,268 @@
+{
+  "app": "instatoon",
+  "v": 1,
+  "savedAt": "2026-10-13T00:00:00.000Z",
+  "state": {
+    "step": "post",
+    "info": {
+      "type": "빵집",
+      "name": "보리당",
+      "role": "사장님",
+      "gender": "여성",
+      "age": "40대",
+      "looks": "짧은 단발, 동그란 안경, 밀가루 묻은 베이지 앞치마",
+      "story": "오후 3시에 빵이 전부 사라졌다. CCTV를 보니 단골 할머니가 경로당 친구들 몫까지 다 사 가신 것. 그 뒤로 오후 3시에 한 판 더 굽는다.",
+      "offer": "오후 3시 추가 굽기",
+      "target": "",
+      "action": "",
+      "tone": "auto",
+      "mode": "auto",
+      "cuts": 6,
+      "style": "classic",
+      "art": "chibi",
+      "layout": "auto",
+      "details": [
+        "emotion",
+        "lines",
+        "handsfx",
+        "captionbox"
+      ],
+      "cast": "",
+      "kind": "daily",
+      "kindCustom": "",
+      "p2": {
+        "role": "알바생",
+        "gender": "남성",
+        "age": "20대",
+        "looks": "까치머리, 초록 앞치마",
+        "on": true
+      },
+      "ratio": "3:4"
+    },
+    "toon": {
+      "title": "오후 3시, 빵이 다 사라졌다",
+      "tone": "미스터리 반전",
+      "hookIdx": 0,
+      "hooks": [
+        "오후 3시,\n빵이 다 사라졌다",
+        "CCTV에 찍힌\n범인의 정체",
+        "빵집 사장님이\n얼어붙은 이유"
+      ],
+      "cuts": [
+        {
+          "role": "표지 · 사건",
+          "shot": "부감",
+          "title": "오후 3시,\n빵이 다 사라졌다",
+          "highlight": "다 사라졌다",
+          "sub": "",
+          "bubble": "",
+          "bubbleSide": "l",
+          "sfx": "텅—",
+          "direction": "텅 빈 빵 진열대 앞에 사장님이 빈 쟁반을 든 채 얼어붙어 있다.",
+          "panels": "",
+          "caption": "",
+          "extras": "땀방울"
+        },
+        {
+          "role": "궁금증",
+          "shot": "미디엄샷",
+          "title": "",
+          "highlight": "",
+          "sub": "",
+          "bubble": "사장님(떨림): 아, 아까까지 가득했는데…\n알바생: 사장님… 저 아무것도 안 했어요",
+          "bubbleSide": "l",
+          "sfx": "",
+          "direction": "사장님이 진열대를 가리키고, 알바생이 두 손을 들고 억울한 표정.",
+          "panels": "",
+          "caption": "오후 2시 58분",
+          "extras": ""
+        },
+        {
+          "role": "추적",
+          "shot": "클로즈업",
+          "title": "",
+          "highlight": "",
+          "sub": "",
+          "bubble": "알바생(속삭임): CCTV 돌려 볼까요?\n사장님: …돌려 봐",
+          "bubbleSide": "l",
+          "sfx": "딸깍",
+          "direction": "둘이 계산대 모니터에 얼굴을 바짝 대고 있다. 모니터 화면은 글자 없이 흐릿한 실루엣만.",
+          "panels": "",
+          "caption": "",
+          "extras": ""
+        },
+        {
+          "role": "반전",
+          "shot": "초클로즈업",
+          "title": "범인은\n단골 할머니",
+          "highlight": "단골 할머니",
+          "sub": "",
+          "bubble": "사장님(외침): 저 할머니가…?!",
+          "bubbleSide": "l",
+          "sfx": "",
+          "direction": "모니터 속 작은 할머니가 빵을 쟁반 가득 담는 모습, 사장님 눈이 커진다.",
+          "panels": "",
+          "caption": "",
+          "extras": "집중선"
+        },
+        {
+          "role": "진실",
+          "shot": "미디엄샷",
+          "title": "",
+          "highlight": "",
+          "sub": "",
+          "bubble": "할머니: 경로당 친구들이 여기 빵만 찾아서~\n사장님(속마음): 우리 빵이… 소문이 났구나",
+          "bubbleSide": "l",
+          "sfx": "",
+          "direction": "할머니가 웃으며 사장님 손을 꼭 잡는다. 따뜻한 햇살.",
+          "panels": "",
+          "caption": "다음 날 오전",
+          "extras": ""
+        },
+        {
+          "role": "행동 유도",
+          "shot": "풀샷",
+          "title": "그래서 이제\n오후 3시에 한 판 더",
+          "highlight": "한 판 더",
+          "sub": "보리당 · 오후 3시 추가 굽기",
+          "bubble": "사장님: 늦게 오셔도 드실 수 있게 구워 둘게요",
+          "bubbleSide": "l",
+          "sfx": "",
+          "direction": "사장님과 알바생이 갓 구운 빵 쟁반을 들고 환하게 웃는다. 김이 모락모락.",
+          "panels": "",
+          "caption": "",
+          "extras": "반짝이"
+        }
+      ],
+      "caption": "빵이 전부 사라진 오후 3시, CCTV를 돌려 봤더니… 🥐\n범인은 매일 오시는 단골 할머니였어요.\n경로당 친구분들께 나눠 드리려고 한 번에 다 담아 가셨대요.\n그래서 이제 오후 3시에 한 판 더 굽습니다.\n늦게 오셔도 빈손으로 돌아가지 않게요 😊",
+      "hashtags": "#망원동빵집 #동네빵집 #빵집일상",
+      "comment": "여러분 동네에도 이런 단골 계신가요? 👀\n📌 오후 3시 추가 굽기는 월~토 매일이에요!",
+      "reel": {
+        "caption": "오후 3시, 빵집이 텅 비었다 😳\nCCTV에 찍힌 범인의 정체는…?\n전체 이야기는 프로필 게시물에서 확인하세요!",
+        "hashtags": "#망원동빵집 #빵집브이로그 #인스타툰",
+        "comment": "다음 편: 새벽 5시, 불 켜진 빵집의 비밀 🌙"
+      },
+      "cast": "단골 할머니 - 흰 단발 파마, 보라색 카디건, 장바구니",
+      "ideas": [
+        "알바생의 첫 반죽",
+        "새벽 5시의 빵집",
+        "비 오는 날 우산 대여"
+      ],
+      "pics": [
+        "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
+        "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+      ],
+      "hid": "h-fixture-1",
+      "zipped": true
+    },
+    "check": null,
+    "demo": true,
+    "demoKey": "bakery",
+    "mode": "one",
+    "profile": {
+      "voice": "다정한 존댓말, 이모지는 한두 개",
+      "banned": "최고, 1등",
+      "tags": "#보리당 #망원동빵집",
+      "cta": "📍 망원동 보리당 · 매일 8시~20시 (일요일 휴무)",
+      "loc": "보리당",
+      "collab": "",
+      "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+    },
+    "endcard": {
+      "on": true,
+      "style": "point",
+      "head": "내일 오후 3시,\n갓 구운 빵 한 판 더",
+      "lines": "📍 망원동 보리당 (망원역 1번 출구 5분)\n⏰ 매일 8:00~20:00 · 일요일 휴무",
+      "btn": "프로필 링크에서 길 찾기"
+    },
+    "month": {
+      "ym": "2026-11",
+      "freq": 8,
+      "memo": "단골 할머니 사건\n알바생 첫 출근",
+      "concept": "빵 냄새 나는 동네 미스터리",
+      "items": [
+        {
+          "date": "11/3(화)",
+          "type": "실화 사건",
+          "title": "오후 3시, 빵이 다 사라졌다",
+          "story": "빵이 전부 사라진 오후, CCTV 속 범인은 단골 할머니였다.",
+          "goal": "공감",
+          "cuts": 6,
+          "made": true,
+          "status": "script",
+          "who": "알바생"
+        },
+        {
+          "date": "11/6(금)",
+          "type": "비하인드",
+          "title": "새벽 5시, 불 켜진 빵집",
+          "story": "아무도 모르는 새벽 반죽 시간. 사장님이 매일 하는 한 가지 의식.",
+          "goal": "신뢰",
+          "cuts": 6,
+          "status": "plan",
+          "who": "알바생"
+        },
+        {
+          "date": "11/10(화)",
+          "type": "고객 고민",
+          "title": "식빵, 냉동해도 되나요?",
+          "story": "가장 많이 받는 질문에 사장님이 답한다. 맛있게 보관하는 법.",
+          "goal": "정보",
+          "cuts": 5,
+          "status": "plan"
+        },
+        {
+          "date": "11/13(금)",
+          "type": "소식",
+          "title": "알바생의 첫 작품",
+          "story": "알바생이 처음 만든 빵이 진열대에 올라가는 날. 결과는?",
+          "goal": "홍보",
+          "cuts": 6,
+          "status": "plan"
+        }
+      ]
+    },
+    "history": [
+      {
+        "hid": "h-fixture-1",
+        "title": "오후 3시, 빵이 다 사라졌다",
+        "date": "2026-09-30",
+        "thumb": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
+        "art": "chibi",
+        "tone": "warm",
+        "cuts": 6,
+        "type": "daily",
+        "goal": "방문",
+        "hook": "",
+        "link": "",
+        "stats": {
+          "reach": 120,
+          "like": 10,
+          "cmt": 2,
+          "save": 5,
+          "share": 1
+        }
+      }
+    ],
+    "planRef": null
+  },
+  "photos": {
+    "0": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
+    "1": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+  },
+  "refs": {
+    "0": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
+    "1": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+  },
+  "samples": {
+    "chibi": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
+    "mono": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+  },
+  "fonts": [
+    {
+      "f": "테스트폰트",
+      "b64": "AQIDBAX6"
+    }
+  ]
+}

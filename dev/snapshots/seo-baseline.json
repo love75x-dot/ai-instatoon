@@ -1,0 +1,256 @@
+{
+  "sitemapLocs": [
+    "https://www.ai-instatoon.com/",
+    "https://www.ai-instatoon.com/guide/",
+    "https://www.ai-instatoon.com/guide/what-is-instatoon/",
+    "https://www.ai-instatoon.com/guide/how-to-make-instatoon/",
+    "https://www.ai-instatoon.com/guide/4-panel-instatoon/",
+    "https://www.ai-instatoon.com/guide/instatoon-storytelling/",
+    "https://www.ai-instatoon.com/guide/small-business-instagram-content/",
+    "https://www.ai-instatoon.com/guide/instagram-post-structure/",
+    "https://www.ai-instatoon.com/guide/instagram-caption-writing/",
+    "https://www.ai-instatoon.com/guide/instagram-reels-vs-feed/",
+    "https://www.ai-instatoon.com/guide/small-business-instagram-start/",
+    "https://www.ai-instatoon.com/guide/restaurant-instagram-content/",
+    "https://www.ai-instatoon.com/guide/cafe-instagram-content/",
+    "https://www.ai-instatoon.com/guide/service-business-instagram-content/",
+    "https://www.ai-instatoon.com/guide/new-store-instagram-marketing/",
+    "https://www.ai-instatoon.com/guide/store-story-to-instatoon/",
+    "https://www.ai-instatoon.com/guide/customer-questions-to-content/",
+    "https://www.ai-instatoon.com/guide/instatoon-character-consistency/",
+    "https://www.ai-instatoon.com/guide/ai-instatoon-review-checklist/",
+    "https://www.ai-instatoon.com/guide/instagram-content-copyright/",
+    "https://www.ai-instatoon.com/guide/instagram-facebook-content/",
+    "https://www.ai-instatoon.com/guide/meta-business-suite-guide/",
+    "https://www.ai-instatoon.com/guide/gemini-api-key-setup-guide/",
+    "https://www.ai-instatoon.com/guide/how-to-use-instatoon-room/",
+    "https://www.ai-instatoon.com/guide/instatoon-troubleshooting/",
+    "https://www.ai-instatoon.com/about/",
+    "https://www.ai-instatoon.com/privacy/",
+    "https://www.ai-instatoon.com/terms/"
+  ],
+  "robotsTxt": "User-agent: *\nAllow: /\n\nSitemap: https://www.ai-instatoon.com/sitemap.xml\n",
+  "guideDirs": [
+    "4-panel-instatoon",
+    "ai-instatoon-review-checklist",
+    "cafe-instagram-content",
+    "customer-questions-to-content",
+    "gemini-api-key-setup-guide",
+    "how-to-make-instatoon",
+    "how-to-use-instatoon-room",
+    "instagram-caption-writing",
+    "instagram-content-copyright",
+    "instagram-facebook-content",
+    "instagram-post-structure",
+    "instagram-reels-vs-feed",
+    "instatoon-character-consistency",
+    "instatoon-storytelling",
+    "instatoon-troubleshooting",
+    "meta-business-suite-guide",
+    "new-store-instagram-marketing",
+    "restaurant-instagram-content",
+    "service-business-instagram-content",
+    "small-business-instagram-content",
+    "small-business-instagram-start",
+    "store-story-to-instatoon",
+    "what-is-instatoon"
+  ],
+  "pages": {
+    "/": {
+      "status": 200,
+      "canonical": "https://www.ai-instatoon.com/",
+      "ogUrl": "https://www.ai-instatoon.com/",
+      "robots": "index,follow",
+      "title": "인스타툰 연재실"
+    },
+    "/guide/": {
+      "status": 200,
+      "canonical": "https://www.ai-instatoon.com/guide/",
+      "ogUrl": "https://www.ai-instatoon.com/guide/",
+      "robots": "index,follow",
+      "title": "인스타툰 · SNS 콘텐츠 가이드 | 인스타툰 연재실"
+    },
+    "/guide/what-is-instatoon/": {
+      "status": 200,
+      "canonical": "https://www.ai-instatoon.com/guide/what-is-instatoon/",
+      "ogUrl": "https://www.ai-instatoon.com/guide/what-is-instatoon/",
+      "robots": "index,follow",
+      "title": "인스타툰이란? 처음 시작하는 사람을 위한 기본 가이드 | 인스타툰 연재실"
+    },
+    "/guide/how-to-make-instatoon/": {
+      "status": 200,
+      "canonical": "https://www.ai-instatoon.com/guide/how-to-make-instatoon/",
+      "ogUrl": "https://www.ai-instatoon.com/guide/how-to-make-instatoon/",
+      "robots": "index,follow",
+      "title": "인스타툰 만드는 방법: 아이디어부터 게시까지 8단계 | 인스타툰 연재실"
+    },
+    "/guide/4-panel-instatoon/": {
+      "status": 200,
+      "canonical": "https://www.ai-instatoon.com/guide/4-panel-instatoon/",
+      "ogUrl": "https://www.ai-instatoon.com/guide/4-panel-instatoon/",
+      "robots": "index,follow",
+      "title": "인스타툰 4컷 구성법: 상황·문제·전개·결론으로 쓰는 방법 | 인스타툰 연재실"
+    },
+    "/guide/instatoon-storytelling/": {
+      "status": 200,
+      "canonical": "https://www.ai-instatoon.com/guide/instatoon-storytelling/",
+      "ogUrl": "https://www.ai-instatoon.com/guide/instatoon-storytelling/",
+      "robots": "index,follow",
+      "title": "인스타툰 스토리 만드는 방법: 일상·고객 질문·실수에서 소재 찾기 | 인스타툰 연재실"
+    },
+    "/guide/small-business-instagram-content/": {
+      "status": 200,
+      "canonical": "https://www.ai-instatoon.com/guide/small-business-instagram-content/",
+      "ogUrl": "https://www.ai-instatoon.com/guide/small-business-instagram-content/",
+      "robots": "index,follow",
+      "title": "소상공인 인스타그램 콘텐츠 아이디어 20가지와 게시물 예시 | 인스타툰 연재실"
+    },
+    "/guide/instagram-post-structure/": {
+      "status": 200,
+      "canonical": "https://www.ai-instatoon.com/guide/instagram-post-structure/",
+      "ogUrl": "https://www.ai-instatoon.com/guide/instagram-post-structure/",
+      "robots": "index,follow",
+      "title": "인스타그램 게시물 구성법: 첫 이미지, 제목, 본문, 캡션, CTA | 인스타툰 연재실"
+    },
+    "/guide/instagram-caption-writing/": {
+      "status": 200,
+      "canonical": "https://www.ai-instatoon.com/guide/instagram-caption-writing/",
+      "ogUrl": "https://www.ai-instatoon.com/guide/instagram-caption-writing/",
+      "robots": "index,follow",
+      "title": "인스타그램 캡션 작성법: 가게 홍보 글 자연스럽게 쓰는 법 | 인스타툰 연재실"
+    },
+    "/guide/instagram-reels-vs-feed/": {
+      "status": 200,
+      "canonical": "https://www.ai-instatoon.com/guide/instagram-reels-vs-feed/",
+      "ogUrl": "https://www.ai-instatoon.com/guide/instagram-reels-vs-feed/",
+      "robots": "index,follow",
+      "title": "인스타그램 릴스와 피드 콘텐츠 차이: 하나의 소재로 둘 다 만들기 | 인스타툰 연재실"
+    },
+    "/guide/small-business-instagram-start/": {
+      "status": 200,
+      "canonical": "https://www.ai-instatoon.com/guide/small-business-instagram-start/",
+      "ogUrl": "https://www.ai-instatoon.com/guide/small-business-instagram-start/",
+      "robots": "index,follow",
+      "title": "소상공인 인스타그램 시작 전 정할 것: 대상·주제·일정 정하기 | 인스타툰 연재실"
+    },
+    "/guide/restaurant-instagram-content/": {
+      "status": 200,
+      "canonical": "https://www.ai-instatoon.com/guide/restaurant-instagram-content/",
+      "ogUrl": "https://www.ai-instatoon.com/guide/restaurant-instagram-content/",
+      "robots": "index,follow",
+      "title": "음식점 인스타그램 콘텐츠 아이디어 20가지: 메뉴·주방·후기 소재 | 인스타툰 연재실"
+    },
+    "/guide/cafe-instagram-content/": {
+      "status": 200,
+      "canonical": "https://www.ai-instatoon.com/guide/cafe-instagram-content/",
+      "ogUrl": "https://www.ai-instatoon.com/guide/cafe-instagram-content/",
+      "robots": "index,follow",
+      "title": "카페 인스타그램 콘텐츠 아이디어 20가지: 원두·음료·공간 소재 | 인스타툰 연재실"
+    },
+    "/guide/service-business-instagram-content/": {
+      "status": 200,
+      "canonical": "https://www.ai-instatoon.com/guide/service-business-instagram-content/",
+      "ogUrl": "https://www.ai-instatoon.com/guide/service-business-instagram-content/",
+      "robots": "index,follow",
+      "title": "미용실·네일샵 SNS 콘텐츠 만드는 방법: 시술 전후부터 후기까지 | 인스타툰 연재실"
+    },
+    "/guide/new-store-instagram-marketing/": {
+      "status": 200,
+      "canonical": "https://www.ai-instatoon.com/guide/new-store-instagram-marketing/",
+      "ogUrl": "https://www.ai-instatoon.com/guide/new-store-instagram-marketing/",
+      "robots": "index,follow",
+      "title": "신규 매장 오픈 인스타그램 콘텐츠: 오픈 전부터 첫 달 운영 계획 | 인스타툰 연재실"
+    },
+    "/guide/store-story-to-instatoon/": {
+      "status": 200,
+      "canonical": "https://www.ai-instatoon.com/guide/store-story-to-instatoon/",
+      "ogUrl": "https://www.ai-instatoon.com/guide/store-story-to-instatoon/",
+      "robots": "index,follow",
+      "title": "매장 이야기를 인스타툰 홍보 콘텐츠로 만드는 방법 9단계 | 인스타툰 연재실"
+    },
+    "/guide/customer-questions-to-content/": {
+      "status": 200,
+      "canonical": "https://www.ai-instatoon.com/guide/customer-questions-to-content/",
+      "ogUrl": "https://www.ai-instatoon.com/guide/customer-questions-to-content/",
+      "robots": "index,follow",
+      "title": "고객 질문을 SNS 콘텐츠로 바꾸는 방법: FAQ에서 인스타툰·릴스까지 | 인스타툰 연재실"
+    },
+    "/guide/instatoon-character-consistency/": {
+      "status": 200,
+      "canonical": "https://www.ai-instatoon.com/guide/instatoon-character-consistency/",
+      "ogUrl": "https://www.ai-instatoon.com/guide/instatoon-character-consistency/",
+      "robots": "index,follow",
+      "title": "인스타툰 캐릭터 일관성 유지법: 캐릭터 설정표와 AI 이미지 주의점 | 인스타툰 연재실"
+    },
+    "/guide/ai-instatoon-review-checklist/": {
+      "status": 200,
+      "canonical": "https://www.ai-instatoon.com/guide/ai-instatoon-review-checklist/",
+      "ogUrl": "https://www.ai-instatoon.com/guide/ai-instatoon-review-checklist/",
+      "robots": "index,follow",
+      "title": "AI로 인스타툰 만들 때 사람이 직접 확인할 것: 게시 전 체크리스트 | 인스타툰 연재실"
+    },
+    "/guide/instagram-content-copyright/": {
+      "status": 200,
+      "canonical": "https://www.ai-instatoon.com/guide/instagram-content-copyright/",
+      "ogUrl": "https://www.ai-instatoon.com/guide/instagram-content-copyright/",
+      "robots": "index,follow",
+      "title": "인스타그램 콘텐츠 저작권 확인하기: 이미지·폰트·음악·AI 이미지 | 인스타툰 연재실"
+    },
+    "/guide/instagram-facebook-content/": {
+      "status": 200,
+      "canonical": "https://www.ai-instatoon.com/guide/instagram-facebook-content/",
+      "ogUrl": "https://www.ai-instatoon.com/guide/instagram-facebook-content/",
+      "robots": "index,follow",
+      "title": "인스타그램과 Facebook 함께 운영하기: 콘텐츠 차이와 확장 방법 | 인스타툰 연재실"
+    },
+    "/guide/meta-business-suite-guide/": {
+      "status": 200,
+      "canonical": "https://www.ai-instatoon.com/guide/meta-business-suite-guide/",
+      "ogUrl": "https://www.ai-instatoon.com/guide/meta-business-suite-guide/",
+      "robots": "index,follow",
+      "title": "Meta Business Suite란? 소상공인을 위한 SNS 콘텐츠 관리 기초 | 인스타툰 연재실"
+    },
+    "/guide/gemini-api-key-setup-guide/": {
+      "status": 200,
+      "canonical": "https://www.ai-instatoon.com/guide/gemini-api-key-setup-guide/",
+      "ogUrl": "https://www.ai-instatoon.com/guide/gemini-api-key-setup-guide/",
+      "robots": "index,follow",
+      "title": "Gemini API 키 넣는 방법과 오류 해결 (인스타툰 연재실) | 인스타툰 연재실"
+    },
+    "/guide/how-to-use-instatoon-room/": {
+      "status": 200,
+      "canonical": "https://www.ai-instatoon.com/guide/how-to-use-instatoon-room/",
+      "ogUrl": "https://www.ai-instatoon.com/guide/how-to-use-instatoon-room/",
+      "robots": "index,follow",
+      "title": "인스타툰 연재실 사용법: 업종 입력부터 게시용 글까지 | 인스타툰 연재실"
+    },
+    "/guide/instatoon-troubleshooting/": {
+      "status": 200,
+      "canonical": "https://www.ai-instatoon.com/guide/instatoon-troubleshooting/",
+      "ogUrl": "https://www.ai-instatoon.com/guide/instatoon-troubleshooting/",
+      "robots": "index,follow",
+      "title": "인스타툰 만들다 막힐 때: 증상별 원인과 해결 방법 | 인스타툰 연재실"
+    },
+    "/about/": {
+      "status": 200,
+      "canonical": "https://www.ai-instatoon.com/about/",
+      "ogUrl": "https://www.ai-instatoon.com/about/",
+      "robots": "index,follow",
+      "title": "인스타툰 연재실 소개: 내 이야기를 인스타툰으로 | 인스타툰 연재실"
+    },
+    "/privacy/": {
+      "status": 200,
+      "canonical": "https://www.ai-instatoon.com/privacy/",
+      "ogUrl": "https://www.ai-instatoon.com/privacy/",
+      "robots": "index,follow",
+      "title": "개인정보처리방침: 저장되는 정보와 외부로 전송되는 정보 | 인스타툰 연재실"
+    },
+    "/terms/": {
+      "status": 200,
+      "canonical": "https://www.ai-instatoon.com/terms/",
+      "ogUrl": "https://www.ai-instatoon.com/terms/",
+      "robots": "index,follow",
+      "title": "이용안내: 서비스 범위와 이용 시 유의사항 | 인스타툰 연재실"
+    }
+  }
+}
