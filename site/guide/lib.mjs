@@ -122,6 +122,35 @@ main{padding-bottom:56px}
 .hero p{color:var(--ink-2);max-width:60ch;margin:0 0 20px;font-size:17px}
 .hubsec{margin:36px 0 0}.hubsec>p{margin:-6px 0 12px;color:var(--muted);font-size:14.5px}
 .note{max-width:820px;margin:20px auto 0;font-size:13.5px;color:var(--muted);line-height:1.7}
+.bhead{padding:12px 0 4px}.bhead h1{font-size:clamp(30px,5vw,44px);line-height:1.2;letter-spacing:-.035em;font-weight:900;margin:0 0 8px}
+.bhead p{color:var(--ink-2);margin:0;font-size:17px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:18px 0 6px;margin:0 -16px;padding-inline:16px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips a{flex:none;border:1px solid var(--line-2);background:var(--surface);color:var(--ink-2);border-radius:999px;padding:7px 16px;min-height:40px;font-size:14px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;white-space:nowrap}
+.chips a:hover{border-color:var(--ink)}
+.chips a[aria-current="true"]{background:var(--ink);border-color:var(--ink);color:var(--surface)}
+.cnt{margin:10px 0 14px;font-size:13.5px;color:var(--muted)}
+.anc{display:block;height:0;scroll-margin-top:90px}
+.posts{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.post[hidden]{display:none}
+.post a{display:flex;flex-direction:column;height:100%;background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden;text-decoration:none}
+.post a:hover{border-color:var(--ink)}
+.post img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;background:var(--sunken)}
+.pb{display:flex;flex-direction:column;gap:6px;padding:16px 18px 20px}
+.pm{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);font-weight:700}
+.pc{background:var(--accent-soft);color:var(--ink);border-radius:999px;padding:2px 10px}
+.post b{font-size:17px;line-height:1.45;letter-spacing:-.01em}
+.ps{font-size:14px;line-height:1.6;color:var(--ink-2)}
+.post.feat{grid-column:1/-1}
+.post.feat a{flex-direction:row}
+.post.feat img{width:56%;aspect-ratio:auto;height:100%;min-height:260px}
+.post.feat .pb{justify-content:center;padding:28px 32px}.post.feat b{font-size:24px;line-height:1.4}.post.feat .ps{font-size:15.5px}
+@media (max-width:900px){.posts{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:640px){.posts{grid-template-columns:1fr;gap:14px}.post.feat a{flex-direction:column}.post.feat img{width:100%;min-height:0;aspect-ratio:16/9}.post.feat .pb{padding:16px 18px 20px}.post.feat b{font-size:19px}}
+.bcta{margin:44px 0 0;background:var(--ink);color:var(--surface);border-radius:var(--r);padding:24px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.bcta b{display:block;font-size:19px}.bcta span{opacity:.85;font-size:15px}
+.bcta .btn{background:var(--accent);border-color:var(--accent);color:#121214}
+.cover{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;border-radius:14px;margin:0 0 22px;background:var(--sunken)}
 footer{border-top:1px solid var(--line);padding:26px 0 40px;font-size:14px;color:var(--muted)}
 footer .nav a{color:var(--ink-2);text-decoration:none;padding:6px 4px;min-height:40px;display:inline-flex;align-items:center}
 footer .nav a:hover{text-decoration:underline}
@@ -133,10 +162,10 @@ const FONTS = '<link rel="preconnect" href="https://fonts.googleapis.com"><link 
 export const header = (cur) => `<a class="skip" href="#main">본문 바로가기</a>
 <div class="wrap"><header class="topbar">
 <a class="brand" href="/" aria-label="${SITE} 메인으로"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><b>${SITE}</b></a>
-<nav class="nav" aria-label="주요 메뉴"><a class="btn" href="/">메인으로</a><a class="btn acc" href="/" data-track="cta" data-loc="header">인스타툰 만들기</a><a class="btn"${cur === 'guide' ? ' aria-current="page"' : ''} href="/guide/">콘텐츠 가이드</a></nav>
+<nav class="nav" aria-label="주요 메뉴"><a class="btn" href="/">메인으로</a><a class="btn acc" href="/" data-track="cta" data-loc="header">인스타툰 만들기</a><a class="btn"${cur === 'guide' ? ' aria-current="page"' : ''} href="/guide/">인스타툰 노트</a></nav>
 </header></div>`;
 
-export const footer = `<footer><div class="wrap"><nav class="nav" aria-label="푸터 메뉴"><a href="/guide/">콘텐츠 가이드</a><a href="/" data-track="cta" data-loc="footer">인스타툰 만들기</a><a href="/about/">소개</a><a href="/privacy/">개인정보처리방침</a><a href="/terms/">이용안내</a><a href="/sitemap.xml">사이트맵</a></nav>
+export const footer = `<footer><div class="wrap"><nav class="nav" aria-label="푸터 메뉴"><a href="/guide/">인스타툰 노트</a><a href="/" data-track="cta" data-loc="footer">인스타툰 만들기</a><a href="/about/">소개</a><a href="/privacy/">개인정보처리방침</a><a href="/terms/">이용안내</a><a href="/sitemap.xml">사이트맵</a></nav>
 <p>© ${SITE} · 이 사이트의 가이드는 일반적인 정보 제공을 위한 것이며, 서비스 기능과 정책은 각 서비스의 공식 안내에서 확인해 주세요.</p></div></footer>`;
 
 export function head({ title, desc, canonical, type, extra = '', body = '', ga = {} }) {
@@ -191,7 +220,7 @@ export function renderArticle(a, all, i) {
   const crumbs = {
     '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [
       { '@type': 'ListItem', position: 1, name: '홈', item: ORIGIN + '/' },
-      { '@type': 'ListItem', position: 2, name: '콘텐츠 가이드', item: ORIGIN + '/guide/' },
+      { '@type': 'ListItem', position: 2, name: '인스타툰 노트', item: ORIGIN + '/guide/' },
       { '@type': 'ListItem', position: 3, name: a.title, item: u }] };
   const toc = a.sections.map((s, k) => `<li><a href="#s${k + 1}">${esc(s.h)}</a></li>`).join('');
   const body = a.sections.map((s, k) => `<section><h2 id="s${k + 1}">${esc(s.h)}</h2>${s.blocks.map(block).join('')}</section>`).join('\n');
@@ -202,16 +231,17 @@ export function renderArticle(a, all, i) {
   const more = extra.length ? `<h3 style="font-size:15px;margin:22px 0 10px">${cat} 더 보기</h3><ul class="cards">${extra.map((x, k) => card(x, rel.length + k)).join('')}</ul>` : '';
   const prevHtml = prev
     ? `<a href="/guide/${prev.slug}/" rel="prev" data-track="prevnext" data-loc="prev"><small>← 이전 글</small>${esc(prev.title)}</a>`
-    : `<a href="/guide/" rel="up" data-track="prevnext" data-loc="prev"><small>← 콘텐츠 가이드</small>가이드 전체 글 보기</a>`;
+    : `<a href="/guide/" rel="up" data-track="prevnext" data-loc="prev"><small>← 인스타툰 노트</small>노트 전체 글 보기</a>`;
   const nextHtml = next
     ? `<a class="nx" href="/guide/${next.slug}/" rel="next" data-track="prevnext" data-loc="next"><small>다음 글 →</small>${esc(next.title)}</a>`
-    : `<a class="nx" href="/guide/" rel="up" data-track="prevnext" data-loc="next"><small>콘텐츠 가이드 →</small>가이드 전체 글 보기</a>`;
+    : `<a class="nx" href="/guide/" rel="up" data-track="prevnext" data-loc="next"><small>인스타툰 노트 →</small>노트 전체 글 보기</a>`;
   return head({ title, desc: a.desc, canonical: u, type: 'article', body: bodyAttr('article', a.slug, a.cat), ga: { content_group: cat, content_id: a.slug },
       extra: `<meta property="article:published_time" content="${pub}"><meta property="article:modified_time" content="${mod}">${ld(article)}${ld(crumbs)}` })
     + header('guide') + `
 <main id="main" class="wrap">
-<nav class="crumb" aria-label="현재 위치"><ol><li><a href="/">홈</a></li><li><a href="/guide/">콘텐츠 가이드</a></li><li aria-current="page">${esc(a.title)}</li></ol></nav>
+<nav class="crumb" aria-label="현재 위치"><ol><li><a href="/">홈</a></li><li><a href="/guide/">인스타툰 노트</a></li><li aria-current="page">${esc(a.title)}</li></ol></nav>
 <article class="article">
+<img class="cover" src="${coverOf(a)}" width="800" height="450" alt="">
 <a class="cat" href="/guide/#${a.cat}">${cat}</a>
 <h1>${esc(a.title)}</h1>
 <p class="lead">${inline(a.lead)}</p>
@@ -232,28 +262,51 @@ ${trackJs}
 `;
 }
 
+export const IMG_DIR = '/note-img/';
+export const coverOf = (a) => IMG_DIR + (a.image || `cat-${a.cat}.svg`);
+const fmtDate = (d) => String(d || '').replace(/-/g, '.');
+// 최신순: 공개일이 같으면 목록에서 뒤에 있는 글(나중에 추가된 글)이 먼저
+const newestFirst = (all) => all.map((a, i) => ({ a, i })).sort((x, y) => String(y.a.published || '').localeCompare(String(x.a.published || '')) || y.i - x.i).map((x) => x.a);
+
+const HUB_JS = `<script>(function(){var L=document.getElementById('posts');if(!L)return;var chips=[].slice.call(document.querySelectorAll('.chips a'));
+function apply(){var c=(location.hash||'').slice(1);if(!/^(toon|insta|biz|ai|meta)$/.test(c))c='all';
+[].slice.call(L.children).forEach(function(li){li.hidden=c!=='all'&&li.getAttribute('data-cat')!==c;});
+chips.forEach(function(a){a.setAttribute('aria-current',a.getAttribute('data-cat')===c?'true':'false');});
+var n=L.querySelectorAll('li:not([hidden])').length,s=document.getElementById('count');if(s)s.textContent='글 '+n+'편';}
+window.addEventListener('hashchange',apply);apply();})();</script>`;
+
 export function renderHub(all) {
   const u = `${ORIGIN}/guide/`;
-  const title = `인스타툰 · SNS 콘텐츠 가이드 | ${SITE}`;
-  const desc = '인스타툰 제작부터 Instagram 콘텐츠 구성, 소상공인 SNS 활용 방법까지 실제 콘텐츠를 만들 때 도움이 되는 가이드 20편을 모았습니다.';
+  const title = `인스타툰 노트: 인스타툰·SNS 콘텐츠 만드는 법 | ${SITE}`;
+  const desc = '인스타툰 제작부터 Instagram 콘텐츠 구성, 소상공인 SNS 활용까지 콘텐츠를 만들 때 도움이 되는 글을 최신순으로 모았습니다.';
   const crumbs = { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [
     { '@type': 'ListItem', position: 1, name: '홈', item: ORIGIN + '/' },
-    { '@type': 'ListItem', position: 2, name: '콘텐츠 가이드', item: u }] };
+    { '@type': 'ListItem', position: 2, name: '인스타툰 노트', item: u }] };
   const list = { '@context': 'https://schema.org', '@type': 'CollectionPage', name: title, url: u, description: desc, inLanguage: 'ko' };
-  const sections = Object.entries(CATS).map(([k, c]) => {
-    const items = all.filter((x) => x.cat === k);
-    return `<section class="hubsec" id="${k}" aria-labelledby="h-${k}"><h2 id="h-${k}">${c.name}</h2><p>${c.desc}</p><ul class="cards">${items.map((x) => `<li><a class="card" href="/guide/${x.slug}/" data-track="guide_card" data-loc="hub_${k}"><small>${c.name}</small><b>${esc(x.title)}</b><span style="display:block;color:var(--muted);font-size:13.5px;margin-top:6px">${esc(x.card)}</span></a></li>`).join('')}</ul></section>`;
-  }).join('\n');
+  const posts = newestFirst(all);
+  const chips = [['all', '전체'], ...Object.entries(CATS).map(([k, c]) => [k, c.name])]
+    .map(([k, n]) => `<a href="#${k}" data-cat="${k}" aria-current="${k === 'all' ? 'true' : 'false'}">${n}</a>`).join('');
+  const anchors = Object.keys(CATS).map((k) => `<i id="${k}" class="anc"></i>`).join('');
+  const item = (x, k) => `<li class="post${k === 0 ? ' feat' : ''}" data-cat="${x.cat}"><a href="/guide/${x.slug}/" data-track="guide_card" data-loc="hub_${x.cat}">
+<img src="${coverOf(x)}" width="800" height="450" alt=""${k < 2 ? '' : ' loading="lazy"'} decoding="async">
+<span class="pb"><span class="pm"><span class="pc">${CATS[x.cat].name}</span><time datetime="${x.published}">${fmtDate(x.published)}</time></span>
+<b>${esc(x.title)}</b><span class="ps">${esc(x.card)}</span></span></a></li>`;
   return head({ title, desc, canonical: u, type: 'website', body: bodyAttr('hub'), ga: { content_group: '콘텐츠 가이드 허브' }, extra: ld(list) + ld(crumbs) }) + header('guide') + `
 <main id="main" class="wrap">
-<nav class="crumb" aria-label="현재 위치"><ol><li><a href="/">홈</a></li><li aria-current="page">콘텐츠 가이드</li></ol></nav>
-<section class="hero"><h1>인스타툰과 SNS 콘텐츠를 쉽게 시작하는 방법</h1>
-<p>인스타툰 제작부터 Instagram 콘텐츠 구성, 소상공인 SNS 활용 방법까지 실제 콘텐츠를 만들 때 도움이 되는 정보를 정리했습니다.</p>
-<a class="btn pri big" href="/" data-track="cta" data-loc="hub_hero">인스타툰 만들어보기</a></section>
-${sections}
+<nav class="crumb" aria-label="현재 위치"><ol><li><a href="/">홈</a></li><li aria-current="page">인스타툰 노트</li></ol></nav>
+<section class="bhead"><h1>인스타툰 노트</h1>
+<p>인스타툰 만드는 법과 SNS 콘텐츠 이야기를 최신순으로 모았어요.</p></section>
+<nav class="chips" aria-label="카테고리">${chips}</nav>
+<p class="cnt" id="count" aria-live="polite">글 ${posts.length}편</p>
+${anchors}
+<ul class="posts" id="posts">
+${posts.map(item).join('\n')}
+</ul>
+<section class="bcta"><div><b>직접 만들어 보고 싶다면</b><span>내 이야기를 입력하면 대본과 컷 구성까지 정리해 드려요.</span></div><a class="btn pri big" href="/" data-track="cta" data-loc="hub_hero">인스타툰 만들어보기</a></section>
 </main>
 ` + footer + `
 ${trackJs}
+${HUB_JS}
 </body>
 </html>
 `;
@@ -265,7 +318,7 @@ export function render404() {
     .replace(/<link rel="canonical"[^>]*>\n/, '')
     + header('') + `
 <main id="main" class="wrap"><section class="hero"><h1>페이지를 찾을 수 없어요</h1><p>주소가 바뀌었거나 없는 페이지예요. 아래에서 원하는 곳으로 이동해 주세요.</p>
-<div class="nav"><a class="btn pri big" href="/guide/">콘텐츠 가이드로 돌아가기</a><a class="btn big" href="/">인스타툰 만들기</a></div></section></main>
+<div class="nav"><a class="btn pri big" href="/guide/">인스타툰 노트로 돌아가기</a><a class="btn big" href="/">인스타툰 만들기</a></div></section></main>
 ` + footer + `
 ${trackJs}
 </body>

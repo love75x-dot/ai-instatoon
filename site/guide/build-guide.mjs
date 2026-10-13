@@ -2,7 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { ORIGIN, DATE, cfg, url, renderArticle, renderHub, render404 } from './lib.mjs';
+import { ORIGIN, DATE, CATS, cfg, url, renderArticle, renderHub, render404 } from './lib.mjs';
 import { validate } from './validate.mjs';
 import { gaId } from '../analytics.mjs';
 import { pages, siteInfo } from './pages.mjs';
@@ -30,6 +30,8 @@ const SCHEDULE = ['2026-09-25', '2026-09-27', '2026-09-29', '2026-10-01'];
 articles.forEach((a, i) => { a.published ||= SCHEDULE[Math.floor(i / 5)]; a.modified ||= a.published; });
 
 const { errs, warns } = validate(articles);
+for (const a of articles) if (a.image && !fs.existsSync(path.join(here, 'img', a.image))) errs.push(`[${a.slug}] image 파일이 없어요: site/guide/img/${a.image}`);
+for (const k of Object.keys(CATS)) if (!fs.existsSync(path.join(here, 'img', `cat-${k}.svg`))) errs.push(`카테고리 대표 이미지 없음: site/guide/img/cat-${k}.svg`);
 warns.forEach((w) => console.warn('경고', w));
 if (errs.length) { errs.forEach((e) => console.error('오류', e)); throw new Error(`글 검증 실패 ${errs.length}건`); }
 
@@ -43,6 +45,9 @@ fs.rmSync(path.join(dep, 'ads.txt'), { force: true });
 if (siteInfo.adsensePublisherId) write('ads.txt', `google.com, ${siteInfo.adsensePublisherId}, DIRECT, f08c47fec0942fa0
 `);
 fs.copyFileSync(path.join(here, 'track.js'), path.join(dep, 'guide-track.js'));
+// 게시판 대표 이미지: site/guide/img/* → deploy/note-img/* (카테고리별 cat-<키>.svg, 글마다 따로 쓰려면 글에 image: '파일명')
+fs.rmSync(path.join(dep, 'note-img'), { recursive: true, force: true });
+fs.cpSync(path.join(here, 'img'), path.join(dep, 'note-img'), { recursive: true });
 write('404.html', render404());
 write('robots.txt', `User-agent: *\nAllow: /\n\nSitemap: ${ORIGIN}/sitemap.xml\n`);
 const lastmod = Object.fromEntries(articles.map((a) => [url(a.slug), a.modified || a.published || DATE]));

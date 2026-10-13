@@ -1,11 +1,17 @@
-# 콘텐츠 가이드 운영 안내
+# 인스타툰 노트(구 "콘텐츠 가이드") 운영 안내
+
+화면에 보이는 이름은 "인스타툰 노트"이고, 주소는 그대로 `/guide/`(글은 `/guide/<slug>/`)입니다. 주소·sitemap·canonical은 바꾸지 않습니다.
+
+## 대표 이미지
+- 기본: 카테고리별 공통 이미지 `site/guide/img/cat-<카테고리키>.svg` (빌드 때 `deploy/note-img/`로 복사)
+- 글마다 따로 쓰려면 이미지를 `site/guide/img/`에 넣고 글에 `image: '파일명.webp'`를 추가 (가로 800×세로 450 비율 권장, 없는 파일이면 빌드 실패)
 
 ## 새 글 추가
 1. `npm run guide:new -- <slug> <카테고리>` (카테고리: toon, insta, biz, ai, meta)
 2. 생성된 `site/guide/posts/<slug>.mjs`의 `TODO`를 실제 내용으로 교체
 3. `npm run build` → `npm run check`
 
-자동으로 처리되는 것: 허브 카드, sitemap.xml(+lastmod), 이전/다음 링크, 같은 카테고리 "더 보기" 링크,
+자동으로 처리되는 것: 허브 카드(최신순), sitemap.xml(+lastmod), 이전/다음 링크, 같은 카테고리 "더 보기" 링크,
 canonical/OG/Article·BreadcrumbList JSON-LD, GA4 태그와 클릭·스크롤 추적.
 
 빌드가 막는 것: slug·title·description 중복, 주제가 거의 같은 글, 섹션 4개 미만, 요약 3~5개 아님,
