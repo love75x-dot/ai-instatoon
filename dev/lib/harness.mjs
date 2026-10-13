@@ -47,7 +47,7 @@ export async function launch() {
 
 // 시각·난수를 고정해 프롬프트가 매번 똑같이 나오게 한다.
 const FREEZE = `(() => {
-  const T = new Date('2026-10-13T12:00:00+09:00').getTime(); const D = Date;
+  const D = Date; let shift = 0; try { shift = (Number(sessionStorage.getItem('__shift')) || 0) * 86400000; } catch (_) {} const T = new Date('2026-10-13T12:00:00+09:00').getTime() + shift;
   class FD extends D { constructor(...a) { if (a.length) super(...a); else super(T); } static now() { return T; } }
   window.Date = FD;
   let s = 12345; Math.random = () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };

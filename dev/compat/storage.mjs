@@ -17,6 +17,8 @@ function missing(e, a, p = '') {
   for (const k of Object.keys(e)) { const m = missing(e[k], a[k], p ? `${p}.${k}` : k); if (m) return m; }
   return null;
 }
+const DAY = 86400000;
+const lsVals = (page) => page.evaluate(() => Object.fromEntries(Object.keys(localStorage).filter((k) => k.startsWith('instatoon') && !k.startsWith('instatoon.storage.')).map((k) => [k, localStorage.getItem(k)])));
 const DATA = (k) => k.startsWith('instatoon') && !k.startsWith('instatoon.storage.');
 const info = (page) => page.evaluate(() => ({ mode: kv.mode, state: kv.state, flag: localStorage.getItem('instatoon.storage.verified'), lsData: Object.keys(localStorage).filter((k) => k.startsWith('instatoon') && !k.startsWith('instatoon.storage.')), S: JSON.parse(JSON.stringify(S)) }));
 const idbDump = (page) => page.evaluate(() => new Promise((res) => { const r = indexedDB.open('instatoonStore', 1); r.onsuccess = () => { const q = r.result.transaction('kv').objectStore('kv').getAll(); q.onsuccess = () => { const o = {}; q.result.forEach((x) => { o[x.k] = x.v; }); res(o); }; }; r.onerror = () => res(null); }));
@@ -35,21 +37,31 @@ const seedKeys = Object.keys(ls).filter(DATA);
   C.ok(seedKeys.every((k) => i.lsData.includes(k)), '확인 전·옮긴 첫 실행에서는 원본 localStorage 항목이 하나도 지워지지 않음');
   C.ok(!missing(exp.full.S, i.S) && same(await prompts(page), exp.full.prompts), '옮긴 뒤에도 작업 내용과 만들어지는 프롬프트가 그대로');
   C.ok(await page.evaluate(() => /옮겼어요/.test(document.querySelector('#toast').textContent) || kv.notice === 'migrated'), '옮겼다는 안내가 한 번 나옴');
+  C.ok(m.verifiedAt && Math.round((m.verifiedAt + 14 * DAY - (await page.evaluate(() => kv.cleanupAt))) / 1000) === 0, '정리 예정일은 확인한 날로부터 14일 뒤로 기록됨');
   C.ok(!errors.length, '첫 이전: 페이지 오류 없음' + (errors[0] ? ' ← ' + errors[0] : ''));
-  // 2) 다음 실행: 원본 정리
+  // 2) 다음 실행: 14일 전에는 원본을 그대로 둠, 새 저장은 새 저장소에만
   await reload(page);
-  const j = await info(page), d2 = await idbDump(page);
-  C.ok(j.mode === 'idb' && j.state === 'cleaned' && meta(d2).state === 'cleaned', `다음에 열면 확인된 원본을 정리함 (상태 ${j.state})`);
-  C.ok(j.lsData.length === 0 && j.flag === '1', '정리 뒤 localStorage에는 작업 데이터가 없고 확인 표시만 남음');
-  C.ok(!missing(exp.full.S, j.S) && same(await prompts(page), exp.full.prompts), '정리 뒤에도 새 저장소에서 읽은 작업·프롬프트가 그대로');
+  const j = await info(page), d2 = await idbDump(page), l2 = await lsVals(page);
+  C.ok(j.mode === 'idb' && j.state === 'verified' && meta(d2).state === 'verified', `다음에 열어도 14일이 지나기 전에는 원본을 지우지 않음 (상태 ${j.state})`);
+  C.ok(seedKeys.every((k) => l2[k] === ls[k]), '원본 localStorage 항목이 이전 시점 그대로(글자까지 같음) 남아 있음');
+  C.ok(!missing(exp.full.S, j.S) && same(await prompts(page), exp.full.prompts), '새 저장소에서 읽은 작업·프롬프트가 그대로');
   const got = await page.evaluate(() => ({ p0: getPhoto(0), r0: refOf(0), key: API.key, copied: [...COPIED], sample: kv.getItem('instatoon.sample.chibi') }));
   C.ok(got.p0 === ls['instatoon.photo.0'] && got.r0 === ls['instatoon.charRef'] && got.key === ls['instatoon.key'] && same(got.copied, JSON.parse(ls['instatoon.copied'])) && got.sample === ls['instatoon.sample.chibi'], '사진·기준 이미지·API 키·복사 표시·샘플도 그대로 읽힘');
-  // 3) 정리 뒤 저장
+  // 3) 14일 안에 새로 저장하는 값은 새 저장소에만 (원본은 이전 시점 그대로)
   await page.evaluate(() => { S.info.name = '새이름'; save(); kv.setItem('instatoon.photo.2', 'data:image/png;base64,ZZZ'); });
   await reload(page);
-  const k = await info(page);
-  C.ok(k.S.info.name === '새이름' && (await page.evaluate(() => getPhoto(2))) === 'data:image/png;base64,ZZZ' && k.lsData.length === 0, '정리 뒤 새로 저장한 값이 새로고침 후에도 남고, localStorage에는 쓰지 않음');
-  // 12) 백업 파일: 정리된 상태에서도 같은 형식으로 내보내고 불러옴
+  const k = await info(page), l3 = await lsVals(page);
+  C.ok(k.S.info.name === '새이름' && (await page.evaluate(() => getPhoto(2))) === 'data:image/png;base64,ZZZ', '새로 저장한 값이 새로고침 후에도 남음(새 저장소)');
+  C.ok(l3['instatoonRoom.v4'] === ls['instatoonRoom.v4'] && l3['instatoon.photo.2'] === undefined && seedKeys.every((x) => l3[x] === ls[x]), '14일 동안 새 저장은 localStorage에 쓰지 않아 원본은 이전 시점 그대로(사이트를 되돌려도 예전 작업이 보임)');
+  // 13일째까지는 정리하지 않음 → 14일째에 정리
+  await page.evaluate(() => sessionStorage.setItem('__shift', '13')); await reload(page);
+  const s13 = await info(page);
+  C.ok(s13.state === 'verified' && seedKeys.every((x) => s13.lsData.includes(x)) && s13.S.info.name === '새이름', '확인한 지 13일째에는 아직 원본을 정리하지 않음');
+  await page.evaluate(() => sessionStorage.setItem('__shift', '14')); await reload(page);
+  const s14 = await info(page), d14 = await idbDump(page);
+  C.ok(s14.state === 'cleaned' && meta(d14).state === 'cleaned' && s14.lsData.length === 0 && s14.flag === '1', '확인한 지 14일이 되면 원본을 정리하고 확인 표시만 남김');
+  C.ok(s14.S.info.name === '새이름' && (await page.evaluate(() => getPhoto(2))) === 'data:image/png;base64,ZZZ' && !missing(exp.full.S.info, { ...s14.S.info, name: exp.full.S.info.name }) && (await page.evaluate(() => getPhoto(0))) === ls['instatoon.photo.0'], '정리 뒤에도 작업(최신 수정 포함)·사진이 새 저장소에서 그대로');
+  // 12) 백업 파일: 같은 형식으로 내보내고 불러옴
   const [dl] = await Promise.all([page.waitForEvent('download', { timeout: 5000 }).catch(() => null), page.evaluate(() => makeBackup())]);
   const out = dl ? JSON.parse(fs.readFileSync(await dl.path(), 'utf8')) : null;
   C.ok(out && out.app === 'instatoon' && out.v === 1 && same(Object.keys(out).sort(), Object.keys(backup).sort()) && out.photos[0] === ls['instatoon.photo.0'] && out.refs[0] === ls['instatoon.charRef'] && out.samples.chibi === ls['instatoon.sample.chibi'], '새 저장소 상태에서 내보낸 백업 파일이 기존과 같은 형식·내용');
@@ -60,16 +72,16 @@ const seedKeys = Object.keys(ls).filter(DATA);
   await page.close();
 }
 
-// 4) 확인했지만 아직 정리 전: 새로 저장하는 값은 두 곳에 같이 기록 → 다음 실행에 최신 값
+// 4) 14일 동안 새 값은 새 저장소에만, 14일째에 정리하고 최신 값 유지
 {
   const { page } = await boot({ ls });
-  await page.evaluate(() => { kv.setItem('instatoon.copied', '["a","b"]'); S.info.name = '이중기록'; save(); kv.flush(); });
-  const i = await info(page);
-  const lsNow = await page.evaluate(() => localStorage.getItem('instatoon.copied'));
-  C.ok(i.state === 'verified' && lsNow === '["a","b"]', '정리 전에는 새 값을 새 저장소와 localStorage에 같이 씀(되돌려야 할 때 안전)');
-  await reload(page);
-  const j = await info(page), d = await idbDump(page);
-  C.ok(j.state === 'cleaned' && j.S.info.name === '이중기록' && d['instatoon.copied'] === '["a","b"]' && j.lsData.length === 0, '다음 실행: 정리되고 최신 값이 새 저장소에 있음');
+  await page.evaluate(() => { kv.setItem('instatoon.copied', '["a","b"]'); S.info.name = '새저장'; save(); kv.flush(); });
+  await page.waitForTimeout(250);
+  const d = await idbDump(page), l = await lsVals(page);
+  C.ok(d['instatoon.copied'] === '["a","b"]' && l['instatoon.copied'] === ls['instatoon.copied'], '14일 안: 새 값은 새 저장소에만 쓰고 원본 사본은 이전 시점 그대로');
+  await page.evaluate(() => sessionStorage.setItem('__shift', '14')); await reload(page);
+  const j = await info(page), d2 = await idbDump(page);
+  C.ok(j.state === 'cleaned' && j.S.info.name === '새저장' && d2['instatoon.copied'] === '["a","b"]' && j.lsData.length === 0, '14일째: 원본을 정리하고 최신 값은 새 저장소에 그대로');
   await page.close();
 }
 
@@ -145,26 +157,54 @@ for (const [label, opts, init] of [['IndexedDB 없음', { noIDB: true }, null], 
   C.ok(await h.page.evaluate(() => /저장하지 못했어요/.test(document.querySelector('#savedTxt').textContent)), '새 저장소 쓰기가 실패하면 "저장하지 못했어요"로 알려 줌');
   await h.page.close();
 }
-// 14) 정리된 뒤 옛 버전(localStorage만 쓰는 버전)이 값을 쓴 경우: 그 값이 최신이므로 이어받음
+// 14) 사이트를 되돌려 옛 버전이 localStorage에 새로 쓴 경우: 그 값이 최신이므로 이어받음(사본은 계속 보관)
 {
-  const { page } = await boot({ ls }); await reload(page);
+  const { page } = await boot({ ls });
+  await page.evaluate(() => { S.info.name = '새저장소에서고침'; save(); kv.flush(); }); await page.waitForTimeout(250); await reload(page);
   const s = JSON.parse(ls['instatoonRoom.v4']); s.info.name = '옛버전이쓴이름';
   await page.evaluate((v) => localStorage.setItem('instatoonRoom.v4', v), JSON.stringify(s));
   await reload(page);
   const i = await info(page), d = await idbDump(page);
-  C.ok(i.S.info.name === '옛버전이쓴이름' && JSON.parse(d['instatoonRoom.v4']).info.name === '옛버전이쓴이름' && i.state === 'verified', '옛 버전이 localStorage에 쓴 값은 최신으로 보고 새 저장소에 반영(정리는 다음 실행으로 미룸)');
-  await reload(page); const j = await info(page);
-  C.ok(j.state === 'cleaned' && j.S.info.name === '옛버전이쓴이름' && j.lsData.length === 0, '그다음 실행에서 정리');
+  C.ok(i.S.info.name === '옛버전이쓴이름' && JSON.parse(d['instatoonRoom.v4']).info.name === '옛버전이쓴이름' && i.state === 'verified' && i.lsData.length === seedKeys.length, '옛 버전이 localStorage에 쓴 값은 최신으로 보고 새 저장소에 반영하며, 사본은 정리하지 않고 둠');
+  await page.evaluate(() => sessionStorage.setItem('__shift', '14')); await reload(page);
+  const j = await info(page);
+  C.ok(j.state === 'cleaned' && j.S.info.name === '옛버전이쓴이름' && j.lsData.length === 0, '14일이 지나면 정리하고 이어받은 최신 값 유지');
+  // 정리 뒤 옛 버전이 다시 쓰면 그 값도 이어받음
+  await page.evaluate((v) => localStorage.setItem('instatoonRoom.v4', v), JSON.stringify({ ...s, info: { ...s.info, name: '정리뒤옛버전' } }));
+  await reload(page);
+  const k = await info(page);
+  C.ok(k.S.info.name === '정리뒤옛버전' && k.state === 'verified', '정리된 뒤 옛 버전이 값을 쓰면 그것도 이어받고 새 14일 보관을 시작');
   await page.close();
 }
+
 // 15) 안내 패널의 "저장소 상태"
 {
   const { page } = await boot({ ls }); await page.evaluate(() => toggleHelp(true)); await page.waitForTimeout(200);
   const t = await page.evaluate(() => document.querySelector('#kvInfo').textContent);
-  C.ok(/새 저장소/.test(t) && /확인했어요/.test(t), `"전체 사용 안내" 맨 아래 저장소 상태 표시: ${t.slice(0, 40)}…`);
-  await reload(page); await page.evaluate(() => toggleHelp(true)); await page.waitForTimeout(200);
-  C.ok(/정리가 끝났어요/.test(await page.evaluate(() => document.querySelector('#kvInfo').textContent)), '다음 실행에서는 "정리가 끝났어요"로 바뀜');
+  C.ok(/새 저장소/.test(t) && /확인했어요/.test(t) && /원래 사본은 10월 27일에 정리돼요/.test(t), `"전체 사용 안내" 맨 아래 저장소 상태: ${t.slice(0, 90)}…`);
+  await page.evaluate(() => sessionStorage.setItem('__shift', '14')); await reload(page); await page.evaluate(() => toggleHelp(true)); await page.waitForTimeout(200);
+  C.ok(/정리가 끝났어요/.test(await page.evaluate(() => document.querySelector('#kvInfo').textContent)), '14일 뒤에는 "정리가 끝났어요"로 바뀜');
   await page.close();
+}
+// 16) 저장 보호 요청(navigator.storage.persist): 결과는 "저장소 상태"에만 조용히, 거절·미지원·오류여도 정상 동작
+for (const [label, init, want, txt] of [
+  ['허용', () => { const s = navigator.storage; s.persisted = () => Promise.resolve(false); s.persist = () => Promise.resolve(true); }, 'granted', /저장 보호: 켜짐/],
+  ['거절', () => { const s = navigator.storage; s.persisted = () => Promise.resolve(false); s.persist = () => Promise.resolve(false); }, 'denied', /허용되지 않았어요/],
+  ['이미 켜져 있음', () => { const s = navigator.storage; s.persisted = () => Promise.resolve(true); s.persist = () => Promise.reject(new Error('부르면 안 됨')); }, 'granted', /저장 보호: 켜짐/],
+  ['미지원', () => { Object.defineProperty(navigator, 'storage', { value: undefined, configurable: true }); }, 'unsupported', /지원하지 않아요/],
+  ['요청 중 오류', () => { const s = navigator.storage; s.persisted = () => Promise.resolve(false); s.persist = () => Promise.reject(new Error('오류')); }, 'unsupported', /지원하지 않아요/],
+]) {
+  const h = await newPage(browser, srv.base, { ls }); const pops = []; h.page.on('dialog', (dlg) => { pops.push(dlg.type()); dlg.dismiss(); }); await h.page.addInitScript(init);
+  await h.page.goto(srv.base + '/'); await h.page.waitForTimeout(900);
+  await h.page.evaluate(() => toggleHelp(true)); await h.page.waitForTimeout(200);
+  const r = await h.page.evaluate(() => ({ persist: kv.persist, state: kv.state, text: document.querySelector('#kvInfo').textContent, visibleDialog: !!document.querySelector('dialog[open]'), toast: document.querySelector('#toast').classList.contains('show') && /보호/.test(document.querySelector('#toast').textContent) }));
+  C.ok(r.persist === want && txt.test(r.text) && r.state === 'verified' && !pops.length && !r.visibleDialog && !r.toast && !h.errors.length, `저장 보호 요청(${label}): "저장소 상태"에만 조용히 표시(${r.persist}), 팝업·오류 없이 이전·동작 정상`);
+  await h.page.close();
+}
+{ // IndexedDB가 없는 브라우저에서는 요청하지 않고 지원 안 함으로 표시
+  const h = await boot({ ls, noIDB: true }); await h.page.evaluate(() => toggleHelp(true)); await h.page.waitForTimeout(200);
+  C.ok(await h.page.evaluate(() => kv.persist === 'unsupported' && /기본 저장소/.test(document.querySelector('#kvInfo').textContent)), '새 저장소를 못 쓰는 브라우저: 저장 보호 요청 없이 기존 방식으로 동작');
+  await h.page.close();
 }
 await browser.close(); srv.close();
 console.log(C.fail ? `\n[FAIL] 저장소 이전 검사 ${C.fail}건 실패` : '\n[PASS] 저장소 이전 검사 전부 통과');

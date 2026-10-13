@@ -801,7 +801,7 @@ details.artsbox{margin-top:0}
    앱 코드는 localStorage 대신 kv.getItem/setItem/removeItem 을 쓴다(같은 모양). */
 (function(){
 'use strict';
-var DBN='instatoonStore', ST='kv', META='__meta', FLAG='instatoon.storage.verified', MAX_TRIES=3;
+var DBN='instatoonStore', ST='kv', META='__meta', FLAG='instatoon.storage.verified', ASK='instatoon.storage.persistAsk', MAX_TRIES=3, DAYS14=14*86400000;
 var ls=null; try{ ls=window.localStorage; void ls.length; }catch(e){ ls=null; }
 var map=new Map(), mode='ls', state='none', db=null, dirty=new Map(), timer=0, writing=false, aborted=false, notice='';
 var bootId=(function(){ try{ if(window.crypto&&crypto.randomUUID) return crypto.randomUUID(); var u=new Uint32Array(4); crypto.getRandomValues(u); return Array.prototype.join.call(u,'-'); }catch(e){ return Math.random().toString(36).slice(2)+Date.now().toString(36)+(performance.now()+'').slice(0,12); } })();
@@ -810,19 +810,22 @@ var lsGet=function(k){ try{ return ls?ls.getItem(k):null; }catch(e){ return null
 var lsSet=function(k,v){ try{ ls.setItem(k,v); return true; }catch(e){ return false; } };
 var lsDel=function(k){ try{ ls.removeItem(k); }catch(e){} };
 function lsKeys(){ var o=[]; try{ for(var i=0;i<ls.length;i++){ var k=ls.key(i); if(isData(k)) o.push(k); } }catch(e){} return o; }
+function h32(s){ var h=2166136261; s=String(s); for(var i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return (h>>>0).toString(36)+':'+s.length; }
+function snapOf(keys){ var o={}; keys.forEach(function(k){ o[k]=h32(lsGet(k)||''); }); return o; }
 function req2p(r){ return new Promise(function(res,rej){ r.onsuccess=function(){ res(r.result); }; r.onerror=function(){ rej(r.error||new Error('idb')); }; }); }
 function readAll(){ return req2p(db.transaction(ST,'readonly').objectStore(ST).getAll()).then(function(rows){ var m=new Map(); rows.forEach(function(r){ m.set(r.k,r.v); }); return m; }); }
 function putRows(rows,metaObj){ return new Promise(function(res,rej){ var tx=db.transaction(ST,'readwrite'), os=tx.objectStore(ST); try{ rows.forEach(function(r){ os.put({k:r[0],v:r[1]}); }); if(metaObj) os.put({k:META,v:JSON.stringify(metaObj)}); }catch(e){ try{ tx.abort(); }catch(_){} rej(e); return; } tx.oncomplete=function(){ res(); }; tx.onerror=tx.onabort=function(){ rej(tx.error||new Error('abort')); }; }); }
 function setMeta(o){ return putRows([],o); }
 function useIdb(data,st){ map=data; mode='idb'; state=st; kv.mode='idb'; }
-function doMigrate(tries){
+function doMigrate(tries,waited){
+  waited=waited||0;
   var legacy={}, keys=lsKeys(); keys.forEach(function(k){ legacy[k]=lsGet(k); });
   return new Promise(function(res,rej){
     var tx=db.transaction(ST,'readwrite'), os=tx.objectStore(ST), other=false, g=os.get(META);
     g.onsuccess=function(){
       try{
         var m=g.result?JSON.parse(g.result.v):null;
-        if(m&&m.state!=='failed'&&m.state!=='copied'){ other=true; tx.abort(); return; } /* 다른 탭이 이미 옮김 */
+        if(m&&(m.state==='verified'||m.state==='cleaned'||(m.state==='copied'&&waited<40&&Math.abs(Date.now()-m.at)<15000))){ other=true; tx.abort(); return; } /* 다른 탭이 이미 옮겼거나 지금 옮기는 중 */
         if(m) os.clear(); /* 실패·중단된 이전 시도의 찌꺼기 정리 */
         keys.forEach(function(k){ os.put({k:k,v:legacy[k]}); });
         os.put({k:META,v:JSON.stringify({state:'copied',at:Date.now(),n:keys.length,tries:tries})});
@@ -832,27 +835,32 @@ function doMigrate(tries){
     tx.onabort=function(){ if(other) res('other'); else rej(tx.error||new Error('abort')); };
     tx.onerror=function(e){ if(e&&e.preventDefault) e.preventDefault(); };
   }).then(function(r){
-    if(r==='other') return start(true);
+    if(r==='other') return new Promise(function(ok){ setTimeout(ok,250); }).then(function(){ return startW(waited+1); });
     return readAll().then(function(m){
       var bad=0; Object.keys(legacy).forEach(function(k){ if(m.get(k)!==legacy[k]) bad++; });
       if(bad||m.size-1!==Object.keys(legacy).length){ return setMeta({state:'failed',at:Date.now(),tries:tries,bad:bad}).then(function(){ state='failed'; }); }
       var data=new Map(); m.forEach(function(v,k){ if(k!==META) data.set(k,v); });
-      return setMeta({state:'verified',at:Date.now(),n:keys.length,boot:bootId,tries:tries}).then(function(){ lsSet(FLAG,'1'); useIdb(data,'verified'); if(keys.length) notice='migrated'; });
+      var vAt=Date.now(); return setMeta({state:'verified',at:vAt,verifiedAt:vAt,n:keys.length,boot:bootId,tries:tries,snap:snapOf(keys)}).then(function(){ lsSet(FLAG,'1'); useIdb(data,'verified'); kv.cleanupAt=vAt+DAYS14; if(keys.length) notice='migrated'; });
     });
   }).catch(function(){ state='failed'; });
 }
 function reconcile(meta,data,legacyKeys){
-  var changed=[]; legacyKeys.forEach(function(k){ var v=lsGet(k); if(v!==null&&data.get(k)!==v){ data.set(k,v); changed.push(k); } });
-  var st=meta.state;
+  var snap=meta.snap||{}, changed=[], st=meta.state, now=Date.now();
+  legacyKeys.forEach(function(k){ var v=lsGet(k); if(v!==null&&h32(v)!==snap[k]){ changed.push(k); data.set(k,v); } });
   useIdb(data,st);
-  if(changed.length||(st==='cleaned'&&legacyKeys.length)){ /* 옛 버전 등이 localStorage에 새로 쓴 값이 있음: 그쪽이 최신이므로 반영하고, 정리는 다음 실행으로 미룸 */
-    return putRows(changed.map(function(k){ return [k,data.get(k)]; }),{state:'verified',at:Date.now(),n:data.size,boot:bootId,tries:meta.tries||1}).then(function(){ state='verified'; kv.state='verified'; });
+  if(changed.length||(st==='cleaned'&&legacyKeys.length)){ /* 옛 버전이 localStorage에 새로 쓴 값: 그쪽이 최신이므로 반영하고 사본은 그대로 둠 */
+    var vAt=st==='cleaned'?now:(meta.verifiedAt||meta.at||now), nm={state:'verified',at:vAt,verifiedAt:vAt,n:data.size,boot:bootId,tries:meta.tries||1,snap:snapOf(legacyKeys)};
+    return putRows(changed.map(function(k){ return [k,data.get(k)]; }),nm).then(function(){ state='verified'; kv.state='verified'; kv.cleanupAt=vAt+DAYS14; });
   }
-  if(st==='verified'&&legacyKeys.length&&meta.boot!==bootId){ /* 확인한 다음 실행: 원본 정리 */
-    return setMeta({state:'cleaned',at:Date.now(),n:data.size,tries:meta.tries||1}).then(function(){ legacyKeys.forEach(lsDel); state='cleaned'; });
+  if(st==='verified'){
+    var v0=meta.verifiedAt||meta.at||0; kv.cleanupAt=v0+DAYS14;
+    if(!legacyKeys.length||now-v0>=DAYS14){ /* 확인한 지 14일이 지났거나 정리할 사본이 없음 */
+      return setMeta({state:'cleaned',at:now,verifiedAt:v0,n:data.size,tries:meta.tries||1}).then(function(){ legacyKeys.forEach(lsDel); state='cleaned'; kv.state='cleaned'; });
+    }
   }
-  if(st==='verified'&&!legacyKeys.length){ return setMeta({state:'cleaned',at:Date.now(),n:data.size,tries:meta.tries||1}).then(function(){ state='cleaned'; }); }
 }
+var waitN=0;
+function startW(n){ waitN=n; return start(true); }
 function start(again){
   return readAll().then(function(rows){
     var metaRaw=rows.get(META), meta=null; try{ meta=metaRaw?JSON.parse(metaRaw):null; }catch(e){ meta=null; }
@@ -862,7 +870,7 @@ function start(again){
       return doMigrate(1);
     }
     if(meta.state==='failed'){ if((meta.tries||0)>=MAX_TRIES){ state='failed'; return; } return doMigrate((meta.tries||0)+1); }
-    if(meta.state==='copied') return doMigrate((meta.tries||0)+1);
+    if(meta.state==='copied') return doMigrate((meta.tries||0)+1,waitN);
     return reconcile(meta,data,legacyKeys);
   });
 }
@@ -895,17 +903,24 @@ var kv={
   getItem:function(k){ if(mode!=='idb'||!isData(k)) return lsGet(k); return map.has(k)?map.get(k):null; },
   setItem:function(k,v){ v=String(v);
     if(mode!=='idb'||!isData(k)){ if(!ls) throw new Error('storage unavailable'); ls.setItem(k,v); return; }
-    map.set(k,v); if(state!=='cleaned') lsSet(k,v); queue(k,v); },
+    map.set(k,v); queue(k,v); },
   removeItem:function(k){
     if(mode!=='idb'||!isData(k)){ lsDel(k); return; }
-    map.delete(k); if(state!=='cleaned') lsDel(k); queue(k,null); },
+    map.delete(k); queue(k,null); },
   flush:flush,
-  info:function(){ return {mode:mode,state:state,count:map.size,verified:lsGet(FLAG)==='1'}; },
+  persist:'pending', cleanupAt:0,
+  info:function(){ return {mode:mode,state:state,count:map.size,verified:lsGet(FLAG)==='1',cleanupAt:kv.cleanupAt,persist:kv.persist}; },
   onError:null
 };
 window.addEventListener('pagehide',flush);
 document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='hidden') flush(); });
-kv.ready=init().then(function(){ kv.state=state; kv.notice=notice; kv.mode=mode; });
+function askPersist(){ /* 브라우저에 "이 저장소는 함부로 지우지 마세요"를 조용히 요청. 거절·미지원이어도 아무 문제 없음 */
+  try{ var ns=navigator.storage; if(!ns||typeof ns.persist!=='function'||typeof ns.persisted!=='function'){ kv.persist='unsupported'; return; }
+    ns.persisted().then(function(p){ if(p){ kv.persist='granted'; return; }
+      var last=+lsGet(ASK)||0, now=Date.now(); if(last&&now-last<86400000&&now>=last){ kv.persist='denied'; return; }
+      lsSet(ASK,String(now)); return ns.persist().then(function(g){ kv.persist=g?'granted':'denied'; }); }).catch(function(){ kv.persist='unsupported'; }); }
+  catch(e){ kv.persist='unsupported'; } }
+kv.ready=init().then(function(){ kv.state=state; kv.notice=notice; kv.mode=mode; if(mode==='idb') setTimeout(askPersist,0); else kv.persist='unsupported'; });
 window.kv=kv;
 })();
 </script>
@@ -2255,9 +2270,13 @@ const FIX_LABEL='그림에 제가 드리지 않은 글자가 들어갔어요. �
 const FIX_DRAW=()=>`설명 말고 이미지로 그려 주세요. 방금 드린 장면을 ${ratioText()} 그림 한 장으로 만들어 주세요.`;
 
 
-function storageInfoText(){ let i={mode:'ls',state:'none',count:0}; try{ i=kv.info(); }catch(_){}
-  if(i.mode==='idb') return `이 브라우저의 새 저장소(IndexedDB)에 저장 중이에요 ✓ 저장된 항목 ${i.count}개. `+(i.state==='verified'?'기존 저장 내용을 옮겨서 똑같은지 확인했어요. 원래 있던 사본은 다음에 열 때 정리돼요.':'기존 저장 내용 옮기기와 정리가 끝났어요.');
-  return i.state==='failed'?'새 저장소로 옮기지 못해서 이 브라우저의 기본 저장소에 그대로 저장 중이에요. 기존 작업은 그대로 있어요.':'이 브라우저의 기본 저장소에 저장 중이에요. (새 저장소를 쓸 수 없는 환경이에요)'; }
+function storageInfoText(){ let i={mode:'ls',state:'none',count:0,persist:'pending'}; try{ i=kv.info(); }catch(_){}
+  if(i.mode!=='idb') return i.state==='failed'?'새 저장소로 옮기지 못해서 이 브라우저의 기본 저장소에 그대로 저장 중이에요. 기존 작업은 그대로 있어요.':'이 브라우저의 기본 저장소에 저장 중이에요. (새 저장소를 쓸 수 없는 환경이에요)';
+  const dt=i.cleanupAt?new Date(i.cleanupAt):null, day=dt?`${dt.getMonth()+1}월 ${dt.getDate()}일`:'';
+  const a=`이 브라우저의 새 저장소(IndexedDB)에 저장 중이에요 ✓ 저장된 항목 ${i.count}개.`;
+  const b=i.state==='verified'?`기존 저장 내용을 옮겨서 똑같은지 확인했어요. 원래 사본은 ${day}에 정리돼요(그때까지는 예전 방식으로 되돌려도 작업이 보여요).`:'기존 저장 내용 옮기기와 정리가 끝났어요.';
+  const p={granted:'브라우저 저장 보호: 켜짐 ✓ (브라우저가 임의로 지우지 않아요)',denied:'브라우저 저장 보호: 요청했지만 허용되지 않았어요. 작업은 정상적으로 저장돼요.',unsupported:'브라우저 저장 보호: 이 브라우저는 지원하지 않아요. 작업은 정상적으로 저장돼요.'}[i.persist]||'브라우저 저장 보호: 확인하는 중이에요.';
+  return a+' '+b+' '+p; }
 function helpHTML(){
   const ai = STANDALONE
     ? `<b>이 파일 버전은 Gemini API 키로 AI를 써요.</b> 위쪽 <b>"API 키 설정"</b>을 열고 키를 붙여 넣은 뒤 저장하면 오른쪽 위에 초록 점과 "Gemini 연결됨"이 떠요.<br>키 받는 법: <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> 접속 → 구글 로그인 → "Create API key" → 복사. Gemini는 대본·기획·글 만들기에만 쓰고, 그림은 ChatGPT에서 그려요.`
