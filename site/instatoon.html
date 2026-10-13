@@ -625,6 +625,36 @@ details.more summary::after{position:absolute;right:0;top:14px}
 .gcards a{border-radius:12px;font-weight:600}
 .gfoot h2{font-size:17px}
 .adm-vars .chip{font-size:13px}
+/* ===== 리뉴얼 3단계: 컷 편집 ===== */
+.cut .edit{padding:4px 18px 18px}
+.ce-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:12px;flex-wrap:wrap}
+.ok-btn[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.cut.is-ok summary .sumt b::after{content:" · 확정 ✓";color:var(--ink);font-weight:800}
+.pvbox{margin:10px 0 0}
+.pvbox pre{margin:0;padding:12px 14px;background:var(--sunken);border-radius:10px;white-space:pre-wrap;word-break:break-word;font:13px/1.6 var(--sans);color:var(--ink-2);max-height:260px;overflow:auto}
+.cf{margin-top:2px}
+.clab{display:block;font-size:13.5px;font-weight:800;margin:18px 0 6px}.clab small{font-weight:500;color:var(--muted);margin-left:4px}
+.cf .lab-row{align-items:center}
+.cf .chips{margin:0 0 4px}
+.side-sel{width:auto;min-height:36px;padding:4px 10px;font-size:14px;margin-top:12px}
+.dl-rows{display:grid;gap:8px}
+.dl-row{display:grid;grid-template-columns:minmax(0,22%) minmax(0,22%) minmax(0,1fr) auto;gap:8px;align-items:center}
+.dl-row .in{min-height:44px;padding:8px 12px}
+.dl-n{font-size:12.5px;color:var(--muted);white-space:nowrap}.dl-n.warn{color:var(--ink);font-weight:800;text-decoration:underline}
+.dl-add{margin-top:8px}
+.hl-box{margin-top:10px}.hl-box:empty{display:none}
+.hl-lab{display:block;font-size:13px;font-weight:700;margin-bottom:6px}.hl-lab small{font-weight:500;color:var(--muted)}
+.hl-box .chip[aria-pressed="true"]{background:var(--surface);color:var(--ink);border-color:var(--ink);box-shadow:inset 0 -6px 0 var(--accent)}
+.hl-box .in{margin-top:6px}
+.chk{display:flex;align-items:center;gap:8px;margin:14px 0 4px;font-size:14.5px;cursor:pointer}.chk input{width:18px;height:18px;accent-color:var(--ink)}
+.addrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:18px;padding-top:14px;border-top:1px dashed var(--line-2)}
+.addlab{font-size:13px;font-weight:800;color:var(--muted);margin-right:2px}
+.addrow .chip{border-style:dashed;color:var(--ink-2)}
+.rwbox{margin-top:16px}.rwbox>summary{cursor:pointer;font-size:13.5px;font-weight:700;color:var(--muted);list-style:none}.rwbox>summary::-webkit-details-marker{display:none}.rwbox>summary::after{content:" ＋"}.rwbox[open]>summary::after{content:" －"}
+.rwbox .rewrite{margin-top:8px}
+.sumchips{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}.sumchips:empty{display:none}
+.sc{font-size:12.5px;line-height:1.4;padding:1px 8px;border:1px solid var(--line);border-radius:6px;color:var(--ink-2);white-space:nowrap}.sc i{font-style:normal;color:var(--muted);margin-right:4px}
+@media (max-width:640px){.dl-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr);}.dl-row .dl-text{grid-column:1/-1}.dl-row .dl-n{grid-column:1/-1;margin-top:-4px}.cut .edit{padding:4px 12px 14px}}
 /* 정리: 입구 하나씩 */
 .keyrow{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:48px;padding:12px 16px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);font:800 14px/1.4 var(--sans);text-align:left;cursor:pointer}
 .keyrow:hover{border-color:var(--ink)}
@@ -899,7 +929,7 @@ function init(){
     };
   });
 }
-function queue(k,v){ dirty.set(k,v); clearTimeout(timer); timer=setTimeout(flush,120); }
+function queue(k,v){ dirty.set(k,v); clearTimeout(timer); timer=setTimeout(flush,40); }
 function fail(batch,e){ writing=false; batch.forEach(function(v,k){ if(v!==null) lsSet(k,v); else lsDel(k); }); try{ if(kv.onError) kv.onError(e); }catch(_){} }
 function flush(){
   clearTimeout(timer); if(writing||!dirty.size||!db||mode!=='idb') return;
@@ -922,7 +952,7 @@ var kv={
   info:function(){ return {mode:mode,state:state,count:map.size,verified:lsGet(FLAG)==='1',cleanupAt:kv.cleanupAt,persist:kv.persist}; },
   onError:null
 };
-window.addEventListener('pagehide',flush);
+window.addEventListener('pagehide',flush); window.addEventListener('beforeunload',flush);
 document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='hidden') flush(); });
 function askPersist(){ /* 브라우저에 "이 저장소는 함부로 지우지 마세요"를 조용히 요청. 거절·미지원이어도 아무 문제 없음 */
   try{ var ns=navigator.storage; if(!ns||typeof ns.persist!=='function'||typeof ns.persisted!=='function'){ kv.persist='unsupported'; return; }
@@ -1457,6 +1487,101 @@ function checkCut(c,i,n){
 }
 const badgesHTML=(c,i,n)=>checkCut(c,i,n).map(([k,m])=>`<span class="bdg ${k}">${m}</span>`).join('');
 const fieldName=f=>({title:'제목',bubble:'말풍선',sub:'보조 문구',sfx:'효과음'})[f]||f;
+/* ---------- 앱 2단계 · 컷 편집 (리뉴얼 3단계) ----------
+   기본 칸 4개(등장인물·대사·그림 설명·화면 구도)만 보이고, 나머지는 값이 있으면 항상 보이고 비어 있으면 "+ 추가" 뒤에 둔다.
+   데이터는 기존과 같은 칸(title·highlight·sub·bubble·sfx·caption·extras·panels …)에 그대로 저장하고, 새 칸은 선택 항목(없어도 됨)이다. */
+let CUT_EXTRA_PROMPT=false; /* 새 칸(등장인물·표정·배경·달라진 점·제외할 것)을 그림 프롬프트에 넣을지. 문장 승인 전까지 꺼 둠 → 꺼져 있으면 프롬프트가 한 글자도 바뀌지 않음 */
+const KIND_LABEL={say:'',think:'속마음',shout:'외침',whisper:'속삭임',shaky:'떨림'};
+const KIND_NAME={say:'보통',think:'속마음',shout:'외침',whisper:'속삭임',shaky:'떨림'};
+const DETAIL_CHIPS=['땀방울','반짝이','집중선','분노 마크','물음표','느낌표','당황 표시'];
+const AVOID_CHIPS=['배경 속 사람','간판·글씨','로고','반려동물'];
+const OPT_FIELDS=[['title','제목(내레이션)','선택 · 표지와 꼭 필요한 컷만'],['sfx','효과음',''],['sub','작은 글씨','제목 아래'],['caption','자막 박스','시간·장소'],['extras','디테일',''],['panels','칸 나누기','비우면 한 장면'],['emotion','표정·감정','예: 당황, 땀 흘림'],['place','배경·시간대','예: 빵집 진열대 앞, 오후 3시'],['same','앞 컷과 같은 배경 유지',''],['diff','이 컷에서 달라진 점','예: 진열대가 텅 비었어요'],['avoid','제외할 것','기본은 비어 있어요']];
+const OPT_PH={sfx:'쾅',caption:'예: 오후 11시 편집 작업',panels:'예: 위 큰 칸 전신, 오른쪽 아래 작은 칸 놀란 얼굴',emotion:'예: 당황, 땀 흘림',place:'예: 빵집 진열대 앞, 오후 3시',diff:'예: 진열대가 텅 비었어요'};
+const shownF={}, dlRest={}, pvOpen={};
+const castCodes=()=>[...peopleIdx().map(k=>['p'+k,person(k).role||whoLabel(k)]),...(castText()?[['cast','조연']]:[])];
+const castNames=c=>{ const all=castCodes(); return (c.chars||[]).map(code=>(all.find(x=>x[0]===code)||[])[1]).filter(Boolean); };
+function cutExtraLines(c,i){
+  if(!CUT_EXTRA_PROMPT) return '';
+  const o=[], ch=castNames(c); if(ch.length) o.push(`등장인물: ${ch.join(', ')}`);
+  if(String(c.emotion||'').trim()) o.push(`표정·감정: ${c.emotion.trim()}`);
+  const bg=[String(c.place||'').trim(), c.sameBg&&i>0?'앞 컷과 같은 배경 유지':''].filter(Boolean).join(' · '); if(bg) o.push(`배경·시간대: ${bg}`);
+  if(i>0&&String(c.diff||'').trim()) o.push(`앞 컷과 달라진 점: ${c.diff.trim()}`);
+  if(String(c.avoid||'').trim()) o.push(`그리지 말 것: ${c.avoid.trim()}`);
+  return o.length?o.join('\n')+'\n':'';
+}
+const optFilled=(c,k,i)=>k==='same'?!!c.sameBg&&i>0:k==='title'?!!String(c.title||'').trim():!!String(c[k==='same'?'sameBg':k]||'').trim();
+const optAvail=(k,i)=>!(i===0&&(k==='same'||k==='diff'));
+const detList=c=>String(c.extras||'').split(/[,，]/).map(x=>x.trim()).filter(Boolean);
+const titleWords=c=>[...new Set(String(c.title||'').split(/\s+/).map(x=>x.trim()).filter(Boolean))];
+function bubbleFrom(rows,rest){ return [...rows.filter(r=>String(r.text).trim()).map(r=>{ const w=String(r.who||'').trim(), k=KIND_LABEL[r.kind]||''; return (w||k)?`${w}${k?`(${k})`:''}: ${String(r.text).trim()}`:String(r.text).trim(); }),...rest].join('\n'); }
+function dlRowHTML(i,k,r){ const n=len(r.text||'');
+  return `<div class="dl-row"><input class="in dl-who" data-dl="${k}" list="dl-names" value="${esc(r.who||'')}" placeholder="인물" aria-label="${k+1}번째 대사 인물"><select class="in dl-kind" data-dl="${k}" aria-label="${k+1}번째 말풍선 종류">${Object.entries(KIND_NAME).map(([v,nm])=>`<option value="${v}" ${(r.kind||'say')===v?'selected':''}>${nm}</option>`).join('')}</select><input class="in dl-text" data-dl="${k}" value="${esc(r.text||'')}" placeholder="대사" aria-label="${k+1}번째 대사"><span class="dl-n${n>20?' warn':''}">${n}/20자</span></div>`; }
+function optFieldHTML(c,i,k){
+  const id=`c${i}-${k}`, nm=OPT_FIELDS.find(x=>x[0]===k);
+  const head=(extra='')=>`<div class="lab-row"><label class="f" for="${id}">${nm[1]}${nm[2]?` <small>${nm[2]}</small>`:''}</label>${extra}</div>`;
+  if(k==='title') return `<div class="cf" data-k="title">${head(`<button type="button" class="btn sm" data-tidea="${i}">제목 아이디어 5개</button>`)}<div class="tideas" id="tideas-${i}"></div><div class="status" id="st-tidea-${i}"></div><textarea class="in" id="${id}" data-f="title" rows="2">${esc(c.title)}</textarea>${hlHTML(c,i)}</div>`;
+  if(k==='extras') return `<div class="cf" data-k="extras">${head()}<div class="chips det-chips">${DETAIL_CHIPS.map(w=>`<button type="button" class="chip" data-cdet="${i}|${esc(w)}" aria-pressed="${detList(c).includes(w)}">${w}</button>`).join('')}</div><input class="in" id="${id}" data-f="extras" value="${esc(c.extras||'')}" placeholder="직접 입력 예: 손글씨 '두근'"></div>`;
+  if(k==='same') return `<div class="cf" data-k="same"><label class="chk"><input type="checkbox" data-csame="${i}" ${c.sameBg?'checked':''}> 앞 컷과 같은 배경 유지</label></div>`;
+  if(k==='avoid') return `<div class="cf" data-k="avoid">${head()}<div class="chips det-chips">${AVOID_CHIPS.map(w=>`<button type="button" class="chip" data-cavoid="${i}|${esc(w)}" aria-pressed="${String(c.avoid||'').split(/[,，]/).map(x=>x.trim()).includes(w)}">${w}</button>`).join('')}</div><input class="in" id="${id}" data-f="avoid" value="${esc(c.avoid||'')}"></div>`;
+  return `<div class="cf" data-k="${k}">${head()}<input class="in" id="${id}" data-f="${k}" value="${esc(c[k]||'')}" placeholder="${esc(OPT_PH[k]||'')}"></div>`;
+}
+function hlHTML(c,i){ const w=titleWords(c); if(!w.length) return `<div class="hl-box" id="hl-${i}"></div>`;
+  const inList=w.includes(c.highlight||'');
+  return `<div class="hl-box" id="hl-${i}"><span class="hl-lab">노란 강조 <small>단어를 눌러 지정 · 다시 누르면 해제</small></span><div class="chips">${w.map(x=>`<button type="button" class="chip" data-chw="${i}|${esc(x)}" aria-pressed="${c.highlight===x}">${esc(x)}</button>`).join('')}</div>${c.highlight&&!inList?`<input class="in" data-f="highlight" value="${esc(c.highlight)}" aria-label="노란 강조(직접 입력)">`:''}</div>`; }
+function sumChipsHTML(c,i){
+  const t=(s,n=10)=>{ s=String(s||'').replace(/\s+/g,' ').trim(); return s.length>n?s.slice(0,n)+'…':s; }, o=[];
+  const ch=castNames(c); if(ch.length) o.push(['인물',ch.join('·')]);
+  if(c.sfx) o.push(['효과음',t(c.sfx,6)]); if(c.sub) o.push(['작은 글씨',t(c.sub)]); if(c.caption) o.push(['자막',t(c.caption)]); if(c.extras) o.push(['디테일',t(c.extras)]); if(c.panels) o.push(['칸 나누기',t(c.panels,8)]);
+  if(c.emotion) o.push(['표정',t(c.emotion,8)]); if(c.place) o.push(['배경',t(c.place,8)]); if(c.sameBg&&i>0) o.push(['배경','앞 컷과 같음']); if(i>0&&c.diff) o.push(['달라진 점',t(c.diff,8)]); if(c.avoid) o.push(['제외',t(c.avoid,8)]);
+  return o.map(([k,v])=>`<span class="sc"><i>${k}</i>${esc(v)}</span>`).join(''); }
+function cutEditHTML(c,i){
+  const rows=talk(c); dlRest[i]=lines(c.bubble).slice(3);
+  const sh=(shownF[i]=shownF[i]||new Set());
+  const shown=OPT_FIELDS.filter(([k])=>optAvail(k,i)&&(optFilled(c,k,i)||sh.has(k))), hidden=OPT_FIELDS.filter(([k])=>optAvail(k,i)&&!optFilled(c,k,i)&&!sh.has(k));
+  const codes=castCodes();
+  return `<div class="ce-head"><button type="button" class="btn sm ok-btn" data-cok="${i}" aria-pressed="${!!c.ok}">${c.ok?'확정됨 ✓':'이 컷 확정'}</button><button type="button" class="btn sm ghost" data-cpv="${i}" aria-expanded="${!!pvOpen[i]}">이 컷 프롬프트 ${pvOpen[i]?'닫기':'보기'}</button></div>
+  <div class="pvbox" id="pv-${i}" ${pvOpen[i]?'':'hidden'}><pre>${esc(cutPrompt(c,i))}</pre></div>
+  <div class="cf" data-k="chars"><div class="lab-row"><span class="clab">등장인물 <small>이 컷에 나오는 사람 · 비우면 AI가 알아서</small></span></div><div class="chips">${codes.map(([code,nm])=>`<button type="button" class="chip" data-cchar="${i}|${code}" aria-pressed="${(c.chars||[]).includes(code)}">${esc(nm)}</button>`).join('')}</div></div>
+  <div class="cf" data-k="bubble"><div class="lab-row"><span class="clab">대사 <small>인물 · 종류 · 대사 (최대 3줄)</small></span><select class="in side-sel" data-f="bubbleSide" aria-label="첫 말풍선 위치"><option value="l" ${c.bubbleSide!=='r'?'selected':''}>첫 말풍선 왼쪽</option><option value="r" ${c.bubbleSide==='r'?'selected':''}>첫 말풍선 오른쪽</option></select></div>
+    <div class="dl-rows" data-rows="${i}">${(rows.length?rows:[{who:'',text:'',kind:'say'}]).map((r,k)=>dlRowHTML(i,k,r)).join('')}</div><button type="button" class="btn sm ghost dl-add" data-cdl="${i}" ${rows.length>=3?'hidden':''}>+ 대사 줄 추가</button></div>
+  <div class="cf" data-k="direction"><div class="lab-row"><label class="f" for="c${i}-dir">그림 설명 <small>그림 그릴 때 쓰여요</small></label></div><textarea class="in" id="c${i}-dir" data-f="direction" rows="2">${esc(c.direction)}</textarea></div>
+  <div class="cf" data-k="shot"><div class="lab-row"><label class="f" for="c${i}-shot">화면 구도</label></div><select class="in" id="c${i}-shot" data-f="shot">${SHOTS.map(s=>`<option ${c.shot===s?'selected':''}>${s}</option>`).join('')}</select></div>
+  ${shown.map(([k])=>optFieldHTML(c,i,k)).join('')}
+  ${hidden.length?`<div class="addrow"><span class="addlab">+ 추가</span>${hidden.map(([k,nm])=>`<button type="button" class="chip" data-cadd="${i}|${k}">${nm}</button>`).join('')}</div>`:''}
+  <details class="rwbox"><summary>AI에게 부탁하기</summary><div class="rewrite"><input class="in" id="rw-${i}" placeholder="더 웃기게, 더 짧게, 고객 말투로… (이 컷만 고쳐요)"><button class="btn sm" data-act="rewrite" data-i="${i}">이 컷 고치기</button></div></details>
+  <div class="status" id="st-cut-${i}"></div>`;
+}
+const okCount=()=>cuts().filter(c=>c.ok).length;
+function refreshCut(i){
+  const d=document.querySelector(`.cut[data-cut="${i}"]`), c=cuts()[i]; if(!d||!c) return;
+  d.querySelector('.mini').innerHTML=frameHTML(c,i); d.querySelector('.sumt div').textContent=c.title.replace(/\n/g,' ');
+  const bd=$('#bdg-'+i); if(bd) bd.innerHTML=badgesHTML(c,i,cuts().length);
+  const sc=d.querySelector('.sumchips'); if(sc) sc.innerHTML=sumChipsHTML(c,i);
+  d.classList.toggle('is-ok',!!c.ok);
+  const pv=d.querySelector('.pvbox pre'); if(pv&&pvOpen[i]) pv.textContent=cutPrompt(c,i);
+  const oc=$('#okcount'); if(oc) oc.textContent=`확정 ${okCount()}/${cuts().length}`;
+}
+function reEdit(i){ const d=document.querySelector(`.cut[data-cut="${i}"]`); if(!d) return; const ed=d.querySelector('.edit'); ed.innerHTML=cutEditHTML(cuts()[i],i); refreshCut(i); }
+function cutAction(b){
+  const d=b.dataset, parse=s=>{ const j=s.indexOf('|'); return [+s.slice(0,j),s.slice(j+1)]; };
+  if(d.cchar){ const [i,code]=parse(d.cchar), c=cuts()[i], a=new Set(c.chars||[]); a.has(code)?a.delete(code):a.add(code); c.chars=[...a]; save(); reEdit(i); renderPhone(); return true; }
+  if(d.cdet){ const [i,w]=parse(d.cdet), c=cuts()[i], a=detList(c), p=a.indexOf(w); if(p>=0) a.splice(p,1); else a.push(w); c.extras=a.join(', '); save(); reEdit(i); return true; }
+  if(d.cavoid){ const [i,w]=parse(d.cavoid), c=cuts()[i], a=String(c.avoid||'').split(/[,，]/).map(x=>x.trim()).filter(Boolean), p=a.indexOf(w); if(p>=0) a.splice(p,1); else a.push(w); c.avoid=a.join(', '); save(); reEdit(i); return true; }
+  if(d.chw){ const [i,w]=parse(d.chw), c=cuts()[i]; c.highlight=c.highlight===w?'':w; save(); const hb=$('#hl-'+i); if(hb) hb.outerHTML=hlHTML(c,i); refreshCut(i); renderPhone(); return true; }
+  if(d.cadd){ const [i,k]=parse(d.cadd); (shownF[i]=shownF[i]||new Set()).add(k); reEdit(i); setTimeout(()=>{ const el=document.querySelector(`.cut[data-cut="${i}"] [data-k="${k}"] .in, .cut[data-cut="${i}"] [data-k="${k}"] input`); if(el) el.focus(); },0); return true; }
+  if(d.cok){ const i=+d.cok, c=cuts()[i]; c.ok=!c.ok; save(); reEdit(i); return true; }
+  if(d.cpv){ const i=+d.cpv; pvOpen[i]=!pvOpen[i]; reEdit(i); return true; }
+  if(d.cdl){ const i=+d.cdl, box=document.querySelector(`[data-rows="${i}"]`); if(box&&box.children.length<3){ box.insertAdjacentHTML('beforeend',dlRowHTML(i,box.children.length,{who:'',text:'',kind:'say'})); const nx=box.lastElementChild.querySelector('.dl-text'); if(nx) nx.focus(); } if(box&&box.children.length>=3) b.hidden=true; return true; }
+  return false;
+}
+function cutInput(el){
+  if(el.dataset.dl!==undefined){ const box=el.closest('.edit'), i=+el.closest('.cut').dataset.cut, c=cuts()[i];
+    const rows=[...box.querySelectorAll('.dl-row')].map(r=>({who:r.querySelector('.dl-who').value,kind:r.querySelector('.dl-kind').value,text:r.querySelector('.dl-text').value}));
+    c.bubble=bubbleFrom(rows,dlRest[i]||[]); const row=el.closest('.dl-row'), n=len(row.querySelector('.dl-text').value), cn=row.querySelector('.dl-n'); if(cn){ cn.textContent=n+'/20자'; cn.classList.toggle('warn',n>20); }
+    save(); refreshCut(i); pv=i; renderPhone(); return true; }
+  if(el.dataset.csame!==undefined){ const i=+el.dataset.csame, c=cuts()[i]; c.sameBg=el.checked; save(); refreshCut(i); return true; }
+  return false;
+}
 function vEdit(){
   const T=S.toon,cs=cuts(),n=cs.length;
   if(!n){ $('#main').innerHTML=`<section class="panel"><div class="empty">아직 만든 인스타툰이 없어요.<br><br><button class="btn pri" data-step="input">내 이야기 적으러 가기</button></div></section>`; return; }
@@ -1472,34 +1597,12 @@ function vEdit(){
     <div class="hooks" style="margin-bottom:22px">${T.hooks.map((h,k)=>`<button class="hook" data-hook="${k}" aria-pressed="${T.hookIdx===k}"><span class="t">${esc(h)}</span><span class="s">${T.hookIdx===k?'사용 중':'이걸로'}</span></button>`).join('')}</div>`:''}
 
     <div class="story-m" id="storyM">${storyHTML()}</div>
-    <label class="f" style="margin-top:0">컷별 대본</label>
+    <datalist id="dl-names">${castCodes().map(([,nm])=>`<option value="${esc(nm)}">`).join('')}</datalist>
+    <label class="f" style="margin-top:0">컷별 대본 <small id="okcount">확정 ${okCount()}/${n}</small></label>
     <div class="cutlist">${cs.map((c,i)=>`
-      <details class="cut" data-cut="${i}" ${openCut===i?'open':''}>
-        <summary><div class="mini">${frameHTML(c,i)}</div><div class="sumt"><b>${i+1}컷<span>${esc(c.role)}</span></b><div>${esc(c.title.replace(/\n/g,' '))}</div></div><span class="badges" id="bdg-${i}">${badgesHTML(c,i,n)}</span></summary>
-        <div class="edit">
-          <div class="lab-row"><label class="f" for="c${i}-title">제목(내레이션) <small>선택 · 표지와 꼭 필요한 컷만</small></label><button class="btn sm" data-tidea="${i}">제목 아이디어 5개</button></div><div class="tideas" id="tideas-${i}"></div><div class="status" id="st-tidea-${i}"></div>
-          <textarea class="in" id="c${i}-title" data-f="title" rows="2">${esc(c.title)}</textarea>
-          <div class="g3">
-            <div class="span2"><label class="f" for="c${i}-bb">대사 <small>한 줄에 하나 · 인물: 대사 · 최대 3줄 · 종류: (속마음) (외침) (속삭임) (떨림)</small></label><textarea class="in" id="c${i}-bb" data-f="bubble" rows="3" placeholder="친구: 너 그거 아직도 다 직접 해?&#10;주인공(떨림): 언, 언제부터 있었어?&#10;친구(속삭임): 아까부터.">${esc(c.bubble)}</textarea></div>
-            <div><label class="f" for="c${i}-side">첫 말풍선 위치</label><select class="in" id="c${i}-side" data-f="bubbleSide"><option value="l" ${c.bubbleSide!=='r'?'selected':''}>왼쪽</option><option value="r" ${c.bubbleSide==='r'?'selected':''}>오른쪽</option></select></div>
-          </div>
-          <div class="g3">
-            <div><label class="f" for="c${i}-hl">노란 강조</label><input class="in" id="c${i}-hl" data-f="highlight" value="${esc(c.highlight)}"></div>
-            <div><label class="f" for="c${i}-fx">효과음</label><input class="in" id="c${i}-fx" data-f="sfx" value="${esc(c.sfx)}" placeholder="쾅"></div>
-            <div><label class="f" for="c${i}-shot">화면 구도</label><select class="in" id="c${i}-shot" data-f="shot">${SHOTS.map(s=>`<option ${c.shot===s?'selected':''}>${s}</option>`).join('')}</select></div>
-          </div>
-          <label class="f" for="c${i}-sub">작은 글씨 <small>선택</small></label><input class="in" id="c${i}-sub" data-f="sub" value="${esc(c.sub)}">
-          <div class="g2">
-            <div><label class="f" for="c${i}-cap">자막 박스 <small>선택</small></label><input class="in" id="c${i}-cap" data-f="caption" value="${esc(c.caption||'')}" placeholder="예: 오후 11시 편집 작업"></div>
-            <div><label class="f" for="c${i}-ex">디테일 <small>선택</small></label><input class="in" id="c${i}-ex" data-f="extras" value="${esc(c.extras||'')}" placeholder="예: 땀방울, 손글씨 \'두근\'"></div>
-          </div>
-          <label class="f" for="c${i}-pn">칸 나누기 <small>선택 · 비우면 한 장면</small></label>
-          <input class="in" id="c${i}-pn" data-f="panels" value="${esc(c.panels||'')}" placeholder="예: 위 큰 칸 전신, 오른쪽 아래 작은 칸 놀란 얼굴">
-          <label class="f" for="c${i}-dir">그림 설명 <small>그림 그릴 때 쓰여요</small></label>
-          <textarea class="in" id="c${i}-dir" data-f="direction" rows="2">${esc(c.direction)}</textarea>
-          <div class="rewrite"><input class="in" id="rw-${i}" placeholder="AI에게 부탁하기: 더 웃기게, 더 짧게, 고객 말투로…"><button class="btn sm" data-act="rewrite" data-i="${i}">이 컷 고치기</button></div>
-          <div class="status" id="st-cut-${i}"></div>
-        </div>
+      <details class="cut${c.ok?' is-ok':''}" data-cut="${i}" ${openCut===i?'open':''}>
+        <summary><div class="mini">${frameHTML(c,i)}</div><div class="sumt"><b>${i+1}컷<span>${esc(c.role)}</span></b><div>${esc(c.title.replace(/\n/g,' '))}</div><div class="sumchips">${sumChipsHTML(c,i)}</div></div><span class="badges" id="bdg-${i}">${badgesHTML(c,i,n)}</span></summary>
+        <div class="edit">${cutEditHTML(c,i)}</div>
       </details>`).join('')}</div>
 
     <div class="pre" id="pre" style="margin:0 0 14px"><div class="lab-row"><b style="font-size:15px">그림 그리기 전에 확인</b><button class="btn sm" data-act="spell">AI 맞춤법 검사</button></div>
@@ -1615,12 +1718,12 @@ function cutPrompt(c,i){ const n=cuts().length, tl=lines(c.title);
 비율: ${ratioText()} (앞 컷과 똑같이)
 구도: ${c.shot||'미디엄샷'}
 장면: ${c.direction||'(장면 설명을 적어 주세요)'}
-${c.panels?`칸 나누기: ${c.panels}\n`:''}${c.extras?`디테일: ${c.extras} (글자로 된 부분은 빼고 그림만)\n`:''}${c.caption?'비워 둘 자리: 왼쪽 가운데 (자막 박스가 들어가요)\n':''}${c.sfx?'연출: 긴장감 있는 집중선 효과(글자 없이)\n':''}${c.bubble?`비워 둘 자리: 말풍선 ${talk(c).length}개가 들어갈 여백(말하는 인물 머리 근처)\n`:''}${c.title?'윗부분 4분의 1은 비워 두고, ':''}글자는 넣지 마세요.`;
+${cutExtraLines(c,i)}${c.panels?`칸 나누기: ${c.panels}\n`:''}${c.extras?`디테일: ${c.extras} (글자로 된 부분은 빼고 그림만)\n`:''}${c.caption?'비워 둘 자리: 왼쪽 가운데 (자막 박스가 들어가요)\n':''}${c.sfx?'연출: 긴장감 있는 집중선 효과(글자 없이)\n':''}${c.bubble?`비워 둘 자리: 말풍선 ${talk(c).length}개가 들어갈 여백(말하는 인물 머리 근처)\n`:''}${c.title?'윗부분 4분의 1은 비워 두고, ':''}글자는 넣지 마세요.`;
   return `${i+1}컷 / 총 ${n}컷을 그려 주세요. 앞 컷과 같은 주인공, 같은 그림체, 같은 글자 규칙이에요.
 비율: ${ratioText()} (앞 컷과 똑같이)
 구도: ${c.shot||'미디엄샷'}
 장면: ${c.direction||'(장면 설명을 적어 주세요)'}
-${c.panels?`칸 나누기: ${c.panels}\n`:''}${c.extras?`디테일: ${c.extras}\n`:''}${c.sfx?'연출: 긴장감 있는 집중선 효과\n':''}
+${cutExtraLines(c,i)}${c.panels?`칸 나누기: ${c.panels}\n`:''}${c.extras?`디테일: ${c.extras}\n`:''}${c.sfx?'연출: 긴장감 있는 집중선 효과\n':''}
 [이 컷에 들어갈 글자 - 정확히 이대로]
 ${c.title?`제목 (위쪽 가운데${tl.length>1?', 두 줄':''}): ${tl.map(l=>`"${l}"`).join(' / ')}`:'제목 없음 (대사 중심 컷, 위쪽도 그림으로 채워요)'}${c.highlight&&c.title?`\n노란 형광펜 강조: "${c.highlight}"`:''}${c.sub?`\n작은 글씨 (제목 아래): "${c.sub}"`:''}${talk(c).map((t,k)=>`\n${({think:'생각 말풍선(뭉게구름 모양, 동그라미 꼬리)',shout:'외침 말풍선(가장자리 뾰족한 폭발형, 글씨 크고 굵게)',whisper:'속삭임 말풍선(점선 테두리, 글씨 작게)',shaky:'떨림 말풍선(물결치는 테두리, 글씨 끝이 떨리게)'})[t.kind]||'말풍선'} ${k+1}${t.who?` - ${t.who}의 말, 꼬리는 ${t.who} 쪽`:''}: "${t.text}"`).join('')}${c.sfx?`\n효과음: "${c.sfx}"`:''}${c.caption?`\n자막 박스 (흰 네모에 검은 테두리, 왼쪽): "${c.caption}"`:''}
 위 문구와 디테일의 작은따옴표 속 손글씨 말고 다른 글자는 넣지 마세요.`; }
@@ -2479,6 +2582,7 @@ function updateMake(){ const b=$('#makeBtn'),s=$('#st-make'); if(!b) return; con
 async function run(btn,fn){ if(busy){ toast('아직 만드는 중이에요'); return; } if(STANDALONE&&!API.key&&btn.dataset.act!=='zip'){ openKeySheet(()=>run(btn,fn)); return; } btn.disabled=true; try{ await fn(); } finally{ if(document.body.contains(btn)) btn.disabled=false; renderPhone(); } }
 document.addEventListener('click',async e=>{
   const b=e.target.closest('button'); if(!b) return;
+  if(cutAction(b)) return;
   if(b.dataset.pv){ pv+=+b.dataset.pv; return renderPhone(); }
   if(b.dataset.todo) return goTodo();
   if(b.dataset.tour){ const d=b.dataset.tour; if(d==='end') return endTour(); if(d==='guide'){ endTour(); return toggleHelp(true); } if(d==='next'&&tourI>=TOUR().length-1) return endTour(); tourI+=d==='next'?1:-1; return showTour(d==='prev'?-1:1); }
@@ -2613,13 +2717,12 @@ document.addEventListener('input',e=>{
   if(el.dataset.info){ S.info[el.dataset.info]=el.value; save(); if(el.dataset.info==='type'){ const mb=document.querySelector('[data-act="monthMake"]'); if(mb) mb.disabled=!el.value.trim(); document.querySelectorAll('[data-ind]').forEach(c=>c.setAttribute('aria-pressed',c.dataset.ind===el.value)); updateMake(); } if(['name','type'].includes(el.dataset.info)) renderPhone(); return; }
   if(['tScale','tTilt','tColor','tOutline','hlColor','tShadow'].includes(el.id)){ const k={tScale:'titleScale',tTilt:'tTilt',tColor:'titleColor',tOutline:'tOutline',hlColor:'hlColor',tShadow:'tShadow'}[el.id];
     S.info[k]=el.type==='checkbox'?el.checked:(el.type==='range'?+el.value:el.value); if(el.id==='tScale') $('#tScaleV').textContent=el.value+'%'; if(el.id==='tTilt') $('#tTiltV').textContent=el.value+'°'; save(); clearTimeout(window._tt); window._tt=setTimeout(()=>{ drawAll(); renderPhone(); },100); return; }
+  if(cutInput(el)) return;
   if(el.dataset.f){
     const d=el.closest('.cut'),i=+d.dataset.cut,c=cuts()[i];
     c[el.dataset.f]=el.value; if(i===0&&el.dataset.f==='title'&&S.toon.hooks.length) S.toon.hooks[S.toon.hookIdx]=el.value;
     save();
-    d.querySelector('.mini').innerHTML=frameHTML(c,i);
-    d.querySelector('.sumt div').textContent=c.title.replace(/\n/g,' ');
-    $('#bdg-'+i).innerHTML=badgesHTML(c,i,cuts().length);
+    refreshCut(i); if(el.dataset.f==='title'){ const hb=$('#hl-'+i); if(hb) hb.outerHTML=hlHTML(c,i); }
     pv=i; renderPhone();
   }
 });
