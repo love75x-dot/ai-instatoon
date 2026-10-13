@@ -63,9 +63,20 @@ ok((hub.match(/<nav class="chips"[\s\S]*?<\/nav>/) || [''])[0].split('<a ').leng
 ok((hub.match(/<li class="post/g) || []).length === articles.length, '허브 글 카드 수 = 글 수');
 const dts = [...hub.matchAll(/<time datetime="([\d-]+)"/g)].map((m) => m[1]);
 ok(dts.every((d, i) => i === 0 || dts[i - 1] >= d), '허브 글 목록 최신순');
+// 10개씩 나누기는 화면에서만: HTML에는 글 링크가 전부 있고, 페이지 번호 자리는 hidden(JS가 꺼져 있으면 전체 목록이 보임), canonical은 /guide/ 그대로
+const postLinks = [...hub.matchAll(/<li class="post"[^>]*><a href="\/guide\/([a-z0-9-]+)\/"/g)].map((m) => m[1]);
+ok(postLinks.length === articles.length && new Set(postLinks).size === articles.length && articles.every((a) => postLinks.includes(a.slug)), `허브 HTML 안에 글 링크 ${articles.length}개가 모두 있음(${postLinks.length}개 발견)`);
+ok(!/<li class="post"[^>]* hidden/.test(hub), '허브 HTML에서 글 항목이 숨겨져 있지 않음(숨김은 자바스크립트가 화면에서만)');
+ok(/<nav class="pager" id="pager"[^>]* hidden>/.test(hub), '허브 페이지 번호 자리는 기본 hidden');
+ok(hub.includes('<link rel="canonical" href="' + ORIGIN + '/guide/">'), '허브 canonical은 /guide/ 그대로(?page= 주소는 canonical로 /guide/를 가리킴)');
 ok(articles.some((a) => a.image) || !hub.includes('<img '), '허브 목록에 그림 없음(image 지정 글이 없을 때)');
 ok(!/<img /.test((await get('/guide/how-to-make-instatoon/')).text), '글 페이지 상단에 그림 없음(image 지정 글 제외)');
 for (const u of ['/', ...pages]) { const t = (await get(u)).text.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g, ''); ok(!t.includes('콘텐츠 가이드'), `${u} 화면에 옛 이름(콘텐츠 가이드) 남음`); }
+// 공통 머리말: "메인으로" 버튼 없음, 로고는 첫 화면(/)으로, 검정 "인스타툰 만들기" 버튼 하나
+// 공통 머리말: "메인으로" 버튼 없음, 로고는 첫 화면(/)으로, 노트 목록은 검정 "인스타툰 만들기"만, 나머지는 보조 "인스타툰 노트" + 검정 "인스타툰 만들기"
+const MAKE = '<a class="hb pri" href="/" data-track="cta" data-loc="header" aria-label="인스타툰 만들기"><span class="hp">인스타툰&nbsp;</span>만들기</a>', NOTE = '<a class="hb" href="/guide/" aria-label="인스타툰 노트"><span class="hp">인스타툰&nbsp;</span>노트</a>';
+for (const u of ['/guide/', `/guide/${articles[0].slug}/`, '/about/', '/privacy/', '/terms/']) { const t = (await get(u)).text; ok(!/>메인으로</.test(t), `${u} 머리말에 메인으로 버튼 남음`); ok(t.includes('<a class="brand" href="/"'), `${u} 로고가 첫 화면(/)으로 연결`); ok(t.includes(MAKE), `${u} 검정 인스타툰 만들기 버튼`); ok(u === '/guide/' ? !t.includes(NOTE) : t.includes(NOTE + MAKE), `${u} 머리말 버튼 구성(${u === '/guide/' ? '만들기만' : '노트 → 만들기'})`); }
+const nf = fs.readFileSync(path.join(dep, '404.html'), 'utf8'); ok(!/>메인으로</.test(nf) && nf.includes('<a class="brand" href="/"') && nf.includes(NOTE + MAKE), '404 머리말');
 // 메인 → /guide/
 ok((await get('/')).text.includes('href="/guide/"'), '메인에 /guide/ 링크 없음');
 // sitemap
