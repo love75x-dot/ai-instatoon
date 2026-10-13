@@ -157,7 +157,7 @@ const FONTS = '<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigi
 export const header = (cur) => `<a class="skip" href="#main">본문 바로가기</a>
 <div class="wrap"><header class="topbar">
 <a class="brand" href="/" aria-label="${SITE} 메인으로"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><b>${SITE}</b></a>
-<nav class="nav" aria-label="주요 메뉴"><a class="btn" href="/">메인으로</a><a class="btn acc" href="/" data-track="cta" data-loc="header">인스타툰 만들기</a><a class="btn"${cur === 'guide' ? ' aria-current="page"' : ''} href="/guide/">인스타툰 노트</a></nav>
+<nav class="nav" aria-label="주요 메뉴"><a class="btn pri" href="/" data-track="cta" data-loc="header">인스타툰 만들기</a><a class="btn"${cur === 'guide' ? ' aria-current="page"' : ''} href="/guide/">인스타툰 노트</a></nav>
 </header></div>`;
 
 export const footer = `<footer><div class="wrap"><nav class="nav" aria-label="푸터 메뉴"><a href="/guide/">인스타툰 노트</a><a href="/" data-track="cta" data-loc="footer">인스타툰 만들기</a><a href="/about/">소개</a><a href="/privacy/">개인정보처리방침</a><a href="/terms/">이용안내</a><a href="/sitemap.xml">사이트맵</a></nav>

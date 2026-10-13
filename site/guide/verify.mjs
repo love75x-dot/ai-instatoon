@@ -66,6 +66,9 @@ ok(dts.every((d, i) => i === 0 || dts[i - 1] >= d), '허브 글 목록 최신순
 ok(articles.some((a) => a.image) || !hub.includes('<img '), '허브 목록에 그림 없음(image 지정 글이 없을 때)');
 ok(!/<img /.test((await get('/guide/how-to-make-instatoon/')).text), '글 페이지 상단에 그림 없음(image 지정 글 제외)');
 for (const u of ['/', ...pages]) { const t = (await get(u)).text.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g, ''); ok(!t.includes('콘텐츠 가이드'), `${u} 화면에 옛 이름(콘텐츠 가이드) 남음`); }
+// 공통 머리말: "메인으로" 버튼 없음, 로고는 첫 화면(/)으로, 검정 "인스타툰 만들기" 버튼 하나
+for (const u of ['/guide/', `/guide/${articles[0].slug}/`, '/about/', '/privacy/', '/terms/']) { const t = (await get(u)).text; ok(!/>메인으로</.test(t), `${u} 머리말에 메인으로 버튼 남음`); ok(t.includes('<a class="brand" href="/"'), `${u} 로고가 첫 화면(/)으로 연결`); ok(t.includes('<a class="btn pri" href="/" data-track="cta" data-loc="header">인스타툰 만들기</a>'), `${u} 검정 인스타툰 만들기 버튼`); }
+const nf = fs.readFileSync(path.join(dep, '404.html'), 'utf8'); ok(!/>메인으로</.test(nf) && nf.includes('<a class="brand" href="/"'), '404 머리말');
 // 메인 → /guide/
 ok((await get('/')).text.includes('href="/guide/"'), '메인에 /guide/ 링크 없음');
 // sitemap
