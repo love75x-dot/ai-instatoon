@@ -15,7 +15,7 @@ await page.goto(srv.base + '/'); await page.waitForTimeout(600);
 
 const result = await page.evaluate(() => {
   const out = {};
-  const base = () => { localStorage.removeItem('instatoon.photo.0'); localStorage.removeItem('instatoon.photo.1'); S = demoState('bakery'); S.info.ratio = '4:5'; return S; };
+  const base = () => { kv.removeItem('instatoon.photo.0'); kv.removeItem('instatoon.photo.1'); S = demoState('bakery'); S.info.ratio = '4:5'; return S; };
   const grab = () => {
     const r = { sheets: peopleIdx().map((k) => sheetPrompt(k)), setup: setupPrompt(), cuts: cuts().map((c, i) => cutPrompt(c, i)), end: endPrompt(),
       fix: { char: FIX_CHAR, text: FIX_TEXT, ratio: FIX_RATIO(), typo: FIX_TYPO, style: FIX_STYLE, label: FIX_LABEL, draw: FIX_DRAW() } };
@@ -30,7 +30,7 @@ const result = await page.evaluate(() => {
     '디테일없음': () => { S.info.details = []; },
     '디테일전부': () => { S.info.details = DETAILS.map((d) => d[0]); },
     '조연+캐릭터메모': () => { S.info.cast = '단골 할머니(흰 파마머리, 보라 카디건)'; S.info.locks = { 0: '안경은 항상 동그란 테', 1: '초록 앞치마' }; },
-    '사진첨부+로고': () => { localStorage.setItem('instatoon.photo.0', 'data:image/png;base64,AAAA'); prof().logo = 'data:image/png;base64,BBBB'; },
+    '사진첨부+로고': () => { kv.setItem('instatoon.photo.0', 'data:image/png;base64,AAAA'); prof().logo = 'data:image/png;base64,BBBB'; },
     '컷변형': () => {
       const m = { role: '', shot: '미디엄샷', title: '', highlight: '', sub: '', bubble: '', bubbleSide: 'l', sfx: '', direction: '', panels: '', caption: '', extras: '' };
       S.toon.cuts = [
