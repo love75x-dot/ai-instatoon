@@ -24,7 +24,8 @@ export default {
   title: 'TODO 독자의 질문에 답하는 제목',
   metaTitle: 'TODO 검색 결과에 보일 제목(60자 이내)',
   desc: 'TODO 이 글이 무엇을 알려주는지 50~170자로 구체적으로 작성',
-  // image: 'my-cover.webp', // 선택: 글마다 대표 이미지를 따로 쓰려면 site/guide/img/ 에 넣고 주석 해제 (없으면 카테고리 공통 이미지)
+  // image: 'my-cover.webp', // 선택: 이 글에만 작은 대표 그림을 쓰려면 site/guide/img/ 에 넣고 주석 해제 (기본은 그림 없음)
+  // order: 1, // 선택: 같은 날짜 글 사이 순서(클수록 위)
   card: 'TODO 허브 카드에 보일 한 줄',
   lead: 'TODO 검색자의 질문에 바로 답하는 도입부',
   related: ['what-is-instatoon', 'how-to-make-instatoon', 'store-story-to-instatoon'], // 실제로 관련 있는 글 3~4개로 교체

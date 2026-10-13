@@ -63,7 +63,8 @@ ok((hub.match(/<nav class="chips"[\s\S]*?<\/nav>/) || [''])[0].split('<a ').leng
 ok((hub.match(/<li class="post/g) || []).length === articles.length, '허브 글 카드 수 = 글 수');
 const dts = [...hub.matchAll(/<time datetime="([\d-]+)"/g)].map((m) => m[1]);
 ok(dts.every((d, i) => i === 0 || dts[i - 1] >= d), '허브 글 목록 최신순');
-for (const m of new Set([...hub.matchAll(/src="(\/note-img\/[^"]+)"/g)].map((x) => x[1]))) ok((await get(m)).status === 200, `대표 이미지 응답 ${m}`);
+ok(articles.some((a) => a.image) || !hub.includes('<img '), '허브 목록에 그림 없음(image 지정 글이 없을 때)');
+ok(!/<img /.test((await get('/guide/how-to-make-instatoon/')).text), '글 페이지 상단에 그림 없음(image 지정 글 제외)');
 for (const u of ['/', ...pages]) { const t = (await get(u)).text.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g, ''); ok(!t.includes('콘텐츠 가이드'), `${u} 화면에 옛 이름(콘텐츠 가이드) 남음`); }
 // 메인 → /guide/
 ok((await get('/')).text.includes('href="/guide/"'), '메인에 /guide/ 링크 없음');

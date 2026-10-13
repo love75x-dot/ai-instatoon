@@ -49,7 +49,7 @@ main{padding-bottom:56px}
 .crumb a{color:var(--muted)}
 .article{max-width:820px;margin:0 auto;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:36px 40px}
 @media (max-width:640px){.article{padding:22px 18px}}
-.cat{display:inline-block;font-size:13px;font-weight:800;background:var(--accent-soft);border-radius:999px;padding:3px 12px;text-decoration:none;line-height:1.7}
+.cat{display:inline-block;font-size:13px;font-weight:700;color:var(--muted);text-decoration:none;line-height:1.7}
 .article h1{font-size:clamp(26px,4vw,34px);line-height:1.35;letter-spacing:-.03em;font-weight:900;margin:14px 0 12px;text-wrap:balance}
 .lead{font-size:17.5px;color:var(--ink-2);margin:0 0 12px}
 .meta{font-size:13px;color:var(--muted);margin:0 0 24px;padding-bottom:20px;border-bottom:1px solid var(--line)}
@@ -93,35 +93,30 @@ main{padding-bottom:56px}
 .hero p{color:var(--ink-2);max-width:60ch;margin:0 0 20px;font-size:17px}
 .hubsec{margin:36px 0 0}.hubsec>p{margin:-6px 0 12px;color:var(--muted);font-size:14.5px}
 .note{max-width:820px;margin:20px auto 0;font-size:13.5px;color:var(--muted);line-height:1.7}
-.bhead{padding:12px 0 4px}.bhead h1{font-size:clamp(30px,5vw,44px);line-height:1.2;letter-spacing:-.035em;font-weight:900;margin:0 0 8px}
-.bhead p{color:var(--ink-2);margin:0;font-size:17px}
-.chips{display:flex;gap:8px;overflow-x:auto;padding:18px 0 6px;margin:0 -16px;padding-inline:16px;scrollbar-width:none}
+body[data-page-type="hub"]{background:var(--surface)}
+.bhead{padding:12px 0 4px}.bhead h1{font-size:clamp(30px,5vw,40px);line-height:1.2;letter-spacing:-.035em;font-weight:900;margin:0 0 8px}
+.bhead p{color:var(--muted);margin:0;font-size:16px}
+.chips{display:flex;gap:4px;overflow-x:auto;padding:20px 0 14px;margin:0 -16px;padding-inline:16px;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
-.chips a{flex:none;border:1px solid var(--line-2);background:var(--surface);color:var(--ink-2);border-radius:999px;padding:7px 16px;min-height:40px;font-size:14px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;white-space:nowrap}
-.chips a:hover{border-color:var(--ink)}
-.chips a[aria-current="true"]{background:var(--ink);border-color:var(--ink);color:var(--surface)}
-.cnt{margin:10px 0 14px;font-size:13.5px;color:var(--muted)}
+.chips a{flex:none;border:0;background:none;color:var(--muted);border-radius:999px;padding:7px 14px;min-height:40px;font-size:14px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;white-space:nowrap}
+.chips a:hover{color:var(--ink)}
+.chips a[aria-current="true"]{background:var(--ink);color:var(--surface)}
+.cnt{margin:0 0 4px;font-size:13px;color:var(--muted)}
 .anc{display:block;height:0;scroll-margin-top:90px}
-.posts{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.posts{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
 .post[hidden]{display:none}
-.post a{display:flex;flex-direction:column;height:100%;background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden;text-decoration:none}
-.post a:hover{border-color:var(--ink)}
-.post img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;background:var(--sunken)}
-.pb{display:flex;flex-direction:column;gap:6px;padding:16px 18px 20px}
-.pm{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);font-weight:700}
-.pc{background:var(--accent-soft);color:var(--ink);border-radius:999px;padding:2px 10px}
-.post b{font-size:17px;line-height:1.45;letter-spacing:-.01em}
-.ps{font-size:14px;line-height:1.6;color:var(--ink-2)}
-.post.feat{grid-column:1/-1}
-.post.feat a{flex-direction:row}
-.post.feat img{width:56%;aspect-ratio:auto;height:100%;min-height:260px}
-.post.feat .pb{justify-content:center;padding:28px 32px}.post.feat b{font-size:24px;line-height:1.4}.post.feat .ps{font-size:15.5px}
-@media (max-width:900px){.posts{grid-template-columns:repeat(2,1fr)}}
-@media (max-width:640px){.posts{grid-template-columns:1fr;gap:14px}.post.feat a{flex-direction:column}.post.feat img{width:100%;min-height:0;aspect-ratio:16/9}.post.feat .pb{padding:16px 18px 20px}.post.feat b{font-size:19px}}
-.bcta{margin:44px 0 0;background:var(--ink);color:var(--surface);border-radius:var(--r);padding:24px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
-.bcta b{display:block;font-size:19px}.bcta span{opacity:.85;font-size:15px}
-.bcta .btn{background:var(--accent);border-color:var(--accent);color:#121214}
-.cover{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;border-radius:14px;margin:0 0 22px;background:var(--sunken)}
+.post{border-bottom:1px solid var(--line)}
+.post a{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding:22px 0;text-decoration:none}
+.pb{display:flex;flex-direction:column;gap:4px;min-width:0}
+.pm{font-size:13px;color:var(--muted);line-height:1.5}
+.post b{font-size:19px;line-height:1.45;letter-spacing:-.015em;font-weight:800}
+.post a:hover b{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px}
+.ps{font-size:15px;line-height:1.6;color:var(--muted)}
+.post img{flex:none;width:120px;height:auto;aspect-ratio:16/9;object-fit:cover;border-radius:6px}
+@media (max-width:640px){.post a{padding:18px 0}.post b{font-size:17px}.post img{width:88px}}
+.bcta{margin:40px 0 0;border-top:1px solid var(--ink);padding:24px 0 0;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.bcta b{display:block;font-size:17px}.bcta span{color:var(--muted);font-size:15px}
+.cover{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;border-radius:6px;margin:0 0 22px}
 footer{border-top:1px solid var(--line);padding:26px 0 40px;font-size:14px;color:var(--muted)}
 footer .nav a{color:var(--ink-2);text-decoration:none;padding:6px 4px;min-height:40px;display:inline-flex;align-items:center}
 footer .nav a:hover{text-decoration:underline}
@@ -138,7 +133,7 @@ footer p{margin:10px 0 0;font-size:13px}
 <main id="main" class="wrap">
 <nav class="crumb" aria-label="현재 위치"><ol><li><a href="/">홈</a></li><li><a href="/guide/">인스타툰 노트</a></li><li aria-current="page">인스타그램 캡션 작성법: 가게 홍보 글을 자연스럽게 만드는 방법</li></ol></nav>
 <article class="article">
-<img class="cover" src="/note-img/cat-insta.svg" width="800" height="450" alt="">
+
 <a class="cat" href="/guide/#insta">Instagram 콘텐츠</a>
 <h1>인스타그램 캡션 작성법: 가게 홍보 글을 자연스럽게 만드는 방법</h1>
 <p class="lead">가게 홍보 캡션이 어색해지는 이유는 &quot;팔려고 쓴 티&quot;가 나기 때문인 경우가 많습니다. 손님에게 도움이 되는 정보를 먼저 두고, 부탁은 마지막에 가볍게 붙이면 자연스러워져요.</p>

@@ -49,7 +49,7 @@ main{padding-bottom:56px}
 .crumb a{color:var(--muted)}
 .article{max-width:820px;margin:0 auto;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:36px 40px}
 @media (max-width:640px){.article{padding:22px 18px}}
-.cat{display:inline-block;font-size:13px;font-weight:800;background:var(--accent-soft);border-radius:999px;padding:3px 12px;text-decoration:none;line-height:1.7}
+.cat{display:inline-block;font-size:13px;font-weight:700;color:var(--muted);text-decoration:none;line-height:1.7}
 .article h1{font-size:clamp(26px,4vw,34px);line-height:1.35;letter-spacing:-.03em;font-weight:900;margin:14px 0 12px;text-wrap:balance}
 .lead{font-size:17.5px;color:var(--ink-2);margin:0 0 12px}
 .meta{font-size:13px;color:var(--muted);margin:0 0 24px;padding-bottom:20px;border-bottom:1px solid var(--line)}
@@ -93,35 +93,30 @@ main{padding-bottom:56px}
 .hero p{color:var(--ink-2);max-width:60ch;margin:0 0 20px;font-size:17px}
 .hubsec{margin:36px 0 0}.hubsec>p{margin:-6px 0 12px;color:var(--muted);font-size:14.5px}
 .note{max-width:820px;margin:20px auto 0;font-size:13.5px;color:var(--muted);line-height:1.7}
-.bhead{padding:12px 0 4px}.bhead h1{font-size:clamp(30px,5vw,44px);line-height:1.2;letter-spacing:-.035em;font-weight:900;margin:0 0 8px}
-.bhead p{color:var(--ink-2);margin:0;font-size:17px}
-.chips{display:flex;gap:8px;overflow-x:auto;padding:18px 0 6px;margin:0 -16px;padding-inline:16px;scrollbar-width:none}
+body[data-page-type="hub"]{background:var(--surface)}
+.bhead{padding:12px 0 4px}.bhead h1{font-size:clamp(30px,5vw,40px);line-height:1.2;letter-spacing:-.035em;font-weight:900;margin:0 0 8px}
+.bhead p{color:var(--muted);margin:0;font-size:16px}
+.chips{display:flex;gap:4px;overflow-x:auto;padding:20px 0 14px;margin:0 -16px;padding-inline:16px;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
-.chips a{flex:none;border:1px solid var(--line-2);background:var(--surface);color:var(--ink-2);border-radius:999px;padding:7px 16px;min-height:40px;font-size:14px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;white-space:nowrap}
-.chips a:hover{border-color:var(--ink)}
-.chips a[aria-current="true"]{background:var(--ink);border-color:var(--ink);color:var(--surface)}
-.cnt{margin:10px 0 14px;font-size:13.5px;color:var(--muted)}
+.chips a{flex:none;border:0;background:none;color:var(--muted);border-radius:999px;padding:7px 14px;min-height:40px;font-size:14px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;white-space:nowrap}
+.chips a:hover{color:var(--ink)}
+.chips a[aria-current="true"]{background:var(--ink);color:var(--surface)}
+.cnt{margin:0 0 4px;font-size:13px;color:var(--muted)}
 .anc{display:block;height:0;scroll-margin-top:90px}
-.posts{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.posts{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
 .post[hidden]{display:none}
-.post a{display:flex;flex-direction:column;height:100%;background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden;text-decoration:none}
-.post a:hover{border-color:var(--ink)}
-.post img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;background:var(--sunken)}
-.pb{display:flex;flex-direction:column;gap:6px;padding:16px 18px 20px}
-.pm{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);font-weight:700}
-.pc{background:var(--accent-soft);color:var(--ink);border-radius:999px;padding:2px 10px}
-.post b{font-size:17px;line-height:1.45;letter-spacing:-.01em}
-.ps{font-size:14px;line-height:1.6;color:var(--ink-2)}
-.post.feat{grid-column:1/-1}
-.post.feat a{flex-direction:row}
-.post.feat img{width:56%;aspect-ratio:auto;height:100%;min-height:260px}
-.post.feat .pb{justify-content:center;padding:28px 32px}.post.feat b{font-size:24px;line-height:1.4}.post.feat .ps{font-size:15.5px}
-@media (max-width:900px){.posts{grid-template-columns:repeat(2,1fr)}}
-@media (max-width:640px){.posts{grid-template-columns:1fr;gap:14px}.post.feat a{flex-direction:column}.post.feat img{width:100%;min-height:0;aspect-ratio:16/9}.post.feat .pb{padding:16px 18px 20px}.post.feat b{font-size:19px}}
-.bcta{margin:44px 0 0;background:var(--ink);color:var(--surface);border-radius:var(--r);padding:24px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
-.bcta b{display:block;font-size:19px}.bcta span{opacity:.85;font-size:15px}
-.bcta .btn{background:var(--accent);border-color:var(--accent);color:#121214}
-.cover{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;border-radius:14px;margin:0 0 22px;background:var(--sunken)}
+.post{border-bottom:1px solid var(--line)}
+.post a{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding:22px 0;text-decoration:none}
+.pb{display:flex;flex-direction:column;gap:4px;min-width:0}
+.pm{font-size:13px;color:var(--muted);line-height:1.5}
+.post b{font-size:19px;line-height:1.45;letter-spacing:-.015em;font-weight:800}
+.post a:hover b{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px}
+.ps{font-size:15px;line-height:1.6;color:var(--muted)}
+.post img{flex:none;width:120px;height:auto;aspect-ratio:16/9;object-fit:cover;border-radius:6px}
+@media (max-width:640px){.post a{padding:18px 0}.post b{font-size:17px}.post img{width:88px}}
+.bcta{margin:40px 0 0;border-top:1px solid var(--ink);padding:24px 0 0;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.bcta b{display:block;font-size:17px}.bcta span{color:var(--muted);font-size:15px}
+.cover{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;border-radius:6px;margin:0 0 22px}
 footer{border-top:1px solid var(--line);padding:26px 0 40px;font-size:14px;color:var(--muted)}
 footer .nav a{color:var(--ink-2);text-decoration:none;padding:6px 4px;min-height:40px;display:inline-flex;align-items:center}
 footer .nav a:hover{text-decoration:underline}
@@ -143,97 +138,74 @@ footer p{margin:10px 0 0;font-size:13px}
 <p class="cnt" id="count" aria-live="polite">글 23편</p>
 <i id="toon" class="anc"></i><i id="insta" class="anc"></i><i id="biz" class="anc"></i><i id="ai" class="anc"></i><i id="meta" class="anc"></i>
 <ul class="posts" id="posts">
-<li class="post feat" data-cat="toon"><a href="/guide/instatoon-troubleshooting/" data-track="guide_card" data-loc="hub_toon">
-<img src="/note-img/cat-toon.svg" width="800" height="450" alt="" decoding="async">
-<span class="pb"><span class="pm"><span class="pc">인스타툰 가이드</span><time datetime="2026-10-06">2026.10.06</time></span>
+<li class="post" data-cat="toon"><a href="/guide/instatoon-troubleshooting/" data-track="guide_card" data-loc="hub_toon">
+<span class="pb"><span class="pm">인스타툰 가이드 · <time datetime="2026-10-06">2026.10.06</time></span>
 <b>인스타툰 만들다 막힐 때: 증상별 원인과 해결 방법</b><span class="ps">그림·대본·저장·업로드 문제를 증상 → 원인 → 해결 순서로</span></span></a></li>
 <li class="post" data-cat="toon"><a href="/guide/how-to-use-instatoon-room/" data-track="guide_card" data-loc="hub_toon">
-<img src="/note-img/cat-toon.svg" width="800" height="450" alt="" decoding="async">
-<span class="pb"><span class="pm"><span class="pc">인스타툰 가이드</span><time datetime="2026-10-01">2026.10.01</time></span>
+<span class="pb"><span class="pm">인스타툰 가이드 · <time datetime="2026-10-01">2026.10.01</time></span>
 <b>인스타툰 연재실 사용법: 업종 입력부터 게시용 글까지 한 편 만들기</b><span class="ps">3단계 사용 순서와 도구가 하는 일·내가 하는 일</span></span></a></li>
 <li class="post" data-cat="ai"><a href="/guide/gemini-api-key-setup-guide/" data-track="guide_card" data-loc="hub_ai">
-<img src="/note-img/cat-ai.svg" width="800" height="450" alt="" loading="lazy" decoding="async">
-<span class="pb"><span class="pm"><span class="pc">AI 콘텐츠 제작</span><time datetime="2026-10-01">2026.10.01</time></span>
+<span class="pb"><span class="pm">AI 콘텐츠 제작 · <time datetime="2026-10-01">2026.10.01</time></span>
 <b>Gemini API 키 넣는 방법과 오류가 날 때 해결하기</b><span class="ps">키 입력 순서, 오류 메시지별 해결, 키 보관 주의점</span></span></a></li>
 <li class="post" data-cat="meta"><a href="/guide/meta-business-suite-guide/" data-track="guide_card" data-loc="hub_meta">
-<img src="/note-img/cat-meta.svg" width="800" height="450" alt="" loading="lazy" decoding="async">
-<span class="pb"><span class="pm"><span class="pc">Instagram · Facebook</span><time datetime="2026-10-01">2026.10.01</time></span>
+<span class="pb"><span class="pm">Instagram · Facebook · <time datetime="2026-10-01">2026.10.01</time></span>
 <b>Meta Business Suite란? 소상공인을 위한 SNS 콘텐츠 관리 기초</b><span class="ps">게시물·일정·메시지·인사이트 관리 기초</span></span></a></li>
 <li class="post" data-cat="meta"><a href="/guide/instagram-facebook-content/" data-track="guide_card" data-loc="hub_meta">
-<img src="/note-img/cat-meta.svg" width="800" height="450" alt="" loading="lazy" decoding="async">
-<span class="pb"><span class="pm"><span class="pc">Instagram · Facebook</span><time datetime="2026-10-01">2026.10.01</time></span>
+<span class="pb"><span class="pm">Instagram · Facebook · <time datetime="2026-10-01">2026.10.01</time></span>
 <b>인스타그램과 Facebook을 함께 운영하면 어떻게 달라질까?</b><span class="ps">두 채널의 차이, 인스타툰 활용, 문구 다르게 쓰기</span></span></a></li>
 <li class="post" data-cat="ai"><a href="/guide/instagram-content-copyright/" data-track="guide_card" data-loc="hub_ai">
-<img src="/note-img/cat-ai.svg" width="800" height="450" alt="" loading="lazy" decoding="async">
-<span class="pb"><span class="pm"><span class="pc">AI 콘텐츠 제작</span><time datetime="2026-10-01">2026.10.01</time></span>
+<span class="pb"><span class="pm">AI 콘텐츠 제작 · <time datetime="2026-10-01">2026.10.01</time></span>
 <b>인스타그램 콘텐츠를 만들 때 이미지와 문구의 저작권 확인하기</b><span class="ps">이미지·폰트·음악·AI 이미지·상표 확인 체크리스트</span></span></a></li>
 <li class="post" data-cat="ai"><a href="/guide/ai-instatoon-review-checklist/" data-track="guide_card" data-loc="hub_ai">
-<img src="/note-img/cat-ai.svg" width="800" height="450" alt="" loading="lazy" decoding="async">
-<span class="pb"><span class="pm"><span class="pc">AI 콘텐츠 제작</span><time datetime="2026-10-01">2026.10.01</time></span>
+<span class="pb"><span class="pm">AI 콘텐츠 제작 · <time datetime="2026-10-01">2026.10.01</time></span>
 <b>AI로 인스타툰을 만들 때 사람이 직접 확인해야 하는 것</b><span class="ps">사실관계·가격·글자·저작권·광고 표현 확인 목록</span></span></a></li>
 <li class="post" data-cat="ai"><a href="/guide/instatoon-character-consistency/" data-track="guide_card" data-loc="hub_ai">
-<img src="/note-img/cat-ai.svg" width="800" height="450" alt="" loading="lazy" decoding="async">
-<span class="pb"><span class="pm"><span class="pc">AI 콘텐츠 제작</span><time datetime="2026-10-01">2026.10.01</time></span>
+<span class="pb"><span class="pm">AI 콘텐츠 제작 · <time datetime="2026-10-01">2026.10.01</time></span>
 <b>인스타툰 캐릭터를 일관되게 유지하는 방법</b><span class="ps">설정표, 얼굴·옷·표정, 참고 이미지, AI 주의점</span></span></a></li>
 <li class="post" data-cat="biz"><a href="/guide/customer-questions-to-content/" data-track="guide_card" data-loc="hub_biz">
-<img src="/note-img/cat-biz.svg" width="800" height="450" alt="" loading="lazy" decoding="async">
-<span class="pb"><span class="pm"><span class="pc">소상공인 SNS 마케팅</span><time datetime="2026-09-29">2026.09.29</time></span>
+<span class="pb"><span class="pm">소상공인 SNS 마케팅 · <time datetime="2026-09-29">2026.09.29</time></span>
 <b>고객 질문을 SNS 콘텐츠로 바꾸는 방법</b><span class="ps">질문 수집, FAQ → 게시물 → 인스타툰 → 릴스</span></span></a></li>
 <li class="post" data-cat="biz"><a href="/guide/store-story-to-instatoon/" data-track="guide_card" data-loc="hub_biz">
-<img src="/note-img/cat-biz.svg" width="800" height="450" alt="" loading="lazy" decoding="async">
-<span class="pb"><span class="pm"><span class="pc">소상공인 SNS 마케팅</span><time datetime="2026-09-29">2026.09.29</time></span>
+<span class="pb"><span class="pm">소상공인 SNS 마케팅 · <time datetime="2026-09-29">2026.09.29</time></span>
 <b>매장 이야기를 인스타툰으로 홍보 콘텐츠로 만드는 방법</b><span class="ps">소재 수집부터 CTA까지, 실제 제작 예시 포함</span></span></a></li>
 <li class="post" data-cat="biz"><a href="/guide/new-store-instagram-marketing/" data-track="guide_card" data-loc="hub_biz">
-<img src="/note-img/cat-biz.svg" width="800" height="450" alt="" loading="lazy" decoding="async">
-<span class="pb"><span class="pm"><span class="pc">소상공인 SNS 마케팅</span><time datetime="2026-09-29">2026.09.29</time></span>
+<span class="pb"><span class="pm">소상공인 SNS 마케팅 · <time datetime="2026-09-29">2026.09.29</time></span>
 <b>신규 매장 오픈 후 인스타그램 콘텐츠를 어떻게 만들까?</b><span class="ps">오픈 전~첫 달 콘텐츠 일정표</span></span></a></li>
 <li class="post" data-cat="biz"><a href="/guide/service-business-instagram-content/" data-track="guide_card" data-loc="hub_biz">
-<img src="/note-img/cat-biz.svg" width="800" height="450" alt="" loading="lazy" decoding="async">
-<span class="pb"><span class="pm"><span class="pc">소상공인 SNS 마케팅</span><time datetime="2026-09-29">2026.09.29</time></span>
+<span class="pb"><span class="pm">소상공인 SNS 마케팅 · <time datetime="2026-09-29">2026.09.29</time></span>
 <b>미용실·네일샵 등 서비스 매장의 SNS 콘텐츠 만드는 방법</b><span class="ps">시술 전후, 전문가 정보, 예약 안내, 후기 활용</span></span></a></li>
 <li class="post" data-cat="biz"><a href="/guide/cafe-instagram-content/" data-track="guide_card" data-loc="hub_biz">
-<img src="/note-img/cat-biz.svg" width="800" height="450" alt="" loading="lazy" decoding="async">
-<span class="pb"><span class="pm"><span class="pc">소상공인 SNS 마케팅</span><time datetime="2026-09-29">2026.09.29</time></span>
+<span class="pb"><span class="pm">소상공인 SNS 마케팅 · <time datetime="2026-09-29">2026.09.29</time></span>
 <b>카페 인스타그램 콘텐츠 아이디어 20가지</b><span class="ps">원두·시즌 메뉴·공간 이야기 등 20가지</span></span></a></li>
 <li class="post" data-cat="biz"><a href="/guide/restaurant-instagram-content/" data-track="guide_card" data-loc="hub_biz">
-<img src="/note-img/cat-biz.svg" width="800" height="450" alt="" loading="lazy" decoding="async">
-<span class="pb"><span class="pm"><span class="pc">소상공인 SNS 마케팅</span><time datetime="2026-09-27">2026.09.27</time></span>
+<span class="pb"><span class="pm">소상공인 SNS 마케팅 · <time datetime="2026-09-27">2026.09.27</time></span>
 <b>음식점 인스타그램 콘텐츠 아이디어 20가지</b><span class="ps">메뉴·재료·주방 이야기 20가지와 인스타툰 변환 예시</span></span></a></li>
 <li class="post" data-cat="biz"><a href="/guide/small-business-instagram-start/" data-track="guide_card" data-loc="hub_biz">
-<img src="/note-img/cat-biz.svg" width="800" height="450" alt="" loading="lazy" decoding="async">
-<span class="pb"><span class="pm"><span class="pc">소상공인 SNS 마케팅</span><time datetime="2026-09-27">2026.09.27</time></span>
+<span class="pb"><span class="pm">소상공인 SNS 마케팅 · <time datetime="2026-09-27">2026.09.27</time></span>
 <b>소상공인이 인스타그램을 운영할 때 가장 먼저 정해야 할 것</b><span class="ps">대상·강점·주제·일정, 첫 한 달 운영표</span></span></a></li>
 <li class="post" data-cat="insta"><a href="/guide/instagram-reels-vs-feed/" data-track="guide_card" data-loc="hub_insta">
-<img src="/note-img/cat-insta.svg" width="800" height="450" alt="" loading="lazy" decoding="async">
-<span class="pb"><span class="pm"><span class="pc">Instagram 콘텐츠</span><time datetime="2026-09-27">2026.09.27</time></span>
+<span class="pb"><span class="pm">Instagram 콘텐츠 · <time datetime="2026-09-27">2026.09.27</time></span>
 <b>인스타그램 릴스와 피드 콘텐츠는 어떻게 다를까?</b><span class="ps">피드·릴스 특성 비교와 소재 확장</span></span></a></li>
 <li class="post" data-cat="insta"><a href="/guide/instagram-caption-writing/" data-track="guide_card" data-loc="hub_insta">
-<img src="/note-img/cat-insta.svg" width="800" height="450" alt="" loading="lazy" decoding="async">
-<span class="pb"><span class="pm"><span class="pc">Instagram 콘텐츠</span><time datetime="2026-09-27">2026.09.27</time></span>
+<span class="pb"><span class="pm">Instagram 콘텐츠 · <time datetime="2026-09-27">2026.09.27</time></span>
 <b>인스타그램 캡션 작성법: 가게 홍보 글을 자연스럽게 만드는 방법</b><span class="ps">첫 문장, CTA, 해시태그, 실제 예시</span></span></a></li>
 <li class="post" data-cat="insta"><a href="/guide/instagram-post-structure/" data-track="guide_card" data-loc="hub_insta">
-<img src="/note-img/cat-insta.svg" width="800" height="450" alt="" loading="lazy" decoding="async">
-<span class="pb"><span class="pm"><span class="pc">Instagram 콘텐츠</span><time datetime="2026-09-27">2026.09.27</time></span>
+<span class="pb"><span class="pm">Instagram 콘텐츠 · <time datetime="2026-09-27">2026.09.27</time></span>
 <b>인스타그램 게시물은 어떻게 구성해야 할까?</b><span class="ps">첫 이미지부터 CTA, 게시 전 체크리스트</span></span></a></li>
 <li class="post" data-cat="biz"><a href="/guide/small-business-instagram-content/" data-track="guide_card" data-loc="hub_biz">
-<img src="/note-img/cat-biz.svg" width="800" height="450" alt="" loading="lazy" decoding="async">
-<span class="pb"><span class="pm"><span class="pc">소상공인 SNS 마케팅</span><time datetime="2026-09-25">2026.09.25</time></span>
+<span class="pb"><span class="pm">소상공인 SNS 마케팅 · <time datetime="2026-09-25">2026.09.25</time></span>
 <b>소상공인 인스타그램 콘텐츠 아이디어 20가지</b><span class="ps">20가지 소재와 게시물 예시</span></span></a></li>
 <li class="post" data-cat="toon"><a href="/guide/instatoon-storytelling/" data-track="guide_card" data-loc="hub_toon">
-<img src="/note-img/cat-toon.svg" width="800" height="450" alt="" loading="lazy" decoding="async">
-<span class="pb"><span class="pm"><span class="pc">인스타툰 가이드</span><time datetime="2026-09-25">2026.09.25</time></span>
+<span class="pb"><span class="pm">인스타툰 가이드 · <time datetime="2026-09-25">2026.09.25</time></span>
 <b>인스타툰 스토리 만드는 방법: 평범한 일상을 콘텐츠로 바꾸기</b><span class="ps">일상·고객 질문·실수담에서 소재 찾고 시리즈로 잇기</span></span></a></li>
 <li class="post" data-cat="toon"><a href="/guide/4-panel-instatoon/" data-track="guide_card" data-loc="hub_toon">
-<img src="/note-img/cat-toon.svg" width="800" height="450" alt="" loading="lazy" decoding="async">
-<span class="pb"><span class="pm"><span class="pc">인스타툰 가이드</span><time datetime="2026-09-25">2026.09.25</time></span>
+<span class="pb"><span class="pm">인스타툰 가이드 · <time datetime="2026-09-25">2026.09.25</time></span>
 <b>인스타툰 4컷 구성법: 짧은 이야기로 전달하는 방법</b><span class="ps">상황-문제-전개-결론, 가게 예시, 8컷 확장</span></span></a></li>
 <li class="post" data-cat="toon"><a href="/guide/how-to-make-instatoon/" data-track="guide_card" data-loc="hub_toon">
-<img src="/note-img/cat-toon.svg" width="800" height="450" alt="" loading="lazy" decoding="async">
-<span class="pb"><span class="pm"><span class="pc">인스타툰 가이드</span><time datetime="2026-09-25">2026.09.25</time></span>
+<span class="pb"><span class="pm">인스타툰 가이드 · <time datetime="2026-09-25">2026.09.25</time></span>
 <b>인스타툰 만드는 방법: 아이디어부터 게시까지</b><span class="ps">소재부터 업로드 전 확인까지 8단계 제작 흐름</span></span></a></li>
 <li class="post" data-cat="toon"><a href="/guide/what-is-instatoon/" data-track="guide_card" data-loc="hub_toon">
-<img src="/note-img/cat-toon.svg" width="800" height="450" alt="" loading="lazy" decoding="async">
-<span class="pb"><span class="pm"><span class="pc">인스타툰 가이드</span><time datetime="2026-09-25">2026.09.25</time></span>
+<span class="pb"><span class="pm">인스타툰 가이드 · <time datetime="2026-09-25">2026.09.25</time></span>
 <b>인스타툰이란? 처음 시작하는 사람을 위한 기본 가이드</b><span class="ps">의미, 웹툰과의 차이, 4컷·8컷 구성, 매장 활용법</span></span></a></li>
 </ul>
 <section class="bcta"><div><b>직접 만들어 보고 싶다면</b><span>내 이야기를 입력하면 대본과 컷 구성까지 정리해 드려요.</span></div><a class="btn pri big" href="/" data-track="cta" data-loc="hub_hero">인스타툰 만들어보기</a></section>
