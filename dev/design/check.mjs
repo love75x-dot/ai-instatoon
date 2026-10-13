@@ -14,7 +14,7 @@ const SCREENS = [
   ['반응·댓글', () => { S = demoState('bakery'); S.mode = 'stats'; }],
 ];
 const probe = () => {
-  const YEL = 'rgb(255, 213, 61)', okYellow = '.todo, .endpv, .arts, .endsw, .mark, .endwrap, .swatches, .frame, .phone, .ftile';
+  const YEL = 'rgb(255, 213, 61)', okYellow = '.todo, .sumtodo, .endpv, .arts, .endsw, .mark, .endwrap, .swatches, .frame, .phone, .ftile';
   const out = { overflow: document.documentElement.scrollWidth - window.innerWidth, smallInputs: [], shadows: [], yellow: [], emoji: [] };
   const emo = /\p{Extended_Pictographic}/u;
   for (const el of document.querySelectorAll('body *')) {
@@ -23,7 +23,7 @@ const probe = () => {
     if ((el.matches('input.in,textarea.in,.dd-btn,.snum input')) && parseFloat(cs.fontSize) < 16) out.smallInputs.push(tag + cls);
     if (cs.boxShadow !== 'none' && !el.closest('#tour,.tour-hl,.frame')) out.shadows.push(tag + cls);
     if (cs.backgroundColor === YEL && !el.closest(okYellow)) out.yellow.push(tag + cls);
-    if (el.children.length === 0 && !el.closest('textarea,pre,.phone,.frame,.endpv,.kit,#kitWarn,.ig-cap') && emo.test(el.textContent || '')) out.emoji.push((el.textContent || '').trim().slice(0, 24));
+    if (el.children.length === 0 && !el.closest('textarea,pre,.phone,.frame,.endpv,.kit,#kitWarn,.ig-cap,.capbox,.sb,.story-sb,.story-m') && emo.test(el.textContent || '')) out.emoji.push((el.textContent || '').trim().slice(0, 24));
   }
   return out;
 };
@@ -46,7 +46,7 @@ for (const [vk, vp] of [['모바일 390', { width: 390, height: 844 }], ['PC 130
 import fs from 'node:fs';
 import path from 'node:path';
 import { root } from '../lib/harness.mjs';
-const blockOf = (html) => (html.match(/\/\* HEADER:BEGIN[\s\S]*?\/\* HEADER:END \*\//) || [''])[0];
+const blockOf = (html) => (html.split('\r\n').join('\n').match(/\/\* HEADER:BEGIN[\s\S]*?\/\* HEADER:END \*\//) || [''])[0];
 const appCss = blockOf(fs.readFileSync(path.join(root, 'deploy', 'index.html'), 'utf8')), noteCss = blockOf(fs.readFileSync(path.join(root, 'deploy', 'guide', 'index.html'), 'utf8'));
 C.ok(appCss.length > 200 && appCss === noteCss, '머리말 CSS 블록이 홈과 노트에서 글자까지 같음');
 const HPAGES = [['홈', '/'], ['노트 목록', '/guide/'], ['노트 글', '/guide/how-to-make-instatoon/'], ['소개', '/about/'], ['개인정보', '/privacy/'], ['이용안내', '/terms/'], ['404', '/없는-주소/']];
