@@ -63,6 +63,12 @@ ok((hub.match(/<nav class="chips"[\s\S]*?<\/nav>/) || [''])[0].split('<a ').leng
 ok((hub.match(/<li class="post/g) || []).length === articles.length, '허브 글 카드 수 = 글 수');
 const dts = [...hub.matchAll(/<time datetime="([\d-]+)"/g)].map((m) => m[1]);
 ok(dts.every((d, i) => i === 0 || dts[i - 1] >= d), '허브 글 목록 최신순');
+// 10개씩 나누기는 화면에서만: HTML에는 글 링크가 전부 있고, 페이지 번호 자리는 hidden(JS가 꺼져 있으면 전체 목록이 보임), canonical은 /guide/ 그대로
+const postLinks = [...hub.matchAll(/<li class="post"[^>]*><a href="\/guide\/([a-z0-9-]+)\/"/g)].map((m) => m[1]);
+ok(postLinks.length === articles.length && new Set(postLinks).size === articles.length && articles.every((a) => postLinks.includes(a.slug)), `허브 HTML 안에 글 링크 ${articles.length}개가 모두 있음(${postLinks.length}개 발견)`);
+ok(!/<li class="post"[^>]* hidden/.test(hub), '허브 HTML에서 글 항목이 숨겨져 있지 않음(숨김은 자바스크립트가 화면에서만)');
+ok(/<nav class="pager" id="pager"[^>]* hidden>/.test(hub), '허브 페이지 번호 자리는 기본 hidden');
+ok(hub.includes('<link rel="canonical" href="' + ORIGIN + '/guide/">'), '허브 canonical은 /guide/ 그대로(?page= 주소는 canonical로 /guide/를 가리킴)');
 ok(articles.some((a) => a.image) || !hub.includes('<img '), '허브 목록에 그림 없음(image 지정 글이 없을 때)');
 ok(!/<img /.test((await get('/guide/how-to-make-instatoon/')).text), '글 페이지 상단에 그림 없음(image 지정 글 제외)');
 for (const u of ['/', ...pages]) { const t = (await get(u)).text.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g, ''); ok(!t.includes('콘텐츠 가이드'), `${u} 화면에 옛 이름(콘텐츠 가이드) 남음`); }

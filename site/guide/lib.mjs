@@ -155,6 +155,15 @@ body[data-page-type="hub"]{background:var(--surface)}
 .ps{font-size:15px;line-height:1.6;color:var(--muted)}
 .post img{flex:none;width:120px;height:auto;aspect-ratio:16/9;object-fit:cover;border-radius:6px}
 @media (max-width:640px){.post a{padding:18px 0}.post b{font-size:17px}.post img{width:88px}}
+.pager{display:flex;justify-content:center;align-items:center;gap:4px;margin:28px 0 0}
+.pager[hidden]{display:none}
+.pg{display:inline-flex;align-items:center;justify-content:center;min-width:40px;height:40px;padding:0 4px;border-radius:999px;color:var(--muted);font:700 15px/1 var(--sans);text-decoration:none}
+.pg:hover{color:var(--ink)}
+.pg[aria-current="page"]{background:var(--ink);color:var(--surface)}
+.pg.pgn{font-size:20px}
+.pg.dis{opacity:.3;pointer-events:none}
+.pe{display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:40px;color:var(--muted)}
+@media (max-width:480px){.pager{gap:2px}.pe{min-width:24px}}
 .bcta{margin:40px 0 0;border-top:1px solid var(--ink);padding:24px 0 0;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .bcta b{display:block;font-size:17px}.bcta span{color:var(--muted);font-size:15px}
 .cover{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;border-radius:6px;margin:0 0 22px}
@@ -276,12 +285,37 @@ const fmtDate = (d) => String(d || '').replace(/-/g, '.');
 // 최신순: 공개일 → 같은 날짜 안에서는 글의 order 값(클수록 위, 없으면 0) → 같으면 목록에서 뒤에 있는 글이 먼저
 const newestFirst = (all) => all.map((a, i) => ({ a, i })).sort((x, y) => String(y.a.published || '').localeCompare(String(x.a.published || '')) || (y.a.order || 0) - (x.a.order || 0) || y.i - x.i).map((x) => x.a);
 
-const HUB_JS = `<script>(function(){var L=document.getElementById('posts');if(!L)return;var chips=[].slice.call(document.querySelectorAll('.chips a'));
-function apply(){var c=(location.hash||'').slice(1);if(!/^(toon|insta|biz|ai|meta)$/.test(c))c='all';
-[].slice.call(L.children).forEach(function(li){li.hidden=c!=='all'&&li.getAttribute('data-cat')!==c;});
+const HUB_JS = `<script>(function(){
+var PER=10,L=document.getElementById('posts');if(!L)return;
+var items=[].slice.call(L.children),chips=[].slice.call(document.querySelectorAll('.chips a')),pager=document.getElementById('pager'),count=document.getElementById('count'),top=document.querySelector('.chips');
+var CATS=/^(toon|insta|biz|ai|meta)$/;
+function state(){var c=(location.hash||'').slice(1);if(!CATS.test(c))c='all';var m=/[?&]page=(\\\d+)/.exec(location.search);return {c:c,p:m?Math.max(1,parseInt(m[1],10)):1};}
+function url(c,p){return location.pathname+(p>1?'?page='+p:'')+(c!=='all'?'#'+c:'');}
+function slots(){return window.innerWidth<=480?5:7;}
+function nums(p,t){var S=slots(),o=[],i;if(t<=S){for(i=1;i<=t;i++)o.push(i);return o;}
+if(p<=S-3){for(i=1;i<=S-2;i++)o.push(i);o.push(0,t);}
+else if(p>=t-(S-4)){o.push(1,0);for(i=t-(S-3);i<=t;i++)o.push(i);}
+else{o.push(1,0);var k=(S-5)/2;for(i=p-k;i<=p+k;i++)o.push(i);o.push(0,t);}
+return o;}
+function render(c,p,t){
+if(t<=1){pager.hidden=true;pager.innerHTML='';return;}
+var h='<a class="pg pgn'+(p<=1?' dis':'')+'" href="'+(p>1?url(c,p-1):'#')+'" data-p="'+(p-1)+'" aria-label="이전 페이지"'+(p<=1?' aria-disabled="true" tabindex="-1"':'')+'>‹</a>';
+nums(p,t).forEach(function(n){h+=n?'<a class="pg" href="'+url(c,n)+'" data-p="'+n+'" aria-label="'+n+'페이지"'+(n===p?' aria-current="page"':'')+'>'+n+'</a>':'<span class="pe" aria-hidden="true">…</span>';});
+h+='<a class="pg pgn'+(p>=t?' dis':'')+'" href="'+(p<t?url(c,p+1):'#')+'" data-p="'+(p+1)+'" aria-label="다음 페이지"'+(p>=t?' aria-disabled="true" tabindex="-1"':'')+'>›</a>';
+pager.innerHTML=h;pager.hidden=false;}
+function apply(){var s=state(),c=s.c,sel=items.filter(function(li){return c==='all'||li.getAttribute('data-cat')===c;}),t=Math.max(1,Math.ceil(sel.length/PER)),p=Math.min(s.p,t);
+items.forEach(function(li){li.hidden=true;});
+sel.slice((p-1)*PER,p*PER).forEach(function(li){li.hidden=false;});
 chips.forEach(function(a){a.setAttribute('aria-current',a.getAttribute('data-cat')===c?'true':'false');});
-var n=L.querySelectorAll('li:not([hidden])').length,s=document.getElementById('count');if(s)s.textContent='글 '+n+'편';}
-window.addEventListener('hashchange',apply);apply();})();</script>`;
+if(count)count.textContent='글 '+sel.length+'편'+(t>1?' · '+p+'/'+t+'쪽':'');
+render(c,p,t);
+if(p!==s.p)history.replaceState(null,'',url(c,p));}
+function go(u,scroll){history.pushState(null,'',u);apply();if(scroll&&top)top.scrollIntoView({behavior:'smooth',block:'start'});}
+chips.forEach(function(a){a.addEventListener('click',function(e){e.preventDefault();var c=a.getAttribute('data-cat');go(url(c==='all'?'all':c,1),false);});});
+pager.addEventListener('click',function(e){var a=e.target.closest('a.pg');if(!a)return;e.preventDefault();if(a.classList.contains('dis')||a.getAttribute('aria-current'))return;var s=state();go(url(s.c,parseInt(a.getAttribute('data-p'),10)),true);});
+window.addEventListener('popstate',apply);
+var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(apply,120);});
+apply();})();</script>`;
 
 export function renderHub(all) {
   const u = `${ORIGIN}/guide/`;
@@ -309,6 +343,7 @@ ${anchors}
 <ul class="posts" id="posts">
 ${posts.map(item).join('\n')}
 </ul>
+<nav class="pager" id="pager" aria-label="페이지 이동" hidden></nav>
 <section class="bcta"><div><b>직접 만들어 보고 싶다면</b><span>내 이야기를 입력하면 대본과 컷 구성까지 정리해 드려요.</span></div><a class="btn pri big" href="/" data-track="cta" data-loc="hub_hero">인스타툰 만들어보기</a></section>
 </main>
 ` + footer + `

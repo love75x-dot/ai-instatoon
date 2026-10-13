@@ -626,7 +626,6 @@ details.more summary::after{position:absolute;right:0;top:14px}
 .gfoot h2{font-size:17px}
 .adm-vars .chip{font-size:13px}
 /* 홈 머리말 전용: 도구 글자 버튼 · AI 상태 · ⋯ 메뉴 (공통 블록의 .hb·.hnav 위에 얹음) */
-.hai{display:inline-flex;align-items:center;gap:6px;margin-right:8px;font-size:13px;line-height:1;color:var(--muted);white-space:nowrap}
 .htools{display:flex;align-items:center;gap:2px;margin-right:6px}
 .ht{display:inline-flex;align-items:center;height:40px;padding:0 12px;border:0;border-radius:999px;background:none;color:var(--muted);font:700 14px/1 var(--sans);text-decoration:none;white-space:nowrap;cursor:pointer}
 .ht:hover{color:var(--ink)}
@@ -638,8 +637,6 @@ details.more summary::after{position:absolute;right:0;top:14px}
 .hpop button:hover,.hpop a:hover{background:var(--sunken)}
 .hpop .hpri{justify-content:center;background:var(--ink);color:var(--surface);font-weight:700;margin-bottom:6px}
 .hpop .hpri:hover{background:var(--ink);opacity:.86}
-.hpai{display:flex;align-items:center;gap:8px;margin-top:4px;padding:12px 14px 6px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
-@media (max-width:799px){.hai{display:none}}
 @media (max-width:720px){.htools{display:none}.hmenu{display:block}}
 @media (max-width:640px){.btn{max-width:100%;white-space:normal;text-align:left;line-height:1.4}}
 </style>
@@ -648,10 +645,9 @@ details.more summary::after{position:absolute;right:0;top:14px}
   <header class="topbar">
     <button type="button" class="brand" data-act="home" title="처음 화면으로" aria-label="인스타툰 연재실 처음 화면으로 이동"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><b>인스타툰 연재실</b></button>
     <nav class="hnav" aria-label="주요 메뉴">
-      <span class="hai"><span class="dot" id="aiDot"></span><span id="aiText">확인 중</span></span>
       <span class="htools"><button type="button" class="ht" data-act="backup">백업 저장</button><button type="button" class="ht" data-act="restore">불러오기</button><a class="ht" href="/guide/instatoon-troubleshooting/">문제 해결</a><button type="button" class="ht" data-act="help">사용 방법</button></span>
       <span class="hmenu"><button type="button" class="hb hmore" id="hmoreBtn" aria-haspopup="menu" aria-expanded="false" aria-controls="hpop" aria-label="더 보기 메뉴">⋯</button>
-        <div class="hpop" id="hpop" role="menu" hidden><button type="button" class="hpri" role="menuitem" data-act="backup">백업 저장</button><button type="button" role="menuitem" data-act="restore">불러오기</button><a role="menuitem" href="/guide/instatoon-troubleshooting/">문제 해결</a><button type="button" role="menuitem" data-act="help">사용 방법</button><div class="hpai"><span class="dot" id="aiDotM"></span><span id="aiTextM">확인 중</span></div></div></span>
+        <div class="hpop" id="hpop" role="menu" hidden><button type="button" class="hpri" role="menuitem" data-act="backup">백업 저장</button><button type="button" role="menuitem" data-act="restore">불러오기</button><a role="menuitem" href="/guide/instatoon-troubleshooting/">문제 해결</a><button type="button" role="menuitem" data-act="help">사용 방법</button></div></span>
       <a class="hb" href="/guide/" aria-label="인스타툰 노트"><span class="hp">인스타툰&nbsp;</span>노트</a>
     </nav>
   </header>
@@ -2497,8 +2493,7 @@ function keyBoxHTML(){ return `<details class="more keybox" id="keyBox" ${API.ke
   <div class="row" style="margin-top:12px"><button class="btn pri sm" data-act="keySave">저장</button><span class="status">모델 이름은 기본값 그대로 쓰면 돼요. 오류가 나면 AI Studio에 보이는 이름으로 바꿔 주세요.</span></div>
 </div></details>`; }
 
-function refreshAi(){ const on=STANDALONE?!!API.key:!!sample, cls='dot '+(on?'on':'off'), full=STANDALONE?(on?'Gemini 연결됨':'API 키 필요'):(on?'AI 연결됨':'AI 연결 없음 · 직접 쓰기 가능'), short=on?'연결됨':(STANDALONE?'키 필요':'연결 없음');
-  $('#aiDot').className=cls; $('#aiText').textContent=short; const dm=$('#aiDotM'), tm=$('#aiTextM'); if(dm) dm.className=cls; if(tm) tm.textContent=full; }
+function refreshAi(){ /* 연결 상태 표시는 첫 화면의 "API 키 설정" 줄(keyBoxHTML)에만 있다. 머리말에는 두지 않는다. */ }
 /* ================= 관리자: 프롬프트 편집실 ================= */
 /* 앱이 Gemini에 보내는 프롬프트 틀을 관리자가 수정·저장하고(API 키 사용 시 즉시 반영),
    빈칸을 ( )로 둔 채 완성된 프롬프트를 만들어 유료 Gemini(웹/앱)에 직접 붙여 넣을 수 있게 한다.
