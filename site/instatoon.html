@@ -647,6 +647,9 @@ details.demo-link[open]>summary{border:0;color:var(--ink)}
 .exl{margin:0;padding:0;list-style:none;border-top:1px solid var(--line)}
 .exl li{padding:10px 0;border-bottom:1px solid var(--line);font-size:14.5px;line-height:1.5}
 .exl li span{display:block;font-size:12.5px;color:var(--muted);font-weight:700;margin-bottom:1px}
+.faq-more{margin:14px 0 0}
+.linkbtn{padding:0;border:0;background:none;color:var(--muted);font:600 13.5px/1.5 var(--sans);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.linkbtn:hover{color:var(--ink)}
 .exc{margin:12px 0 0;font-size:14px;color:var(--ink-2);line-height:1.6}
 /* ===== 리뉴얼 2단계: API 키 바닥 시트 · FAQ · 갤러리 자리 ===== */
 .sheet{position:fixed;inset:0;z-index:120;display:flex;align-items:flex-end;justify-content:center}
@@ -777,6 +780,7 @@ details.artsbox{margin-top:0}
     <details><summary>그림은 어디서 그리나요?</summary><p>이 사이트가 그림을 직접 그리지는 않아요. 3단계에서 정리해 주는 문장을 ChatGPT 같은 이미지 도구에 붙여 넣어 그림을 받고, 완성 그림을 다시 올려 저장해요.</p></details>
     <details><summary>작업이 사라지면 어떻게 하나요?</summary><p>작업은 이 브라우저에 자동으로 저장돼요. 브라우저 데이터를 지우거나 다른 컴퓨터로 옮기면 보이지 않을 수 있어서, 위쪽 "백업 저장"으로 파일을 받아 두고 "불러오기"로 되살릴 수 있어요. 7일 넘게 백업하지 않으면 알려 드려요.</p></details>
     <details><summary>AI가 쓴 글을 그대로 올려도 되나요?</summary><p>초안이에요. 가격·시간·상호명·효능 표현은 직접 확인해 주세요. 다른 사람의 사진이나 개인정보는 넣지 마세요. 자세한 점검 목록은 <a href="/guide/ai-instatoon-review-checklist/">AI로 인스타툰을 만들 때 직접 확인할 것</a>에 있어요.</p></details>
+    <p class="faq-more"><button type="button" class="linkbtn" data-act="helpPanel">전체 사용 안내 보기</button></p>
   </section>
   <footer class="gfoot">
     <h2>인스타툰 노트</h2>
@@ -2432,6 +2436,7 @@ document.addEventListener('click',async e=>{
   if(a==='restore') return $('#backupIn').click();
   if(a==='help') return startTour();
   if(a==='helpClose') return toggleHelp(false);
+  if(a==='helpPanel') return toggleHelp(true);
   if(a==='moreHooks') return run(b,moreHooks);
   if(a==='monthMake') return run(b,makeMonth);
   if(a==='monthCopy'){ const M=mo(); return copy(`${M.ym} 인스타툰 연재표\n${M.concept}\n\n`+M.items.map(x=>`${x.date} [${x.type}] ${x.title}\n${x.story}`).join('\n\n')); }

@@ -261,6 +261,15 @@ for (const [vk, vp] of [['휴대폰 390', MOB], ['PC 1300', PC]]) {
   C.ok(await d.page.evaluate(() => API.text === 'gemini-3.5-flash'), '모델을 정한 적이 없으면 기본 모델(gemini-3.5-flash)이 그대로 쓰임');
   await d.page.close();
 }
+// 9) FAQ 맨 아래 "전체 사용 안내 보기" 글자 링크 → 상세 안내 패널
+for (const [vk, vp] of [['휴대폰 390', MOB], ['PC 1300', PC]]) {
+  const { page } = await open(vp, withKey);
+  const l = await page.evaluate(() => { const b = document.querySelector('.faq .faq-more .linkbtn'), last = document.querySelector('.faq').lastElementChild; return { n: document.querySelectorAll('.faq .linkbtn').length, text: b && b.textContent.trim(), last: last === b.parentElement, bg: b && getComputedStyle(b).backgroundColor, border: b && getComputedStyle(b).borderTopWidth, deco: b && getComputedStyle(b).textDecorationLine }; });
+  C.ok(l.n === 1 && l.text === '전체 사용 안내 보기' && l.last && l.border === '0px' && /underline/.test(l.deco), `${vk} FAQ 맨 아래에 글자 링크 "전체 사용 안내 보기" 하나(버튼 모양 아님)`);
+  await page.click('.faq .linkbtn'); await page.waitForTimeout(250);
+  C.ok(await page.evaluate(() => !document.querySelector('#help').hidden && !document.querySelector('#tour') && /1단계|내 이야기 적기/.test(document.querySelector('#help').textContent)), `${vk} 누르면 상세 안내 패널이 열림(둘러보기는 시작되지 않음)`);
+  await page.close();
+}
 await browser.close(); srv.close();
 console.log(C.fail ? `\n[FAIL] 2단계 검사 ${C.fail}건 실패` : '\n[PASS] 2단계 검사 전부 통과');
 process.exit(C.fail ? 1 : 0);
