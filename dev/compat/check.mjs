@@ -49,6 +49,7 @@ for (const noIDB of [false, true]) {
     C.ok(!missing(exp.full.S, r.S), `${tag}현재 형식: 작업 상태(S) 그대로 복원` + (missing(exp.full.S, r.S) ? ' ← ' + missing(exp.full.S, r.S) : ''));
     C.ok(same(exp.full.prompts, r.prompts), `${tag}현재 형식: 불러온 작업의 프롬프트 동일`);
     const extra = await page.evaluate(() => ({ key: API.key, photo0: getPhoto(0), ref0: refOf(0), ref1: refOf(1), copied: [...COPIED], tm: localStorage.getItem('instatoon.textModel') }));
+    C.ok(extra.tm === ls['instatoon.textModel'] && (await page.evaluate(() => API.text)) === ls['instatoon.textModel'] && (await page.evaluate(() => API.image)) === ls['instatoon.imageModel'], `${tag}현재 형식: 저장된 모델 선택값(대본·그림)이 그대로 쓰임`);
     C.ok(extra.key === ls['instatoon.key'] && extra.photo0 === ls['instatoon.photo.0'] && extra.ref0 === ls['instatoon.charRef'] && extra.ref1 === ls['instatoon.charRef2'], `${tag}현재 형식: API 키·사진·기준 이미지`);
     C.ok(same(extra.copied, JSON.parse(ls['instatoon.copied'])), `${tag}현재 형식: 복사 ✓ 표시`);
     // 모든 앱 단계·탭이 오류 없이 그려지는지
