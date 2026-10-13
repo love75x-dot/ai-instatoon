@@ -22,7 +22,7 @@ const head = [
 ].filter(Boolean).join(NL) + NL;
 const out = head + src + '\n</body>\n</html>\n';
 
-const js = [...src.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m => m[1]).join('\n');
+const js = [...src.matchAll(/<script(?: type="text\/plain" id="appjs")?>([\s\S]*?)<\/script>/g)].map(m => m[1]).join('\n');
 new vm.Script(js); // 문법 오류면 여기서 예외
 console.log('JS 문법 OK');
 

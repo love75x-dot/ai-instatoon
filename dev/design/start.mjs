@@ -126,10 +126,10 @@ for (const [vk, vp, want] of [['휴대폰 390', MOB, '툰 만들기'], ['PC 1300
   await page.click('[data-sheet="test"]'); await page.waitForTimeout(300);
   C.ok(await page.evaluate(() => /연결됐어요/.test(document.querySelector('#ks-st').textContent)), '키 테스트: 맞는 키는 "연결됐어요 ✓"');
   await page.keyboard.press('Escape'); await page.waitForTimeout(100);
-  C.ok(await page.evaluate(() => document.querySelector('#keySheet').hidden && !localStorage.getItem('instatoon.key')), 'Esc로 시트를 닫으면 키는 저장되지 않음');
+  C.ok(await page.evaluate(() => document.querySelector('#keySheet').hidden && !kv.getItem('instatoon.key')), 'Esc로 시트를 닫으면 키는 저장되지 않음');
   await page.click('#makeBtn'); await page.waitForTimeout(200); await page.fill('#ks-key', 'AIza-good-key');
   await page.click('[data-sheet="save"]'); await page.waitForTimeout(600);
-  const after = await page.evaluate(() => ({ closed: document.querySelector('#keySheet').hidden, key: localStorage.getItem('instatoon.key'), line: document.querySelector('#keyTxt').textContent.trim() }));
+  const after = await page.evaluate(() => ({ closed: document.querySelector('#keySheet').hidden, key: kv.getItem('instatoon.key'), line: document.querySelector('#keyTxt').textContent.trim() }));
   C.ok(after.closed && after.key === 'AIza-good-key' && /연결됨 ✓/.test(after.line), `키를 저장하면 시트가 닫히고 줄이 "${after.line}"로 바뀜`);
   C.ok(reqs.some((r) => r.startsWith('POST') && /generateContent/.test(r)), '키를 저장하면 누르려던 "툰 만들기"가 이어서 실행됨(AI 호출 발생)');
   C.ok(!errors.length, '키 시트: 페이지 오류 없음' + (errors[0] ? ' ← ' + errors[0] : ''));
@@ -154,7 +154,7 @@ for (const [vk, vp, want] of [['휴대폰 390', MOB, '툰 만들기'], ['PC 1300
   C.ok(/8일 전/.test(note) && /지금 백업 저장/.test(note), `마지막 백업이 8일 전이면 알림이 뜸 (${note.slice(0, 30)})`);
   const [dl] = await Promise.all([a.page.waitForEvent('download', { timeout: 4000 }).catch(() => null), a.page.click('#bkNote [data-act="backup"]')]);
   await a.page.waitForTimeout(300);
-  C.ok(!!dl && await a.page.evaluate(() => !document.querySelector('#bkNote') && +localStorage.getItem('instatoon.lastBackup') === Date.now()), '"지금 백업 저장"을 누르면 백업 파일이 받아지고 알림이 사라짐(백업 시각 기록)');
+  C.ok(!!dl && await a.page.evaluate(() => !document.querySelector('#bkNote') && +kv.getItem('instatoon.lastBackup') === Date.now()), '"지금 백업 저장"을 누르면 백업 파일이 받아지고 알림이 사라짐(백업 시각 기록)');
   await a.page.close();
   const b = await open(PC, old);
   await b.page.click('#bkNote [data-act="bkLater"]'); await b.page.waitForTimeout(150);
@@ -177,7 +177,7 @@ for (const [vk, vp, want] of [['휴대폰 390', MOB, '툰 만들기'], ['PC 1300
 {
   const noSeen = { ...full }; delete noSeen['instatoon.helpSeen'];
   const a = await open(PC, noSeen); await a.page.evaluate(() => { S.step = 'post'; save(); }); await a.page.reload(); await a.page.waitForTimeout(1300);
-  const r = await a.page.evaluate(() => ({ step: S.step, tour: !!document.querySelector('#tour'), seen: localStorage.getItem('instatoon.helpSeen') }));
+  const r = await a.page.evaluate(() => ({ step: S.step, tour: !!document.querySelector('#tour'), seen: kv.getItem('instatoon.helpSeen') }));
   C.ok(r.step === 'post' && !r.tour && r.seen === '1', `작업이 있는 방문자: 둘러보기가 자동으로 뜨지 않고 단계가 3단계로 유지됨 (단계 ${r.step})`);
   await a.page.close();
   const b = await open(PC, {}); await b.page.waitForTimeout(1000);
@@ -251,11 +251,11 @@ for (const [vk, vp] of [['휴대폰 390', MOB], ['PC 1300', PC]]) {
   await page.click('.ks-adv summary'); await page.waitForTimeout(100);
   C.ok(await page.evaluate(() => document.querySelector('#ks-text').checkVisibility()), '"고급 설정"을 펼치면 모델 입력칸이 보임');
   await page.click('[data-sheet="save"]'); await page.waitForTimeout(300);
-  C.ok(await page.evaluate(() => localStorage.getItem('instatoon.textModel') === 'my-saved-model'), '바꾸지 않고 저장하면 저장된 모델 값이 그대로 유지됨');
+  C.ok(await page.evaluate(() => kv.getItem('instatoon.textModel') === 'my-saved-model'), '바꾸지 않고 저장하면 저장된 모델 값이 그대로 유지됨');
   await page.click('#keyBox .keyrow'); await page.waitForTimeout(200); await page.click('.ks-adv summary'); await page.fill('#ks-text', 'gemini-new-model'); await page.click('[data-sheet="save"]'); await page.waitForTimeout(300);
   await page.reload(); await page.waitForTimeout(400);
   await page.click('#keyBox .keyrow'); await page.waitForTimeout(200);
-  C.ok(await page.evaluate(() => localStorage.getItem('instatoon.textModel') === 'gemini-new-model' && document.querySelector('#ks-text').value === 'gemini-new-model'), '모델을 바꿔 저장하면 새로고침 후에도 유지됨');
+  C.ok(await page.evaluate(() => kv.getItem('instatoon.textModel') === 'gemini-new-model' && document.querySelector('#ks-text').value === 'gemini-new-model'), '모델을 바꿔 저장하면 새로고침 후에도 유지됨');
   await page.close();
   const d = await open(PC, withKey);
   C.ok(await d.page.evaluate(() => API.text === 'gemini-3.5-flash'), '모델을 정한 적이 없으면 기본 모델(gemini-3.5-flash)이 그대로 쓰임');

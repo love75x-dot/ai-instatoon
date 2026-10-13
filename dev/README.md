@@ -7,6 +7,7 @@
 |---|---|---|
 | 프롬프트 골든 | `node dev/golden/golden.mjs` | 앱 3단계 프롬프트(캐릭터 시트·규칙·컷별·안내 카드·다시 그리기 문장) 문장 불변. 의도한 변경이면 **이유를 보고·승인받은 뒤에만** `--update` |
 | 데이터 호환 | `node dev/compat/check.mjs` | 옛 localStorage·백업 파일(`dev/compat/fixtures/`, 0단계에서 만든 고정본)이 그대로 불러와짐. 고정본은 다시 만들지 말 것 |
+| 저장소 이전 | `node dev/compat/storage.mjs` | localStorage → IndexedDB 자동 이전 안전성(원본 보존, 실패·중단·동시 탭·IndexedDB 없음 등) |
 | 주소·SEO | `node dev/snapshots/seo.mjs` | /guide/ 주소, sitemap, canonical, robots 불변 |
 
 화면 캡처: `npm run snapshot [폴더]` → `dev/snapshots/<폴더>/` (기준은 `before/`).
