@@ -1,0 +1,12 @@
+{
+  "instatoonRoom.v3": {
+    "info": {
+      "type": "카페",
+      "name": "옛카페",
+      "notes": "옛 이야기 메모",
+      "offer": "아메리카노 500원 할인",
+      "target": "직장인",
+      "action": "저장"
+    }
+  }
+}
