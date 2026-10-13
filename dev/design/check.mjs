@@ -95,7 +95,7 @@ const homeProbe = () => {
     toolsVisible: tools.every(vis), toolLabels: tools.map((t) => t.textContent.trim()).join(','),
     rowTops: [...tools, note].filter(vis).map(top), rowHeights: [...tools, note].filter(vis).map(h),
     toolCss: [...new Set(tools.map((t) => { const c = getComputedStyle(t); return [c.fontSize, c.fontWeight, c.borderTopWidth, c.color, c.height].join('|'); }))].length,
-    menuVisible: vis(tb.querySelector('.hmenu')), moreH: h(tb.querySelector('.hmore')), noStatus: !tb.querySelector('.hai,#aiDot,#aiText,#aiDotM,#aiTextM,.hpai,.dot') && !/연결됨|키 필요|연결 없음|연결 확인/.test(tb.textContent), keyRow: (document.querySelector('#keyBox summary') || {}).textContent || '',
+    menuVisible: vis(tb.querySelector('.hmenu')), moreH: h(tb.querySelector('.hmore')), noStatus: !tb.querySelector('.hai,#aiDot,#aiText,#aiDotM,#aiTextM,.hpai,.dot') && !/연결됨|키 필요|연결 없음|연결 확인/.test(tb.textContent), keyRow: (document.querySelector('#keyTxt') || {}).textContent || '',
     overflow: document.documentElement.scrollWidth - window.innerWidth, tbH: h(tb),
   };
 };
@@ -129,7 +129,7 @@ for (const [vk, w] of [['PC 1300', 1300], ['PC 1024', 1024], ['태블릿 768', 7
     await page.click('#hmoreBtn'); await page.mouse.click(Math.round(w / 2), 400);
     C.ok(await page.evaluate(() => document.querySelector('#hpop').hidden), `${vk} 홈: 바깥을 누르면 메뉴가 닫힘`);
     await page.click('#hmoreBtn'); await page.click('#hpop [data-act="help"]'); await page.waitForTimeout(200);
-    C.ok(await page.evaluate(() => !document.querySelector('#help').hidden), `${vk} 홈: 메뉴의 "사용 방법"이 도움말을 엶`);
+    C.ok(await page.evaluate(() => !!document.querySelector('#tour')), `${vk} 홈: 메뉴의 "사용 방법"을 누르면 둘러보기가 시작됨`);
   }
   C.ok(!errors.length, `${vk} 홈 머리말: 페이지 오류 없음${errors[0] ? ' ← ' + errors[0] : ''}`);
   await page.close();
@@ -142,7 +142,7 @@ for (const [vk, w] of [['PC 1300', 1300], ['PC 1024', 1024], ['태블릿 768', 7
   const [fc] = await Promise.all([page.waitForEvent('filechooser', { timeout: 4000 }).catch(() => null), page.click('.htools [data-act="restore"]')]);
   C.ok(!!fc, 'PC 1300 홈: 머리말 "불러오기" 버튼이 파일 선택 창을 엶');
   await page.click('.htools [data-act="help"]'); await page.waitForTimeout(200);
-  C.ok(await page.evaluate(() => !document.querySelector('#help').hidden), 'PC 1300 홈: 머리말 "사용 방법" 버튼이 도움말을 엶');
+  C.ok(await page.evaluate(() => !!document.querySelector('#tour')), 'PC 1300 홈: 머리말 "사용 방법" 버튼을 누르면 둘러보기가 시작됨');
   C.ok(await page.evaluate(() => document.querySelector('.htools a.ht').getAttribute('href') === '/guide/instatoon-troubleshooting/'), 'PC 1300 홈: "문제 해결"이 문제 해결 글로 연결');
   await page.close();
 }

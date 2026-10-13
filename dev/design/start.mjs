@@ -91,7 +91,7 @@ const vis = (page, sel) => page.evaluate((s) => { const e = document.querySelect
   const hb = await page.evaluate(() => 0);
   await page.close();
   const pc = await open(PC, withKey); await setState(pc.page, () => { S = demoState('bakery'); S.mode = 'one'; S.step = 'input'; });
-  C.ok(await pc.page.evaluate(() => document.querySelector('#artsBox').open), 'PC 앱 1단계: 웹툰 테마는 펼쳐져 있음');
+  C.ok(await pc.page.evaluate(() => !document.querySelector('#artsBox').open && !!document.querySelector('#artsBox .art-thumb')), 'PC 앱 1단계: 웹툰 테마는 접혀 있고 선택한 테마 썸네일·이름이 보임');
   await pc.page.close();
 }
 // 휴대폰 "툰 만들기"
@@ -106,11 +106,11 @@ for (const [vk, vp, want] of [['휴대폰 390', MOB, '툰 만들기'], ['PC 1300
 {
   const { page, errors } = await open(PC, SEEN);
   const reqs = []; page.on('request', (r) => { if (/generativelanguage/.test(r.url())) reqs.push(r.method() + ' ' + r.url().replace(/\?.*/, '')); });
-  let line = await page.evaluate(() => ({ text: document.querySelector('#keyBox summary').textContent.trim(), open: document.querySelector('#keyBox').open }));
-  C.ok(/API 키 설정 · 필요해요/.test(line.text) && !line.open, `키 없음: "API 키 설정" 줄은 접혀 있고 "${line.text}" 로 보임`);
+  let line = await page.evaluate(() => ({ text: document.querySelector('#keyTxt').textContent.trim(), open: false }));
+  C.ok(/API 키 설정 · 필요해요/.test(line.text) && !line.open, `키 없음: "API 키 설정" 줄에 "${line.text}" 로 보임`);
   await setState(page, () => { S = demoState('bakery'); S.mode = 'one'; S.step = 'input'; });
-  line = await page.evaluate(() => document.querySelector('#keyBox summary').textContent.trim());
-  C.ok(/체험 중/.test(line) && !/필요해요$/.test(line), `체험 모드: "API 키 필요" 대신 "${line}"`);
+  line = await page.evaluate(() => document.querySelector('#keyTxt').textContent.trim());
+  C.ok(/둘러보기만/.test(line) && !/필요해요$/.test(line), `체험 모드: "API 키 필요" 대신 "${line}"`);
   await page.click('#makeBtn'); await page.waitForTimeout(250);
   let sh = await page.evaluate(() => { const w = document.querySelector('#keySheet'); return { shown: !!w && !w.hidden, text: w ? w.textContent : '', terms: !!(w && w.querySelector('a[href="https://ai.google.dev/gemini-api/terms"]')), role: w && w.getAttribute('role'), pos: w && getComputedStyle(w.querySelector('.sheet-in')).borderRadius }; });
   C.ok(sh.shown && sh.role === 'dialog' && /Gemini API 키가 필요해요/.test(sh.text), '키 없이 "툰 만들기"를 누르면 키 입력 시트가 열림');
@@ -129,7 +129,7 @@ for (const [vk, vp, want] of [['휴대폰 390', MOB, '툰 만들기'], ['PC 1300
   C.ok(await page.evaluate(() => document.querySelector('#keySheet').hidden && !localStorage.getItem('instatoon.key')), 'Esc로 시트를 닫으면 키는 저장되지 않음');
   await page.click('#makeBtn'); await page.waitForTimeout(200); await page.fill('#ks-key', 'AIza-good-key');
   await page.click('[data-sheet="save"]'); await page.waitForTimeout(600);
-  const after = await page.evaluate(() => ({ closed: document.querySelector('#keySheet').hidden, key: localStorage.getItem('instatoon.key'), line: document.querySelector('#keyBox summary').textContent.trim() }));
+  const after = await page.evaluate(() => ({ closed: document.querySelector('#keySheet').hidden, key: localStorage.getItem('instatoon.key'), line: document.querySelector('#keyTxt').textContent.trim() }));
   C.ok(after.closed && after.key === 'AIza-good-key' && /연결됨 ✓/.test(after.line), `키를 저장하면 시트가 닫히고 줄이 "${after.line}"로 바뀜`);
   C.ok(reqs.some((r) => r.startsWith('POST') && /generateContent/.test(r)), '키를 저장하면 누르려던 "툰 만들기"가 이어서 실행됨(AI 호출 발생)');
   C.ok(!errors.length, '키 시트: 페이지 오류 없음' + (errors[0] ? ' ← ' + errors[0] : ''));
@@ -197,11 +197,69 @@ for (const [vk, vp, want] of [['휴대폰 390', MOB, '툰 만들기'], ['PC 1300
 // 6) FAQ · 갤러리 자리, 넘침
 for (const [vk, vp] of [['휴대폰 390', MOB], ['PC 1300', PC]]) {
   const { page } = await open(vp, withKey);
-  const f = await page.evaluate(() => ({ faq: document.querySelectorAll('.faq details').length, gal: !!document.querySelector('.galslot'), demos: document.querySelectorAll('#galDemos button').length, ov: document.documentElement.scrollWidth - innerWidth }));
-  C.ok(f.faq === 5 && f.gal && f.demos === 3 && f.ov <= 1, `${vk} 첫 화면 아래: FAQ ${f.faq}개, 갤러리 자리, 예시 체험 버튼 ${f.demos}개, 넘침 없음`);
+  const f = await page.evaluate(() => ({ faq: document.querySelectorAll('.faq details').length, gal: document.querySelectorAll('.galslot').length, galBtn: document.querySelectorAll('.galslot button, .galslot a').length, galTxt: document.querySelector('.galslot').textContent, items: document.querySelectorAll('.exl li').length, ov: document.documentElement.scrollWidth - innerWidth }));
+  C.ok(f.faq === 4 && f.gal === 1 && f.galBtn === 0 && !/준비/.test(f.galTxt) && f.items === 6 && f.ov <= 1, `${vk} 첫 화면 아래: FAQ ${f.faq}개, "이렇게 나와요" 한 칸(결과 예시 ${f.items}컷, 버튼·준비 중 문구 없음), 넘침 없음`);
   const before = await page.evaluate(() => document.querySelector('.faq details').open);
   await page.click('.faq summary'); C.ok(await page.evaluate(() => document.querySelector('.faq details').open) && !before, `${vk} FAQ를 누르면 열림`);
   await page.close();
+}
+
+// 7) 같은 역할의 입구가 하나씩만 있는지 (첫 화면)
+for (const [vk, vp] of [['휴대폰 390', MOB], ['PC 1300', PC]]) {
+  const { page } = await open(vp, withKey);
+  const e = await page.evaluate(() => {
+    const visible = (el) => !el.closest('[hidden]') && el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden';
+    const closedDetails = (el) => { let d = el.closest('details'); while (d) { if (!d.open && !(el.tagName === 'SUMMARY' && el.parentElement === d)) return true; d = d.parentElement && d.parentElement.closest('details'); } return false; };
+    const vis = (sel, scope = document) => [...scope.querySelectorAll(sel)].filter((el) => visible(el) && !closedDetails(el));
+    const text = vis('body *').filter((el) => el.children.length === 0).map((el) => el.textContent.trim()).join(' | ');
+    const count = (re) => (text.match(re) || []).length;
+    return {
+      help: vis('[data-act="help"]').length, tourBtn: vis('[data-act="tour"]').length, tourText: count(/30초 둘러보기/g),
+      demoLinks: vis('details.demo-link > summary').length, demoBtnsAll: document.querySelectorAll('[data-act="demo"]').length, demoOpen: document.querySelectorAll('.demo-more').length,
+      exSections: document.querySelectorAll('#exSec').length, ex: count(/이렇게 나와요/g), prep: count(/준비하고 있어요|준비 중/g), galDemos: document.querySelectorAll('#galDemos').length,
+      model: count(/대본·기획 모델|gemini-3\.5-flash/g), saveNote: count(/이 브라우저에만 저장/g),
+      keyRows: vis('#keyBox .keyrow').length, keyInputs: vis('input[type=password]').length,
+      helpPanelEntrances: [...document.querySelectorAll('#help')].length,
+    };
+  });
+  C.ok(e.tourBtn === 0 && e.tourText === 0, `${vk} 첫 화면: "30초 둘러보기" 버튼이 없음(둘러보기 입구는 머리말 "사용 방법" 하나)`);
+  C.ok(e.help === (vp.width > 720 ? 1 : 0), `${vk} 첫 화면: 눈에 보이는 "사용 방법" 입구 ${e.help}개 (${vp.width > 720 ? '머리말 글자 버튼 1개' : '⋯ 메뉴 안에만'})`);
+  C.ok(e.demoLinks === 1 && e.demoOpen === 1, `${vk} 첫 화면: "예시로 먼저 체험해 보기" 입구는 입력칸 근처 글자 링크 한 곳 (${e.demoLinks}개)`);
+  C.ok(e.exSections === 1 && e.ex === 1 && e.prep === 0 && e.galDemos === 0, `${vk} 첫 화면: "이렇게 나와요"와 갤러리 자리는 한 칸, "준비 중"·체험 버튼 없음`);
+  C.ok(e.model === 0, `${vk} 첫 화면: 모델 이름(대본·기획 모델 / gemini-…)이 보이지 않음`);
+  C.ok(e.keyRows === 1 && e.keyInputs === 0, `${vk} 첫 화면: API 키 입구는 "API 키 설정" 줄 하나(입력칸은 시트 안에만)`);
+  C.ok(e.saveNote <= 1, `${vk} 첫 화면: "이 브라우저에만 저장" 안내가 한 번만 보임 (${e.saveNote}번)`);
+  if (vp.width <= 720) { await page.click('#hmoreBtn'); C.ok(await page.evaluate(() => [...document.querySelectorAll('#hpop [data-act="help"]')].length === 1), `${vk}: ⋯ 메뉴 안에 "사용 방법" 하나`); await page.click('#hmoreBtn'); }
+  // 사용 방법 = 둘러보기 시작 → 마지막에서 전체 안내(패널) 열기. 패널엔 겹치는 입구가 없음
+  await page.evaluate(() => { document.querySelector(window.innerWidth > 720 ? '.htools [data-act="help"]' : '#hpop [data-act="help"]').click(); });
+  await page.waitForTimeout(300);
+  C.ok(await page.evaluate(() => !!document.querySelector('#tour') && document.querySelector('#help').hidden), `${vk}: "사용 방법"을 누르면 둘러보기가 시작되고 안내 패널은 열리지 않음`);
+  await page.evaluate(() => { while (document.querySelector('#tour') && !document.querySelector('[data-tour="guide"]')) document.querySelector('[data-tour="next"]').click(); });
+  await page.waitForTimeout(200);
+  C.ok(await page.evaluate(() => !!document.querySelector('[data-tour="guide"]')), `${vk}: 둘러보기 마지막에 "전체 사용 안내" 버튼`);
+  await page.click('[data-tour="guide"]'); await page.waitForTimeout(250);
+  const hp = await page.evaluate(() => ({ open: !document.querySelector('#help').hidden, tour: !!document.querySelector('#tour'), dup: document.querySelectorAll('#help [data-act="demo"], #help [data-act="tour"]').length, keyCard: /시작 전 준비/.test(document.querySelector('#help').textContent), backupCard: /저장과 백업|먼저 체험해 보고 싶다면/.test(document.querySelector('#help').textContent) }));
+  C.ok(hp.open && !hp.tour && hp.dup === 0 && !hp.keyCard && !hp.backupCard, `${vk}: "전체 사용 안내"가 열리고, 안에 둘러보기·체험 버튼과 키·저장/백업 중복 안내가 없음`);
+  await page.close();
+}
+// 8) 모델 선택은 키 시트 "고급 설정"(접힘)에, 값은 그대로 유지·저장
+{
+  const { page } = await open(PC, { ...withKey, 'instatoon.textModel': 'my-saved-model' });
+  await page.click('#keyBox .keyrow'); await page.waitForTimeout(200);
+  const a = await page.evaluate(() => ({ shown: !document.querySelector('#keySheet').hidden, advOpen: document.querySelector('.ks-adv').open, val: document.querySelector('#ks-text').value, vis: document.querySelector('#ks-text').checkVisibility() }));
+  C.ok(a.shown && !a.advOpen && !a.vis && a.val === 'my-saved-model', '키 줄을 누르면 시트가 열리고, "고급 설정"은 접혀 있으며 저장된 모델 값이 들어 있음');
+  await page.click('.ks-adv summary'); await page.waitForTimeout(100);
+  C.ok(await page.evaluate(() => document.querySelector('#ks-text').checkVisibility()), '"고급 설정"을 펼치면 모델 입력칸이 보임');
+  await page.click('[data-sheet="save"]'); await page.waitForTimeout(300);
+  C.ok(await page.evaluate(() => localStorage.getItem('instatoon.textModel') === 'my-saved-model'), '바꾸지 않고 저장하면 저장된 모델 값이 그대로 유지됨');
+  await page.click('#keyBox .keyrow'); await page.waitForTimeout(200); await page.click('.ks-adv summary'); await page.fill('#ks-text', 'gemini-new-model'); await page.click('[data-sheet="save"]'); await page.waitForTimeout(300);
+  await page.reload(); await page.waitForTimeout(400);
+  await page.click('#keyBox .keyrow'); await page.waitForTimeout(200);
+  C.ok(await page.evaluate(() => localStorage.getItem('instatoon.textModel') === 'gemini-new-model' && document.querySelector('#ks-text').value === 'gemini-new-model'), '모델을 바꿔 저장하면 새로고침 후에도 유지됨');
+  await page.close();
+  const d = await open(PC, withKey);
+  C.ok(await d.page.evaluate(() => API.text === 'gemini-3.5-flash'), '모델을 정한 적이 없으면 기본 모델(gemini-3.5-flash)이 그대로 쓰임');
+  await d.page.close();
 }
 await browser.close(); srv.close();
 console.log(C.fail ? `\n[FAIL] 2단계 검사 ${C.fail}건 실패` : '\n[PASS] 2단계 검사 전부 통과');
