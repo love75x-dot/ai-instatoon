@@ -611,21 +611,40 @@ details.more summary::after{position:absolute;right:0;top:14px}
 
 /* 위쪽 버튼 줄 */
 .ai{gap:6px}
-.apptools{display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:flex-end;margin:0 0 12px}
-.apptools .ai{margin-left:6px}
 .hero-h em{background:linear-gradient(transparent 62%,var(--accent) 62%,var(--accent) 90%,transparent 90%)}
 .gcards a{border-radius:12px;font-weight:600}
 .gfoot h2{font-size:17px}
 .adm-vars .chip{font-size:13px}
+/* 홈 머리말 전용: 도구 글자 버튼 · AI 상태 · ⋯ 메뉴 (공통 블록의 .hb·.hnav 위에 얹음) */
+.hai{display:inline-flex;align-items:center;gap:6px;margin-right:8px;font-size:13px;line-height:1;color:var(--muted);white-space:nowrap}
+.htools{display:flex;align-items:center;gap:2px;margin-right:6px}
+.ht{display:inline-flex;align-items:center;height:40px;padding:0 12px;border:0;border-radius:999px;background:none;color:var(--muted);font:700 14px/1 var(--sans);text-decoration:none;white-space:nowrap;cursor:pointer}
+.ht:hover{color:var(--ink)}
+.hmenu{display:none;position:relative}
+.hmore{min-width:40px;padding:0 12px;font-size:20px;line-height:1;letter-spacing:0}
+.hpop{position:absolute;right:0;top:calc(100% + 8px);z-index:50;min-width:220px;display:flex;flex-direction:column;gap:2px;padding:8px;background:var(--surface);border:1px solid var(--ink);border-radius:16px}
+.hpop[hidden]{display:none}
+.hpop button,.hpop a{display:flex;align-items:center;width:100%;min-height:44px;padding:0 14px;border:0;border-radius:10px;background:none;color:var(--ink);font:600 15px/1 var(--sans);text-align:left;text-decoration:none;cursor:pointer}
+.hpop button:hover,.hpop a:hover{background:var(--sunken)}
+.hpop .hpri{justify-content:center;background:var(--ink);color:var(--surface);font-weight:700;margin-bottom:6px}
+.hpop .hpri:hover{background:var(--ink);opacity:.86}
+.hpai{display:flex;align-items:center;gap:8px;margin-top:4px;padding:12px 14px 6px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+@media (max-width:799px){.hai{display:none}}
+@media (max-width:720px){.htools{display:none}.hmenu{display:block}}
 @media (max-width:640px){.btn{max-width:100%;white-space:normal;text-align:left;line-height:1.4}}
 </style>
 
 <div class="wrap">
   <header class="topbar">
     <button type="button" class="brand" data-act="home" title="처음 화면으로" aria-label="인스타툰 연재실 처음 화면으로 이동"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><b>인스타툰 연재실</b></button>
-    <nav class="hnav" aria-label="주요 메뉴"><a class="hb" href="/guide/" aria-label="인스타툰 노트"><span class="hp">인스타툰&nbsp;</span>노트</a></nav>
+    <nav class="hnav" aria-label="주요 메뉴">
+      <span class="hai"><span class="dot" id="aiDot"></span><span id="aiText">확인 중</span></span>
+      <span class="htools"><button type="button" class="ht" data-act="backup">백업 저장</button><button type="button" class="ht" data-act="restore">불러오기</button><a class="ht" href="/guide/instatoon-troubleshooting/">문제 해결</a><button type="button" class="ht" data-act="help">사용 방법</button></span>
+      <span class="hmenu"><button type="button" class="hb hmore" id="hmoreBtn" aria-haspopup="menu" aria-expanded="false" aria-controls="hpop" aria-label="더 보기 메뉴">⋯</button>
+        <div class="hpop" id="hpop" role="menu" hidden><button type="button" class="hpri" role="menuitem" data-act="backup">백업 저장</button><button type="button" role="menuitem" data-act="restore">불러오기</button><a role="menuitem" href="/guide/instatoon-troubleshooting/">문제 해결</a><button type="button" role="menuitem" data-act="help">사용 방법</button><div class="hpai"><span class="dot" id="aiDotM"></span><span id="aiTextM">확인 중</span></div></div></span>
+      <a class="hb" href="/guide/" aria-label="인스타툰 노트"><span class="hp">인스타툰&nbsp;</span>노트</a>
+    </nav>
   </header>
-  <div class="apptools"><button class="btn sm save" data-act="backup">백업 저장</button><button class="btn sm load" data-act="restore">불러오기</button><a class="btn sm" href="/guide/instatoon-troubleshooting/">문제 해결</a><button class="btn sm" data-act="help">사용 방법</button><div class="ai"><span class="dot" id="aiDot"></span><span id="aiText">AI 연결 확인 중</span></div></div>
   <div class="demo-bar" id="demoBar" hidden></div>
   <section id="help" class="help" hidden></section>
   <div id="keyWrap"></div>
@@ -1636,7 +1655,7 @@ const TOUR=()=>[
   ['.prof','브랜드 프로필은 한 번만','말투, 해시태그, 예약 안내를 적어 두면 모든 편에 자동으로 들어가요.'],
   ['#makeBtn','이 버튼 하나면 대본 완성','30초~1분이면 컷별 대본, 첫 장 제목 후보, 캡션, 해시태그가 나와요.'],
   ['#phone','인스타에서 보이는 모습','만든 인스타툰을 여기서 독자처럼 넘겨 볼 수 있어요.'],
-  ['.apptools','막히거나 옮길 때','"문제 해결"은 막혔을 때 보는 가이드 글, "백업 저장"은 작업을 파일로 받아 두거나 다른 컴퓨터로 옮길 때, "불러오기"는 그 파일을 다시 열 때 써요. 이 안내는 "사용 방법"에서 다시 볼 수 있어요.'],
+  ['.hnav','막히거나 옮길 때','"문제 해결"은 막혔을 때 보는 가이드 글, "백업 저장"은 작업을 파일로 받아 두거나 다른 컴퓨터로 옮길 때, "불러오기"는 그 파일을 다시 열 때 써요. 이 안내는 "사용 방법"에서 다시 볼 수 있어요.'],
 ];
 let tourI=-1;
 const tourVis=sel=>{ const el=document.querySelector(sel); return !!el&&!el.closest('[hidden]')&&el.getClientRects().length>0; };
@@ -2468,7 +2487,8 @@ function keyBoxHTML(){ return `<details class="more keybox" id="keyBox" ${API.ke
   <div class="row" style="margin-top:12px"><button class="btn pri sm" data-act="keySave">저장</button><span class="status">모델 이름은 기본값 그대로 쓰면 돼요. 오류가 나면 AI Studio에 보이는 이름으로 바꿔 주세요.</span></div>
 </div></details>`; }
 
-function refreshAi(){ const on=STANDALONE?!!API.key:!!sample; $('#aiDot').className='dot '+(on?'on':'off'); $('#aiText').textContent=STANDALONE?(on?'Gemini 연결됨':'API 키 필요'):(on?'AI 연결됨':'AI 연결 없음 · 직접 쓰기 가능'); }
+function refreshAi(){ const on=STANDALONE?!!API.key:!!sample, cls='dot '+(on?'on':'off'), full=STANDALONE?(on?'Gemini 연결됨':'API 키 필요'):(on?'AI 연결됨':'AI 연결 없음 · 직접 쓰기 가능'), short=on?'연결됨':(STANDALONE?'키 필요':'연결 없음');
+  $('#aiDot').className=cls; $('#aiText').textContent=short; const dm=$('#aiDotM'), tm=$('#aiTextM'); if(dm) dm.className=cls; if(tm) tm.textContent=full; }
 /* ================= 관리자: 프롬프트 편집실 ================= */
 /* 앱이 Gemini에 보내는 프롬프트 틀을 관리자가 수정·저장하고(API 키 사용 시 즉시 반영),
    빈칸을 ( )로 둔 채 완성된 프롬프트를 만들어 유료 Gemini(웹/앱)에 직접 붙여 넣을 수 있게 한다.
@@ -2787,6 +2807,12 @@ async function admClick(e){ const b=e.target.closest('button,a'); if(!b) return;
   if(a==='export'){ const blob=new Blob([JSON.stringify({prompts:admCustom(),arts:admArtCfg(),manual:admRead(ADM_MAN)},null,1)],{type:'application/json'}), u=URL.createObjectURL(blob), l=document.createElement('a'); l.href=u; l.download='instatoon-prompts.json'; l.click(); setTimeout(()=>URL.revokeObjectURL(u),1000); return; }
   if(a==='import'){ const f=document.createElement('input'); f.type='file'; f.accept='.json,application/json'; f.onchange=async()=>{ try{ const d=JSON.parse(await f.files[0].text()); if(d.prompts&&typeof d.prompts==='object'){ let bad=0; for(const k of Object.keys(PROMPTS)){ if(typeof d.prompts[k]==='string'&&d.prompts[k].trim()&&!await admPut(k,d.prompts[k])) bad++; } if(bad) toast('일부를 저장하지 못했어요'); } if(d.arts&&typeof d.arts==='object'&&!await admArtsPut(d.arts)) toast('그림체를 저장하지 못했어요'); if(d.manual&&typeof d.manual==='object') admWrite(ADM_MAN,d.manual); toast('가져왔어요'); render(); admRender(); }catch(_){ toast('파일을 읽지 못했어요'); } }; f.click(); return; }
 }
+(()=>{ const btn=$('#hmoreBtn'), pop=$('#hpop'); if(!btn||!pop) return;
+  const close=()=>{ pop.hidden=true; btn.setAttribute('aria-expanded','false'); };
+  btn.addEventListener('click',e=>{ e.stopPropagation(); const open=pop.hidden; pop.hidden=!open; btn.setAttribute('aria-expanded',String(open)); });
+  document.addEventListener('click',e=>{ if(!e.target.closest('.hmenu')||e.target.closest('#hpop button,#hpop a')) close(); });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!pop.hidden){ close(); btn.focus(); } });
+})();
 document.addEventListener('click',e=>{ const a=e.target.closest('[data-admin]'); if(a){ e.preventDefault(); admOpen(); } });
 document.addEventListener('keydown',e=>{ const g=$('#admin')?.dataset.gate; if(e.key==='Enter'&&e.target.closest?.('.adm-gate')&&e.target.tagName==='INPUT'){ const m={create:'pwcreate',login:'pwlogin',change:'pwchange'}[g]; if(m) admPw(m); } if(e.key==='Escape'&&$('#admin')&&!$('#admin').hidden) admClose(); });
 const admHash=()=>{ if(location.hash===ADM_HASH) admOpen(); };
