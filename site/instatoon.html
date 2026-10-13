@@ -49,16 +49,23 @@ button,input,textarea,select{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 .wrap{max-width:1200px;margin:0 auto;padding-inline:16px;padding-block:0 72px}
 
-.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:18px}
-.brand{display:flex;align-items:center;gap:10px}
-.mark{width:28px;height:28px;display:grid;grid-template-columns:1fr 1fr;gap:3px}
-.mark i{background:var(--ink);border-radius:3px}
-.mark i:nth-child(2){background:var(--accent)}
-.brand b{font-weight:900;font-size:19px;letter-spacing:-.02em}
-.brand b{white-space:nowrap}
-button.brand{background:none;border:0;padding:4px 8px;margin:-4px -8px;border-radius:10px;cursor:pointer;color:inherit;font:inherit;text-align:left}
-button.brand:hover{background:var(--sunken)} button.brand:hover b{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px}
-button.brand:active{transform:translateY(1px)}
+/* HEADER:BEGIN 홈·인스타툰 노트 공통 머리말. 앱(site/index.html)과 노트(site/guide/lib.mjs)의 이 블록은 글자까지 같아야 해요. dev/design/check.mjs가 비교해요. */
+body{margin:0}
+.hwrap{max-width:1200px;margin:0 auto;padding-inline:16px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;height:72px;padding:0}
+.brand{display:flex;align-items:center;gap:10px;height:40px;padding:0 8px;margin:0 -8px;border:0;border-radius:10px;background:none;color:var(--ink);font:inherit;text-align:left;text-decoration:none;cursor:pointer}
+.brand:hover b{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px}
+.brand .mark{width:28px;height:28px;display:grid;grid-template-columns:1fr 1fr;gap:3px;flex:none}
+.brand .mark i{background:var(--ink);border-radius:3px}
+.brand .mark i:nth-child(2){background:var(--accent)}
+.brand b{font-weight:900;font-size:19px;line-height:1;letter-spacing:-.02em;white-space:nowrap}
+.hnav{display:flex;align-items:center;gap:8px;flex:none}
+.hb{display:inline-flex;align-items:center;justify-content:center;height:40px;padding:0 16px;border:1px solid var(--line-2);border-radius:999px;background:var(--surface);color:var(--ink);font:700 14px/1 var(--sans);text-decoration:none;white-space:nowrap;cursor:pointer}
+.hb:hover{border-color:var(--ink)}
+.hb.pri{background:var(--ink);border-color:var(--ink);color:var(--surface)}
+.hb.pri:hover{opacity:.86}
+@media (max-width:480px){.hp{display:none}.hb{padding:0 14px}.topbar{gap:8px}}
+/* HEADER:END */
 .btn.save{background:var(--save);border-color:var(--save);color:var(--save-ink)} .btn.save:hover{border-color:var(--save);opacity:.88}
 .btn.load{background:var(--load-bg);border-color:var(--load-line);color:var(--load-ink)} .btn.load:hover{border-color:var(--load-ink)}
 .hero-lb{align-self:center;font-weight:800;font-size:13px;color:var(--ink-2);margin-right:2px}
@@ -79,7 +86,6 @@ button.brand:active{transform:translateY(1px)}
 .hstep dd .btn{margin:2px 6px 2px 0}
 .harrow{text-align:center;font-size:20px;font-weight:900;color:var(--muted);line-height:1.2;padding:4px 0}
 .hextra{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}@media (max-width:760px){.hextra{grid-template-columns:1fr}}
-@media (max-width:720px){.topbar{flex-wrap:wrap;padding-block:14px 10px}.topbar>.row{width:100%;flex-wrap:wrap}.topbar .btn.sm{padding:6px 10px;font-size:12.5px}}
 .ai{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:6px}
 .dot{width:7px;height:7px;border-radius:50%;background:var(--line-2)} .dot.on{background:var(--ok)} .dot.off{background:var(--warn)}
 
@@ -614,8 +620,9 @@ details.more summary::after{position:absolute;right:0;top:14px}
 @media (max-width:640px){.mode b{font-size:14.5px}}
 
 /* 위쪽 버튼 줄 */
-.topbar .row{gap:6px}
 .ai{gap:6px}
+.apptools{display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:flex-end;margin:0 0 12px}
+.apptools .ai{margin-left:6px}
 .hero-h em{background:linear-gradient(transparent 62%,var(--accent) 62%,var(--accent) 90%,transparent 90%)}
 .gcards a{border-radius:12px;font-weight:600}
 .gfoot h2{font-size:17px}
@@ -626,8 +633,9 @@ details.more summary::after{position:absolute;right:0;top:14px}
 <div class="wrap">
   <header class="topbar">
     <button type="button" class="brand" data-act="home" title="처음 화면으로" aria-label="인스타툰 연재실 처음 화면으로 이동"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><b>인스타툰 연재실</b></button>
-    <div class="row" style="gap:8px"><button class="btn sm save" data-act="backup">백업 저장</button><button class="btn sm load" data-act="restore">불러오기</button><a class="btn sm" href="/guide/instatoon-troubleshooting/">문제 해결</a><button class="btn sm" data-act="help">사용 방법</button><a class="btn sm" href="/guide/">인스타툰 노트</a><div class="ai"><span class="dot" id="aiDot"></span><span id="aiText">AI 연결 확인 중</span></div></div>
+    <nav class="hnav" aria-label="주요 메뉴"><a class="hb" href="/guide/" aria-label="인스타툰 노트"><span class="hp">인스타툰&nbsp;</span>노트</a></nav>
   </header>
+  <div class="apptools"><button class="btn sm save" data-act="backup">백업 저장</button><button class="btn sm load" data-act="restore">불러오기</button><a class="btn sm" href="/guide/instatoon-troubleshooting/">문제 해결</a><button class="btn sm" data-act="help">사용 방법</button><div class="ai"><span class="dot" id="aiDot"></span><span id="aiText">AI 연결 확인 중</span></div></div>
   <div class="demo-bar" id="demoBar" hidden></div>
   <section id="help" class="help" hidden></section>
   <div id="keyWrap"></div>
@@ -1638,7 +1646,7 @@ const TOUR=()=>[
   ['.prof','브랜드 프로필은 한 번만','말투, 해시태그, 예약 안내를 적어 두면 모든 편에 자동으로 들어가요.'],
   ['#makeBtn','이 버튼 하나면 대본 완성','30초~1분이면 컷별 대본, 첫 장 제목 후보, 캡션, 해시태그가 나와요.'],
   ['#phone','인스타에서 보이는 모습','만든 인스타툰을 여기서 독자처럼 넘겨 볼 수 있어요.'],
-  ['.topbar>.row','막히거나 옮길 때','"문제 해결"은 막혔을 때 보는 가이드 글, 파란 "백업 저장"은 작업을 파일로 받아 두거나 다른 컴퓨터로 옮길 때, "불러오기"는 그 파일을 다시 열 때 써요. 이 안내는 "사용 방법"에서 다시 볼 수 있어요.'],
+  ['.apptools','막히거나 옮길 때','"문제 해결"은 막혔을 때 보는 가이드 글, "백업 저장"은 작업을 파일로 받아 두거나 다른 컴퓨터로 옮길 때, "불러오기"는 그 파일을 다시 열 때 써요. 이 안내는 "사용 방법"에서 다시 볼 수 있어요.'],
 ];
 let tourI=-1;
 const tourVis=sel=>{ const el=document.querySelector(sel); return !!el&&!el.closest('[hidden]')&&el.getClientRects().length>0; };
