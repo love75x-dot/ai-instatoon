@@ -41,6 +41,10 @@ const result = await page.evaluate(() => {
         { ...m, role: '빈컷' },
       ];
     },
+    '안내카드_일부비움': () => { Object.assign(ec(), { on: true, style: 'light', name: '', head: '내일도\n문 열어요', lines: '', btn: '', foot: '저장해 두세요' }); },
+    '안내카드_전부비움': () => { Object.assign(ec(), { on: true, name: '', head: '', lines: '', btn: '', foot: '' }); },
+    '컷수_최소4': () => { S.toon.cuts = S.toon.cuts.slice(0, 4); S.info.cuts = 4; },
+    '컷수_최대10': () => { const c = S.toon.cuts; let i = 0; while (c.length < 10) { const o = { ...c[i % 6] }; o.role = '추가' + (c.length + 1); o.title = o.title ? o.title + ' ' + (c.length + 1) : ''; c.push(o); i++; } S.info.cuts = 10; },
     '안내카드_스타일별': () => {},
   };
   for (const [name, fn] of Object.entries(SC)) {
