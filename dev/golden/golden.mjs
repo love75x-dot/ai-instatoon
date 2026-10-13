@@ -6,14 +6,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { root, serve, launch, newPage } from '../lib/harness.mjs';
 
-const file = path.join(root, 'dev', 'golden', 'prompts.json'), fileX = path.join(root, 'dev', 'golden', 'prompts-extra.json');
+const file = path.join(root, 'dev', 'golden', 'prompts.json');
 const update = process.argv.includes('--update');
 
 const srv = await serve(); const browser = await launch();
 const { page, errors } = await newPage(browser, srv.base);
 await page.goto(srv.base + '/'); await page.waitForTimeout(600);
 
-const { main: result, extra } = await page.evaluate(() => {
+const result = await page.evaluate(() => {
   const out = {};
   const base = () => { kv.removeItem('instatoon.photo.0'); kv.removeItem('instatoon.photo.1'); S = demoState('bakery'); S.info.ratio = '4:5'; return S; };
   const grab = () => {
@@ -58,7 +58,7 @@ const { main: result, extra } = await page.evaluate(() => {
   out['글자테마별_규칙'] = {};
   for (const a of Object.keys(ARTS)) { base(); S.info.art = a; out['글자테마별_규칙'][a] = { setup: setupPrompt(), sheet: sheetPrompt(0) }; }
   base();
-  // ── 3단계(컷 편집) 새 칸: 채워도 반영이 꺼져 있으면 프롬프트가 그대로여야 한다
+  // ── 3단계(컷 편집) 새 칸: 비어 있으면 기본과 같고(승인된 문장은 새 칸을 채웠을 때만 추가), 스위치를 끄면 채워도 기본과 같다
   const fillNew = () => {
     const c = S.toon.cuts;
     Object.assign(c[0], { chars: ['p0'], emotion: '당황, 땀 흘림', place: '빵집 진열대 앞, 오후 3시', avoid: '배경 속 사람', ok: true });
@@ -68,20 +68,17 @@ const { main: result, extra } = await page.evaluate(() => {
   };
   const withCast = () => { base(); S.info.cast = '단골 할머니(흰 파마머리)'; };
   withCast(); out['조연설정_기본'] = grab();
-  withCast(); fillNew(); out['새칸_채움_반영꺼짐'] = grab();
-  // 반영을 켠 경우(승인 전 미리보기용 문장). 새 칸이 모두 비어 있으면 켜도 기본과 같아야 한다.
-  const ex = {}; CUT_EXTRA_PROMPT = true;
-  withCast(); ex['새칸_비움_반영켜짐'] = grab();
-  withCast(); fillNew(); ex['새칸_채움_반영켜짐'] = grab();
-  base(); S.info.p2.on = false; S.toon.cuts[0].chars = ['p0']; S.toon.cuts[1].sameBg = true; ex['주인공1명_반영켜짐'] = { cut1: cutPrompt(S.toon.cuts[0], 0), cut2: cutPrompt(S.toon.cuts[1], 1) };
-  CUT_EXTRA_PROMPT = false; base();
-  return { main: out, extra: ex };
+  withCast(); fillNew(); out['새칸_채움'] = grab();
+  withCast(); fillNew(); CUT_EXTRA_PROMPT = false; out['새칸_채움_스위치꺼짐'] = grab(); CUT_EXTRA_PROMPT = true;
+  base(); S.info.p2.on = false; S.toon.cuts[0].chars = ['p0']; S.toon.cuts[1].sameBg = true; out['주인공1명_새칸'] = { cut1: cutPrompt(S.toon.cuts[0], 0), cut2: cutPrompt(S.toon.cuts[1], 1) };
+  base();
+  return out;
 });
 await browser.close(); srv.close();
 if (errors.length) { console.log('[FAIL] 페이지 오류:', errors.slice(0, 3)); process.exit(1); }
 
-const json = JSON.stringify(result, null, 2) + '\n', jsonX = JSON.stringify(extra, null, 2) + '\n';
-if (update) { fs.writeFileSync(file, json); fs.writeFileSync(fileX, jsonX); console.log('골든 갱신:', path.relative(root, file), `(${(json.length / 1024).toFixed(0)}KB)`); process.exit(0); }
+const json = JSON.stringify(result, null, 2) + '\n';
+if (update) { fs.writeFileSync(file, json); console.log('골든 갱신:', path.relative(root, file), `(${(json.length / 1024).toFixed(0)}KB)`); process.exit(0); }
 if (!fs.existsSync(file)) { console.log('[FAIL] 골든 파일이 없어요. --update 로 처음 만드세요.'); process.exit(1); }
 const gold = JSON.parse(fs.readFileSync(file, 'utf8'));
 let diffs = 0;
@@ -96,11 +93,9 @@ const walk = (a, b, p) => {
   for (const k of new Set([...Object.keys(a), ...Object.keys(b)])) walk(a[k], b[k], p ? p + ' › ' + k : k);
 };
 walk(gold, result, '');
-if (!fs.existsSync(fileX)) { console.log('[FAIL] prompts-extra.json 이 없어요. --update 로 만드세요.'); process.exit(1); }
-walk(JSON.parse(fs.readFileSync(fileX, 'utf8')), extra, '[반영 켠 문장] ');
 // 새 칸을 비웠을 때 반영을 켜도 기본과 같고, 새 칸을 채워도 반영이 꺼져 있으면 기본과 같아야 한다
 const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
-if (!eq(result['새칸_채움_반영꺼짐'], result['조연설정_기본'])) { diffs++; console.log('[DIFF] 새 칸을 채웠는데 반영이 꺼져 있는 프롬프트가 기본 프롬프트와 달라요'); }
-if (!eq(extra['새칸_비움_반영켜짐'], result['조연설정_기본'])) { diffs++; console.log('[DIFF] 새 칸이 모두 비어 있는데 반영을 켜면 프롬프트가 기본과 달라져요'); }
+if (!eq(result['새칸_채움_스위치꺼짐'], result['조연설정_기본'])) { diffs++; console.log('[DIFF] 스위치를 끄면 새 칸을 채워도 프롬프트가 기본과 같아야 해요'); }
+// 새 칸이 모두 비어 있으면 프롬프트가 기본(조연설정_기본)과 같아야 한다 → 아래 '새칸_채움'과 비교하는 대신, 비어 있는 상태의 기본 시나리오들이 승인 전 골든과 그대로인지로 보장한다(위 walk)
 if (diffs) { console.log(`\n[FAIL] 프롬프트 ${diffs}곳이 골든과 달라요. 의도한 변경이면 이유를 먼저 보고하고 승인받으세요.`); process.exit(1); }
 console.log('[PASS] 프롬프트 골든 일치 (시나리오 ' + Object.keys(gold).length + '개)');

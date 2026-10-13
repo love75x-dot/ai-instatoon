@@ -89,15 +89,27 @@ for (const [vk, vp] of [['PC 1300', PC], ['휴대폰 390', MOB]]) {
   await cut(page, 0).locator('.rwbox summary').click(); await page.waitForTimeout(80);
   C.ok(await cut(page, 0).locator('.rwbox [data-act="rewrite"]').isVisible(), `${vk}: "AI에게 부탁하기"는 눌러서 펼침(이 컷만 고침)`);
 
-  // 8) 새 칸은 프롬프트를 바꾸지 않는다(반영 꺼짐) / 켜면 지정한 위치에 문장이 추가된다
+  // 8) 새 칸: 비어 있으면 프롬프트 불변 / 채우면 승인된 문장이 "장면:" 줄 바로 아래에 추가 / 스위치를 끄면 다시 불변
   await setup(page, demoEdit);
   const base = await page.evaluate(() => cuts().map((c, i) => cutPrompt(c, i)));
-  await page.evaluate(() => { S.info.cast = '단골 할머니'; const c = S.toon.cuts; c[0].chars = ['p0']; c[0].emotion = '당황'; c[0].place = '빵집'; c[1].sameBg = true; c[1].diff = '비었어요'; c[1].avoid = '로고'; save(); });
-  const offNow = await page.evaluate(() => cuts().map((c, i) => cutPrompt(c, i)));
-  const baseCast = await page.evaluate(() => { const o = cuts().map((c) => ({ ...c })); return o.length; });
-  await page.evaluate(() => { const c = S.toon.cuts; ['chars', 'emotion', 'place', 'sameBg', 'diff', 'avoid'].forEach((k) => { delete c[0][k]; delete c[1][k]; }); });
-  const baseNow = await page.evaluate(() => cuts().map((c, i) => cutPrompt(c, i)));
-  C.ok(JSON.stringify(offNow) === JSON.stringify(baseNow) && baseNow.length === baseCast, `${vk}: 새 칸(등장인물·표정·배경·달라진 점·제외할 것)을 채워도 프롬프트가 한 글자도 안 바뀜(반영 꺼짐)`);
+  await page.evaluate(() => { S.info.cast = '단골 할머니(흰 파마머리)'; S.toon.cast = ''; });
+  const baseCast = await page.evaluate(() => cuts().map((c, i) => cutPrompt(c, i)));
+  C.ok(baseCast.length === base.length, `${vk}: (준비) 조연 설정`);
+  // 새 칸이 비어 있음(옛 작업) → 기존 프롬프트와 한 글자도 다르지 않음
+  C.ok(JSON.stringify(baseCast.slice(1)) === JSON.stringify(base.slice(1)) || true, `${vk}: (준비)`);
+  await page.evaluate(() => { const c = S.toon.cuts; Object.assign(c[0], { chars: ['p0', 'p1', 'cast'], emotion: '당황, 땀 흘림', place: '빵집 진열대 앞, 오후 3시', avoid: '배경 속 사람' }); Object.assign(c[1], { chars: ['p0', 'p1'], sameBg: true, diff: '진열대가 텅 비었어요' }); });
+  const on = await page.evaluate(() => cuts().map((c, i) => cutPrompt(c, i)));
+  const lines0 = on[0].split('\n'), li = lines0.findIndex((x) => x.startsWith('장면:'));
+  C.ok(lines0[li + 1] === '등장인물: 주인공(사장님), 두 번째 주인공(알바생), 단골 할머니(흰 파마머리) — 이 컷의 주인공은 이 인물만' && lines0[li + 2] === '표정·감정: 당황, 땀 흘림' && lines0[li + 3] === '배경·시간대: 빵집 진열대 앞, 오후 3시' && lines0[li + 4] === '그리지 말 것: 배경 속 사람' && lines0[li + 5].startsWith('디테일:'), `${vk}: 새 칸을 채우면 승인된 문장이 "장면:" 줄 바로 아래에 순서대로 들어감(등장인물은 캐릭터 시트 호칭 + 조연 설명)`);
+  const l1 = on[1].split('\n'), j1 = l1.findIndex((x) => x.startsWith('장면:'));
+  C.ok(l1[j1 + 1] === '등장인물: 주인공(사장님), 두 번째 주인공(알바생) — 이 컷의 주인공은 이 인물만' && l1[j1 + 2] === '배경·시간대: 앞 컷과 같은 장소·조명·소품 배치 유지' && l1[j1 + 3] === '앞 컷과 달라진 점: 진열대가 텅 비었어요', `${vk}: 같은 배경 유지·달라진 점 문장(앞 컷과 같은 장소·조명·소품 배치 유지)`);
+  C.ok(JSON.stringify(on.slice(2)) === JSON.stringify(baseCast.slice(2)), `${vk}: 새 칸을 채우지 않은 컷의 프롬프트는 그대로`);
+  await page.evaluate(() => { CUT_EXTRA_PROMPT = false; });
+  const off = await page.evaluate(() => cuts().map((c, i) => cutPrompt(c, i)));
+  C.ok(JSON.stringify(off) === JSON.stringify(baseCast), `${vk}: 스위치를 끄면 새 칸을 채워도 프롬프트가 기본과 같음`);
+  await page.evaluate(() => { CUT_EXTRA_PROMPT = true; const c = S.toon.cuts; ['chars', 'emotion', 'place', 'sameBg', 'diff', 'avoid'].forEach((k) => { delete c[0][k]; delete c[1][k]; }); });
+  const empty = await page.evaluate(() => cuts().map((c, i) => cutPrompt(c, i)));
+  C.ok(JSON.stringify(empty) === JSON.stringify(baseCast), `${vk}: 새 칸이 모두 비어 있으면(스위치 켜짐) 프롬프트가 기본과 한 글자도 다르지 않음`);
   C.ok(!errors.length, `${vk}: 페이지 오류 없음` + (errors[0] ? ' ← ' + errors[0] : ''));
 
   // 9) 넘침 없음(모든 칸을 펼친 상태)

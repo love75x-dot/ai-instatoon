@@ -1490,7 +1490,7 @@ const fieldName=f=>({title:'제목',bubble:'말풍선',sub:'보조 문구',sfx:'
 /* ---------- 앱 2단계 · 컷 편집 (리뉴얼 3단계) ----------
    기본 칸 4개(등장인물·대사·그림 설명·화면 구도)만 보이고, 나머지는 값이 있으면 항상 보이고 비어 있으면 "+ 추가" 뒤에 둔다.
    데이터는 기존과 같은 칸(title·highlight·sub·bubble·sfx·caption·extras·panels …)에 그대로 저장하고, 새 칸은 선택 항목(없어도 됨)이다. */
-let CUT_EXTRA_PROMPT=false; /* 새 칸(등장인물·표정·배경·달라진 점·제외할 것)을 그림 프롬프트에 넣을지. 문장 승인 전까지 꺼 둠 → 꺼져 있으면 프롬프트가 한 글자도 바뀌지 않음 */
+let CUT_EXTRA_PROMPT=true; /* 새 칸(등장인물·표정·배경·달라진 점·제외할 것)을 그림 프롬프트에 넣을지. 문장은 사장님 승인(2026-10-13) 완료. 새 칸이 비어 있으면 어느 쪽이든 프롬프트는 한 글자도 바뀌지 않는다 */
 const KIND_LABEL={say:'',think:'속마음',shout:'외침',whisper:'속삭임',shaky:'떨림'};
 const KIND_NAME={say:'보통',think:'속마음',shout:'외침',whisper:'속삭임',shaky:'떨림'};
 const DETAIL_CHIPS=['땀방울','반짝이','집중선','분노 마크','물음표','느낌표','당황 표시'];
@@ -1499,12 +1499,13 @@ const OPT_FIELDS=[['title','제목(내레이션)','선택 · 표지와 꼭 필�
 const OPT_PH={sfx:'쾅',caption:'예: 오후 11시 편집 작업',panels:'예: 위 큰 칸 전신, 오른쪽 아래 작은 칸 놀란 얼굴',emotion:'예: 당황, 땀 흘림',place:'예: 빵집 진열대 앞, 오후 3시',diff:'예: 진열대가 텅 비었어요'};
 const shownF={}, dlRest={}, pvOpen={};
 const castCodes=()=>[...peopleIdx().map(k=>['p'+k,person(k).role||whoLabel(k)]),...(castText()?[['cast','조연']]:[])];
+const castPromptNames=c=>{ const sel=new Set(c.chars||[]); return castCodes().filter(([code])=>sel.has(code)).map(([code])=>{ if(code==='cast') return castText()||'조연'; const k=+code.slice(1), role=String(person(k).role||'').trim(); return role?`${whoLabel(k)}(${role})`:whoLabel(k); }); };
 const castNames=c=>{ const all=castCodes(); return (c.chars||[]).map(code=>(all.find(x=>x[0]===code)||[])[1]).filter(Boolean); };
 function cutExtraLines(c,i){
   if(!CUT_EXTRA_PROMPT) return '';
-  const o=[], ch=castNames(c); if(ch.length) o.push(`등장인물: ${ch.join(', ')}`);
+  const o=[], ch=castPromptNames(c); if(ch.length) o.push(`등장인물: ${ch.join(', ')} — 이 컷의 주인공은 이 인물만`);
   if(String(c.emotion||'').trim()) o.push(`표정·감정: ${c.emotion.trim()}`);
-  const bg=[String(c.place||'').trim(), c.sameBg&&i>0?'앞 컷과 같은 배경 유지':''].filter(Boolean).join(' · '); if(bg) o.push(`배경·시간대: ${bg}`);
+  const bg=[String(c.place||'').trim(), c.sameBg&&i>0?'앞 컷과 같은 장소·조명·소품 배치 유지':''].filter(Boolean).join(' · '); if(bg) o.push(`배경·시간대: ${bg}`);
   if(i>0&&String(c.diff||'').trim()) o.push(`앞 컷과 달라진 점: ${c.diff.trim()}`);
   if(String(c.avoid||'').trim()) o.push(`그리지 말 것: ${c.avoid.trim()}`);
   return o.length?o.join('\n')+'\n':'';
