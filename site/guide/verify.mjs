@@ -38,7 +38,7 @@ for (const [i, u] of pages.entries()) {
     ok(/<article/.test(h) && (h.match(/<h2/g) || []).length >= 6, `${u} 본문/H2`);
     ok(h.includes('"@type":"Article"') && h.includes('"datePublished"') && h.includes('"dateModified"') && h.includes('"mainEntityOfPage"') && h.includes('"headline"') && h.includes('"@type":"BreadcrumbList"'), `${u} 구조화 데이터`);
     ok((h.match(/class="card"/g) || []).length >= 3, `${u} 관련 글 <3`);
-    ok(/rel="prev"|<small>← 콘텐츠 가이드/.test(h) && /rel="next"|<small>콘텐츠 가이드 →/.test(h), `${u} 이전/다음`);
+    ok(/rel="prev"|<small>← 인스타툰 노트/.test(h) && /rel="next"|<small>인스타툰 노트 →/.test(h), `${u} 이전/다음`);
     ok(h.includes('class="cta"') && h.includes('인스타툰 만들기'), `${u} CTA`);
     ok((h.replace(/<[^>]+>/g, '').length) > 3000, `${u} 본문 분량 짧음`);
   }
@@ -56,6 +56,16 @@ for (const u of ['/about/', '/privacy/', '/terms/']) {
 // 허브 → 모든 글 링크
 const hub = (await get('/guide/')).text;
 for (const a of articles) ok(hub.includes(`href="/guide/${a.slug}/"`), `허브에 ${a.slug} 링크 없음`);
+// 인스타툰 노트(게시판) 허브: 이름·카테고리·대표 이미지·최신순, 옛 이름이 화면에 안 남았는지
+ok(/<h1>인스타툰 노트<\/h1>/.test(hub), '허브 H1 인스타툰 노트');
+ok(hub.includes('<title>인스타툰 노트'), '허브 title 인스타툰 노트');
+ok((hub.match(/<nav class="chips"[\s\S]*?<\/nav>/) || [''])[0].split('<a ').length - 1 === 6, '허브 카테고리 칩 6개(전체+5)');
+ok((hub.match(/<li class="post/g) || []).length === articles.length, '허브 글 카드 수 = 글 수');
+const dts = [...hub.matchAll(/<time datetime="([\d-]+)"/g)].map((m) => m[1]);
+ok(dts.every((d, i) => i === 0 || dts[i - 1] >= d), '허브 글 목록 최신순');
+ok(articles.some((a) => a.image) || !hub.includes('<img '), '허브 목록에 그림 없음(image 지정 글이 없을 때)');
+ok(!/<img /.test((await get('/guide/how-to-make-instatoon/')).text), '글 페이지 상단에 그림 없음(image 지정 글 제외)');
+for (const u of ['/', ...pages]) { const t = (await get(u)).text.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g, ''); ok(!t.includes('콘텐츠 가이드'), `${u} 화면에 옛 이름(콘텐츠 가이드) 남음`); }
 // 메인 → /guide/
 ok((await get('/')).text.includes('href="/guide/"'), '메인에 /guide/ 링크 없음');
 // sitemap

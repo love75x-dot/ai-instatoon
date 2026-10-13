@@ -30,6 +30,7 @@ const SCHEDULE = ['2026-09-25', '2026-09-27', '2026-09-29', '2026-10-01'];
 articles.forEach((a, i) => { a.published ||= SCHEDULE[Math.floor(i / 5)]; a.modified ||= a.published; });
 
 const { errs, warns } = validate(articles);
+for (const a of articles) if (a.image && !fs.existsSync(path.join(here, 'img', a.image))) errs.push(`[${a.slug}] image 파일이 없어요: site/guide/img/${a.image}`);
 warns.forEach((w) => console.warn('경고', w));
 if (errs.length) { errs.forEach((e) => console.error('오류', e)); throw new Error(`글 검증 실패 ${errs.length}건`); }
 
@@ -43,6 +44,11 @@ fs.rmSync(path.join(dep, 'ads.txt'), { force: true });
 if (siteInfo.adsensePublisherId) write('ads.txt', `google.com, ${siteInfo.adsensePublisherId}, DIRECT, f08c47fec0942fa0
 `);
 fs.copyFileSync(path.join(here, 'track.js'), path.join(dep, 'guide-track.js'));
+// 글별 대표 이미지(글에 image 지정한 경우만): site/guide/img/* → deploy/note-img/*. 지금은 쓰는 글이 없어 폴더가 만들어지지 않는다.
+fs.rmSync(path.join(dep, 'note-img'), { recursive: true, force: true });
+const imgSrc = path.join(here, 'img');
+const imgFiles = fs.existsSync(imgSrc) ? fs.readdirSync(imgSrc).filter((x) => !x.startsWith('.')) : [];
+if (imgFiles.length) fs.cpSync(imgSrc, path.join(dep, 'note-img'), { recursive: true, filter: (p) => !path.basename(p).startsWith('.') });
 write('404.html', render404());
 write('robots.txt', `User-agent: *\nAllow: /\n\nSitemap: ${ORIGIN}/sitemap.xml\n`);
 const lastmod = Object.fromEntries(articles.map((a) => [url(a.slug), a.modified || a.published || DATE]));
