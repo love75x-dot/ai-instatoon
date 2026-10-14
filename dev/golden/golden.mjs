@@ -102,6 +102,13 @@ const result = await page.evaluate(() => {
   vaultBase(1, null); S.info.link[0].ov = { looks: '이번 편만: 머리를 하나로 묶음', card: { hair: '하나로 묶은 머리' } }; syncLinked(); out['보관함_이번편만수정'] = { ...gv(), vaultOriginal: VAULT.chars['사장님_A'].card.hair };
   base(); S.info.cast = ''; S.toon.cast = ''; VAULT.chars = {}; VAULT.places = {}; S.info.card = { face: '동글동글한 달걀형', hex: '머스타드 옐로(#D4A017)', keep: '안경은 항상 동그란 테' }; S.toon.cuts[0].chars = ['p0']; out['카드만_연결없음'] = gv();
   VAULT.chars = {}; VAULT.places = {};
+  // ── 4a 후속(승인 대기 문장, VAULT_PROMPT2): 규칙 1번=첨부한 인물 전체, 컷별 "이 컷 의상 — 기본 의상 대신", 첨부 줄의 의상 시트, 장소+시간대 글 유지
+  VAULT_PROMPT2 = true;
+  vaultBase(3, 'img'); S.toon.cuts[0].place = '빵집 진열대 앞, 오후 3시'; S.toon.cuts[1].outfit = { p0: '-' }; S.toon.cuts[2].chars = ['p0', 's0']; S.toon.cuts[2].outfit = { p0: '유니폼' }; out['보관함v2_6명_의상_장소시간대'] = { ...gv(), cut3: cutPrompt(S.toon.cuts[2], 2) };
+  vaultBase(1, null); out['보관함v2_4명'] = gv();
+  base(); S.info.cast = '단골 할머니(흰 파마머리)'; VAULT.chars = {}; VAULT.places = {}; out['보관함v2_옛작업_스위치켜도불변'] = grab();
+  VAULT_PROMPT2 = false; VAULT.chars = {}; VAULT.places = {};
+  base(); S.info.cast = '단골 할머니(흰 파마머리)'; out['보관함v2_옛작업_기준'] = grab();
   base();
   return out;
 });
@@ -126,6 +133,7 @@ const walk = (a, b, p) => {
 walk(gold, result, '');
 // 새 칸을 비웠을 때 반영을 켜도 기본과 같고, 새 칸을 채워도 반영이 꺼져 있으면 기본과 같아야 한다
 const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+if (!eq(result['보관함v2_옛작업_스위치켜도불변'], result['보관함v2_옛작업_기준'])) { diffs++; console.log('[DIFF] 보관함을 안 쓰는 옛 작업은 승인 대기 문장을 켜도 프롬프트가 같아야 해요'); }
 if (!eq(result['새칸_채움_스위치꺼짐'], result['조연설정_기본'])) { diffs++; console.log('[DIFF] 스위치를 끄면 새 칸을 채워도 프롬프트가 기본과 같아야 해요'); }
 // 새 칸이 모두 비어 있으면 프롬프트가 기본(조연설정_기본)과 같아야 한다 → 아래 '새칸_채움'과 비교하는 대신, 비어 있는 상태의 기본 시나리오들이 승인 전 골든과 그대로인지로 보장한다(위 walk)
 if (diffs) { console.log(`\n[FAIL] 프롬프트 ${diffs}곳이 골든과 달라요. 의도한 변경이면 이유를 먼저 보고하고 승인받으세요.`); process.exit(1); }
