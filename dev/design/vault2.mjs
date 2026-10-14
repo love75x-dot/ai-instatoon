@@ -103,7 +103,8 @@ await E.page.evaluate(async () => { await seedVault(); S = demoState('bakery'); 
 await E.page.waitForTimeout(300);
 const att = await E.page.evaluate(() => { const b = document.querySelector('.attbox'); return b ? b.innerText : ''; });
 C.ok(/첨부할 이미지 \d+장/.test(att) && /1번 · 사장님_A_00_기준\.png/.test(att) && /2번 · 알바생_B_00_기준\.jpg/.test(att) && /장소_빵집_00\.webp/.test(att), `3단계 규칙 칸에 첨부할 이미지 목록(번호·파일 이름 규칙·원본 확장자)이 보임`);
-C.ok(/사장님_A_01_턴어라운드\.png/.test(att) && /번호 없음, 맨 뒤에 붙이세요/.test(att), '번호 없는 참고 이미지(턴어라운드)는 맨 뒤에 붙이라고 안내');
+C.ok(/4번 · 사장님_A_01_턴어라운드.png/.test(att) && /5번 · 사장님_A_02_표정.png/.test(att) && !/번호 없음/.test(att), '턴어라운드·표정 시트도 번호가 붙어 목록에 이어짐');
+C.ok(await E.page.evaluate(() => attachLine().includes('4번 [사장님_A] 턴어라운드, 5번 [사장님_A] 표정 시트의 이미지예요. 턴어라운드와 표정 시트는 같은 인물의 다른 각도·표정 참고용이에요.')), '첨부 줄 끝에 같은 번호로 이어서 써 주고 참고용 안내 문장이 붙음');
 const names = await E.page.evaluate(() => { const P = planFor(attachItems()); return { nums: P.files.map((f) => f.n + ':' + f.file), line: attachLine() }; });
 C.ok(names.line.includes('의상 시트') === false && names.nums[0].startsWith('1:사장님_A_00_기준'), '목록 번호가 규칙 문장의 "첨부한 이미지는 순서대로"와 같은 순서');
 const dls = []; E.page.on('download', (d) => dls.push(d.suggestedFilename()));
@@ -127,6 +128,24 @@ C.ok(plan.big.need && plan.big.extras === 0 && plan.bundles.length >= 2, `기준
 const two = await E.page.evaluate(() => { S.info.link = {}; S.info.subs = []; if (S.info.p3) S.info.p3.on = false; linkSlot('m0', 'P0'); linkSlot('m1', 'P1'); const cs = S.toon.cuts; cs.forEach((c) => { c.chars = ['p0', 'p1']; c.outfit = {}; c.placeId = ''; delete c.sameBg; }); const p = planFor(attachItems()); const one = (() => { S.info.link = {}; linkSlot('m0', 'P0'); S.info.p2.on = false; cs.forEach((c) => { c.chars = ['p0']; }); return planFor(attachItems()); })(); return { two: p.files.length + ':' + p.extras.length, one: one.files.length + ':' + one.extras.length }; });
 C.ok(two.one === '1:2', `${JSON.stringify(two)} 1명이면 기준+턴어라운드+표정 3장(배분표)`);
 C.ok(two.two === '2:4', '2명이면 인물당 기준+턴어라운드+표정(최대 3장)');
+C.ok(await E.page.evaluate(() => { const it = attachItems(), P = planFor(it); const lineN = it.filter((x) => x.t === 'x').length; return lineN === P.extras.length && P.extras.every((e, i) => e.n === it.length - P.extras.length + i + 1); }), '번호 붙은 참고 이미지 수와 순서가 첨부 줄과 목록에서 같음');
+const cut14 = await E.page.evaluate(async () => { const im = (n, seed) => ({ blob: mk(100, seed), name: n, type: 'image/png', size: 100 });
+  for (let j = 0; j < 6; j++) await vaultPut('characters', { id: 'Q' + j, kind: j < 3 ? 'main' : 'sub', role: 'r', card: {}, images: { ref: im('r.png', j), turn: im('t.png', j + 10), expr: null, outfits: [{ ...im('o.png', j + 30), name: 'A' }] }, savedAt: 1, updatedAt: 1 });
+  S = demoState('bakery'); S.demo = false; S.info.link = {}; S.info.subs = []; ['m0', 'm1', 'm2', 's0', 's1', 's2'].forEach((r, j) => linkSlot(r, 'Q' + j)); const all = ['p0', 'p1', 'p2', 's0', 's1', 's2'];
+  S.toon.cuts.forEach((c) => { c.chars = all.slice(); c.outfit = {}; }); ['p0', 'p1', 'p2'].forEach((code) => { S.toon.cuts[0].outfit[code] = 'A'; });
+  const P = planFor(baseItems()), line = attachLine(); return { total: P.total, dropped: P.dropped.length, xLine: (line.match(/턴어라운드(?!와)/g) || []).length, extras: P.extras.length }; });
+C.ok(cut14.total <= 14 && cut14.dropped === 1 && cut14.xLine === cut14.extras && cut14.extras === 5, `14장 배분표로 줄어든 이미지는 첨부 줄에서도 빠짐 (합계 ${cut14.total}장, 줄인 ${cut14.dropped}장, 문장에 남은 턴어라운드 ${cut14.xLine}장)`);
+// 1단계 맨 위 글자 링크: 보관함이 비어 있으면 숨김
+const F = await open(); await F.page.evaluate(helpers);
+await F.page.evaluate(() => { S = demoState('bakery'); S.demo = false; S.step = 'input'; S.mode = 'one'; save(); render(); });
+C.ok(await F.page.locator('.vlink').count() === 0, '보관함이 비어 있으면 1단계 맨 위 "불러오기" 링크가 안 보임');
+await F.page.evaluate(async () => { await seedVault(); vInput(); }); await F.page.waitForTimeout(150);
+C.ok(await F.page.locator('.vlink .linkbtn').innerText() === '보관함에 인물 2명 · 불러오기', '보관함에 인물이 있으면 1단계 맨 위에 "보관함에 인물 N명 · 불러오기" 글자 링크가 보임');
+C.ok(await F.page.evaluate(() => { const r = document.querySelector('.vlink').getBoundingClientRect(), a = document.querySelector('#artsBox').getBoundingClientRect(); return r.top < a.top; }), '링크가 웹툰 테마 등 입력 칸보다 위(1단계 맨 위)에 있음');
+await F.page.locator('.vlink .linkbtn').click(); await F.page.waitForTimeout(150);
+C.ok(await F.page.locator('#vaultSheet:not([hidden]) [data-v="choose"]').count() === 2, '링크를 누르면 바로 인물 고르기 창이 열림');
+await F.page.locator('#vaultSheet [data-v="choose"][data-id="알바생_B"]').click(); await F.page.waitForTimeout(200);
+C.ok(await F.page.evaluate(() => linkId(0) === '알바생_B'), '고른 인물은 첫 번째로 비어 있는 인물 자리(주인공)에 들어감');
 // 컷별 의상 선택 · 4명 초과 경고
 await E.page.evaluate(() => { S = demoState('bakery'); S.demo = false; S.step = 'edit'; S.mode = 'one'; S.info.link = {}; S.info.subs = []; linkSlot('m0', '사장님_A'); linkSlot('m1', '알바생_B'); linkSlot('m2', 'P2'); linkSlot('s0', 'P3'); linkSlot('s1', 'P4'); linkSlot('s2', 'P5'); S.toon.cuts[0].chars = ['p0']; VAULT_PROMPT2 = false; openCut = 0; save(); render(); });
 await E.page.waitForTimeout(250);

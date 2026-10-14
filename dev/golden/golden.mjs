@@ -71,6 +71,7 @@ const result = await page.evaluate(() => {
   withCast(); fillNew(); out['새칸_채움'] = grab();
   withCast(); fillNew(); CUT_EXTRA_PROMPT = false; out['새칸_채움_스위치꺼짐'] = grab(); CUT_EXTRA_PROMPT = true;
   base(); S.info.p2.on = false; S.toon.cuts[0].chars = ['p0']; S.toon.cuts[1].sameBg = true; out['주인공1명_새칸'] = { cut1: cutPrompt(S.toon.cuts[0], 0), cut2: cutPrompt(S.toon.cuts[1], 1) };
+  VAULT_PROMPT2 = false; /* 4a 보관함_* 시나리오는 승인 전 문장(스위치 끔)으로 고정해 두는 회귀용. 승인 문장은 보관함v2_*(스위치 켬) */
   // ── 4a단계(캐릭터 보관함): 보관함 인물 4·5·6명, 장소 첨부 있음/없음, 이번 편만 수정, 연결 없이 카드만 채움
   const img = (n) => ({ blob: new Blob(['x']), name: n, type: 'image/png', size: 1 });
   const mkc = (id, kind, role, age, gender, looks, card, ready) => ({ id, kind, role, age, gender, looks, card, images: { ref: ready ? img(id + '.png') : null, turn: null, expr: null, outfits: id === '사장님_A' ? [{ ...img('u.png'), name: '유니폼' }] : [] }, savedAt: 1, updatedAt: 1 });
@@ -106,9 +107,13 @@ const result = await page.evaluate(() => {
   VAULT_PROMPT2 = true;
   vaultBase(3, 'img'); S.toon.cuts[0].place = '빵집 진열대 앞, 오후 3시'; S.toon.cuts[1].outfit = { p0: '-' }; S.toon.cuts[2].chars = ['p0', 's0']; S.toon.cuts[2].outfit = { p0: '유니폼' }; out['보관함v2_6명_의상_장소시간대'] = { ...gv(), cut3: cutPrompt(S.toon.cuts[2], 2) };
   vaultBase(1, null); out['보관함v2_4명'] = gv();
+  const refimgs = () => { const A = VAULT.chars['사장님_A'].images, B = VAULT.chars['알바생_B'].images; A.turn = img('t.png'); A.expr = img('e.png'); B.turn = img('t2.png'); B.expr = img('e2.png'); };
+  vaultBase(2, 'img'); refimgs(); S.toon.cuts[0].place = '빵집 진열대 앞, 오후 3시'; out['보관함v2_5명_참고이미지번호'] = gv();
+  vaultBase(0, 'img'); refimgs(); delete S.info.link[2]; S.info.p3.on = false; S.toon.cuts[0].chars = ['p0', 'p1']; S.toon.cuts[1].chars = ['p0', 'p1']; out['보관함v2_2명_참고이미지번호'] = gv();
   base(); S.info.cast = '단골 할머니(흰 파마머리)'; VAULT.chars = {}; VAULT.places = {}; out['보관함v2_옛작업_스위치켜도불변'] = grab();
   VAULT_PROMPT2 = false; VAULT.chars = {}; VAULT.places = {};
   base(); S.info.cast = '단골 할머니(흰 파마머리)'; out['보관함v2_옛작업_기준'] = grab();
+  VAULT_PROMPT2 = true; VAULT.chars = {}; VAULT.places = {};
   base();
   return out;
 });

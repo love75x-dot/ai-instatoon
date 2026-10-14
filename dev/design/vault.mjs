@@ -81,7 +81,7 @@ for (const [vk, vp] of [['PC 1300', PC], ['휴대폰 390', MOB]]) {
   // 7) 의상 선택이 컷 프롬프트 등장인물 줄에 들어감
   await page.evaluate(() => { S.toon.cuts[0].chars = ['p0']; });
   await page.locator('select[data-outfit="m0"]').selectOption('유니폼');
-  C.ok(await page.evaluate(() => cutPrompt(S.toon.cuts[0], 0).includes('등장인물: [사장님_A](주인공, 의상: 유니폼) — 캐릭터 시트 인물 중 이 컷에는 이들만 등장')), `${vk}: 의상을 고르면 [ID](주인공, 의상: …) 형식으로 들어감`);
+  C.ok(await page.evaluate(() => cutPrompt(S.toon.cuts[0], 0).includes('등장인물: [사장님_A](주인공, 이 컷 의상: 유니폼 — 기본 의상 대신) — 캐릭터 시트 인물 중 이 컷에는 이들만 등장')), `${vk}: 의상을 고르면 [ID](주인공, 이 컷 의상: … — 기본 의상 대신)로 들어감`);
 
   // 8) AI 카드 채우기: 빈 칸만, 요청 문장 확인
   const fill = await page.evaluate(async () => {

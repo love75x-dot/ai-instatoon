@@ -717,6 +717,8 @@ body.sheet-open{overflow:hidden}
 .attl .ref{width:44px;height:44px;min-width:44px;border-radius:8px;border:1px solid var(--line);background:var(--sunken);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted);text-align:center}
 .attl .ref img{width:100%;height:100%;object-fit:cover}
 .cwarn{margin:8px 0 0;font-size:13.5px;color:#9B1C1C;font-weight:700}
+.vlink{margin:0 0 14px}
+.linkbtn{background:none;border:0;padding:0;min-height:36px;font:inherit;font-size:14px;font-weight:700;color:var(--ink);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .vrow.imp{align-items:flex-start;cursor:default}
 .vrow.imp:hover{background:none}
 .vrow.imp select{margin-top:6px;min-height:44px}
@@ -1419,6 +1421,7 @@ function vInput(){
   const i=S.info;
   $('#main').innerHTML=`<section class="panel">
     <div class="ph"><div><span class="stepno"><i class="nb">1</i>1단계 · 내 이야기 적기 </span><h1 class="hero-h">내 이야기를 적으면<br><em>인스타툰 한 편</em>이 나와요</h1><p>어떤 분야든 괜찮아요. 가게·프리랜서·회사·크리에이터 모두 분야만 골라도 만들 수 있고, 실제로 있었던 일을 적어 주면 훨씬 재밌어져요.</p>${S.demo?'':``}</div></div>
+    ${vaultLinkHTML()}
 
     <details class="more artsbox" id="artsBox"><summary>${sampleOf(i.art)?`<img class="art-thumb" src="${safeUrl(sampleOf(i.art))}" alt="">`:''}<span class="art-sumt"><b>웹툰 테마</b> <small>${esc(artOf().name)} · 모든 컷과 캐릭터에 똑같이 적용돼요 · 눌러서 바꾸기</small></span></summary><div class="inner"><div class="arts">${(()=>{ const vis=artVisible(); if(!vis.some(([k])=>k===i.art)){ i.art=vis[0][0]; save(); }
       return vis.map(([k,v])=>{ const sm=sampleOf(k), sw=v.c1||v.c2?` style="background:linear-gradient(135deg,${v.c1||'#FFE9A8'},${v.c2||v.c1||'#FFB27A'})"`:''; return `<button class="pick art-${esc(k)}" data-art="${esc(k)}" aria-pressed="${i.art===k}">${sm?`<img class="smp-img" src="${safeUrl(sm)}" alt="${esc(v.name)} 샘플">`:`<span class="sw" aria-hidden="true"${sw}></span>`}<span class="ttl" style="font-size:15px">${esc(v.name)}</span><span class="dsc">${esc(v.desc)}</span></button>`; }).join(''); })()}</div></div></details>
@@ -2664,14 +2667,15 @@ const placeHasImage=n=>!!(VAULT.places[n]&&VAULT.places[n].image);
 function placesAttached(){ const o=[]; cuts().forEach((_,i)=>{ const n=cutPlace(i); if(n&&placeHasImage(n)&&!o.includes(n)) o.push(n); }); return o; }
 const placeAttachText=i=>{ if(!VAULT_PROMPT) return ''; const n=cutPlace(i); return n&&placesAttached().includes(n)?`첨부한 장소_${n} 이미지와 같은 공간`:''; };
 /* 규칙 단계("첨부한 이미지는 순서대로…")에 붙일 이미지 순서: 주연 → 이미지가 있는 조연 → 컷에서 쓰는 장소 */
-function attachItems(){ const it=peopleIdx().map(k=>({t:'p',k}));
+function attachItems(){ const it=baseItems(); if(VAULT_PROMPT&&VAULT_PROMPT2) planFor(it).extras.forEach(e=>it.push({t:'x',id:e.label,k:e.k})); return it; }
+function baseItems(){ const it=peopleIdx().map(k=>({t:'p',k}));
   if(VAULT_PROMPT){ (S.info.subs||[]).forEach((e,j)=>{ if(e&&e.id&&charReady(VAULT.chars[e.id])) it.push({t:'s',j}); }); if(VAULT_PROMPT2){ const seen=new Set(); cuts().forEach(c=>cutCodes(c).forEach(code=>{ const n=effOutfit(c,code), key=code+'|'+n; if(n&&!seen.has(key)&&outfitImage(code,n)){ seen.add(key); it.push({t:'o',code,name:n}); } })); }
     placesAttached().forEach(n=>it.push({t:'l',n})); }
   return it; }
 function attachLine(){ const it=attachItems(), extra=it.some(x=>x.t!=='p'), tag=k=>VAULT_PROMPT&&linkId(k)?` [${linkId(k)}]`:'';
   if(!extra&&peopleIdx().length===1) return `첨부한 이미지가 주인공 캐릭터${tag(0)}(${whoKo()})예요.`;
-  const s=it.map((x,j)=>x.t==='p'?`${j+1}번 ${whoLabel(x.k)}${tag(x.k)}(${whoKo(x.k)})`:x.t==='s'?`${j+1}번 조연 ${subSetupText(x.j)}`:x.t==='o'?`${j+1}번 [${codeEntry(x.code).id}] 의상 시트(${x.name})`:`${j+1}번 장소_${x.n}(배경 기준 이미지${VAULT.places[x.n].desc?`: ${VAULT.places[x.n].desc}`:''})`);
-  return `첨부한 이미지는 순서대로 ${s.join(', ')}의 ${it.some(x=>x.t==='l'||x.t==='o')?'이미지':'캐릭터'}예요.`; }
+  const s=it.map((x,j)=>x.t==='p'?`${j+1}번 ${whoLabel(x.k)}${tag(x.k)}(${whoKo(x.k)})`:x.t==='s'?`${j+1}번 조연 ${subSetupText(x.j)}`:x.t==='x'?`${j+1}번 [${x.id}] ${x.k==='turn'?'턴어라운드':'표정 시트'}`:x.t==='o'?`${j+1}번 [${codeEntry(x.code).id}] 의상 시트(${x.name})`:`${j+1}번 장소_${x.n}(배경 기준 이미지${VAULT.places[x.n].desc?`: ${VAULT.places[x.n].desc}`:''})`);
+  return `첨부한 이미지는 순서대로 ${s.join(', ')}의 ${it.some(x=>x.t==='l'||x.t==='o'||x.t==='x')?'이미지':'캐릭터'}예요.${it.some(x=>x.t==='x')?' 턴어라운드와 표정 시트는 같은 인물의 다른 각도·표정 참고용이에요.':''}`; }
 
 /* ---------- AI로 카드 채우기 ---------- */
 function cardFillPrompt(info){ const card=info.card||{}, filled=CARD_FIELDS.filter(([k])=>String(card[k]||'').trim()), empty=CARD_FIELDS.filter(([k])=>!String(card[k]||'').trim());
@@ -2848,12 +2852,16 @@ function cardEditHTML(ref){ const card=slotLocal(ref).card||{};
     <div class="cardgrid">${CARD_FIELDS.map(([k,n,ph])=>`<div><label class="f" for="cd-${ref}-${k}">${n}</label><input class="in" id="cd-${ref}-${k}" data-cardin="${ref}:${k}" value="${esc(card[k]||'')}" placeholder="${esc(ph)}"></div>`).join('')}</div></div></details>`; }
 function subBlockHTML(j){ const ref='s'+j, e=subEntry(j), linked=!!(e&&e.id), l=(e&&e.local)||{};
   return `<div class="p2box"><div class="row"><b style="flex:1">조연 ${j+1}</b><button type="button" class="btn sm ghost" data-v="rmsub" data-j="${j}">빼기</button></div>${slotBarHTML(ref)}${linked?'':`<div class="who"><div><label class="f" for="sub-${j}-role">역할</label><input class="in" id="sub-${j}-role" data-subf="${ref}:role" value="${esc(l.role||'')}" placeholder="예: 단골 할머니"></div><div style="grid-column:span 2"><label class="f" for="sub-${j}-looks">외모 한 줄</label><input class="in" id="sub-${j}-looks" data-subf="${ref}:looks" value="${esc(l.looks||'')}" placeholder="예: 흰 단발 파마, 보라색 카디건"></div></div>${cardEditHTML(ref)}`}</div>`; }
+function nextPickRef(){ for(const k of peopleIdx()) if(!linkId(k)) return 'm'+k; if(peopleIdx().length<3){ const k=[1,2].find(k=>!(S.info[pkey(k)]||{}).on); if(k) return 'm'+k; }
+  const subs=S.info.subs||[]; for(let j=0;j<Math.min(subs.length+1,SUB_MAX);j++){ const e=subs[j]; if(!e||!e.id) return 's'+j; } return null; }
+const vaultLinkHTML=()=>{ const n=Object.keys(VAULT.chars).length; return n?`<p class="vlink"><button type="button" class="linkbtn" data-v="pickany">보관함에 인물 ${n}명 · 불러오기</button></p>`:''; };
+document.addEventListener('click',e=>{ const b=e.target.closest('[data-v="pickany"]'); if(!b) return; e.preventDefault(); const ref=nextPickRef(); openVault(ref?{pick:{ref,kind:'any'}}:{}); });
 function subsHTML(){ const subs=S.info.subs||[];
   return `<label class="f" style="margin-top:14px">조연 <small>선택 · 최대 ${SUB_MAX}명 · 컷마다 누가 나오는지 고를 수 있어요</small></label>${subs.map((_,j)=>subBlockHTML(j)).join('')}${subs.length<SUB_MAX?`<button type="button" class="btn sm" data-v="addsub" style="margin-top:8px">+ 조연 추가</button>`:''}`; }
 
 
 /* ---------- 컷별 의상, 첨부 이미지 목록(14장 배분), 4명 초과 경고 ---------- */
-let VAULT_PROMPT2=false; /* 규칙 1번(첨부한 인물 전체)·컷별 "이 컷 의상 — 기본 의상 대신"·첨부 줄의 의상 시트. 문장은 사장님 승인 후에 켬. 보관함을 안 쓰는 작업은 어느 쪽이든 프롬프트가 같다 */
+let VAULT_PROMPT2=true; /* 규칙 1번(첨부한 인물 전체)·컷별 "이 컷 의상 — 기본 의상 대신"·첨부 줄의 의상 시트·턴어라운드/표정 시트 번호. 문장은 사장님 승인(2026-10-14) 완료. 보관함을 안 쓰는 작업은 어느 쪽이든 프롬프트가 같다 */
 const ATT_MAX=14;
 function codeEntry(code){ if(code[0]==='p'){ const e=(S.info.link||{})[+code.slice(1)]; return e&&e.id?e:null; } if(code[0]==='s'){ const e=subEntry(+code.slice(1)); return e&&e.id?e:null; } return null; }
 const cutCodes=c=>(c&&c.chars&&c.chars.length)?c.chars.filter(x=>x!=='cast'):peopleIdx().map(k=>'p'+k);
@@ -2874,7 +2882,7 @@ function bundleItems(idxs){ const cs=cuts(), codes=new Set(), it=[]; idxs.forEac
   return it; }
 /* 배분표: 1명 3장(기준+턴어라운드+표정) · 2명 2~3장 · 3~4명 2장(기준+턴어라운드) · 5명 이상 1~2장(컷 나누기 추천) · 장소 1장 추가.
    합계가 14장을 넘으면 표정 → 턴어라운드 순으로 줄이고, 그래도 넘으면 묶음을 나눈다. 기준 이미지는 항상 첫 번째로 빼지 않는다 */
-function planFor(items){ const files=[], ent=[], miss=[];
+function planFor(items0){ const items=items0.filter(x=>x.t!=='x'), files=[], ent=[], miss=[];
   items.forEach((x,idx)=>{ const n=idx+1;
     if(x.t==='p'||x.t==='s'){ const code=x.t==='p'?'p'+x.k:'s'+x.j, e=codeEntry(code), ch=e&&VAULT.chars[e.id]; if(!ch){ files.push({n,missing:true,label:x.t==='p'?whoLabel(x.k):`조연 ${x.j+1}`,kind:'보관함 이미지 없음 · 직접 첨부'}); return; } const im=ch.images||{};
       if(im.ref){ files.push({n,kind:'기준 이미지',label:ch.id,file:fileOfChar(ch.id,'ref',im.ref),im:im.ref}); ent.push({code,id:ch.id,im}); } else { miss.push(ch.id); files.push({n,missing:true,label:ch.id,kind:'기준 이미지 없음 · 보관함에서 올리거나 직접 첨부'}); } }
@@ -2884,6 +2892,7 @@ function planFor(items){ const files=[], ent=[], miss=[];
   ent.forEach(en=>want.forEach(k=>{ if(en.im[k]) extras.push({k,kind:k==='turn'?'턴어라운드':'표정 시트',label:en.id,file:fileOfChar(en.id,k,en.im[k]),im:en.im[k]}); }));
   let total=files.filter(f=>!f.missing).length+extras.length; const dropped=[];
   ['expr','turn'].forEach(kd=>{ for(let i=extras.length-1;i>=0&&total>ATT_MAX;i--){ if(extras[i].k===kd){ dropped.push(extras.splice(i,1)[0]); total--; } } });
+  if(VAULT_PROMPT2) extras.forEach((e,i)=>{ e.n=items.length+i+1; });
   return {files,extras,dropped,total,need:total>ATT_MAX,miss,people:nE}; }
 function splitBundles(){ const cs=cuts(), out=[]; let cur=[];
   cs.forEach((_,i)=>{ const t=cur.concat([i]); if(cur.length&&planFor(bundleItems(t)).need){ out.push(cur); cur=[i]; } else cur=t; }); if(cur.length) out.push(cur); return out; }
