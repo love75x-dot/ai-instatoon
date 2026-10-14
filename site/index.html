@@ -1489,11 +1489,12 @@ const OPT_FIELDS=[['title','제목(내레이션)','선택 · 표지와 꼭 필�
 const OPT_PH={sfx:'쾅',caption:'예: 오후 11시 편집 작업',panels:'예: 위 큰 칸 전신, 오른쪽 아래 작은 칸 놀란 얼굴',emotion:'예: 당황, 땀 흘림',place:'예: 빵집 진열대 앞, 오후 3시',diff:'예: 진열대가 텅 비었어요'};
 const shownF={}, dlRest={}, pvOpen={};
 const castCodes=()=>[...peopleIdx().map(k=>['p'+k,person(k).role||whoLabel(k)]),...(castText()?[['cast','조연']]:[])];
-const castPromptNames=c=>{ const sel=new Set(c.chars||[]); return castCodes().filter(([code])=>sel.has(code)).map(([code])=>{ if(code==='cast') return castText()||'조연'; const k=+code.slice(1), role=String(person(k).role||'').trim(); return role?`${whoLabel(k)}(${role})`:whoLabel(k); }); };
+const castPromptCast=()=>[S.info.cast,S.toon?.cast].map(t=>String(t||'').trim()).filter(Boolean).map(t=>{ const m=t.match(/^(.*?)\s+[-–—]\s+(.*)$/); if(!m) return t; const n=m[1].trim(), d=m[2].trim(); return n&&d?`${n}(${d})`:(n||d); }).join(' / ');
+const castPromptNames=c=>{ const sel=new Set(c.chars||[]); return castCodes().filter(([code])=>sel.has(code)).map(([code])=>{ if(code==='cast') return castPromptCast()||'조연'; const k=+code.slice(1), role=String(person(k).role||'').trim(); return role?`${whoLabel(k)}(${role})`:whoLabel(k); }); };
 const castNames=c=>{ const all=castCodes(); return (c.chars||[]).map(code=>(all.find(x=>x[0]===code)||[])[1]).filter(Boolean); };
 function cutExtraLines(c,i){
   if(!CUT_EXTRA_PROMPT) return '';
-  const o=[], ch=castPromptNames(c); if(ch.length) o.push(`등장인물: ${ch.join(', ')} — 이 컷의 주인공은 이 인물만`);
+  const o=[], ch=castPromptNames(c); if(ch.length) o.push(`등장인물: ${ch.join(', ')} — 캐릭터 시트 인물 중 이 컷에는 이들만 등장`);
   if(String(c.emotion||'').trim()) o.push(`표정·감정: ${c.emotion.trim()}`);
   const bg=[String(c.place||'').trim(), c.sameBg&&i>0?'앞 컷과 같은 장소·조명·소품 배치 유지':''].filter(Boolean).join(' · '); if(bg) o.push(`배경·시간대: ${bg}`);
   if(i>0&&String(c.diff||'').trim()) o.push(`앞 컷과 달라진 점: ${c.diff.trim()}`);

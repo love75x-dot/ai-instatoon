@@ -100,9 +100,11 @@ for (const [vk, vp] of [['PC 1300', PC], ['휴대폰 390', MOB]]) {
   await page.evaluate(() => { const c = S.toon.cuts; Object.assign(c[0], { chars: ['p0', 'p1', 'cast'], emotion: '당황, 땀 흘림', place: '빵집 진열대 앞, 오후 3시', avoid: '배경 속 사람' }); Object.assign(c[1], { chars: ['p0', 'p1'], sameBg: true, diff: '진열대가 텅 비었어요' }); });
   const on = await page.evaluate(() => cuts().map((c, i) => cutPrompt(c, i)));
   const lines0 = on[0].split('\n'), li = lines0.findIndex((x) => x.startsWith('장면:'));
-  C.ok(lines0[li + 1] === '등장인물: 주인공(사장님), 두 번째 주인공(알바생), 단골 할머니(흰 파마머리) — 이 컷의 주인공은 이 인물만' && lines0[li + 2] === '표정·감정: 당황, 땀 흘림' && lines0[li + 3] === '배경·시간대: 빵집 진열대 앞, 오후 3시' && lines0[li + 4] === '그리지 말 것: 배경 속 사람' && lines0[li + 5].startsWith('디테일:'), `${vk}: 새 칸을 채우면 승인된 문장이 "장면:" 줄 바로 아래에 순서대로 들어감(등장인물은 캐릭터 시트 호칭 + 조연 설명)`);
+  C.ok(lines0[li + 1] === '등장인물: 주인공(사장님), 두 번째 주인공(알바생), 단골 할머니(흰 파마머리) — 캐릭터 시트 인물 중 이 컷에는 이들만 등장' && lines0[li + 2] === '표정·감정: 당황, 땀 흘림' && lines0[li + 3] === '배경·시간대: 빵집 진열대 앞, 오후 3시' && lines0[li + 4] === '그리지 말 것: 배경 속 사람' && lines0[li + 5].startsWith('디테일:'), `${vk}: 새 칸을 채우면 승인된 문장이 "장면:" 줄 바로 아래에 순서대로 들어감(등장인물은 캐릭터 시트 호칭 + 조연 설명)`);
   const l1 = on[1].split('\n'), j1 = l1.findIndex((x) => x.startsWith('장면:'));
-  C.ok(l1[j1 + 1] === '등장인물: 주인공(사장님), 두 번째 주인공(알바생) — 이 컷의 주인공은 이 인물만' && l1[j1 + 2] === '배경·시간대: 앞 컷과 같은 장소·조명·소품 배치 유지' && l1[j1 + 3] === '앞 컷과 달라진 점: 진열대가 텅 비었어요', `${vk}: 같은 배경 유지·달라진 점 문장(앞 컷과 같은 장소·조명·소품 배치 유지)`);
+  C.ok(l1[j1 + 1] === '등장인물: 주인공(사장님), 두 번째 주인공(알바생) — 캐릭터 시트 인물 중 이 컷에는 이들만 등장' && l1[j1 + 2] === '배경·시간대: 앞 컷과 같은 장소·조명·소품 배치 유지' && l1[j1 + 3] === '앞 컷과 달라진 점: 진열대가 텅 비었어요', `${vk}: 같은 배경 유지·달라진 점 문장(앞 컷과 같은 장소·조명·소품 배치 유지)`);
+  const castLine = await page.evaluate(() => { S.info.cast = '단골 할머니 - 흰 단발 파마, 보라색 카디건, 장바구니'; S.toon.cast = ''; const a = cutPrompt(cuts()[0], 0).split('\n').find((x) => x.startsWith('등장인물:')); S.info.cast = '단골 할머니'; const b = cutPrompt(cuts()[0], 0).split('\n').find((x) => x.startsWith('등장인물:')); S.info.cast = '단골 할머니(흰 파마머리)'; return [a, b]; });
+  C.ok(castLine[0] === '등장인물: 주인공(사장님), 두 번째 주인공(알바생), 단골 할머니(흰 단발 파마, 보라색 카디건, 장바구니) — 캐릭터 시트 인물 중 이 컷에는 이들만 등장' && castLine[1].includes('두 번째 주인공(알바생), 단골 할머니 — '), `${vk}: 조연 설명은 괄호로 묶고 설명이 없으면 이름만`);
   C.ok(JSON.stringify(on.slice(2)) === JSON.stringify(baseCast.slice(2)), `${vk}: 새 칸을 채우지 않은 컷의 프롬프트는 그대로`);
   await page.evaluate(() => { CUT_EXTRA_PROMPT = false; });
   const off = await page.evaluate(() => cuts().map((c, i) => cutPrompt(c, i)));
