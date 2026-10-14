@@ -58,6 +58,20 @@ const result = await page.evaluate(() => {
   out['글자테마별_규칙'] = {};
   for (const a of Object.keys(ARTS)) { base(); S.info.art = a; out['글자테마별_규칙'][a] = { setup: setupPrompt(), sheet: sheetPrompt(0) }; }
   base();
+  // ── 3단계(컷 편집) 새 칸: 비어 있으면 기본과 같고(승인된 문장은 새 칸을 채웠을 때만 추가), 스위치를 끄면 채워도 기본과 같다
+  const fillNew = () => {
+    const c = S.toon.cuts;
+    Object.assign(c[0], { chars: ['p0'], emotion: '당황, 땀 흘림', place: '빵집 진열대 앞, 오후 3시', avoid: '배경 속 사람', ok: true });
+    Object.assign(c[1], { chars: ['p0', 'p1'], sameBg: true, diff: '진열대가 텅 비었어요' });
+    Object.assign(c[2], { sameBg: true, place: '주방', emotion: '' });
+    Object.assign(c[3], { chars: ['cast'], diff: '할머니가 들어왔어요', avoid: '간판·글씨, 로고' });
+  };
+  const withCast = () => { base(); S.info.cast = '단골 할머니(흰 파마머리)'; };
+  withCast(); out['조연설정_기본'] = grab();
+  withCast(); fillNew(); out['새칸_채움'] = grab();
+  withCast(); fillNew(); CUT_EXTRA_PROMPT = false; out['새칸_채움_스위치꺼짐'] = grab(); CUT_EXTRA_PROMPT = true;
+  base(); S.info.p2.on = false; S.toon.cuts[0].chars = ['p0']; S.toon.cuts[1].sameBg = true; out['주인공1명_새칸'] = { cut1: cutPrompt(S.toon.cuts[0], 0), cut2: cutPrompt(S.toon.cuts[1], 1) };
+  base();
   return out;
 });
 await browser.close(); srv.close();
@@ -79,5 +93,9 @@ const walk = (a, b, p) => {
   for (const k of new Set([...Object.keys(a), ...Object.keys(b)])) walk(a[k], b[k], p ? p + ' › ' + k : k);
 };
 walk(gold, result, '');
+// 새 칸을 비웠을 때 반영을 켜도 기본과 같고, 새 칸을 채워도 반영이 꺼져 있으면 기본과 같아야 한다
+const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+if (!eq(result['새칸_채움_스위치꺼짐'], result['조연설정_기본'])) { diffs++; console.log('[DIFF] 스위치를 끄면 새 칸을 채워도 프롬프트가 기본과 같아야 해요'); }
+// 새 칸이 모두 비어 있으면 프롬프트가 기본(조연설정_기본)과 같아야 한다 → 아래 '새칸_채움'과 비교하는 대신, 비어 있는 상태의 기본 시나리오들이 승인 전 골든과 그대로인지로 보장한다(위 walk)
 if (diffs) { console.log(`\n[FAIL] 프롬프트 ${diffs}곳이 골든과 달라요. 의도한 변경이면 이유를 먼저 보고하고 승인받으세요.`); process.exit(1); }
 console.log('[PASS] 프롬프트 골든 일치 (시나리오 ' + Object.keys(gold).length + '개)');
