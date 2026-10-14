@@ -118,8 +118,8 @@ for (const [vk, w] of [['PC 1300', 1300], ['PC 1024', 1024], ['태블릿 768', 7
     C.ok(bounds.sameRow && bounds.gap >= 4, `${vk} 홈: ⋯와 "노트"가 같은 줄(간격 ${Math.round(bounds.gap)}px)`);
     await page.click('#hmoreBtn');
     const m = await page.evaluate(() => { const pop = document.querySelector('#hpop'), items = [...pop.querySelectorAll('button,a')].map((e) => e.textContent.trim()), r = pop.getBoundingClientRect(); return { open: !pop.hidden, items, expanded: document.querySelector('#hmoreBtn').getAttribute('aria-expanded'), inView: r.left >= 0 && r.right <= window.innerWidth, first: getComputedStyle(pop.querySelector('button')).backgroundColor }; });
-    C.ok(m.open && m.expanded === 'true' && m.items.join(',') === '백업 저장,불러오기,문제 해결,사용 방법' && m.inView, `${vk} 홈: ⋯를 누르면 메뉴가 열리고 백업 저장이 맨 위(화면 안에 들어옴)`);
-    C.ok(m.items.join(',') === '백업 저장,불러오기,문제 해결,사용 방법' && !/연결/.test(await page.evaluate(() => document.querySelector('#hpop').textContent)), `${vk} 홈: ⋯ 메뉴에 AI 연결 상태 항목 없음`);
+    C.ok(m.open && m.expanded === 'true' && m.items.join(',') === '백업 저장,불러오기,캐릭터 보관함,문제 해결,사용 방법' && m.inView, `${vk} 홈: ⋯를 누르면 메뉴가 열리고 백업 저장이 맨 위(화면 안에 들어옴)`);
+    C.ok(m.items.join(',') === '백업 저장,불러오기,캐릭터 보관함,문제 해결,사용 방법' && !/연결/.test(await page.evaluate(() => document.querySelector('#hpop').textContent)), `${vk} 홈: ⋯ 메뉴에 AI 연결 상태 항목 없음`);
     C.ok(m.first === 'rgb(17, 17, 17)', `${vk} 홈: 메뉴의 백업 저장이 검정으로 눈에 띔`);
     const [dl] = await Promise.all([page.waitForEvent('download', { timeout: 4000 }).catch(() => null), page.click('#hpop .hpri')]);
     C.ok(!!dl, `${vk} 홈: 메뉴의 "백업 저장"이 실제로 백업 파일을 내려받음`);
