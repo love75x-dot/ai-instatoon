@@ -109,7 +109,7 @@ export const PROVIDERS = {
 
 /** 요청 한 건 처리. deps: { fetch, now(), quota } — quota는 Quota 저장소(하루 횟수 세기). */
 export async function handle(request, env, deps = {}) {
-  const fetchFn = deps.fetch || fetch, now = deps.now ? deps.now() : Date.now();
+  const fetchFn = deps.fetch || fetch, clock = deps.now || (() => Date.now()), now = clock();
   const cfg = config(env);
   if (request.method !== 'POST') return fail(405, 'bad_request', 'POST로만 쓸 수 있어요.');
   if (!cfg.enabled) return fail(503, 'unavailable', '무료 맛보기를 지금은 쓸 수 없어요.');
@@ -146,11 +146,11 @@ export async function handle(request, env, deps = {}) {
   const deadline = now + cfg.budgetMs; let tried = 0;
   for (const name of cfg.order) {
     const fn = PROVIDERS[name]; if (!fn) continue;
-    const left = deadline - Date.now(); if (left < 8000) break;
-    const st = await quota.canUse(day, name, cfg.caps[name] ?? 0, Date.now()); if (!st) continue;
+    const left = deadline - clock(); if (left < 8000) break;
+    const st = await quota.canUse(day, name, cfg.caps[name] ?? 0, clock()); if (!st) continue;
     tried++;
     let r; try { r = await fn(env, cfg, prompt, fetchFn, Math.min(cfg.providerMs[name] || 30000, left - 1000)); } catch { r = { ok: false }; }
-    if (r.rate) { await quota.block(name, Date.now() + Math.min(r.retryMs || 60000, 3600e3)); continue; }
+    if (r.rate) { await quota.block(name, clock() + Math.min(r.retryMs || 60000, 3600e3)); continue; }
     if (!r.ok) continue;
     const parsed = extractJson(r.text);
     if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed[T.need])) continue; // 형식이 어긋난 답은 다음 공급자로
