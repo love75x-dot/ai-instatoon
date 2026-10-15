@@ -191,6 +191,8 @@ details.more summary::-webkit-details-marker{display:none}
 details.more summary::after{content:"＋";color:var(--muted)}
 details.more[open] summary::after{content:"－"}
 details.more .inner{padding-bottom:16px}
+.tsteps{margin:0;padding-left:20px;font-size:14px;line-height:1.75}
+.serl{list-style:none;margin:0;padding:0}.serl li{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line);font-size:14px;line-height:1.55}.serl li:first-child{border-top:0}.serl .sd{flex:none;width:38px;color:var(--muted);font-weight:700}.serl .stx{flex:1;min-width:0}.serl .stx em{font-style:normal;color:var(--muted)}.serl li.ed{display:block}.serl .ib{flex:none;min-width:36px;min-height:36px;border:0;background:none;color:var(--muted);font-size:17px;cursor:pointer}
 details.more label.f:first-child{margin-top:0}
 .go-row{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:24px}
 
@@ -1209,17 +1211,101 @@ const STORY_FLOW=`[잘 팔린 인스타툰의 흐름 - 컷 수에 맞게 줄이�
 - 한 번 더 조이기: 조력자의 팩트 한마디("그건 네가 잘해야지")로 방심을 깨고, 주인공의 질문으로 다음 장을 넘기게 한다("그걸 어떻게 아는데?").
 - 마지막 컷: 들뜬 반응("얼마야!!!")과 쿨한 펀치라인("무료임;") + 화면이나 소품 속에 알릴 소식. 행동 유도는 여기서만.
 - 대사 톤: 짧은 구어체, 말줄임표, 반말 친구 대화 가능(고객과는 존댓말). 속마음은 작은 손글씨로 따로.`;
-const RULES_FN=()=>pFill('rules',{storymode:S.info.mode==='solo'?'주인공 혼자 내레이션으로 끌고 간다.':S.info.mode==='duo'?'주인공과 조력자 두 사람의 티키타카 대화로 끌고 간다.':'6컷 이상이면 주인공과 조력자의 대화형, 5컷 이하면 내레이션형이 기본. 이야기에 더 맞는 쪽으로.',flow:pTpl('flow')})+(kindRule()?'\n10. [대본 유형] '+kindRule()+' 이 항목이 위 2번·6번의 광고 단어·행동 유도 규칙과 다르면 10번을 우선한다.':'');
-async function ask(prompt,statusEl,msg='AI가 인스타툰을 쓰고 있어요 · 보통 30초~1분',imgs,tier){
+/* ===== 무료 경로용 짧은 지시문 (4c, 최종 승인 전이라 SHORT_PACK=false) =====
+   무료 한도는 토큰이 작아서, 맛보기·이용자 무료 키에서만 "공통 원칙"과 "잘 팔린 흐름"을 뜻은 같고 길이만 줄인 판으로 보낸다.
+   Claude나 유료 키(고급 설정의 "결제를 연결한 유료 키예요")에서는 지금 문장 그대로다. 출력 형식(컷 데이터)은 같다.
+   dev/compare 의 비교 스크립트로 품질을 확인한 뒤 사장님이 최종 승인하면 SHORT_PACK=true. */
+const SHORT_PACK=false; let PACK_FORCE=null; /* PACK_FORCE: 검사·비교용(true/false로 강제) */
+function packShort(){
+  if(PACK_FORCE!==null) return PACK_FORCE; if(!SHORT_PACK) return false;
+  if(API.ready) return AIP()==='gemini'&&kv.getItem('instatoon.paid')!=='1';
+  return !!TASTE.token; }
+const FLOW_SHORT=`[흐름 - 컷 수에 맞게 줄이거나 늘려서 쓴다]
+- 표지(1컷): "내 얘기다" 싶은 공감 한 줄 제목 + 지치거나 당황한 주인공 + 속마음 한마디. 예) 제목 "장사보다 인스타가 더 힘들다", 속마음 "내일은 또 뭐 올리지…"
+- 고생 몽타주(2~3컷): 시간 자막으로 하루를 쪼갠다(오전 10시 촬영 → 오후 4시 → 오후 11시 편집). 깨닫는 순간은 "망.했.다" 같은 한 방 효과로.
+- 기대→배신: 한 칸에 기대("이번 건 느낌 왔다!!!"), 다음 칸에 현실("느낌만 왔네"). 같은 말을 비틀어 웃음을 만든다.
+- 조력자 등장: 해결책을 아는 인물이 불쑥 끼어든다("너 그거 아직도 다 직접 해?").
+- 해결책 한마디: 긴 설명 대신 짧은 반전 대사 하나("A.I가.", "여기 가면 돼.").
+- 의심→답 루프(2~3번): 독자의 의심을 주인공이 대신 말하고("근데 이게 팔려?") 조력자가 짧게 답한다.
+- 한 번 더 조이기: 조력자의 팩트 한마디로 방심을 깨고, 주인공의 질문으로 다음 장을 넘기게 한다.
+- 마지막 컷: 들뜬 반응("얼마야!!!")과 쿨한 펀치라인("무료임;") + 알릴 소식. 행동 유도는 여기서만.
+- 대사 톤: 짧은 구어체, 말줄임표, 친구끼리는 반말 가능(고객에게는 존댓말). 속마음은 작은 손글씨로 따로.`;
+const RULES_SHORT=`[인스타툰 원칙]
+1. 작성자가 적은 사실(시간, 장소, 대사, 숫자, 결과)은 그대로 살린다. 적지 않은 후기·수치·고객 사연은 절대 지어내지 않는다. 적은 이야기가 없으면 이 분야 사람들이 흔히 겪는 고민을 공감형으로 쓴다.
+2. 1컷은 설명이 아니라 한 장면, 가장 긴박하거나 궁금한 순간부터. 상호명·가격·할인·이벤트 같은 광고 단어는 1컷 금지.
+3. 흐름은 아래 [흐름]을 기본으로 내 이야기에 맞게 바꾼다. 컷의 끝은 다음 장이 궁금하게(질문, 말줄임, 표정 클로즈업), 앞 컷의 대사를 다음 컷이 받아 원인과 결과로 잇는다.
+4. 한 컷에 메시지 하나. 제목(내레이션)은 표지와 꼭 필요한 컷에만, 두 줄·한 줄 14자 이내. 나머지는 말풍선 중심: 컷당 1~3개, 개당 18자 이내 실제 말투. 효과음 1~4자.
+5. [주인공]의 1인칭 시점, 역할·나이·성별에 맞는 말투("~했어요/~거든요"). 직원·알바생이면 그 사람이 겪은 일로, 가게가 없는 프리랜서·회사원이면 매장 얘기 없이 일상·업무 이야기로. 여러 명이면 함께 겪는 이야기로 쓰고 대사의 인물은 역할로 구분(같은 역할이면 외모로). 업계 용어 금지, 고객(독자)이 얻는 것 중심.
+6. 행동 유도는 마지막 컷 하나에 방법 하나만.
+7. 7컷 이상이면 장면 전환을 늘리고 작은 반전을 하나 더 넣는다. 같은 말을 반복하지 않는다. 컷마다 표정·손짓·소품 같은 작은 디테일을 하나 이상 넣는다.
+8. 이야기 방식: {{storymode}}
+
+{{flow}}`;
+const RULES_FN=()=>{
+  const sm=S.info.mode==='solo'?'주인공 혼자 내레이션으로 끌고 간다.':S.info.mode==='duo'?'주인공과 조력자 두 사람의 티키타카 대화로 끌고 간다.':'6컷 이상이면 주인공과 조력자의 대화형, 5컷 이하면 내레이션형이 기본. 이야기에 더 맞는 쪽으로.';
+  const sh=packShort(), tpl=sh?RULES_SHORT:pTpl('rules'), kr=kindRule();
+  const body=tpl.replace(/\{\{(\w+)\}\}/g,(m,k)=>k==='storymode'?sm:k==='flow'?(sh?FLOW_SHORT:pTpl('flow')):m);
+  const n=sh?'9':'10';
+  return body+(kr?'\n'+n+'. [대본 유형] '+kr+' 이 항목이 위 2번·6번의 광고 단어·행동 유도 규칙과 다르면 '+n+'번을 우선한다.':''); };
+async function ask(prompt,statusEl,msg='AI가 인스타툰을 쓰고 있어요 · 보통 30초~1분',imgs,tier,task){
   if(!sample) throw {code:'no_ai'};
   const ctl=new AbortController(); busy=ctl; renderPhone();
   if(statusEl){ statusEl.className='status'; statusEl.innerHTML=`<span class="spin"></span> ${msg}`; }
-  try{ const o={signal:ctl.signal,cache:false}; if(tier&&!STANDALONE) o.modelTier=tier; if(imgs&&imgs.length) o.images=STANDALONE?imgs:imgs.map(dataUrlToBlob); const r=await sample.json(prompt,o); if(statusEl) statusEl.textContent=''; return r; }
+  try{ const o={signal:ctl.signal,cache:false}; if(tier&&!STANDALONE) o.modelTier=tier; if(task&&STANDALONE) o.task=task; if(imgs&&imgs.length) o.images=STANDALONE?imgs:imgs.map(dataUrlToBlob); const r=await sample.json(prompt,o); if(statusEl) statusEl.textContent=''; return r; }
   catch(e){
     if(statusEl){ statusEl.className='status err'; statusEl.textContent=e.code==='api'?e.message:e.code==='cancelled'?'멈췄어요.':(e.code==='no_ai'?'AI 연결이 없어요. "직접 쓰기"로 빈 대본을 만들어 채울 수 있어요.':(ERR[e.code]||'잠깐 문제가 생겼어요. 다시 눌러 주세요.')); }
     throw e;
   }finally{ busy=null; }
 }
+/* ================= 연재 기억 (4c) =================
+   한 편을 만들 때 AI가 줄거리·떡밥·말투를 함께 돌려주면(memory) S.series에 쌓고(최대 20편), 다음 편 기획·한 달 기획 요청에 최근 3편만 짧게 붙인다.
+   기억이 없으면 요청 문장은 이전과 한 글자도 다르지 않다. 아직 끝나지 않은 편(그림을 다 올리지 않았고 게시 표시도 안 한 편)을 다시 만들면 그 편의 기억은 새 기억으로 바뀐다. */
+const SERIES_MAX=20, SERIES_SEND=3;
+function finishedToon(T){ return !!(T&&(T.postedAt||(Array.isArray(T.cuts)&&T.cuts.length&&pics().length>=T.cuts.length))); }
+function seriesList(){ const a=(S.series=Array.isArray(S.series)?S.series:[]).slice(), l=a[a.length-1], T=S.toon; if(T&&l&&l.sid&&l.sid===T.sid&&!finishedToon(T)) a.pop(); return a; }
+const serCut=(t,n)=>{ t=String(t||'').replace(/\s+/g,' ').trim(); return t.length>n?t.slice(0,n-1)+'…':t; };
+function seriesBlock(kind){
+  const a=seriesList().slice(-SERIES_SEND); if(!a.length) return '';
+  const recent=a.map((e,i)=>`${i+1}) ${serCut(e.story,60)}`).join(' '), th=[...new Set(a.flatMap(e=>e.threads||[]).map(x=>serCut(x,40)).filter(Boolean))].slice(-3);
+  const thLine=th.length?'\n남은 떡밥: '+th.join(' / '):'';
+  if(kind==='month') return '\n[연재 기억 - 이어지는 이야기로 기획하고, 남은 떡밥은 편에 나눠 풀 것]\n최근 줄거리: '+recent+thLine;
+  const last=a[a.length-1], cast=(last.cast||[]).filter(Boolean), tone=serCut(last.tone,60);
+  const castLine=cast.length||tone?'\n등장인물: '+cast.join(', ')+(tone?(cast.length?' ':'')+'(말투·관계: '+tone+')':''):'';
+  return '\n[연재 기억 - 지난 편과 이어지게 쓰고, 아래 설정을 어기지 말 것]\n최근 줄거리: '+recent+castLine+thLine;
+}
+function castNow(){ const o=peopleIdx().map(k=>linkId(k)||person(k).role||whoLabel(k)); (S.info.subs||[]).forEach((e,j)=>{ if(subActive(j)) o.push((e&&e.id)||('조연 '+(j+1))); }); return [...new Set(o.map(x=>String(x||'').trim()).filter(Boolean))]; }
+function recordSeries(m,prevDone,prevSid){
+  const T=S.toon; if(!T) return; T.sid=T.sid||('m'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36));
+  S.series=Array.isArray(S.series)?S.series:[];
+  const l=S.series[S.series.length-1];
+  if(l&&prevSid&&l.sid===prevSid&&!prevDone) S.series.pop();
+  if(!m||typeof m!=='object'||!String(m.story||'').trim()) return;
+  S.series.push({sid:T.sid,title:String(T.title||''),story:serCut(m.story,120),threads:(Array.isArray(m.threads)?m.threads:[]).map(x=>serCut(x,40)).filter(Boolean).slice(0,2),tone:serCut(m.tone,60),cast:castNow(),at:Date.now()});
+  while(S.series.length>SERIES_MAX) S.series.shift();
+}
+let serOpen=false, serEdit='';
+function seriesHTML(){
+  const a=S.series||[]; if(!a.length) return '';
+  const n=seriesList().slice(-SERIES_SEND).length, dt=t=>{ const d=new Date(t); return (d.getMonth()+1)+'/'+d.getDate(); };
+  const row=e=>{ const ed=serEdit===e.sid, id=esc(e.sid), th=(e.threads||[]).length?` <em>떡밥: ${esc(e.threads.join(' / '))}</em>`:'';
+    return ed?`<li class="ed"><b>${esc(dt(e.at))} · ${esc(e.title||'이번 편')}</b>
+        <label class="f" for="sf-s-${id}">줄거리</label><textarea class="in" id="sf-s-${id}" rows="2" data-serf="story" data-sid="${id}">${esc(e.story)}</textarea>
+        <label class="f" for="sf-t-${id}">남은 떡밥 <small>쉼표로 구분</small></label><input class="in" id="sf-t-${id}" data-serf="threads" data-sid="${id}" value="${esc((e.threads||[]).join(', '))}">
+        <label class="f" for="sf-o-${id}">말투·관계</label><input class="in" id="sf-o-${id}" data-serf="tone" data-sid="${id}" value="${esc(e.tone||'')}">
+        <div class="row" style="margin-top:8px"><button type="button" class="btn sm" data-ser="done">완료</button></div></li>`
+      :`<li><span class="sd">${esc(dt(e.at))}</span><span class="stx"><b>${esc(e.title||'이번 편')}</b> — ${esc(e.story)}${th}</span><button type="button" class="ib" data-ser="edit" data-sid="${id}" aria-label="수정">✎</button><button type="button" class="ib" data-ser="del" data-sid="${id}" aria-label="지우기">×</button></li>`; };
+  return `<details class="more ser" id="serBox" ${serOpen?'open':''}><summary>연재 기억 <small>${a.length}편 저장 · 다음 편 기획에 최근 ${n}편이 쓰여요</small></summary><div class="inner">
+    <p class="sub" style="margin-top:0">한 편을 만들 때마다 줄거리·남은 떡밥·말투를 한 줄씩 기억해 두었다가 다음 편과 한 달 기획에 짧게 알려 줘요. 틀린 내용은 고치거나 지우세요.</p>
+    <ul class="serl">${[...a].reverse().map(row).join('')}</ul>
+  </div></details>`;
+}
+function serRefresh(){ const b=$('#serBox'); if(!b) return; const t=document.createElement('div'); t.innerHTML=seriesHTML(); const nb=t.firstElementChild; if(nb) b.replaceWith(nb); else b.remove(); }
+document.addEventListener('toggle',e=>{ if(e.target.id==='serBox') serOpen=e.target.open; },true);
+document.addEventListener('click',e=>{ const b=e.target.closest('[data-ser]'); if(!b) return; e.preventDefault(); const a=b.dataset.ser, sid=b.dataset.sid;
+  if(a==='edit') serEdit=sid; else if(a==='done') serEdit=''; else if(a==='del'){ if(!confirm('이 편의 연재 기억을 지울까요? 다음 편 기획에서 빠져요.')) return; S.series=(S.series||[]).filter(x=>x.sid!==sid); if(serEdit===sid) serEdit=''; save(); }
+  serOpen=true; serRefresh(); });
+document.addEventListener('input',e=>{ const el=e.target; if(!el.dataset||!el.dataset.serf) return; const x=(S.series||[]).find(y=>y.sid===el.dataset.sid); if(!x) return; const f=el.dataset.serf;
+  if(f==='threads') x.threads=el.value.split(/[,，\n]/).map(t=>t.trim()).filter(Boolean).slice(0,2); else x[f]=el.value; save(); });
 function prof(){ return S.profile=fillDef(S.profile||{},{voice:'',banned:'',tags:'',cta:'',loc:'',collab:'',bio:'',logo:''}); }
 function profBlock(){ const p=prof(), o=[]; if(p.voice.trim()) o.push(`브랜드 말투(캡션·내레이션·고정 댓글에 적용): ${p.voice}`); if(p.banned.trim()) o.push(`절대 쓰지 말 것(대본·캡션·해시태그 모두): ${p.banned}`); if(p.cta.trim()) o.push(`예약·문의 안내(마지막 컷과 캡션의 행동 유도는 이 안내와 맞게, 다른 방법을 지어내지 말 것): ${p.cta}`); return o.length?`\n[브랜드 프로필 - 꼭 지키기]\n${o.join('\n')}`:''; }
 const bannedHits=t=>prof().banned.split(/[,\n]/).map(x=>x.trim()).filter(Boolean).filter(w=>String(t||'').includes(w));
@@ -1260,11 +1346,13 @@ function applyToon(r){
 }
 async function makeToon(theme){
   const st=$('#st-make');
-  const n=S.info.cuts;
-  const prompt=pFill('make',{n,info:infoBlock(),theme:theme?`\n[이번 편 주제] ${theme}\n`:'',rules:RULES_FN(),shots:SHOTS.join(', '),tagSlots:tagSlots(),fixedCount:fixedTags().length,tagsNote:prof().tags.trim()?`. 고정 해시태그(${prof().tags})와 겹치지 않게`:''});
+  const n=S.info.cuts; save();
+  const prompt=pFill('make',{n,info:infoBlock(),series:seriesBlock('make'),theme:theme?`\n[이번 편 주제] ${theme}\n`:'',rules:RULES_FN(),shots:SHOTS.join(', '),tagSlots:tagSlots(),fixedCount:fixedTags().length,tagsNote:prof().tags.trim()?`. 고정 해시태그(${prof().tags})와 겹치지 않게`:''});
   try{
-    const r=await ask(prompt,st);
+    const r=await ask(prompt,st,undefined,undefined,undefined,'make');
+    const prevDone=finishedToon(S.toon), prevSid=S.toon&&S.toon.sid;
     applyToon(r);
+    recordSeries(r.memory,prevDone,prevSid);
     S.check=null; pv=0; openCut=0; S.step='edit'; save(); render(); window.scrollTo({top:0,behavior:'smooth'}); toast('완성! 오른쪽에서 넘겨 보세요');
   }catch(_){}
 }
@@ -1469,6 +1557,7 @@ function vInput(){
     </div></details>
 
     ${profileHTML()}
+    ${seriesHTML()}
 
     <label class="f" id="kind-lb">대본 유형 <small>어떤 이야기로 만들지 골라요 · 구성과 말투, 아래 입력칸과 표가 유형에 맞게 바뀌어요</small></label>
     ${ddHTML('',KIND_KEYS.filter(k=>k!=='custom').map(k=>`<button class="chip" data-kind="${k}" aria-pressed="${kindOf()===k}">${KINDS[k].name}</button>`).join(''),{label:'대본 유형',custom:`<label class="dd-cl" for="i-kind">직접 입력</label><input class="in" id="i-kind" data-kindin="1" value="${kindOf()==='custom'?esc(i.kindCustom||''):''}" placeholder="예: 인터뷰형, 퀴즈형">`})}
@@ -2530,9 +2619,9 @@ function applyMonth(r,dates){
   M.concept=String(r.concept||''); M.items=(r.items||[]).slice(0,dates.length).map((x,k)=>({date:dates[k]||String(x.date||''),type:String(x.type||''),title:String(x.title||''),story:String(x.story||''),goal:String(x.goal||''),cuts:Math.min(10,Math.max(4,Number(x.cuts)||6)),made:false}));
 }
 async function makeMonth(){
-  const M=mo(), st=$('#st-month'), dates=planDates(M.ym,M.freq), [y,m]=M.ym.split('-').map(Number);
-  const prompt=pFill('month',{year:y,month:m,count:dates.length,info:infoBlock(),memo:M.memo||'(없음)',stats:statsBlock(),dates:dates.join(', ')});
-  try{ const r=await ask(prompt,st,`${dates.length}편 기획 중이에요 · 1분 정도 걸려요`);
+  const M=mo(), st=$('#st-month'), dates=planDates(M.ym,M.freq), [y,m]=M.ym.split('-').map(Number); save();
+  const prompt=pFill('month',{year:y,month:m,count:dates.length,info:infoBlock(),memo:M.memo||'(없음)',stats:statsBlock(),series:seriesBlock('month'),dates:dates.join(', ')});
+  try{ const r=await ask(prompt,st,`${dates.length}편 기획 중이에요 · 1분 정도 걸려요`,undefined,undefined,'month');
     applyMonth(r,dates);
     save(); vMonth(); toast('한 달 연재표를 만들었어요'); }catch(_){}
 }
@@ -2540,7 +2629,7 @@ async function makeFromPlan(k){
   const x=mo().items[k]; if(!x) return;
   S.info.story=`이번 편 주제: ${x.title}\n줄거리: ${x.story}`; S.info.cuts=x.cuts||S.info.cuts; S.mode='one'; S.step='input'; save(); render(); window.scrollTo({top:0,behavior:'smooth'});
   const btn=$('#makeBtn'); if(!btn||!S.info.type.trim()){ toast('업종을 확인하고 "인스타툰 만들기"를 눌러 주세요'); return; }
-  await run(btn,()=>makeToon(x.title)); if(cuts().length){ x.made=true; x.status='script'; x.postedAt=''; S.planRef={ym:mo().ym,k,title:x.title}; save(); renderTodo(); }
+  await run(btn,()=>makeToon(x.title),'make'); if(cuts().length){ x.made=true; x.status='script'; x.postedAt=''; S.planRef={ym:mo().ym,k,title:x.title}; save(); renderTodo(); }
 }
 
 
@@ -2704,7 +2793,7 @@ async function aiFillCard(info,st){ /* 빈 칸에만 채워 돌려준다(이미 
   const card=info.card||{}, empty=CARD_FIELDS.map(x=>x[0]).filter(k=>!String(card[k]||'').trim());
   if(!empty.length){ toast('빈 칸이 없어요'); return null; }
   if(!String(info.looks||'').trim()&&Object.keys(card).every(k=>!String(card[k]||'').trim())){ toast('외모 한 줄을 먼저 적어 주세요'); return null; }
-  if(STANDALONE&&!API.key){ openKeySheet(); return null; }
+  if(STANDALONE&&!API.ready){ openKeySheet(); return null; }
   try{ const r=await ask(cardFillPrompt(info),st,'카드를 채우는 중',null,'quick'), out={}; empty.forEach(k=>{ const v=String((r||{})[k]||'').trim(); if(v) out[k]=v; }); if(!Object.keys(out).length){ toast('채울 내용을 받지 못했어요'); return null; } return out; }
   catch(_){ return null; } }
 
@@ -3045,7 +3134,9 @@ document.addEventListener('input',e=>{ const el=e.target; if(!el.dataset||el.dat
   S.info.kindCustom=el.value; S.info.kind=el.value.trim()?'custom':'daily'; save();
   document.querySelectorAll('[data-kind]').forEach(c=>c.setAttribute('aria-pressed','false')); applyKind(true); });
 function updateMake(){ const b=$('#makeBtn'),s=$('#st-make'); if(!b) return; const ok=!!S.info.type.trim(); if(s&&!busy) { s.className='status'; s.textContent=''; } }
-async function run(btn,fn){ if(busy){ toast('아직 만드는 중이에요'); return; } if(STANDALONE&&!API.key&&btn.dataset.act!=='zip'){ openKeySheet(()=>run(btn,fn)); return; } btn.disabled=true; try{ await fn(); } finally{ if(document.body.contains(btn)) btn.disabled=false; renderPhone(); } }
+async function run(btn,fn,task){ if(busy){ toast('아직 만드는 중이에요'); return; } if(STANDALONE&&!API.ready&&btn.dataset.act!=='zip'){
+    if(task&&!TASTE.token){ await tasteInit(); if(tasteOn(task)){ openTasteSheet(()=>run(btn,fn,task)); return; } }
+    if(!(task&&TASTE.token)){ openKeySheet(()=>run(btn,fn,task)); return; } } btn.disabled=true; try{ await fn(); } finally{ if(document.body.contains(btn)) btn.disabled=false; renderPhone(); } }
 document.addEventListener('click',async e=>{
   const b=e.target.closest('button'); if(!b) return;
   if(cutAction(b)) return;
@@ -3104,16 +3195,16 @@ document.addEventListener('click',async e=>{
   if(b.dataset.lm){ S.info.letterMode=b.dataset.lm; save(); return refreshLetter(true); }
   if(b.dataset.font){ S.info.fonts={...DEF_FONTS,...(S.info.fonts||{}),[fontTab]:b.dataset.font}; save(); return refreshLetter(false); }
   if(b.dataset.regen){ const i=+b.dataset.regen; if(peopleIdx().some(k=>!refOf(k))){ toast('주인공 기준 이미지를 먼저 올려 주세요'); return; } autoCtl=new AbortController(); try{ if(i<cuts().length) await drawOne(i,autoCtl.signal); else await drawEndOne(autoCtl.signal); toast(`${i+1}번 그림을 다시 그렸어요`); }catch(e){ toast(e.message||'다시 그리지 못했어요'); } autoCtl=null; vPost(); return renderPhone(); }
-  if(b.dataset.idea){ const d=S.toon.ideas[+b.dataset.idea]; return run(b,()=>makeToon(d)); }
+  if(b.dataset.idea){ const d=S.toon.ideas[+b.dataset.idea]; return run(b,()=>makeToon(d),'make'); }
   const a=b.dataset.act; if(!a) return;
   if(a==='logoUp'){ const inp=document.createElement('input'); inp.type='file'; inp.accept='image/png,image/jpeg,image/webp'; inp.onchange=async()=>{ const fl=inp.files[0]; if(!fl) return; try{ prof().logo=await fileToLogo(fl); save(); render(); toast('로고를 저장했어요'); }catch(_){ toast('이미지를 읽지 못했어요. PNG나 JPG 파일을 골라 주세요'); } }; inp.click(); return; }
   if(a==='logoDel'){ prof().logo=''; save(); render(); return; }
   if(a==='copyReset'){ resetCopied(); toast('복사 표시를 지웠어요'); return; }
-  if(a==='make'){ if(!S.info.type.trim()){ toast('업종을 먼저 골라 주세요. 필수는 이것 하나예요'); const lb=$('#ind-lb'); if(lb){ lb.scrollIntoView({behavior:'smooth',block:'center'}); const box=lb.parentElement; box.classList.add('flash'); setTimeout(()=>box.classList.remove('flash'),1800); } return; } resetCopied(); return run(b,()=>makeToon()); }
+  if(a==='make'){ if(!S.info.type.trim()){ toast('업종을 먼저 골라 주세요. 필수는 이것 하나예요'); const lb=$('#ind-lb'); if(lb){ lb.scrollIntoView({behavior:'smooth',block:'center'}); const box=lb.parentElement; box.classList.add('flash'); setTimeout(()=>box.classList.remove('flash'),1800); } return; } resetCopied(); return run(b,()=>makeToon(),'make'); }
   if(a==='adMake') return run(b,()=>adMake());
   if(a==='adCopy') return copy(adS().table);
   if(a==='adToStory'){ const x=adS(), i=S.info; i.story=(i.story.trim()?i.story.trimEnd()+'\n\n':'')+'['+KINDS[kindOf()].table.name+' 10P 참고]\n'+x.table; if(kindOf()==='ad'){ if(!i.target.trim()) i.target=x.target; if(!i.offer.trim()) i.offer=x.benefit; } save(); toast('이야기 칸에 넣었어요'); return vInput(); }
-  if(a==='remake'){ resetCopied(); return run(b,()=>makeToon()); }
+  if(a==='remake'){ resetCopied(); return run(b,()=>makeToon(),'make'); }
   if(a==='blank') return blankToon();
   if(a==='tReset'){ Object.assign(S.info,{titleScale:100,titleColor:'',tOutline:'',tShadow:undefined,tTilt:0,hl:'marker',hlColor:''}); save(); return refreshLetter(true); }
   if(a==='fontUp'){ return $('#fontIn').click(); }
@@ -3148,7 +3239,7 @@ document.addEventListener('click',async e=>{
   if(a==='helpClose') return toggleHelp(false);
   if(a==='helpPanel') return toggleHelp(true);
   if(a==='moreHooks') return run(b,moreHooks);
-  if(a==='monthMake') return run(b,makeMonth);
+  if(a==='monthMake') return run(b,makeMonth,'month');
   if(a==='monthCopy'){ const M=mo(); return copy(`${M.ym} 인스타툰 연재표\n${M.concept}\n\n`+M.items.map(x=>`${x.date} [${x.type}] ${x.title}\n${x.story}`).join('\n\n')); }
   if(a==='padd'){ const k=[1,2].find(k=>!S.info[pkey(k)]?.on); if(k){ setPerson(k,{role:k===1?'직원':'알바생',gender:'',age:'',looks:'',...(S.info[pkey(k)]||{}),on:true}); save(); } return vInput(); }
   if(a==='sampleMake') return run(b,makeSample);
@@ -3274,13 +3365,13 @@ async function adMake(){
   const a=adS(), st=$('#st-ad');
   if(!a.product.trim()){ st.className='status err'; st.textContent='제품·서비스를 먼저 적어 주세요.'; return; }
   if(!sample){ st.className='status err'; st.textContent='AI 연결이 없어요.'; return; }
-  if(STANDALONE&&!API.key){ openKeySheet(); return; }
+  if(STANDALONE&&!API.ready){ openKeySheet(); return; }
   const F=KINDS[kindOf()].table.f, user=kindOf()==='ad'?`[제품] ${a.product}\n[소구점] ${a.point||'(AI가 제품에 맞게 판단)'}\n[타겟] ${a.target||'(AI가 제품에 맞게 판단)'}\n[혜택] ${a.benefit||'(없음 - 10P에 혜택 대신 방문·문의 유도)'}`:`[${F[0][0]}] ${a.product}\n[${F[1][0]}] ${a.point||'(AI가 주제에 맞게 판단)'}\n[${F[2][0]}] ${a.target||'(AI가 주제에 맞게 판단)'}\n[${F[3][0]}] ${a.benefit||'(없음)'}`;
   const ctl=new AbortController(); busy=ctl; renderPhone();
   st.className='status'; st.innerHTML='<span class="spin"></span> 콘티 표를 만들고 있어요 · 20~40초';
   try{
     let t;
-    if(STANDALONE){ const j=await gcall(API.text,[{text:user}],{temperature:0.8},ctl.signal,adSystem()); t=(j.candidates?.[0]?.content?.parts||[]).map(p=>p.text||'').join(''); }
+    if(STANDALONE&&AIP()==='gemini'){ const j=await gcall(API.text,[{text:user}],{temperature:0.8},ctl.signal,adSystem(),API.alt); t=(j.candidates?.[0]?.content?.parts||[]).map(p=>p.text||'').join(''); }
     else { const r=await sample.json(adSystem()+'\n\n---\n[사용자 입력]\n'+user+'\n\n응답은 JSON {"table":"마크다운 표 전체 문자열"} 형태로만 출력하세요.',{signal:ctl.signal,cache:false}); t=r.table||''; }
     t=String(t).replace(/```(?:markdown)?/g,'').trim();
     if(!t.includes('|')) throw {code:'invalid_json'};
@@ -3291,36 +3382,178 @@ async function adMake(){
 
 /* ================= 파일 버전: Gemini API 연결 ================= */
 const STANDALONE=!window.claude;
-const API={ get key(){ try{ return kv.getItem('instatoon.key')||''; }catch(_){ return ''; } },
-  get text(){ try{ return kv.getItem('instatoon.textModel')||'gemini-3.5-flash'; }catch(_){ return 'gemini-3.5-flash'; } },
+const FREE_TEXT='gemini-3.1-flash-lite', FREE_ALT='gemini-3.5-flash'; /* 기본은 무료 한도가 넉넉한 Flash-Lite, 429가 나면 같은 키로 Flash를 한 번 더 시도 */
+const API={ get ready(){ return AIP()==='claude'?!!CL.key:!!API.key; },
+  get key(){ try{ return kv.getItem('instatoon.key')||''; }catch(_){ return ''; } },
+  get text(){ try{ return kv.getItem('instatoon.textModel')||FREE_TEXT; }catch(_){ return FREE_TEXT; } },
+  get alt(){ let m=''; try{ m=kv.getItem('instatoon.textModelAlt')||''; }catch(_){} return m||(API.text===FREE_ALT?FREE_TEXT:FREE_ALT); },
   get image(){ try{ return kv.getItem('instatoon.imageModel')||'gemini-3.1-flash-image'; }catch(_){ return 'gemini-3.1-flash-image'; } } };
 const GURL=m=>`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(m)}:generateContent`;
-function gerrMsg(st,j){ const e=j.error||{}, raw=e.message||'', txt=(e.status||'')+' '+raw;
+/* Gemini 하루 한도는 미국 태평양시 자정에 풀린다. 그 시각을 한국 시간으로 바꿔 쉬운 말로 돌려준다(여름 오후 4시·겨울 오후 5시). */
+function geminiResetKST(now){ now=now||new Date();
+  try{ const parts=(tz,d)=>Object.fromEntries(new Intl.DateTimeFormat('en-US',{timeZone:tz,hourCycle:'h23',year:'numeric',month:'numeric',day:'numeric',hour:'numeric',minute:'numeric'}).formatToParts(d).filter(p=>p.type!=='literal').map(p=>[p.type,+p.value]));
+    const la=parts('America/Los_Angeles',now); let t=null;
+    for(const off of [7,8]){ const c=Date.UTC(la.year,la.month-1,la.day+1,off,0,0), p=parts('America/Los_Angeles',new Date(c)); if(p.hour===0&&p.minute===0){ t=c; break; } }
+    if(t===null) return '';
+    const k=parts('Asia/Seoul',new Date(t)), n=parts('Asia/Seoul',now), dd=Math.round((Date.UTC(k.year,k.month-1,k.day)-Date.UTC(n.year,n.month-1,n.day))/86400000);
+    return (dd<=0?'오늘':dd===1?'내일':k.month+'월 '+k.day+'일')+' '+(k.hour<12?'오전':'오후')+' '+(k.hour%12||12)+'시'+(k.minute?' '+k.minute+'분':''); }
+  catch(_){ return ''; } }
+function gerrMsg(st,j,triedAlt){ const e=j.error||{}, raw=e.message||'', txt=(e.status||'')+' '+raw+' '+JSON.stringify(e.details||'');
   if(st===429||/quota|RESOURCE_EXHAUSTED|rate.?limit/i.test(txt)){
-    const sec=(raw.match(/retry in ([d.]+)s/i)||[])[1];
-    const perDay=/PerDay|per day/i.test(txt), noFree=/limit: 0/i.test(raw);
-    return 'Gemini 사용 한도를 넘었어요. '+(noFree?'이 모델(특히 그림 모델)은 무료 키로는 쓸 수 없어요. aistudio.google.com에서 결제(요금제)를 연결하거나 다른 모델 이름으로 바꿔 주세요.':perDay?'오늘 쓸 수 있는 양을 모두 썼어요. 내일(한국시간 오후 4~5시경 초기화) 다시 하거나, 결제를 연결하면 바로 쓸 수 있어요.':(sec?Math.ceil(+sec)+'초':'1분')+' 뒤에 다시 눌러 주세요. 계속 나오면 하루 한도를 넘긴 거예요(무료는 한도가 작고, 유료는 결제 한도·예산을 확인하세요).')+' 한도 확인: aistudio.google.com/usage';
+    const sec=(raw.match(/retry in ([\d.]+)s/i)||txt.match(/"retryDelay":"([\d.]+)s"/)||[])[1];
+    const perDay=/PerDay|per day/i.test(txt), noFree=/limit: 0/i.test(raw), also=triedAlt?' 다른 무료 모델로도 한 번 더 시도했지만 같이 막혔어요.':'', keep=' 쓰던 내용은 그대로 저장돼 있어요.', at=geminiResetKST();
+    return 'Gemini 사용 한도를 넘었어요. '+(noFree?'이 모델(특히 그림 모델)은 무료 키로는 쓸 수 없어요. aistudio.google.com에서 결제(요금제)를 연결하거나 다른 모델 이름으로 바꿔 주세요.':perDay?'오늘 쓸 수 있는 양을 모두 썼어요.'+(at?' 한국 시간으로 '+at+'에 다시 쓸 수 있어요.':' 내일 오후에 다시 쓸 수 있어요.')+also+' 지금 바로 이어서 하려면 결제를 연결하거나 다른 모델 이름으로 바꿔 주세요.'+keep:(sec?Math.ceil(+sec)+'초':'1분')+' 뒤에 다시 눌러 주세요.'+also+' 계속 나오면 하루 한도를 넘긴 거예요(무료는 한도가 작고, 유료는 결제 한도·예산을 확인하세요).'+keep)+' 한도 확인: aistudio.google.com/usage';
   }
   if(st===503||/overloaded|UNAVAILABLE/i.test(txt)) return 'Gemini 서버가 지금 붐벼요. 잠시 뒤 다시 눌러 주세요.';
   if(st===403||/PERMISSION_DENIED/i.test(txt)) return 'API 키 권한 문제예요. 키가 맞는지, 결제·지역 제한이 없는지 aistudio.google.com에서 확인해 주세요.';
   if(/API key not valid|API_KEY_INVALID/i.test(txt)) return 'API 키가 올바르지 않아요. "API 키 설정"에서 키를 다시 복사해 붙여 넣어 주세요.';
   return raw||('HTTP '+st);
 }
-async function gcall(model,parts,generationConfig,signal,system){
+async function gcall(model,parts,generationConfig,signal,system,alt){
+  try{ return await gcall1(model,parts,generationConfig,signal,system); }
+  catch(e){
+    if(alt&&alt!==model&&e&&e.code==='api'&&e.rate){
+      toast('이 모델은 한도에 걸려서 다른 무료 모델로 한 번 더 시도할게요');
+      try{ return await gcall1(alt,parts,generationConfig,signal,system,true); }
+      catch(e2){ if(e2&&e2.code==='api'&&e2.rate) toast('Gemini 사용 한도를 넘었어요'); throw e2; }
+    }
+    if(e&&e.code==='api'&&e.rate) toast('Gemini 사용 한도를 넘었어요');
+    throw e;
+  }
+}
+async function gcall1(model,parts,generationConfig,signal,system,triedAlt){
   const body={contents:[{role:'user',parts}],generationConfig}; if(system) body.system_instruction={parts:[{text:system}]};
   const r=await fetch(GURL(model),{method:'POST',signal,headers:{'Content-Type':'application/json','x-goog-api-key':API.key},body:JSON.stringify(body)});
   const j=await r.json().catch(()=>({}));
-  if(!r.ok){ const m=gerrMsg(r.status,j); if(r.status===429||/quota|RESOURCE_EXHAUSTED/i.test(j.error?.status+' '+(j.error?.message||''))) toast('Gemini 사용 한도를 넘었어요'); throw {code:'api',status:r.status,message:m,raw:j.error?.message}; }
+  if(!r.ok){ const rate=r.status===429||/quota|RESOURCE_EXHAUSTED/i.test(j.error?.status+' '+(j.error?.message||'')); throw {code:'api',status:r.status,message:gerrMsg(r.status,j,triedAlt),raw:j.error?.message,rate}; }
   return j;
 }
-const geminiSample={ async json(prompt,{signal,images}={}){
-  if(!API.key) throw {code:'api',message:'화면 위쪽 "API 키 설정"에서 Gemini API 키를 먼저 넣어 주세요.'};
+/* AI가 돌려준 글에서 JSON을 꺼낸다(Gemini·Claude 공통) */
+function parseAIJson(raw){ const t=String(raw||'').replace(/```json|```/g,'').trim();
+  try{ return JSON.parse(t); }catch(_){ const a=t.search(/[\[{]/), b=Math.max(t.lastIndexOf('}'),t.lastIndexOf(']')); if(a>=0&&b>a){ try{ return JSON.parse(t.slice(a,b+1)); }catch(__){} } throw {code:'invalid_json'}; } }
+const geminiSample={ async json(prompt,{signal,images,task}={}){
+  if(!API.key){
+    if((task==='make'||task==='month')&&TASTE.token&&TASTE.cfg){ try{ return await tasteCall(prompt,task,signal); }catch(e){ if(e&&e.name==='AbortError') throw {code:'cancelled'}; throw e; } }
+    throw {code:'api',message:'화면 위쪽 "API 키 설정"에서 Gemini API 키를 먼저 넣어 주세요.'};
+  }
   try{
-    const j=await gcall(API.text,[{text:prompt},...(images||[]).map(inl)],{responseMimeType:'application/json',temperature:0.9},signal);
-    let t=(j.candidates?.[0]?.content?.parts||[]).map(p=>p.text||'').join('').replace(/```json|```/g,'').trim();
-    try{ return JSON.parse(t); }catch(_){ const a=t.search(/[\[{]/), b=Math.max(t.lastIndexOf('}'),t.lastIndexOf(']')); if(a>=0&&b>a) return JSON.parse(t.slice(a,b+1)); throw {code:'invalid_json'}; }
+    const j=await gcall(API.text,[{text:prompt},...(images||[]).map(inl)],{responseMimeType:'application/json',temperature:0.9},signal,undefined,API.alt);
+    return parseAIJson((j.candidates?.[0]?.content?.parts||[]).map(p=>p.text||'').join(''));
   }catch(e){ if(e?.name==='AbortError') throw {code:'cancelled'}; throw e; }
 }};
+/* ================= 운영자 전용 Claude 모드 (4c) =================
+   키 바닥 시트 "고급 설정"에서 AI 종류를 Claude로 고르면 같은 요청 문장·같은 결과 처리로 Anthropic API를 브라우저에서 직접 부른다.
+   키는 이 브라우저에만 저장한다(사이트 코드·서버에 운영자 키를 넣지 않는다). 기획·대본(make·month)은 Sonnet급, 나머지는 Haiku급. */
+const CL_PLAN='claude-sonnet-5-5', CL_FAST='claude-haiku-5-5';
+const CL_PRICE={plan:[2,10],fast:[0.10,0.50]}; /* 100만 토큰당 달러(입력/출력). Anthropic Pricing 페이지(2026-10-15 재확인: Sonnet 5.5 $2/$10, Haiku 5.5 $0.10/$0.50(프롬프트 10만 토큰 이하). Opus 5.5가 $4/$20) */
+const KRW_PER_USD=1400;
+const AIP=()=>{ try{ return kv.getItem('instatoon.ai')==='claude'?'claude':'gemini'; }catch(_){ return 'gemini'; } };
+const CL={ get key(){ try{ return kv.getItem('instatoon.claudeKey')||''; }catch(_){ return ''; } },
+  get plan(){ try{ return kv.getItem('instatoon.claudePlan')||CL_PLAN; }catch(_){ return CL_PLAN; } },
+  get fast(){ try{ return kv.getItem('instatoon.claudeFast')||CL_FAST; }catch(_){ return CL_FAST; } } };
+const monthKey=()=>{ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); };
+const SHOP_ID='s1'; /* 4d에서 가게별로 나뉜다 */
+function usageAll(){ try{ return JSON.parse(kv.getItem('instatoon.usage')||'{}')||{}; }catch(_){ return {}; } }
+function recordUsage(kind,u){
+  if(!u) return; const all=usageAll(), ym=monthKey(), m=(all[ym]=all[ym]||{}), s=(m[SHOP_ID]=m[SHOP_ID]||{}), k=(s[kind]=s[kind]||{i:0,o:0,n:0});
+  k.i+=(+u.input_tokens||0)+(+u.cache_creation_input_tokens||0)+(+u.cache_read_input_tokens||0); k.o+=+u.output_tokens||0; k.n++;
+  try{ kv.setItem('instatoon.usage',JSON.stringify(all)); }catch(_){} }
+function usageCost(ym,shop){ const m=(usageAll()[ym||monthKey()])||{}; let usd=0,n=0;
+  for(const [sid,s] of Object.entries(m)){ if(shop&&sid!==shop) continue; for(const kind of ['plan','fast']){ const k=s[kind]; if(!k) continue; usd+=k.i*CL_PRICE[kind][0]/1e6+k.o*CL_PRICE[kind][1]/1e6; n+=k.n; } }
+  return {usd,n}; }
+function usageText(shop){ const c=usageCost(null,shop); if(!c.n) return '이번 달 사용 기록이 아직 없어요'; return '이번 달 약 $'+(c.usd<0.01?c.usd.toFixed(3):c.usd.toFixed(2))+' (약 '+Math.round(c.usd*KRW_PER_USD).toLocaleString()+'원) · '+c.n+'번 호출 · 토큰 기준 추정'; }
+function claudeErr(st,j,hdr){ const e=(j&&j.error)||{}, msg=e.message||'', t=(e.type||'')+' '+msg;
+  if(st===401||/authentication/i.test(t)) return 'Claude API 키가 올바르지 않아요. "API 키 설정"의 고급 설정에서 키를 다시 확인해 주세요.';
+  if(/credit balance|billing/i.test(msg)) return 'Claude 크레딧이 모두 소진됐어요. Console(platform.claude.com)의 Billing에서 남은 크레딧을 확인해 주세요. 쓰던 내용은 그대로 저장돼 있어요.';
+  if(st===429){ const s=hdr&&+hdr; return 'Claude 사용 한도에 걸렸어요. '+(s?Math.ceil(s)+'초':'잠시')+' 뒤에 다시 눌러 주세요. 쓰던 내용은 그대로 저장돼 있어요.'; }
+  if(st===529||st===503||/overloaded/i.test(t)) return 'Claude 서버가 지금 붐벼요. 잠시 뒤 다시 눌러 주세요.';
+  if(st===403||/permission/i.test(t)) return 'Claude API 키 권한 문제예요. Console에서 키와 조직 설정을 확인해 주세요.';
+  if(st===404||/not_found/i.test(t)) return 'Claude 모델 이름을 찾지 못했어요. 고급 설정의 모델 이름을 확인해 주세요.';
+  return msg||('HTTP '+st); }
+const claudeImg=d=>{ const [h,b]=d.split(','); return {type:'image',source:{type:'base64',media_type:h.match(/data:(.*?);/)[1],data:b}}; };
+const CLAUDE_HEADERS=k=>({'content-type':'application/json','x-api-key':k,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'});
+const claudeSample={ async json(prompt,{signal,images,task}={}){
+  if(!CL.key) throw {code:'api',message:'Claude API 키를 먼저 넣어 주세요. "API 키 설정"의 고급 설정에 있어요.'};
+  const plan=task==='make'||task==='month', model=plan?CL.plan:CL.fast;
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',signal,headers:CLAUDE_HEADERS(CL.key),
+      body:JSON.stringify({model,max_tokens:plan?8000:4096,output_config:{effort:'low'},messages:[{role:'user',content:[...(images||[]).map(claudeImg),{type:'text',text:prompt}]}]})});
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok) throw {code:'api',status:r.status,message:claudeErr(r.status,j,r.headers.get('retry-after')),raw:j.error&&j.error.message};
+    recordUsage(plan?'plan':'fast',j.usage);
+    if(j.stop_reason==='refusal') throw {code:'refused'};
+    if(j.stop_reason==='max_tokens') throw {code:'api',message:'Claude의 답이 너무 길어서 중간에 잘렸어요. 컷 수를 줄이거나 한 번 더 눌러 주세요.'};
+    return parseAIJson((j.content||[]).filter(b=>b.type==='text').map(b=>b.text).join(''));
+  }catch(e){ if(e&&e.name==='AbortError') throw {code:'cancelled'}; if(e instanceof TypeError) throw {code:'api',message:'Claude에 연결하지 못했어요. 인터넷 연결을 확인해 주세요.'}; throw e; }
+}};
+async function testClaudeKey(key){
+  try{ const r=await fetch('https://api.anthropic.com/v1/models?limit=1',{headers:CLAUDE_HEADERS(key)}); const j=await r.json().catch(()=>({}));
+    if(r.ok) return {ok:true,msg:'연결됐어요 ✓ 이 키로 Claude를 쓸 수 있어요'};
+    return {ok:false,msg:claudeErr(r.status,j,r.headers.get('retry-after'))}; }
+  catch(_){ return {ok:false,msg:'Claude에 연결하지 못했어요. 인터넷 연결을 확인해 주세요'}; } }
+/* 선택한 AI(Gemini/Claude)로 보낸다. 요청 문장과 결과 처리는 둘이 같다. */
+const aiSample={ json(prompt,o){ const taste=!API.ready&&o&&o.task&&TASTE.token; return (AIP()==='claude'&&!taste?claudeSample:geminiSample).json(prompt,o); } };
+/* ================= 0원 맛보기 (4c) =================
+   내 AI 키가 없을 때만, 운영자 무료 키로 "인스타툰 한 편(make)"과 "한 달 기획(month)"을 1인 하루 한도 안에서 만들어 볼 수 있다.
+   사이트 서버(/api/ai)가 Turnstile·분당 제한·하루 한도를 확인하고 Gemini → Groq → OpenRouter 순서로 시도한다. 키는 서버 비밀값에만 있다.
+   서버에 입력 내용은 저장하지 않는다. 서버가 꺼져 있거나 설정이 없으면(사이트 키 없음) 이 기능은 보이지 않고 지금처럼 "API 키 설정"이 열린다. */
+const TASTE={cfg:null,token:'',tried:false,wid:null,after:null,provider:''};
+async function tasteInit(){
+  if(TASTE.tried||!STANDALONE||!/^https?:$/.test(location.protocol)) return TASTE.cfg; TASTE.tried=true;
+  try{ const r=await fetch('/api/ai/config',{cache:'no-store'}); const j=await r.json(); TASTE.cfg=(j&&j.ok&&j.taste&&j.sitekey)?j:null; }catch(_){ TASTE.cfg=null; }
+  return TASTE.cfg; }
+const tasteOn=task=>!!(TASTE.cfg&&(task==='make'||task==='month')&&!API.ready);
+async function tasteCall(prompt,task,signal){
+  const ts=TASTE.token; TASTE.token=''; /* 확인 토큰은 한 번만 쓸 수 있어요 */
+  let r; try{ r=await fetch('/api/ai',{method:'POST',signal,headers:{'content-type':'application/json'},body:JSON.stringify({task,prompt,ts})}); }
+  catch(e){ if(e&&e.name==='AbortError') throw e; throw {code:'api',message:'무료 맛보기에 연결하지 못했어요. 인터넷 연결을 확인해 주세요.'}; }
+  const j=await r.json().catch(()=>({}));
+  if(r.ok&&j.ok){ TASTE.provider=j.provider||''; try{ toast('무료 맛보기로 만들었어요'); }catch(_){} return parseAIJson(j.text); }
+  if(j.code==='daily'||j.code==='exhausted'){ setTimeout(()=>openTasteEnd(),0); throw {code:'api',message:'오늘 무료 맛보기가 끝났어요. 내 무료 키를 넣으면 계속할 수 있어요.'}; }
+  if(j.code==='rate') throw {code:'api',message:'잠깐 뒤에 다시 눌러 주세요. (너무 자주 눌렀어요)'};
+  if(j.code==='turnstile') throw {code:'api',message:'사람인지 확인하지 못했어요. 다시 눌러 주세요.'};
+  if(j.code==='unavailable'||r.status>=500){ TASTE.cfg=null; setTimeout(()=>openKeySheet(),0); throw {code:'api',message:'무료 맛보기를 지금은 쓸 수 없어요. 내 무료 키를 넣으면 바로 쓸 수 있어요.'}; }
+  throw {code:'api',message:j.message||'무료 맛보기를 쓰지 못했어요.'};
+}
+function tasteSheetEl(id,label){ let w=document.getElementById(id); if(!w){ w=document.createElement('div'); w.id=id; w.className='sheet'; w.setAttribute('role','dialog'); w.setAttribute('aria-modal','true'); w.setAttribute('aria-labelledby',id+'-t'); document.body.appendChild(w); } return w; }
+function tasteClose(){ for(const id of ['tasteSheet','tasteEnd']){ const w=document.getElementById(id); if(w) w.hidden=true; } if(window.turnstile&&TASTE.wid!=null){ try{ turnstile.remove(TASTE.wid); }catch(_){} TASTE.wid=null; } const k=document.getElementById('keySheet'); if(!k||k.hidden) document.body.classList.remove('sheet-open'); }
+function openTasteSheet(after){
+  TASTE.after=after||null; TASTE.token='';
+  const w=tasteSheetEl('tasteSheet');
+  w.innerHTML=`<div class="sheet-bg" data-taste="close"></div><div class="sheet-in" role="document">
+    <div class="sheet-h"><h2 id="tasteSheet-t">키 없이 무료로 만들어 보기</h2><button type="button" class="btn sm ghost" data-taste="close" aria-label="닫기">닫기</button></div>
+    <p class="sub" style="margin:0 0 12px">내 AI 키가 없어도 <b>하루 한 번</b> 인스타툰 한 편(또는 한 달 기획)을 무료로 만들어 볼 수 있어요. 아래 확인이 끝나면 버튼이 켜져요.</p>
+    <div id="ts-box" style="min-height:70px"></div>
+    <div class="status" id="ts-st" role="status" style="min-height:20px"></div>
+    <div class="row" style="margin-top:8px"><button type="button" class="btn pri" id="taste-go" data-taste="go" disabled>무료로 만들기</button><button type="button" class="btn" data-taste="key">내 키로 쓰기</button></div>
+    <ul class="ks-notes"><li>입력한 내용은 <b>무료 AI 서비스(Google Gemini · Groq · OpenRouter)</b>로 전달돼 글을 만드는 데 쓰여요. 무료 서비스는 입력과 결과를 서비스 개선·학습에 쓰거나 사람이 읽고 검토할 수 있어요. <b>개인정보와 비밀 내용은 넣지 마세요.</b></li>
+    <li>이 사이트는 입력 내용과 결과를 서버에 <b>저장하지 않아요.</b> <a href="/privacy/" target="_blank" rel="noopener">개인정보처리방침</a></li></ul></div>`;
+  w.hidden=false; document.body.classList.add('sheet-open');
+  const draw=()=>{ const box=document.getElementById('ts-box'); if(!box||!window.turnstile||!TASTE.cfg) return;
+    if(TASTE.wid!=null){ try{ turnstile.remove(TASTE.wid); }catch(_){} }
+    TASTE.wid=turnstile.render(box,{sitekey:TASTE.cfg.sitekey,theme:'light',language:'ko',
+      callback:t=>{ TASTE.token=t; const b=document.getElementById('taste-go'); if(b) b.disabled=false; const s=document.getElementById('ts-st'); if(s) s.textContent=''; },
+      'expired-callback':()=>{ TASTE.token=''; const b=document.getElementById('taste-go'); if(b) b.disabled=true; },
+      'error-callback':()=>{ const s=document.getElementById('ts-st'); if(s){ s.className='status err'; s.textContent='확인을 불러오지 못했어요. 잠시 뒤 다시 열어 주세요. 계속 안 되면 "내 키로 쓰기"를 눌러 주세요.'; } } }); };
+  if(window.turnstile) draw(); else if(!document.getElementById('tsScript')){ const sc=document.createElement('script'); sc.id='tsScript'; sc.src='https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'; sc.async=true; sc.onload=draw; sc.onerror=()=>{ const s=document.getElementById('ts-st'); if(s){ s.className='status err'; s.textContent='확인을 불러오지 못했어요. 인터넷 연결을 확인해 주세요.'; } }; document.head.appendChild(sc); }
+}
+function openTasteEnd(){
+  const w=tasteSheetEl('tasteEnd');
+  w.innerHTML=`<div class="sheet-bg" data-taste="close"></div><div class="sheet-in" role="document">
+    <div class="sheet-h"><h2 id="tasteEnd-t">오늘 무료 맛보기가 끝났어요</h2><button type="button" class="btn sm ghost" data-taste="close" aria-label="닫기">닫기</button></div>
+    <p class="sub" style="margin:0 0 10px"><b>내 무료 키를 넣으면 계속할 수 있어요.</b> 키는 3단계면 만들 수 있고, 결제 정보는 필요 없어요.</p>
+    <ol class="tsteps"><li><a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener"><b>aistudio.google.com/apikey</b></a>에 들어가 구글 계정으로 로그인해요.</li>
+    <li><b>"API 키 만들기"</b>를 눌러 키를 만들어요.</li>
+    <li>키를 복사해서 이 사이트의 <b>"API 키 설정"</b>에 붙여 넣어요.</li></ol>
+    <p class="sub" style="margin:8px 0 0">그림이 필요하면 <a href="/guide/gemini-api-key-setup-guide/">자세한 설명 글</a>을 봐 주세요. 내일 다시 오면 무료 맛보기를 또 쓸 수 있어요.</p>
+    <div class="row" style="margin-top:12px"><button type="button" class="btn pri" data-taste="key">내 키 넣기</button><button type="button" class="btn" data-taste="close">닫기</button></div></div>`;
+  w.hidden=false; document.body.classList.add('sheet-open');
+}
+document.addEventListener('click',e=>{ const b=e.target.closest('[data-taste]'); if(!b) return; e.preventDefault(); const a=b.dataset.taste;
+  if(a==='close'){ TASTE.after=null; return tasteClose(); }
+  if(a==='key'){ TASTE.after=null; tasteClose(); return openKeySheet(); }
+  if(a==='go'){ if(!TASTE.token) return; const f=TASTE.after; TASTE.after=null; const t=TASTE.token; tasteClose(); TASTE.token=t; if(f) f(); } });
+document.addEventListener('keydown',e=>{ if(e.key!=='Escape') return; const a=document.getElementById('tasteSheet'), b=document.getElementById('tasteEnd'); if((a&&!a.hidden)||(b&&!b.hidden)){ TASTE.after=null; tasteClose(); } });
 async function gimage(parts,signal){
   if(!API.key) throw {code:'api',message:'API 키를 먼저 넣어 주세요.'};
   let j;
@@ -3403,19 +3636,28 @@ function autoSection(){
 }
 /* ---------- API 키: 바닥 시트(만들기를 누를 때) · 키 테스트 ---------- */
 let keyAfter=null;
-const keySummary=()=>`API 키 설정 ${API.key?'· 연결됨 ✓':(S.demo?'· 둘러보기만 하면 필요 없어요':'· 필요해요')}`;
-function refreshKeyLine(){ const s=document.querySelector('#keyTxt'); if(s) s.textContent=keySummary(); const c=document.querySelector('#keyBox .keychg'); if(c) c.textContent=API.key?'변경':'설정'; }
+const keySummary=()=>`API 키 설정 ${API.ready?(AIP()==='claude'?'· Claude 연결됨 ✓':'· 연결됨 ✓'):(S.demo?'· 둘러보기만 하면 필요 없어요':'· 필요해요')}`;
+function refreshKeyLine(){ const s=document.querySelector('#keyTxt'); if(s) s.textContent=keySummary(); const c=document.querySelector('#keyBox .keychg'); if(c) c.textContent=API.ready?'변경':'설정'; }
 async function testKey(key){
   try{ const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=1',{headers:{'x-goog-api-key':key}}); const j=await r.json().catch(()=>({}));
     if(r.ok) return {ok:true,msg:'연결됐어요 ✓ 이 키로 AI를 쓸 수 있어요'};
     return {ok:false,msg:gerrMsg(r.status,j)}; }
   catch(_){ return {ok:false,msg:'Google에 연결하지 못했어요. 인터넷 연결을 확인해 주세요'}; } }
 function keySheetHTML(){ return `<div class="sheet-bg" data-sheet="close"></div><div class="sheet-in" role="document">
-  <div class="sheet-h"><h2 id="ks-t">${API.key?'Gemini API 키 설정':'Gemini API 키가 필요해요'}</h2><button type="button" class="btn sm ghost" data-sheet="close" aria-label="닫기">닫기</button></div>
+  <div class="sheet-h"><h2 id="ks-t">${AIP()==='claude'?(CL.key?'Claude API 키 설정':'Claude API 키가 필요해요'):(API.key?'Gemini API 키 설정':'Gemini API 키가 필요해요')}</h2><button type="button" class="btn sm ghost" data-sheet="close" aria-label="닫기">닫기</button></div>
   <p class="sub" style="margin:0 0 12px">AI가 대본을 쓰려면 내 Google 키가 필요해요. <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener"><b>Google AI Studio에서 키 만들기</b></a> → 복사해서 아래에 붙여 넣으세요.</p>
   <label class="f" for="ks-key" style="margin-top:0">Gemini API 키</label>
   <input class="in" id="ks-key" type="password" autocomplete="off" spellcheck="false" placeholder="AIza..." value="${esc(API.key)}">
-  <details class="ks-adv"><summary>고급 설정</summary><label class="f" for="ks-text">대본·기획 모델</label><input class="in" id="ks-text" value="${esc(API.text)}" autocomplete="off" spellcheck="false"><p class="sub" style="margin:6px 0 0">기본값 그대로 쓰면 돼요. 오류가 나면 AI Studio에 보이는 모델 이름으로 바꿔 주세요.</p></details>
+  <details class="ks-adv"><summary>고급 설정</summary><label class="f" for="ks-text">대본·기획 모델</label><input class="in" id="ks-text" value="${esc(API.text)}" autocomplete="off" spellcheck="false"><label class="f" for="ks-alt">한도에 걸리면 대신 쓸 모델</label><input class="in" id="ks-alt" value="${esc(API.alt)}" autocomplete="off" spellcheck="false"><p class="sub" style="margin:6px 0 0">기본값 그대로 쓰면 돼요. 한도(429)가 나면 같은 키로 이 모델을 한 번 더 시도해요. 오류가 나면 AI Studio에 보이는 모델 이름으로 바꿔 주세요.</p>
+    ${SHORT_PACK?`<label class="f" style="display:flex;gap:8px;align-items:flex-start"><input type="checkbox" id="ks-paid" ${kv.getItem('instatoon.paid')==='1'?'checked':''} style="margin-top:4px"><span>결제를 연결한 유료 키예요 <small>켜면 더 자세한 원래 지시문을 써요</small></span></label>`:''}
+    <label class="f" for="ks-ai">AI 종류 <small>운영자용 · 이 브라우저에만 적용돼요</small></label>
+    <select class="in" id="ks-ai"><option value="gemini">Gemini</option><option value="claude" ${AIP()==='claude'?'selected':''}>Claude</option></select>
+    <div id="ks-claude" ${AIP()==='claude'?'':'hidden'}>
+      <label class="f" for="ks-ckey">Claude API 키</label><input class="in" id="ks-ckey" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-..." value="${esc(CL.key)}">
+      <label class="f" for="ks-cplan">기획·대본 모델</label><input class="in" id="ks-cplan" value="${esc(CL.plan)}" autocomplete="off" spellcheck="false">
+      <label class="f" for="ks-cfast">그 밖의 작업 모델</label><input class="in" id="ks-cfast" value="${esc(CL.fast)}" autocomplete="off" spellcheck="false">
+      <p class="sub" id="ks-usage" style="margin:6px 0 0">${usageText()}</p>
+    </div></details>
   <div class="status" id="ks-st" role="status" style="margin-top:8px;min-height:20px"></div>
   <div class="row" style="margin-top:12px"><button type="button" class="btn pri" data-sheet="save">저장하고 계속</button><button type="button" class="btn" data-sheet="test">키 테스트</button></div>
   <ul class="ks-notes"><li>키는 <b>이 브라우저에만</b> 저장돼요.</li>
@@ -3426,17 +3668,22 @@ function openKeySheet(after){
 function closeKeySheet(){ const w=$('#keySheet'); if(w) w.hidden=true; document.body.classList.remove('sheet-open'); keyAfter=null; }
 async function keySheetAct(a){
   if(a==='open') return openKeySheet();
-  const inp=$('#ks-key'), st=$('#ks-st'), key=(inp?.value||'').trim();
-  if(a==='open') return openKeySheet();
   if(a==='close') return closeKeySheet();
-  if(!key){ st.className='status err'; st.textContent='키를 붙여 넣어 주세요'; if(inp) inp.focus(); return; }
-  if(a==='test'){ st.className='status'; st.innerHTML='<span class="spin"></span> 확인하는 중'; const r=await testKey(key); st.className='status'+(r.ok?'':' err'); st.textContent=r.msg; return; }
-  try{ kv.setItem('instatoon.key',key); const m=($('#ks-text')?.value||'').trim(); if(m&&m!==API.text) kv.setItem('instatoon.textModel',m); }catch(_){ st.className='status err'; st.textContent='이 브라우저에 저장하지 못했어요'; return; }
-  const after=keyAfter; closeKeySheet(); const kw=$('#keyWrap'); if(kw) kw.innerHTML=keyBoxHTML(); refreshAi(); toast('연결했어요'); if(after) after();
+  const st=$('#ks-st'), ai=($('#ks-ai')?.value)==='claude'?'claude':'gemini', inp=ai==='claude'?$('#ks-ckey'):$('#ks-key'), key=(inp?.value||'').trim();
+  if(!key){ st.className='status err'; st.textContent=ai==='claude'?'Claude 키를 붙여 넣어 주세요':'키를 붙여 넣어 주세요'; if(inp) inp.focus(); return; }
+  if(a==='test'){ st.className='status'; st.innerHTML='<span class="spin"></span> 확인하는 중'; const r=await (ai==='claude'?testClaudeKey(key):testKey(key)); st.className='status'+(r.ok?'':' err'); st.textContent=r.msg; return; }
+  try{
+    kv.setItem('instatoon.ai',ai);
+    if(ai==='claude'){ kv.setItem('instatoon.claudeKey',key); const p=($('#ks-cplan')?.value||'').trim(), q=($('#ks-cfast')?.value||'').trim(); if(p&&p!==CL.plan) kv.setItem('instatoon.claudePlan',p); if(q&&q!==CL.fast) kv.setItem('instatoon.claudeFast',q); const gk=($('#ks-key')?.value||'').trim(); if(gk) kv.setItem('instatoon.key',gk); }
+    else kv.setItem('instatoon.key',key);
+    const pd=$('#ks-paid'); if(pd) kv.setItem('instatoon.paid',pd.checked?'1':'0'); const m=($('#ks-text')?.value||'').trim(); if(m&&m!==API.text) kv.setItem('instatoon.textModel',m); const m2=($('#ks-alt')?.value||'').trim(); if(m2&&m2!==API.alt) kv.setItem('instatoon.textModelAlt',m2);
+  }catch(_){ st.className='status err'; st.textContent='이 브라우저에 저장하지 못했어요'; return; }
+  const after=keyAfter; closeKeySheet(); const kw=$('#keyWrap'); if(kw) kw.innerHTML=keyBoxHTML(); refreshAi(); toast(ai==='claude'?'Claude에 연결했어요':'연결했어요'); if(after) after();
 }
+document.addEventListener('change',e=>{ if(e.target.id!=='ks-ai') return; const c=$('#ks-claude'); if(c) c.hidden=e.target.value!=='claude'; });
 document.addEventListener('click',e=>{ const b=e.target.closest('[data-sheet]'); if(!b) return; e.preventDefault(); keySheetAct(b.dataset.sheet); });
 document.addEventListener('keydown',e=>{ const w=$('#keySheet'); if(!w||w.hidden) return; if(e.key==='Escape') closeKeySheet(); else if(e.key==='Enter'&&e.target.id==='ks-key') keySheetAct('save'); });
-function keyBoxHTML(){ return `<div class="more keybox" id="keyBox"><button type="button" class="keyrow" data-sheet="open" aria-haspopup="dialog"><span id="keyTxt">${keySummary()}</span><span class="keychg" aria-hidden="true">${API.key?'변경':'설정'}</span></button></div>`; }
+function keyBoxHTML(){ return `<div class="more keybox" id="keyBox"><button type="button" class="keyrow" data-sheet="open" aria-haspopup="dialog"><span id="keyTxt">${keySummary()}</span><span class="keychg" aria-hidden="true">${API.ready?'변경':'설정'}</span></button></div>`; }
 
 function refreshAi(){ /* 연결 상태 표시는 첫 화면의 "API 키 설정" 줄(keyBoxHTML)에만 있다. 머리말에는 두지 않는다. */ }
 /* ================= 관리자: 프롬프트 편집실 ================= */
@@ -3466,7 +3713,7 @@ const MANUAL_BASE=[...INFO_FIELDS.map(([k])=>k)];
 /* 프롬프트 목록. def=기본 틀, vars=틀 안에서 쓰는 {{이름}} 설명, manual=직접 입력 칸, auto=직접 입력에서 고정으로 들어가는 값, app()=앱의 현재 값 */
 const PROMPTS={
   make:{tab:'one',name:'대본 한 편 쓰기',use:'info rules',def:`너는 브랜드·콘텐츠 홍보용 인스타툰 작가야. 아래 정보로 {{n}}컷 인스타툰 한 편을 완성해.
-{{info}}
+{{info}}{{series}}
 {{theme}}
 {{rules}}
 
@@ -3490,16 +3737,14 @@ const PROMPTS={
 - caption: 인스타 캡션. 첫 줄은 "더 보기"를 누르게 하는 한 줄, 이어서 3~4줄, 마지막 줄 행동 유도. 이모지 2~3개
 - hashtags: 해시태그 정확히 {{tagSlots}}개(인스타는 게시물당 5개까지만 반영돼요. 고정 해시태그 {{fixedCount}}개가 앞에 붙어 합계 5개가 되니, 더도 덜도 말고 {{tagSlots}}개만). 분야·이번 편 주제에 딱 맞는 구체적인 것, 공백 구분{{tagsNote}}
 - comment: 댓글 유도 질문 1개와 운영자 고정 댓글 1개, 줄바꿈 구분
-- reelCaption: 같은 웹툰을 릴스 영상으로 올릴 때의 캡션. 게시물 caption과 다르게 새로. 첫 줄은 20자 이내 궁금증(결말 스포일러 금지), 2~3줄, 마지막 줄은 "전체 이야기는 프로필 게시물에서" 같은 안내. 이모지 1~2개
-- reelHashtags: 릴스용 해시태그 정확히 {{tagSlots}}개(고정 해시태그 {{fixedCount}}개와 합쳐 5개), 공백 구분. 분야·브랜드 + 릴스 추천에 맞는 조금 넓은 주제 1~2개
-- reelComment: 릴스 고정 댓글 1개(다음 편 예고나 가벼운 질문)
 - endHead: 웹툰 맨 뒤 안내 카드의 큰 문구. 이번 편 이야기와 이어지게 두 줄(\n 구분), 한 줄 10자 이내, 광고 단어 금지
 - endBtn: 안내 카드 버튼 문구 12자 이내(읽는 사람이 할 행동, 예: 프로필 링크에서 예약)
 - cast: 주인공 말고 등장하는 인물들의 고정 외모 한 줄(예: 군 장병 5명 - 디지털 무늬 전투복, 짧은 머리, 모자 없음, 가슴에 빨간 명찰). 없으면 ""
 - ideas: 같은 브랜드로 다음에 만들 수 있는 다른 편 주제 3개(각 20자 이내)
-JSON 하나로만 답해: {"title":"","tone":"","cuts":[{"role":"","shot":"","title":"","highlight":"","sub":"","bubble":"","bubbleSide":"l","sfx":"","direction":"","panels":"","caption":"","extras":""}],"hooks":["","",""],"caption":"","hashtags":"","comment":"","reelCaption":"","reelHashtags":"","reelComment":"","endHead":"","endBtn":"","cast":"","ideas":["","",""]}`,
-    vars:{n:'컷 수',info:'사업·주인공·이야기 정보 묶음',theme:'이번 편 주제 줄(없으면 빈칸)',rules:'아래 "공통 원칙" 틀',shots:'샷 종류 목록',tagSlots:'해시태그 개수',fixedCount:'고정 해시태그 수',tagsNote:'고정 해시태그와 겹치지 않게 하는 문구'},
-    manual:[['n','컷 수','예: 7'],['theme','이번 편 주제','선택']],auto:{shots:SHOTS.join(', '),tagSlots:'5',fixedCount:'0',tagsNote:''},
+- memory: 이번 편 연재 기억. {"story":"줄거리 2줄 80자 이내","threads":["이번에 새로 남긴 떡밥 최대 2개"],"tone":"말투·관계 변화 한 줄"}
+JSON 하나로만 답해: {"title":"","tone":"","cuts":[{"role":"","shot":"","title":"","highlight":"","sub":"","bubble":"","bubbleSide":"l","sfx":"","direction":"","panels":"","caption":"","extras":""}],"hooks":["","",""],"caption":"","hashtags":"","comment":"","endHead":"","endBtn":"","cast":"","ideas":["","",""],"memory":{"story":"","threads":[],"tone":""}}`,
+    vars:{n:'컷 수',info:'사업·주인공·이야기 정보 묶음',theme:'이번 편 주제 줄(없으면 빈칸)',rules:'아래 "공통 원칙" 틀',shots:'샷 종류 목록',tagSlots:'해시태그 개수',fixedCount:'고정 해시태그 수',tagsNote:'고정 해시태그와 겹치지 않게 하는 문구',series:'연재 기억 덩어리(기억이 있을 때만, 없으면 빈칸)'},
+    manual:[['n','컷 수','예: 7'],['theme','이번 편 주제','선택']],auto:{shots:SHOTS.join(', '),tagSlots:'5',fixedCount:'0',tagsNote:'',series:''},
     json:true,app:()=>({n:S.info.cuts,theme:''}),
     toLine:{theme:v=>`\n[이번 편 주제] ${v}\n`}},
   rewrite:{tab:'one',name:'컷 하나만 다시 쓰기',use:'info rules',def:`인스타툰의 {{cutNo}}컷만 다시 써. 요청: {{how}}
@@ -3547,7 +3792,7 @@ JSON 하나로만 답해: {"scores":[{"name":"","score":4,"comment":""}],"summar
 
 [내 소재 메모]
 {{memo}}
-{{stats}}
+{{stats}}{{series}}
 [올리는 날짜] {{dates}}
 
 규칙:
@@ -3561,8 +3806,8 @@ JSON 하나로만 답해: {"scores":[{"name":"","score":4,"comment":""}],"summar
 - goal: 공감, 정보, 신뢰, 홍보 중 하나. cuts: 4~10 중 추천 컷 수.
 - concept: 이번 달 연재 콘셉트 한 줄.
 JSON 하나로만 답해: {"concept":"","items":[{"date":"","type":"","title":"","story":"","goal":"","cuts":6}]}`,
-    vars:{year:'연도',month:'월',count:'편 수',info:'사업·주인공·이야기 정보 묶음',memo:'내 소재 메모',stats:'지난 반응 기록(있을 때만)',dates:'올리는 날짜들'},
-    manual:[['year','연도','예: 2026'],['month','월','예: 11'],['count','편 수','예: 8'],['dates','올리는 날짜','예: 11/3, 11/6, 11/10 …'],['memo','소재 메모','선택','ta'],['stats','지난 반응 기록','선택','ta']],auto:{},
+    vars:{year:'연도',month:'월',count:'편 수',info:'사업·주인공·이야기 정보 묶음',memo:'내 소재 메모',stats:'지난 반응 기록(있을 때만)',dates:'올리는 날짜들',series:'연재 기억 덩어리(기억이 있을 때만, 없으면 빈칸)'},
+    manual:[['year','연도','예: 2026'],['month','월','예: 11'],['count','편 수','예: 8'],['dates','올리는 날짜','예: 11/3, 11/6, 11/10 …'],['memo','소재 메모','선택','ta'],['stats','지난 반응 기록','선택','ta']],auto:{series:''},
     json:true,app:()=>{ const M=mo(), d=planDates(M.ym,M.freq), [y,m]=M.ym.split('-').map(Number); return {year:y,month:m,count:d.length,dates:d.join(', '),memo:M.memo,stats:statsBlock()}; }},
   reelText:{tab:'reels',name:'릴스 캡션·해시태그·고정 댓글',use:'info',def:`너는 브랜드 인스타 담당이야. 이 인스타툰을 그림이 한 장씩 넘어가는 릴스 영상으로도 올려. 릴스에 붙일 글을 써 줘.
 {{info}}
@@ -3777,7 +4022,7 @@ restoreFonts();
 vaultInit().then(()=>{ try{ if(Object.keys(VAULT.chars).length||Object.keys(VAULT.places).length){ syncLinked(); if(S.step==='input'&&(S.mode||'one')==='one'&&!document.activeElement?.closest?.('input,textarea')) vInput(); } }catch(_){} });
 try{ if(kv.notice==='migrated') setTimeout(()=>toast('기존 작업을 새 저장소로 안전하게 옮겼어요 ✓'),600); }catch(_){}
 (async()=>{
-  if(STANDALONE){ sample=geminiSample; $('#keyWrap').innerHTML=keyBoxHTML(); refreshAi(); return; }
+  if(STANDALONE){ sample=aiSample; $('#keyWrap').innerHTML=keyBoxHTML(); refreshAi(); if(!API.ready) tasteInit(); return; }
   try{ sample=await window.claude?.use?.('sample')||null; }catch(_){ sample=null; }
   try{ downloads=await window.claude?.use?.('downloads')||null; }catch(_){ downloads=null; }
   refreshAi();

@@ -258,7 +258,7 @@ for (const [vk, vp] of [['휴대폰 390', MOB], ['PC 1300', PC]]) {
   C.ok(await page.evaluate(() => kv.getItem('instatoon.textModel') === 'gemini-new-model' && document.querySelector('#ks-text').value === 'gemini-new-model'), '모델을 바꿔 저장하면 새로고침 후에도 유지됨');
   await page.close();
   const d = await open(PC, withKey);
-  C.ok(await d.page.evaluate(() => API.text === 'gemini-3.5-flash'), '모델을 정한 적이 없으면 기본 모델(gemini-3.5-flash)이 그대로 쓰임');
+  C.ok(await d.page.evaluate(() => API.text === 'gemini-3.1-flash-lite'), '모델을 정한 적이 없으면 기본 모델(gemini-3.1-flash-lite, 4c에서 무료 한도가 넉넉한 Flash-Lite로 변경)이 쓰임');
   await d.page.close();
 }
 // 9) FAQ 맨 아래 "전체 사용 안내 보기" 글자 링크 → 상세 안내 패널
