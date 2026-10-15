@@ -3435,7 +3435,7 @@ const geminiSample={ async json(prompt,{signal,images,task}={}){
    키 바닥 시트 "고급 설정"에서 AI 종류를 Claude로 고르면 같은 요청 문장·같은 결과 처리로 Anthropic API를 브라우저에서 직접 부른다.
    키는 이 브라우저에만 저장한다(사이트 코드·서버에 운영자 키를 넣지 않는다). 기획·대본(make·month)은 Sonnet급, 나머지는 Haiku급. */
 const CL_PLAN='claude-sonnet-5-5', CL_FAST='claude-haiku-5-5';
-const CL_PRICE={plan:[2,10],fast:[0.10,0.50]}; /* 100만 토큰당 달러(입력/출력). Anthropic 모델 표(2026-10-06) 기준, 구현 직전 가격 페이지로 재확인 */
+const CL_PRICE={plan:[2,10],fast:[0.10,0.50]}; /* 100만 토큰당 달러(입력/출력). Anthropic Pricing 페이지(2026-10-15 재확인: Sonnet 5.5 $2/$10, Haiku 5.5 $0.10/$0.50(프롬프트 10만 토큰 이하). Opus 5.5가 $4/$20) */
 const KRW_PER_USD=1400;
 const AIP=()=>{ try{ return kv.getItem('instatoon.ai')==='claude'?'claude':'gemini'; }catch(_){ return 'gemini'; } };
 const CL={ get key(){ try{ return kv.getItem('instatoon.claudeKey')||''; }catch(_){ return ''; } },
