@@ -55,6 +55,24 @@ body{margin:0}
 .hb.pri{background:var(--ink);border-color:var(--ink);color:var(--surface)}
 .hb.pri:hover{opacity:.86}
 @media (max-width:480px){.hp{display:none}.hb{padding:0 14px}.topbar{gap:8px}}
+.hleft{display:flex;align-items:center;gap:10px;min-width:0}
+.menubtn{width:40px;height:40px;flex:none;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line-2);border-radius:12px;background:var(--surface);color:var(--ink);font:400 20px/1 var(--sans);cursor:pointer}
+.menubtn:hover{border-color:var(--ink)}
+.mwrap{position:fixed;inset:0;z-index:80;visibility:hidden}
+.mwrap.on{visibility:visible}
+.mwrap[hidden]{display:none}
+.mbg{position:absolute;inset:0;background:rgba(0,0,0,.4);opacity:0;transition:opacity .18s}
+.mwrap.on .mbg{opacity:1}
+.mpanel{position:absolute;left:0;top:0;bottom:0;width:min(300px,86vw);display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top,0px) + 12px) 12px 24px;overflow:auto;background:var(--surface);border-right:1px solid var(--ink);transform:translateX(-100%);transition:transform .18s}
+.mwrap.on .mpanel{transform:none}
+.mpanel ul{list-style:none;margin:0;padding:0}
+.mpanel hr{border:0;border-top:1px solid var(--line);margin:10px 0}
+.mi{display:flex;align-items:center;width:100%;min-height:48px;padding:0 14px;border:0;border-left:2px solid transparent;border-radius:0 10px 10px 0;background:none;color:var(--muted);font:600 16px/1 var(--sans);text-align:left;text-decoration:none;cursor:pointer}
+.mi:hover{background:var(--sunken);color:var(--ink)}
+.mi[aria-current="page"]{color:var(--ink);font-weight:800;border-left-color:var(--ink)}
+#shopSlot[hidden]{display:none}
+body.menu-open{overflow:hidden}
+@media (prefers-reduced-motion:reduce){.mbg,.mpanel{transition:none}}
 /* HEADER:END */
 .btn.save{background:var(--save);border-color:var(--save);color:var(--save-ink)} .btn.save:hover{border-color:var(--save);opacity:.88}
 .btn.load{background:var(--load-bg);border-color:var(--load-line);color:var(--load-ink)} .btn.load:hover{border-color:var(--load-ink)}
@@ -795,31 +813,13 @@ details.artsbox{margin-top:0}
   body.has-dock .toast{bottom:calc(env(safe-area-inset-bottom,0px) + 90px)}
 }
 .shell.noside{grid-template-columns:minmax(0,760px);justify-content:center}
-/* 4b: ☰ 메뉴 · 저장 상태 (머리말) */
-.hleft{display:flex;align-items:center;gap:10px;min-width:0}
-.menubtn{width:40px;height:40px;flex:none;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line-2);border-radius:12px;background:var(--surface);color:var(--ink);font:400 20px/1 var(--sans);cursor:pointer}
-.menubtn:hover{border-color:var(--ink)}
+/* 4b: 머리말 저장 상태 (앱 전용, ☰ 메뉴 CSS는 위 HEADER 블록과 노트 페이지가 같이 씀) */
 .hsave{display:inline-flex;align-items:center;gap:4px;height:40px;padding:0 8px;border:0;border-radius:10px;background:none;color:var(--muted);font:600 13px/1 var(--sans);white-space:nowrap;cursor:pointer}
 .hsave:hover{color:var(--ink)}
 .hsave[hidden]{display:none}
 .hsave[data-state="fail"]{color:var(--bad);font-weight:800}
 .hsave .hs-i{font-weight:800}
 @media (max-width:480px){.hsave{padding:0 6px}.hsave[data-state="saved"] .hs-t{display:none}.hsave[data-state="saved"] .hs-i{font-size:15px}}
-.mwrap{position:fixed;inset:0;z-index:80;visibility:hidden}
-.mwrap.on{visibility:visible}
-.mwrap[hidden]{display:none}
-.mbg{position:absolute;inset:0;background:rgba(0,0,0,.4);opacity:0;transition:opacity .18s}
-.mwrap.on .mbg{opacity:1}
-.mpanel{position:absolute;left:0;top:0;bottom:0;width:min(300px,86vw);display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top,0px) + 12px) 12px 24px;overflow:auto;background:var(--surface);border-right:1px solid var(--ink);transform:translateX(-100%);transition:transform .18s}
-.mwrap.on .mpanel{transform:none}
-.mpanel ul{list-style:none;margin:0;padding:0}
-.mpanel hr{border:0;border-top:1px solid var(--line);margin:10px 0}
-.mi{display:flex;align-items:center;width:100%;min-height:48px;padding:0 14px;border:0;border-left:2px solid transparent;border-radius:0 10px 10px 0;background:none;color:var(--muted);font:600 16px/1 var(--sans);text-align:left;text-decoration:none;cursor:pointer}
-.mi:hover{background:var(--sunken);color:var(--ink)}
-.mi[aria-current="page"]{color:var(--ink);font-weight:800;border-left-color:var(--ink)}
-#shopSlot[hidden]{display:none}
-body.menu-open{overflow:hidden}
-@media (prefers-reduced-motion:reduce){.mbg,.mpanel{transition:none}}
 @media (max-width:640px){.btn{max-width:100%;white-space:normal;text-align:left;line-height:1.4}}
 </style>
 
@@ -847,7 +847,7 @@ body.menu-open{overflow:hidden}
       <hr>
       <ul>
         <li><button type="button" class="mi" data-act="backupWin">백업 저장 · 불러오기</button></li>
-        <li><button type="button" class="mi" data-act="helpPanel">사용 방법</button></li>
+        <li><button type="button" class="mi" data-act="help">사용 방법</button></li>
         <li><a class="mi" href="/guide/instatoon-troubleshooting/">문제 해결</a></li>
       </ul>
     </nav>
@@ -3858,12 +3858,12 @@ function goMonth(){
   try{ history.pushState(null,'',location.pathname+location.search+'#month'); }catch(_){}
   render(); window.scrollTo({top:0,behavior:'smooth'}); }
 /* 주소 끝(#month·#vault·#backup·#help)으로 들어오는 길: 인스타툰 노트 페이지의 ☰ 메뉴가 쓴다 */
-function routeHash(){
-  const h=location.hash;
+function routeHash(hh){
+  const h=hh===undefined?location.hash:hh;
   if(h==='#month'){ if((S.mode||'one')!=='month'){ S.mode='month'; save(); render(); } return true; }
   if(h==='#vault'||h==='#backup'||h==='#help'){
     try{ history.replaceState(null,'',location.pathname+location.search); }catch(_){}
-    if(h==='#vault') openVault({}); else if(h==='#backup') openBackupWin(); else toggleHelp(true);
+    if(h==='#vault') openVault({}); else if(h==='#backup') openBackupWin(); else startTour();
     return true; }
   return false; }
 window.addEventListener('hashchange',()=>{ if(location.hash!==ADM_HASH) routeHash(); });
@@ -3894,10 +3894,11 @@ document.addEventListener('click',e=>{ const b=e.target.closest('[data-bkw]'); i
 document.addEventListener('keydown',e=>{ const w=document.getElementById('bkWin'); if(e.key==='Escape'&&w&&!w.hidden) closeBackupWin(); });
 
 /* ================= 시작 ================= */
+const BOOT_HASH=location.hash;
 applyFontVars();
 applyRatio();
 render();
-routeHash();
+routeHash(BOOT_HASH);
 renderHeadSave();
 try{ if(!kv.getItem('instatoon.helpSeen')){ if(hasWork()||S.info.type.trim()||S.info.name.trim()||S.info.story.trim()) kv.setItem('instatoon.helpSeen','1'); else setTimeout(startTour,700); } }catch(_){}
 restoreFonts();

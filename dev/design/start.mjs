@@ -21,17 +21,18 @@ const vis = (page, sel) => page.evaluate((s) => { const e = document.querySelect
 {
   const { page, errors } = await open(PC, withKey);
   await setState(page, () => { S = demoState('bakery'); S.mode = 'one'; S.step = 'input'; });
-  const sum = await page.evaluate(() => ({ kind: document.querySelector('#side').dataset.kind, labels: [...document.querySelectorAll('#sideSummary dt')].map((e) => e.textContent.trim()), todo: !!document.querySelector('#sideSummary .sumtodo'), phone: !document.querySelector('#phoneWrap').hidden, badge: document.querySelectorAll('.ex-badge').length, bannerHidden: getComputedStyle(document.querySelector('#todo')).display === 'none' }));
-  C.ok(sum.kind === 'summary' && sum.labels.join() === '가게·이름,테마,인물,컷 수' && sum.todo, `PC 앱 1단계: 오른쪽에 요약 카드(가게·테마·인물·컷 수 + 지금 할 일) (${sum.labels})`);
+  const sum = await page.evaluate(() => { const m = document.querySelector('#main').getBoundingClientRect(); return { kind: document.querySelector('#side').dataset.kind, sideHidden: document.querySelector('#side').hidden, card: document.querySelectorAll('.sumcard, #sideSummary:not([hidden])').length, phone: !document.querySelector('#phoneWrap').hidden, badge: document.querySelectorAll('#phoneWrap .ex-badge').length, bannerHidden: document.querySelector('#todo').hidden, w: Math.round(m.width), cx: Math.round(m.left + m.width / 2), vw: innerWidth }; });
+  C.ok(sum.kind === 'none' && sum.sideHidden && sum.card === 0, 'PC 앱 1단계(4b): "지금 설정" 요약 카드가 없고 오른쪽 패널도 비어 있음');
   C.ok(!sum.phone && sum.badge === 0, 'PC 앱 1단계: 인스타 폰 미리보기와 "예시" 표시가 없음');
-  C.ok(sum.bannerHidden, 'PC 앱 1단계: 요약 카드에 "지금 할 일"이 있어 위쪽 검정 배너는 숨김(중복 제거)');
+  C.ok(sum.w <= 780 && Math.abs(sum.cx - sum.vw / 2) <= 8, `PC 앱 1단계(4b): 폼이 가운데에 적당한 폭으로 모임 (폭 ${sum.w}px, 가운데 오차 ${Math.abs(sum.cx - sum.vw / 2)}px)`);
+  C.ok(sum.bannerHidden, 'PC 앱 1단계(4b): 위쪽 "지금 할 일" 배너는 없고, 필수칸 안내는 폼 안 한 줄로 대신함');
   await setState(page, () => { S.step = 'edit'; });
   const sb = await page.evaluate(() => ({ kind: document.querySelector('#side').dataset.kind, items: document.querySelectorAll('#sideStory .sb li').length, cuts: cuts().length, frames: document.querySelectorAll('#sideStory .frame, #sideStory canvas, #sideStory img').length, cap: !!document.querySelector('#capPrev'), count: (document.querySelector('#capPrev .cnt2') || {}).textContent, fold: !!document.querySelector('#capPrev .cap-fold'), hasWho: /사장님|알바생/.test(document.querySelector('#sideStory').textContent) }));
   C.ok(sb.kind === 'story' && sb.items === sb.cuts && sb.frames === 0 && sb.hasWho, `PC 앱 2단계: 오른쪽에 텍스트 스토리보드(컷 ${sb.items}개, 그림 박스 없음, 인물·대사 포함)`);
   C.ok(sb.cap && /\/ 2,200자/.test(sb.count) && sb.fold, `PC 앱 2단계: 아래에 캡션 미리보기(글자 수 ${sb.count}, 125자 기준선)`);
   await setState(page, () => { S.step = 'post'; });
   let p3 = await page.evaluate(() => ({ kind: document.querySelector('#side').dataset.kind, phone: !document.querySelector('#phoneWrap').hidden }));
-  C.ok(p3.kind === 'summary' && !p3.phone, 'PC 앱 3단계(그림 올리기 전): 인스타 카드 미리보기가 보이지 않음');
+  C.ok(p3.kind === 'none' && !p3.phone, 'PC 앱 3단계(그림 올리기 전): 인스타 카드 미리보기가 보이지 않음');
   await setState(page, () => { S.toon.pics = ['data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==']; });
   p3 = await page.evaluate(() => ({ kind: document.querySelector('#side').dataset.kind, phone: !document.querySelector('#phoneWrap').hidden }));
   C.ok(p3.kind === 'phone' && p3.phone, 'PC 앱 3단계(그림을 올린 뒤): 인스타 카드 미리보기가 나타남');
@@ -46,7 +47,7 @@ const vis = (page, sel) => page.evaluate((s) => { const e = document.querySelect
   const m = await page.evaluate(() => ({ aside: getComputedStyle(document.querySelector('#side')).display, storyM: getComputedStyle(document.querySelector('#storyM')).display, items: document.querySelectorAll('#storyM .sb li').length, ov: document.documentElement.scrollWidth - innerWidth }));
   C.ok(m.aside === 'none' && m.storyM !== 'none' && m.items === 6 && m.ov <= 1, `휴대폰 앱 2단계: 스토리보드가 본문 위에 나옴(오른쪽 패널은 숨김), 넘침 없음 (${m.items}컷)`);
   await setState(page, () => { S.step = 'input'; });
-  C.ok(await page.evaluate(() => getComputedStyle(document.querySelector('#side')).display === 'none'), '휴대폰 앱 1단계: 요약 카드는 숨김(본문이 먼저)');
+  C.ok(await page.evaluate(() => document.querySelector('#side').hidden), '휴대폰 앱 1단계(4b): 요약 카드 자체가 없음(본문이 먼저)');
   await page.close();
 }
 
@@ -194,17 +195,19 @@ for (const [vk, vp, want] of [['휴대폰 390', MOB, '툰 만들기'], ['PC 1300
   await c.page.close();
 }
 
-// 6) FAQ · 갤러리 자리, 넘침
+// 6) FAQ(접힌 한 줄) · "이렇게 나와요"는 사용 방법 안으로, 넘침 (4b)
 for (const [vk, vp] of [['휴대폰 390', MOB], ['PC 1300', PC]]) {
   const { page } = await open(vp, withKey);
-  const f = await page.evaluate(() => ({ faq: document.querySelectorAll('.faq details').length, gal: document.querySelectorAll('.galslot').length, galBtn: document.querySelectorAll('.galslot button, .galslot a').length, galTxt: document.querySelector('.galslot').textContent, items: document.querySelectorAll('.exl li').length, ov: document.documentElement.scrollWidth - innerWidth }));
-  C.ok(f.faq === 4 && f.gal === 1 && f.galBtn === 0 && !/준비/.test(f.galTxt) && f.items === 6 && f.ov <= 1, `${vk} 첫 화면 아래: FAQ ${f.faq}개, "이렇게 나와요" 한 칸(결과 예시 ${f.items}컷, 버튼·준비 중 문구 없음), 넘침 없음`);
-  const before = await page.evaluate(() => document.querySelector('.faq details').open);
-  await page.click('.faq summary'); C.ok(await page.evaluate(() => document.querySelector('.faq details').open) && !before, `${vk} FAQ를 누르면 열림`);
+  const f = await page.evaluate(() => ({ one: document.querySelectorAll('.faq > details.faqall').length, inner: document.querySelectorAll('.faq details.faqall > details').length, opened: document.querySelector('.faqall').open, sum: document.querySelector('.faqall > summary').textContent.trim(), gal: document.querySelectorAll('.galslot, #exSec').length, exHome: document.querySelectorAll('#main .exl, .faq .exl').length, ov: document.documentElement.scrollWidth - innerWidth }));
+  C.ok(f.one === 1 && f.inner === 4 && !f.opened && f.sum === '자주 묻는 질문' && f.gal === 0 && f.exHome === 0 && f.ov <= 1, `${vk} 첫 화면 아래: FAQ는 접힌 한 줄("${f.sum}")이고 안에 질문 ${f.inner}개, "이렇게 나와요" 칸은 홈에 없음, 넘침 없음`);
+  await page.click('.faqall > summary'); C.ok(await page.evaluate(() => document.querySelector('.faqall').open && getComputedStyle(document.querySelector('.faqall > details')).display !== 'none'), `${vk} FAQ를 누르면 열림`);
+  await page.evaluate(() => toggleHelp(true)); await page.waitForTimeout(150);
+  const ex = await page.evaluate(() => ({ items: document.querySelectorAll('#help .hex .exl li').length, head: /이렇게 나와요/.test(document.querySelector('#help .hex .hn').textContent) }));
+  C.ok(ex.items === 6 && ex.head, `${vk} "이렇게 나와요" 예시(${ex.items}컷)는 사용 방법 안에 있음`);
   await page.close();
 }
 
-// 7) 같은 역할의 입구가 하나씩만 있는지 (첫 화면)
+// 7) 같은 역할의 입구가 하나씩만 있는지 (첫 화면) — 4b: 사용 방법·백업 입구는 ☰ 메뉴 하나로 모임
 for (const [vk, vp] of [['휴대폰 390', MOB], ['PC 1300', PC]]) {
   const { page } = await open(vp, withKey);
   const e = await page.evaluate(() => {
@@ -215,30 +218,31 @@ for (const [vk, vp] of [['휴대폰 390', MOB], ['PC 1300', PC]]) {
     const count = (re) => (text.match(re) || []).length;
     return {
       help: vis('[data-act="help"]').length, tourBtn: vis('[data-act="tour"]').length, tourText: count(/30초 둘러보기/g),
-      demoLinks: vis('details.demo-link > summary').length, demoBtnsAll: document.querySelectorAll('[data-act="demo"]').length, demoOpen: document.querySelectorAll('.demo-more').length,
+      demoLinks: vis('details.demo-link > summary').length, demoOpen: document.querySelectorAll('.demo-more').length,
       exSections: document.querySelectorAll('#exSec').length, ex: count(/이렇게 나와요/g), prep: count(/준비하고 있어요|준비 중/g), galDemos: document.querySelectorAll('#galDemos').length,
       model: count(/대본·기획 모델|gemini-3\.5-flash/g), saveNote: count(/이 브라우저에만 저장/g),
       keyRows: vis('#keyBox .keyrow').length, keyInputs: vis('input[type=password]').length,
-      helpPanelEntrances: [...document.querySelectorAll('#help')].length,
+      oldHeader: document.querySelectorAll('.htools, #hmoreBtn, #hpop, #modes, .mode').length,
     };
   });
-  C.ok(e.tourBtn === 0 && e.tourText === 0, `${vk} 첫 화면: "30초 둘러보기" 버튼이 없음(둘러보기 입구는 머리말 "사용 방법" 하나)`);
-  C.ok(e.help === (vp.width > 720 ? 1 : 0), `${vk} 첫 화면: 눈에 보이는 "사용 방법" 입구 ${e.help}개 (${vp.width > 720 ? '머리말 글자 버튼 1개' : '⋯ 메뉴 안에만'})`);
+  C.ok(e.tourBtn === 0 && e.tourText === 0, `${vk} 첫 화면: "30초 둘러보기" 버튼이 없음(둘러보기 입구는 ☰ 메뉴의 "사용 방법" 하나)`);
+  C.ok(e.help === 0 && e.oldHeader === 0, `${vk} 첫 화면: 메뉴를 닫아 두면 "사용 방법" 입구가 안 보이고, 옛 머리말 도구 버튼·⋯ 메뉴·모드 탭이 없음 (옛 요소 ${e.oldHeader}개)`);
   C.ok(e.demoLinks === 1 && e.demoOpen === 1, `${vk} 첫 화면: "예시로 먼저 체험해 보기" 입구는 입력칸 근처 글자 링크 한 곳 (${e.demoLinks}개)`);
-  C.ok(e.exSections === 1 && e.ex === 1 && e.prep === 0 && e.galDemos === 0, `${vk} 첫 화면: "이렇게 나와요"와 갤러리 자리는 한 칸, "준비 중"·체험 버튼 없음`);
+  C.ok(e.exSections === 0 && e.ex === 0 && e.prep === 0 && e.galDemos === 0, `${vk} 첫 화면: "이렇게 나와요"·갤러리 자리·"준비 중"·체험 버튼이 없음`);
   C.ok(e.model === 0, `${vk} 첫 화면: 모델 이름(대본·기획 모델 / gemini-…)이 보이지 않음`);
   C.ok(e.keyRows === 1 && e.keyInputs === 0, `${vk} 첫 화면: API 키 입구는 "API 키 설정" 줄 하나(입력칸은 시트 안에만)`);
   C.ok(e.saveNote <= 1, `${vk} 첫 화면: "이 브라우저에만 저장" 안내가 한 번만 보임 (${e.saveNote}번)`);
-  if (vp.width <= 720) { await page.click('#hmoreBtn'); C.ok(await page.evaluate(() => [...document.querySelectorAll('#hpop [data-act="help"]')].length === 1), `${vk}: ⋯ 메뉴 안에 "사용 방법" 하나`); await page.click('#hmoreBtn'); }
+  await page.click('#menuBtn'); await page.waitForTimeout(350);
+  C.ok(await page.evaluate(() => document.querySelectorAll('#menuPanel [data-act="help"]').length === 1), `${vk}: ☰ 메뉴 안에 "사용 방법" 하나`);
   // 사용 방법 = 둘러보기 시작 → 마지막에서 전체 안내(패널) 열기. 패널엔 겹치는 입구가 없음
-  await page.evaluate(() => { document.querySelector(window.innerWidth > 720 ? '.htools [data-act="help"]' : '#hpop [data-act="help"]').click(); });
-  await page.waitForTimeout(300);
+  await page.click('#menuPanel [data-act="help"]');
+  await page.waitForTimeout(350);
   C.ok(await page.evaluate(() => !!document.querySelector('#tour') && document.querySelector('#help').hidden), `${vk}: "사용 방법"을 누르면 둘러보기가 시작되고 안내 패널은 열리지 않음`);
   await page.evaluate(() => { while (document.querySelector('#tour') && !document.querySelector('[data-tour="guide"]')) document.querySelector('[data-tour="next"]').click(); });
   await page.waitForTimeout(200);
   C.ok(await page.evaluate(() => !!document.querySelector('[data-tour="guide"]')), `${vk}: 둘러보기 마지막에 "전체 사용 안내" 버튼`);
   await page.click('[data-tour="guide"]'); await page.waitForTimeout(250);
-  const hp = await page.evaluate(() => ({ open: !document.querySelector('#help').hidden, tour: !!document.querySelector('#tour'), dup: document.querySelectorAll('#help [data-act="demo"], #help [data-act="tour"]').length, keyCard: /시작 전 준비/.test(document.querySelector('#help').textContent), backupCard: /저장과 백업|먼저 체험해 보고 싶다면/.test(document.querySelector('#help').textContent) }));
+  const hp = await page.evaluate(() => ({ open: !document.querySelector('#help').hidden, tour: !!document.querySelector('#tour'), dup: document.querySelectorAll('#help [data-act="demo"], #help [data-act="tour"]').length, keyCard: /시작 전 준비/.test(document.querySelector('#help').textContent), backupCard: /저장과 백업/.test(document.querySelector('#help').textContent) }));
   C.ok(hp.open && !hp.tour && hp.dup === 0 && !hp.keyCard && !hp.backupCard, `${vk}: "전체 사용 안내"가 열리고, 안에 둘러보기·체험 버튼과 키·저장/백업 중복 안내가 없음`);
   await page.close();
 }
@@ -264,7 +268,7 @@ for (const [vk, vp] of [['휴대폰 390', MOB], ['PC 1300', PC]]) {
 // 9) FAQ 맨 아래 "전체 사용 안내 보기" 글자 링크 → 상세 안내 패널
 for (const [vk, vp] of [['휴대폰 390', MOB], ['PC 1300', PC]]) {
   const { page } = await open(vp, withKey);
-  const l = await page.evaluate(() => { const b = document.querySelector('.faq .faq-more .linkbtn'), last = document.querySelector('.faq').lastElementChild; return { n: document.querySelectorAll('.faq .linkbtn').length, text: b && b.textContent.trim(), last: last === b.parentElement, bg: b && getComputedStyle(b).backgroundColor, border: b && getComputedStyle(b).borderTopWidth, deco: b && getComputedStyle(b).textDecorationLine }; });
+  const l = await page.evaluate(() => { document.querySelector('.faqall').open = true; const b = document.querySelector('.faq .faq-more .linkbtn'), last = document.querySelector('.faq .faqall').lastElementChild; return { n: document.querySelectorAll('.faq .linkbtn').length, text: b && b.textContent.trim(), last: last === b.parentElement, bg: b && getComputedStyle(b).backgroundColor, border: b && getComputedStyle(b).borderTopWidth, deco: b && getComputedStyle(b).textDecorationLine }; });
   C.ok(l.n === 1 && l.text === '전체 사용 안내 보기' && l.last && l.border === '0px' && /underline/.test(l.deco), `${vk} FAQ 맨 아래에 글자 링크 "전체 사용 안내 보기" 하나(버튼 모양 아님)`);
   await page.click('.faq .linkbtn'); await page.waitForTimeout(250);
   C.ok(await page.evaluate(() => !document.querySelector('#help').hidden && !document.querySelector('#tour') && /1단계|내 이야기 적기/.test(document.querySelector('#help').textContent)), `${vk} 누르면 상세 안내 패널이 열림(둘러보기는 시작되지 않음)`);

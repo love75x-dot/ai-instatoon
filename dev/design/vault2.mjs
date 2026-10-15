@@ -22,12 +22,13 @@ const helpers = `
   };`;
 
 // ─── A 브라우저: 저장 → 알림 → 백업 ───
+const clickBackup = async (pg) => { await pg.locator('#menuBtn').click(); await pg.waitForTimeout(300); await pg.locator('#menuPanel [data-act="backupWin"]').click(); await pg.waitForTimeout(200); await pg.locator('#bkWin [data-bkw="save"]').click(); };
 const A = await open(PC, false); await A.page.evaluate(helpers);
 await A.page.evaluate(() => { S = demoState('bakery'); S.demo = false; S.step = 'input'; S.mode = 'one'; save(); render(); });
 const hashes = await A.page.evaluate(() => seedVault());
 await A.page.waitForTimeout(200);
 C.ok(await A.page.evaluate(() => { const d = backupDue(); return !!(d && d.vault); }) && await A.page.locator('#bkNote').innerText().then((t) => /새로 저장한 캐릭터가 있어요/.test(t)), '캐릭터를 새로 저장하면 백업 알림이 바로 뜸(7일을 기다리지 않음)');
-await A.page.locator('.ht[data-act="backup"]').click(); await A.page.waitForTimeout(250);
+await clickBackup(A.page); await A.page.waitForTimeout(250);
 const dlg = await A.page.locator('#bkSheet').innerText();
 C.ok(/작업 약 .+ \+ 보관함 이미지 약 .+ = 약 .+/.test(dlg) && /인물 2명 · 장소 1개/.test(dlg) && /이미지 빼고 저장/.test(dlg), `저장 전에 용량(작업+보관함 이미지)과 "이미지 빼고 저장" 선택지가 보임 (${dlg.split('\n').find((x) => /작업 약/.test(x))})`);
 const [dlFull] = await Promise.all([A.page.waitForEvent('download'), A.page.locator('[data-bk="full"]').click()]);
@@ -38,7 +39,7 @@ await A.page.waitForTimeout(300);
 C.ok(await A.page.evaluate(() => !backupDue()), '이미지 포함 백업을 하면 캐릭터 백업 알림이 사라짐');
 await A.page.waitForTimeout(30); await A.page.evaluate(() => { vaultMarkChanged(); }); await A.page.waitForTimeout(100);
 C.ok(await A.page.evaluate(() => !!(backupDue() || {}).vault), '그 뒤 보관함을 또 바꾸면 알림이 다시 뜸');
-await A.page.locator('.ht[data-act="backup"]').click(); await A.page.waitForTimeout(200);
+await clickBackup(A.page); await A.page.waitForTimeout(200);
 const [dlLight] = await Promise.all([A.page.waitForEvent('download'), A.page.locator('[data-bk="light"]').click()]);
 const light = JSON.parse(fs.readFileSync(await dlLight.path(), 'utf8'));
 C.ok(light.vault.withImages === false && !JSON.stringify(light.vault).includes('"data"') && light.vault.chars[0].card.keep === '안경은 항상 동그란 테', '"이미지 빼고 저장"은 이미지 없이 인물 정보·카드만 담김');

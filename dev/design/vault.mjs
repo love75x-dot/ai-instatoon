@@ -15,8 +15,8 @@ for (const [vk, vp] of [['PC 1300', PC], ['휴대폰 390', MOB]]) {
   const { page, errors } = await open(vp);
   await page.evaluate(() => { S = demoState('bakery'); S.demo = false; S.step = 'input'; S.mode = 'one'; save(); render(); });
 
-  // 1) 열기: 머리말 ⋯ 메뉴(휴대폰) 또는 1단계의 "캐릭터 보관함 열기"
-  if (vp.width <= 720) { await page.locator('#hmoreBtn').click(); await page.locator('#hpop [data-v="open"]').click(); }
+  // 1) 열기: ☰ 메뉴(휴대폰) 또는 1단계의 "캐릭터 보관함 열기"
+  if (vp.width <= 720) { await page.locator('#menuBtn').click(); await page.waitForTimeout(300); await page.locator('#menuPanel [data-v="open"]').click(); }
   else await page.getByText('캐릭터 보관함 열기').first().click({ force: true });
   await page.waitForTimeout(250);
   C.ok(await page.locator('#vaultSheet:not([hidden]) .sheet-in').count() === 1, `${vk}: 보관함 창이 열림`);

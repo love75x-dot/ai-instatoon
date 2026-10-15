@@ -14,8 +14,6 @@ const shots = [
   ['03-2단계-컷편집(보리당)', () => { S = demoState('bakery'); S.step = 'edit'; S.mode = 'one'; }],
   ['04-3단계-그림저장(보리당)', () => { S = demoState('bakery'); S.step = 'post'; S.mode = 'one'; }],
   ['05-한달기획', () => { S = demoState('bakery'); S.mode = 'month'; }],
-  ['06-릴스', () => { S = demoState('bakery'); S.mode = 'reels'; }],
-  ['07-반응분석', () => { S = demoState('bakery'); S.mode = 'stats'; }],
 ];
 for (const [vk, vp] of Object.entries(VP)) {
   const { page } = await newPage(browser, srv.base, { viewport: vp, ls: { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST' } });

@@ -75,6 +75,24 @@ body{margin:0}
 .hb.pri{background:var(--ink);border-color:var(--ink);color:var(--surface)}
 .hb.pri:hover{opacity:.86}
 @media (max-width:480px){.hp{display:none}.hb{padding:0 14px}.topbar{gap:8px}}
+.hleft{display:flex;align-items:center;gap:10px;min-width:0}
+.menubtn{width:40px;height:40px;flex:none;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line-2);border-radius:12px;background:var(--surface);color:var(--ink);font:400 20px/1 var(--sans);cursor:pointer}
+.menubtn:hover{border-color:var(--ink)}
+.mwrap{position:fixed;inset:0;z-index:80;visibility:hidden}
+.mwrap.on{visibility:visible}
+.mwrap[hidden]{display:none}
+.mbg{position:absolute;inset:0;background:rgba(0,0,0,.4);opacity:0;transition:opacity .18s}
+.mwrap.on .mbg{opacity:1}
+.mpanel{position:absolute;left:0;top:0;bottom:0;width:min(300px,86vw);display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top,0px) + 12px) 12px 24px;overflow:auto;background:var(--surface);border-right:1px solid var(--ink);transform:translateX(-100%);transition:transform .18s}
+.mwrap.on .mpanel{transform:none}
+.mpanel ul{list-style:none;margin:0;padding:0}
+.mpanel hr{border:0;border-top:1px solid var(--line);margin:10px 0}
+.mi{display:flex;align-items:center;width:100%;min-height:48px;padding:0 14px;border:0;border-left:2px solid transparent;border-radius:0 10px 10px 0;background:none;color:var(--muted);font:600 16px/1 var(--sans);text-align:left;text-decoration:none;cursor:pointer}
+.mi:hover{background:var(--sunken);color:var(--ink)}
+.mi[aria-current="page"]{color:var(--ink);font-weight:800;border-left-color:var(--ink)}
+#shopSlot[hidden]{display:none}
+body.menu-open{overflow:hidden}
+@media (prefers-reduced-motion:reduce){.mbg,.mpanel{transition:none}}
 /* HEADER:END */
 .nav{display:flex;flex-wrap:wrap;gap:8px}
 .btn{border:1px solid var(--line-2);background:var(--surface);border-radius:999px;padding:8px 16px;min-height:40px;font-weight:700;font-size:14px;display:inline-flex;align-items:center;text-decoration:none;white-space:nowrap}
@@ -175,11 +193,26 @@ footer p{margin:10px 0 0;font-size:13px}
 
 const FONTS = '<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">';
 
+const MENU_JS = `(function(){var b=document.getElementById('menuBtn'),w=document.getElementById('menuWrap');if(!b||!w)return;var t,on=function(){return !w.hidden&&w.classList.contains('on')};
+function op(){clearTimeout(t);w.hidden=false;document.body.classList.add('menu-open');b.setAttribute('aria-expanded','true');requestAnimationFrame(function(){requestAnimationFrame(function(){w.classList.add('on')})});setTimeout(function(){var f=w.querySelector('.mi');if(f&&on())f.focus({preventScroll:true})},40)}
+function cl(r){w.classList.remove('on');document.body.classList.remove('menu-open');b.setAttribute('aria-expanded','false');clearTimeout(t);t=setTimeout(function(){w.hidden=true},190);if(r!==false)b.focus({preventScroll:true})}
+b.addEventListener('click',function(){on()?cl():op()});
+w.addEventListener('click',function(e){if(e.target.closest('.mbg'))cl();else if(e.target.closest('.mi'))cl(false)});
+document.addEventListener('keydown',function(e){if(!on())return;if(e.key==='Escape'){e.preventDefault();cl();return}
+if(e.key==='Tab'){var a=[].slice.call(w.querySelectorAll('.mi'));if(!a.length)return;var f=a[0],l=a[a.length-1];if(e.shiftKey&&document.activeElement===f){e.preventDefault();l.focus()}else if(!e.shiftKey&&document.activeElement===l){e.preventDefault();f.focus()}}});
+})();`;
+
+/* ☰ 메뉴: 홈(site/index.html)과 항목·순서가 같다. #shopSlot은 4d(가게 전환)가 채울 빈 자리. */
+const menuHtml = (cur) => `<div class="mwrap" id="menuWrap" hidden><div class="mbg"></div><nav class="mpanel" id="menuPanel" role="dialog" aria-modal="true" aria-label="메뉴"><div id="shopSlot" hidden></div>
+<ul><li><a class="mi" href="/">인스타툰 만들기</a></li><li><a class="mi" href="/#month">한 달 기획</a></li><li><a class="mi" href="/#vault">캐릭터 보관함</a></li><li><a class="mi" href="/guide/"${cur === 'hub' || cur === 'guide' ? ' aria-current="page"' : ''}>인스타툰 노트</a></li></ul><hr>
+<ul><li><a class="mi" href="/#backup">백업 저장 · 불러오기</a></li><li><a class="mi" href="/#help">사용 방법</a></li><li><a class="mi" href="/guide/instatoon-troubleshooting/">문제 해결</a></li></ul></nav></div>`;
+
 export const header = (cur) => `<a class="skip" href="#main">본문 바로가기</a>
 <div class="hwrap"><header class="topbar">
-<a class="brand" href="/" aria-label="${SITE} 첫 화면으로"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><b>${SITE}</b></a>
+<div class="hleft"><button type="button" class="menubtn" id="menuBtn" aria-label="메뉴 열기" aria-haspopup="dialog" aria-expanded="false" aria-controls="menuPanel"><span aria-hidden="true">☰</span></button>
+<a class="brand" href="/" aria-label="${SITE} 첫 화면으로"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><b>${SITE}</b></a></div>
 <nav class="hnav" aria-label="주요 메뉴">${cur === 'hub' ? '' : '<a class="hb" href="/guide/" aria-label="인스타툰 노트"><span class="hp">인스타툰&nbsp;</span>노트</a>'}<a class="hb pri" href="/" data-track="cta" data-loc="header" aria-label="인스타툰 만들기"><span class="hp">인스타</span>툰 만들기</a></nav>
-</header></div>`;
+</header></div>${menuHtml(cur)}<script>${MENU_JS}</script>`;
 
 export const footer = `<footer><div class="wrap"><nav class="nav" aria-label="푸터 메뉴"><a href="/guide/">인스타툰 노트</a><a href="/" data-track="cta" data-loc="footer">인스타툰 만들기</a><a href="/about/">소개</a><a href="/privacy/">개인정보처리방침</a><a href="/terms/">이용안내</a><a href="/sitemap.xml">사이트맵</a></nav>
 <p>© ${SITE} · 이 사이트의 가이드는 일반적인 정보 제공을 위한 것이며, 서비스 기능과 정책은 각 서비스의 공식 안내에서 확인해 주세요.</p></div></footer>`;

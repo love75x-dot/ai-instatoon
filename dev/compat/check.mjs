@@ -61,7 +61,7 @@ for (const noIDB of [false, true]) {
     C.ok(same(extra.copied, JSON.parse(ls['instatoon.copied'])), `${tag}현재 형식: 복사 ✓ 표시`);
     // 모든 앱 단계·탭이 오류 없이 그려지는지
     const modes = await page.evaluate(() => { const bad = []; for (const mode of ['one', 'month', 'reels', 'stats']) for (const step of ['input', 'edit', 'post']) { try { S.mode = mode; S.step = step; render(); } catch (e) { bad.push(mode + '/' + step + ': ' + e.message); } } return bad; });
-    C.ok(!modes.length && !errors.length, `${tag}현재 형식: 4개 탭×3단계 화면 오류 없음` + (modes[0] ? ' ← ' + modes[0] : '') + (errors[0] ? ' ← ' + errors[0] : ''));
+    C.ok(!modes.length && !errors.length, `${tag}현재 형식: 모든 모드·3단계 화면 오류 없음(옛 reels·stats는 홈으로)` + (modes[0] ? ' ← ' + modes[0] : '') + (errors[0] ? ' ← ' + errors[0] : ''));
     await legacyKept(page, ls, `${tag}현재 형식`);
   }
   // B) 옛 v3

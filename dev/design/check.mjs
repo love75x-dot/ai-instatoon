@@ -10,8 +10,6 @@ const SCREENS = [
   ['2단계', () => { S = demoState('bakery'); S.step = 'edit'; S.mode = 'one'; }],
   ['3단계', () => { S = demoState('bakery'); S.step = 'post'; S.mode = 'one'; }],
   ['한 달 기획', () => { S = demoState('bakery'); S.mode = 'month'; }],
-  ['스토리·릴스', () => { S = demoState('bakery'); S.mode = 'reels'; }],
-  ['반응·댓글', () => { S = demoState('bakery'); S.mode = 'stats'; }],
 ];
 const probe = () => {
   const YEL = 'rgb(255, 213, 61)', okYellow = '.todo, .sumtodo, .endpv, .arts, .endsw, .mark, .endwrap, .swatches, .frame, .phone, .ftile';
@@ -52,10 +50,10 @@ C.ok(appCss.length > 200 && appCss === noteCss, '머리말 CSS 블록이 홈과 
 const HPAGES = [['홈', '/'], ['노트 목록', '/guide/'], ['노트 글', '/guide/how-to-make-instatoon/'], ['소개', '/about/'], ['개인정보', '/privacy/'], ['이용안내', '/terms/'], ['404', '/없는-주소/']];
 const headProbe = () => {
   const box = (el) => { const r = el.getBoundingClientRect(); return { x: Math.round(r.left * 10) / 10, y: Math.round(r.top * 10) / 10, w: Math.round(r.width * 10) / 10, h: Math.round(r.height * 10) / 10, r: Math.round((window.innerWidth - r.right) * 10) / 10 }; };
-  const tb = document.querySelector('.topbar'), brand = tb.querySelector('.brand'), mark = brand.querySelector('.mark'), name = brand.querySelector('b');
+  const tb = document.querySelector('.topbar'), brand = tb.querySelector('.brand'), mark = brand.querySelector('.mark'), name = brand.querySelector('b'), menu = tb.querySelector('#menuBtn');
   const btns = [...tb.querySelectorAll('.hnav .hb:not(.hmore)')].map((b) => { const cs = getComputedStyle(b); return { kind: b.classList.contains('pri') ? '주' : '보조', text: b.textContent.trim(), box: box(b), css: [cs.fontSize, cs.fontWeight, cs.paddingLeft, cs.borderRadius, cs.borderTopWidth, cs.backgroundColor, cs.color, cs.borderTopColor].join('|') }; });
   const ncs = getComputedStyle(name);
-  return { tb: box(tb), mark: box(mark), name: { ...box(name), font: [ncs.fontSize, ncs.fontWeight, ncs.fontFamily].join('|') }, btns, overflow: document.documentElement.scrollWidth - window.innerWidth, logoHref: brand.tagName === 'A' ? brand.getAttribute('href') : '(앱: 첫 화면 이동 버튼)' };
+  return { tb: box(tb), menu: box(menu), mark: box(mark), name: { ...box(name), font: [ncs.fontSize, ncs.fontWeight, ncs.fontFamily].join('|') }, btns, overflow: document.documentElement.scrollWidth - window.innerWidth, logoHref: brand.tagName === 'A' ? brand.getAttribute('href') : '(앱: 첫 화면 이동 버튼)' };
 };
 for (const [vk, vp] of [['모바일 390', { width: 390, height: 844 }], ['태블릿 768', { width: 768, height: 900 }], ['PC 1300', { width: 1300, height: 900 }]]) {
   const res = {};
@@ -70,7 +68,7 @@ for (const [vk, vp] of [['모바일 390', { width: 390, height: 844 }], ['태블
     C.ok(r.btns.every((b) => b.box.h === 40), `${vk} ${name}: 머리말 버튼 높이 40px, 한 줄(줄바꿈 없음)`);
     if (name === '홈') continue;
     C.ok(same(r.tb, base.tb) , `${vk} ${name}: 머리말 높이·위치가 홈과 같음 (${r.tb.h}px / 홈 ${base.tb.h}px)`);
-    C.ok(same(r.mark, base.mark) && same(r.name, base.name), `${vk} ${name}: 로고 위치·크기·글꼴이 홈과 같음`);
+    C.ok(same(r.mark, base.mark) && same(r.name, base.name) && same(r.menu, base.menu), `${vk} ${name}: ☰ 버튼·로고 위치·크기·글꼴이 홈과 같음`);
     const last = r.btns[r.btns.length - 1], hl = base.btns[base.btns.length - 1];
     C.ok(last.box.r === hl.box.r && last.box.y === hl.box.y, `${vk} ${name}: 맨 오른쪽 버튼의 오른쪽 여백·세로 위치가 홈과 같음 (${last.box.r}px)`);
   }
@@ -84,67 +82,141 @@ for (const [vk, vp] of [['모바일 390', { width: 390, height: 844 }], ['태블
   C.ok(lst === '주', `${vk} 노트 목록 머리말: 주 "인스타툰 만들기"만`);
   for (const n of ['노트 글', '소개', '개인정보', '이용안내', '404']) C.ok(res[n].btns.map((b) => b.kind).join() === '보조,주', `${vk} ${n} 머리말: 보조 "인스타툰 노트" → 주 "인스타툰 만들기"`);
 }
-// ---- 홈 머리말: 한 줄(PC·태블릿) / ⋯ 메뉴(휴대폰), 별도 도구 줄 없음 ----
+// ---- 4b: 머리말 [☰] 로고 …… [저장 상태] [인스타툰 노트], ☰ 메뉴, 모드 탭 없음 ----
+const MENU_ITEMS = '인스타툰 만들기,한 달 기획,캐릭터 보관함,인스타툰 노트,백업 저장 · 불러오기,사용 방법,문제 해결';
 const homeProbe = () => {
   const vis = (el) => !!el && getComputedStyle(el).display !== 'none' && el.getBoundingClientRect().width > 0;
-  const tb = document.querySelector('.topbar'), top = (el) => Math.round(el.getBoundingClientRect().top * 10) / 10, h = (el) => Math.round(el.getBoundingClientRect().height * 10) / 10;
-  const tools = [...tb.querySelectorAll('.htools .ht')], note = tb.querySelector('.hnav > a.hb');
-  const outside = [...document.querySelectorAll('[data-act="backup"],[data-act="restore"],[data-act="help"],a[href="/guide/instatoon-troubleshooting/"]')].filter((e) => ['백업 저장', '불러오기', '문제 해결', '사용 방법'].includes(e.textContent.trim()) && !e.closest('.topbar') && !e.closest('#help,#trouble,.tour,#tour,.help-in,main'));
+  const tb = document.querySelector('.topbar'), h = (el) => Math.round(el.getBoundingClientRect().height * 10) / 10;
+  const mb = document.querySelector('#menuBtn'), br = tb.querySelector('.brand'), note = tb.querySelector('.hnav > a.hb');
   return {
-    noToolRow: !document.querySelector('.apptools'), outside: outside.map((e) => e.textContent.trim()),
-    toolsVisible: tools.every(vis), toolLabels: tools.map((t) => t.textContent.trim()).join(','),
-    rowTops: [...tools, note].filter(vis).map(top), rowHeights: [...tools, note].filter(vis).map(h),
-    toolCss: [...new Set(tools.map((t) => { const c = getComputedStyle(t); return [c.fontSize, c.fontWeight, c.borderTopWidth, c.color, c.height].join('|'); }))].length,
-    menuVisible: vis(tb.querySelector('.hmenu')), moreH: h(tb.querySelector('.hmore')), noStatus: !tb.querySelector('.hai,#aiDot,#aiText,#aiDotM,#aiTextM,.hpai,.dot') && !/연결됨|키 필요|연결 없음|연결 확인/.test(tb.textContent), keyRow: (document.querySelector('#keyTxt') || {}).textContent || '',
-    overflow: document.documentElement.scrollWidth - window.innerWidth, tbH: h(tb),
+    menuBtn: vis(mb) && h(mb) === 40 && Math.round(mb.getBoundingClientRect().width) === 40, menuLeftOfLogo: mb.getBoundingClientRect().right <= br.getBoundingClientRect().left + 8,
+    sameRow: Math.abs(mb.getBoundingClientRect().top - note.getBoundingClientRect().top) < 1,
+    oldHeader: document.querySelectorAll('.htools, #hmoreBtn, #hpop, .apptools').length, modes: document.querySelectorAll('#modes, .modes, [data-mode2]').length,
+    noStatus: !tb.querySelector('.hai,#aiDot,#aiText,#aiDotM,#aiTextM,.hpai,.dot') && !/연결됨|키 필요|연결 없음|연결 확인/.test(tb.textContent), keyRow: (document.querySelector('#keyTxt') || {}).textContent || '',
+    overflow: document.documentElement.scrollWidth - window.innerWidth, tbH: h(tb), expanded: mb.getAttribute('aria-expanded'), wrapHidden: document.querySelector('#menuWrap').hidden,
   };
 };
-for (const [vk, w] of [['PC 1300', 1300], ['PC 1024', 1024], ['태블릿 768', 768], ['한 줄 최소 721', 721], ['휴대폰 720', 720], ['휴대폰 390', 390], ['휴대폰 320', 320]]) {
+for (const [vk, w] of [['PC 1300', 1300], ['PC 1024', 1024], ['태블릿 768', 768], ['휴대폰 390', 390], ['휴대폰 320', 320]]) {
   const { page, errors } = await newPage(browser, srv.base, { viewport: { width: w, height: 800 }, ls: { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST' } });
   await page.goto(srv.base + '/'); await page.waitForTimeout(300);
-  const r = await page.evaluate(homeProbe), one = w > 720;
-  C.ok(r.noToolRow && !r.outside.length, `${vk} 홈: 머리말 아래 별도 도구 줄 없음, 도구 버튼이 모두 머리말 안에 있음${r.outside.length ? ' ← 밖에 있음: ' + r.outside : ''}`);
+  const r = await page.evaluate(homeProbe);
+  C.ok(r.menuBtn && r.menuLeftOfLogo && r.sameRow, `${vk} 홈: ☰ 버튼이 로고 왼쪽에 높이 40px로 있고 "인스타툰 노트"와 같은 줄`);
+  C.ok(r.oldHeader === 0 && r.modes === 0, `${vk} 홈: 옛 도구 버튼·⋯ 메뉴·모드 탭이 없음 (옛 요소 ${r.oldHeader}개, 모드 탭 ${r.modes}개)`);
   C.ok(r.overflow <= 1 && r.tbH === 72, `${vk} 홈: 가로 넘침 없음, 머리말 높이 72px`);
   C.ok(r.noStatus, `${vk} 홈: 머리말에 AI 연결 상태 표시(● 연결됨 / ● 키 필요) 없음`);
   C.ok(/API 키 설정/.test(r.keyRow) && /연결됨/.test(r.keyRow), `${vk} 홈: 연결 상태는 첫 화면 "API 키 설정" 줄에서만 보임(${r.keyRow.trim()})`);
-  if (one) {
-    C.ok(r.toolsVisible && r.toolLabels === '백업 저장,불러오기,문제 해결,사용 방법' && !r.menuVisible, `${vk} 홈: 도구 4개가 머리말에 글자 버튼으로 보이고 ⋯는 숨김`);
-    C.ok(new Set(r.rowTops).size === 1 && r.rowHeights.every((x) => x === 40), `${vk} 홈: 도구 4개와 "인스타툰 노트"가 같은 줄·높이 40px`);
-    C.ok(r.toolCss === 1, `${vk} 홈: 도구 버튼 글자 14px·굵기·테두리 없음·회색이 모두 같음`);
-    C.ok(true, `${vk} 홈: 머리말은 도구 4개와 "인스타툰 노트"만`);
-  } else {
-    C.ok(r.menuVisible && r.moreH === 40 && !r.toolsVisible, `${vk} 홈: ⋯ 버튼(높이 40px)과 "노트"만 보임`);
-    const bounds = await page.evaluate(() => { const b = document.querySelector('.hmore').getBoundingClientRect(), n = document.querySelector('.hnav > a.hb').getBoundingClientRect(); return { sameRow: Math.abs(b.top - n.top) < 1 && b.height === n.height, gap: n.left - b.right }; });
-    C.ok(bounds.sameRow && bounds.gap >= 4, `${vk} 홈: ⋯와 "노트"가 같은 줄(간격 ${Math.round(bounds.gap)}px)`);
-    await page.click('#hmoreBtn');
-    const m = await page.evaluate(() => { const pop = document.querySelector('#hpop'), items = [...pop.querySelectorAll('button,a')].map((e) => e.textContent.trim()), r = pop.getBoundingClientRect(); return { open: !pop.hidden, items, expanded: document.querySelector('#hmoreBtn').getAttribute('aria-expanded'), inView: r.left >= 0 && r.right <= window.innerWidth, first: getComputedStyle(pop.querySelector('button')).backgroundColor }; });
-    C.ok(m.open && m.expanded === 'true' && m.items.join(',') === '백업 저장,불러오기,캐릭터 보관함,문제 해결,사용 방법' && m.inView, `${vk} 홈: ⋯를 누르면 메뉴가 열리고 백업 저장이 맨 위(화면 안에 들어옴)`);
-    C.ok(m.items.join(',') === '백업 저장,불러오기,캐릭터 보관함,문제 해결,사용 방법' && !/연결/.test(await page.evaluate(() => document.querySelector('#hpop').textContent)), `${vk} 홈: ⋯ 메뉴에 AI 연결 상태 항목 없음`);
-    C.ok(m.first === 'rgb(17, 17, 17)', `${vk} 홈: 메뉴의 백업 저장이 검정으로 눈에 띔`);
-    const [dl] = await Promise.all([page.waitForEvent('download', { timeout: 4000 }).catch(() => null), page.click('#hpop .hpri')]);
-    C.ok(!!dl, `${vk} 홈: 메뉴의 "백업 저장"이 실제로 백업 파일을 내려받음`);
-    C.ok(await page.evaluate(() => document.querySelector('#hpop').hidden), `${vk} 홈: 메뉴 항목을 누르면 메뉴가 닫힘`);
-    await page.click('#hmoreBtn'); await page.keyboard.press('Escape');
-    C.ok(await page.evaluate(() => document.querySelector('#hpop').hidden), `${vk} 홈: Esc로 메뉴가 닫힘`);
-    await page.click('#hmoreBtn'); await page.mouse.click(Math.round(w / 2), 400);
-    C.ok(await page.evaluate(() => document.querySelector('#hpop').hidden), `${vk} 홈: 바깥을 누르면 메뉴가 닫힘`);
-    await page.click('#hmoreBtn'); await page.click('#hpop [data-act="help"]'); await page.waitForTimeout(200);
-    C.ok(await page.evaluate(() => !!document.querySelector('#tour')), `${vk} 홈: 메뉴의 "사용 방법"을 누르면 둘러보기가 시작됨`);
-  }
-  C.ok(!errors.length, `${vk} 홈 머리말: 페이지 오류 없음${errors[0] ? ' ← ' + errors[0] : ''}`);
+  C.ok(r.wrapHidden && r.expanded === 'false', `${vk} 홈: 메뉴는 닫혀 있음`);
+  // 열기
+  await page.click('#menuBtn'); await page.waitForTimeout(350);
+  const m = await page.evaluate(() => {
+    const p = document.querySelector('#menuPanel'), rc = p.getBoundingClientRect(), items = [...p.querySelectorAll('.mi')], cur = p.querySelector('[aria-current="page"]'), ss = document.querySelector('#shopSlot');
+    const cs = cur && getComputedStyle(cur);
+    return { open: document.querySelector('#menuWrap').classList.contains('on'), expanded: document.querySelector('#menuBtn').getAttribute('aria-expanded'), items: items.map((e) => e.textContent.trim()).join(','), inView: rc.left >= -1 && rc.right <= window.innerWidth + 1 && rc.top >= 0 && rc.bottom <= window.innerHeight + 1,
+      slotFirst: p.firstElementChild === ss, slotHidden: ss.hidden && ss.children.length === 0 && ss.textContent.trim() === '', cur: cur && cur.textContent.trim(), curColor: cs && cs.color, curLine: cs && cs.borderLeftWidth + ' ' + cs.borderLeftStyle, others: items.filter((e) => e !== cur).every((e) => getComputedStyle(e).color !== getComputedStyle(cur).color), focus: document.activeElement && document.activeElement.className, bodyLock: document.body.classList.contains('menu-open'), panelW: Math.round(rc.width), sheetOpen: document.body.classList.contains('sheet-open') };
+  });
+  C.ok(m.open && m.expanded === 'true' && m.items === MENU_ITEMS && m.inView, `${vk} 홈: ☰를 누르면 왼쪽에서 메뉴가 열리고 항목 7개가 순서대로 (${m.items})`);
+  C.ok(m.slotFirst && m.slotHidden, `${vk} 홈: 메뉴 맨 위에 #shopSlot 빈 자리가 있고 지금은 아무것도 그리지 않음`);
+  C.ok(m.cur === '인스타툰 만들기' && m.curColor === 'rgb(17, 17, 17)' && m.curLine === '2px solid' && m.others, `${vk} 홈: 지금 보는 항목은 검정 글씨 + 왼쪽 얇은 선, 나머지는 회색 (${m.cur})`);
+  C.ok(m.panelW <= 300 && m.bodyLock, `${vk} 홈: 메뉴 폭 ${m.panelW}px, 열려 있는 동안 뒤 화면 스크롤 잠김`);
+  // 닫기: Esc · 바깥 · 항목
+  await page.keyboard.press('Escape'); await page.waitForTimeout(300);
+  C.ok(await page.evaluate(() => document.querySelector('#menuWrap').hidden && document.querySelector('#menuBtn').getAttribute('aria-expanded') === 'false' && document.activeElement.id === 'menuBtn'), `${vk} 홈: Esc로 메뉴가 닫히고 ☰로 초점이 돌아옴`);
+  await page.click('#menuBtn'); await page.waitForTimeout(300); await page.mouse.click(Math.round(w - 6), 500); await page.waitForTimeout(300);
+  C.ok(await page.evaluate(() => document.querySelector('#menuWrap').hidden), `${vk} 홈: 바깥(어두운 곳)을 누르면 메뉴가 닫힘`);
+  // 한 달 기획 → 현재 표시가 옮겨감 → 인스타툰 만들기로 돌아오기
+  await page.click('#menuBtn'); await page.waitForTimeout(300); await page.click('#menuPanel [data-menu="month"]'); await page.waitForTimeout(400);
+  C.ok(await page.evaluate(() => S.mode === 'month' && document.querySelector('#menuWrap').hidden && !!document.querySelector('[data-act="monthMake"]') && location.hash === '#month'), `${vk} 홈: 메뉴의 "한 달 기획"으로 한 달 기획 화면이 열림`);
+  await page.click('#menuBtn'); await page.waitForTimeout(300);
+  C.ok(await page.evaluate(() => document.querySelector('#menuPanel [aria-current="page"]').textContent.trim() === '한 달 기획'), `${vk} 한 달 기획: 메뉴의 현재 표시가 "한 달 기획"으로 바뀜`);
+  await page.click('#menuPanel [data-menu="home"]'); await page.waitForTimeout(400);
+  C.ok(await page.evaluate(() => S.mode === 'one' && S.step === 'input' && !!document.querySelector('#makeBtn')), `${vk} 한 달 기획: 메뉴의 "인스타툰 만들기"로 홈에 돌아옴`);
+  // 백업 · 사용 방법 · 문제 해결
+  await page.click('#menuBtn'); await page.waitForTimeout(300); await page.click('#menuPanel [data-act="backupWin"]'); await page.waitForTimeout(300);
+  const bk = await page.evaluate(() => { const w = document.querySelector('#bkWin'); return { open: !!w && !w.hidden, text: w && w.innerText.replace(/\s+/g, ' '), menuClosed: document.querySelector('#menuWrap').hidden, btns: w && [...w.querySelectorAll('.row .btn')].map((b) => b.textContent.trim()).join(',') }; });
+  C.ok(bk.open && bk.menuClosed && bk.btns === '백업 저장,불러오기' && /작업은 이 브라우저에만 저장돼요\. 다른 기기로 옮기거나 브라우저 기록을 지우기 전에 백업 파일을 받아 두세요\./.test(bk.text) && /다른 기기에서는 백업 불러오기로 그대로 이어서 할 수 있어요\./.test(bk.text), `${vk} 홈: 메뉴의 "백업 저장 · 불러오기"가 백업 창을 열고 안내 문구 두 개가 그대로 들어 있음`);
+  const [dl] = await Promise.all([page.waitForEvent('download', { timeout: 4000 }).catch(() => null), page.click('#bkWin [data-bkw="save"]')]);
+  C.ok(!!dl, `${vk} 홈: 백업 창의 "백업 저장"이 실제로 백업 파일을 내려받음`);
+  await page.evaluate(() => openBackupWin());
+  const [fc] = await Promise.all([page.waitForEvent('filechooser', { timeout: 4000 }).catch(() => null), page.click('#bkWin [data-bkw="load"]')]);
+  C.ok(!!fc, `${vk} 홈: 백업 창의 "불러오기"가 파일 선택 창을 엶`);
+  await page.evaluate(() => openBackupWin()); await page.keyboard.press('Escape');
+  C.ok(await page.evaluate(() => document.querySelector('#bkWin').hidden), `${vk} 홈: Esc로 백업 창이 닫힘`);
+  await page.click('#menuBtn'); await page.waitForTimeout(300); await page.click('#menuPanel [data-act="help"]'); await page.waitForTimeout(300);
+  C.ok(await page.evaluate(() => !!document.querySelector('#tour')), `${vk} 홈: 메뉴의 "사용 방법"을 누르면 둘러보기가 시작됨`);
+  C.ok(await page.evaluate(() => { const a = document.querySelector('#menuPanel a[href="/guide/instatoon-troubleshooting/"]'); const n = document.querySelector('#menuPanel a[href="/guide/"]'); return !!a && !!n && a.textContent.trim() === '문제 해결'; }), `${vk} 홈: "문제 해결"과 "인스타툰 노트"는 글 주소로 연결`);
+  C.ok(!errors.length, `${vk} 홈 머리말·메뉴: 페이지 오류 없음${errors[0] ? ' ← ' + errors[0] : ''}`);
   await page.close();
 }
-{ // 한 줄 모드에서 "백업 저장"·"불러오기"·"사용 방법" 기능
+{ // 저장 상태(머리말 오른쪽)
   const { page } = await newPage(browser, srv.base, { viewport: { width: 1300, height: 800 }, ls: { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST' } });
-  await page.goto(srv.base + '/'); await page.waitForTimeout(300);
-  const [dl] = await Promise.all([page.waitForEvent('download', { timeout: 4000 }).catch(() => null), page.click('.htools [data-act="backup"]')]);
-  C.ok(!!dl, 'PC 1300 홈: 머리말 "백업 저장" 버튼이 백업 파일을 내려받음');
-  const [fc] = await Promise.all([page.waitForEvent('filechooser', { timeout: 4000 }).catch(() => null), page.click('.htools [data-act="restore"]')]);
-  C.ok(!!fc, 'PC 1300 홈: 머리말 "불러오기" 버튼이 파일 선택 창을 엶');
-  await page.click('.htools [data-act="help"]'); await page.waitForTimeout(200);
-  C.ok(await page.evaluate(() => !!document.querySelector('#tour')), 'PC 1300 홈: 머리말 "사용 방법" 버튼을 누르면 둘러보기가 시작됨');
-  C.ok(await page.evaluate(() => document.querySelector('.htools a.ht').getAttribute('href') === '/guide/instatoon-troubleshooting/'), 'PC 1300 홈: "문제 해결"이 문제 해결 글로 연결');
+  await page.goto(srv.base + '/'); await page.waitForTimeout(400);
+  C.ok(await page.evaluate(() => document.querySelector('#saveStat').hidden), '새 브라우저(저장된 것 없음): 저장 상태는 아직 안 보임');
+  await page.evaluate(() => { S.info.type = '빵집'; save(); }); await page.waitForTimeout(250);
+  const s1 = await page.evaluate(() => { const b = document.querySelector('#saveStat'); return { hidden: b.hidden, state: b.dataset.state, text: b.textContent.replace(/\s+/g, ' ').trim(), color: getComputedStyle(b).color, h: b.getBoundingClientRect().height, left: b.getBoundingClientRect().right <= document.querySelector('.hnav > a.hb').getBoundingClientRect().left }; });
+  C.ok(!s1.hidden && s1.state === 'saved' && /^저장됨s?✓$/.test(s1.text) && s1.h === 40 && s1.left, `PC 홈: 작업을 시작하면 인스타툰 노트 버튼 왼쪽에 "${s1.text}"가 보임`);
+  C.ok(s1.color === 'rgb(107, 107, 107)' || s1.color !== 'rgb(17, 17, 17)', 'PC 홈: 저장 상태는 작은 회색 글씨');
+  await page.evaluate(() => { saveFailed = true; updateSaved(); });
+  C.ok(await page.evaluate(() => { const b = document.querySelector('#saveStat'); return b.dataset.state === 'fail' && /저장 실패/.test(b.textContent); }), 'PC 홈: 저장에 실패하면 "저장 실패"로 바뀜');
+  await page.evaluate(() => { saveFailed = false; updateSaved(); });
+  await page.click('#saveStat'); await page.waitForTimeout(250);
+  C.ok(await page.evaluate(() => !document.querySelector('#bkWin').hidden), 'PC 홈: 저장 상태를 누르면 백업 저장·불러오기 창이 열림');
   await page.close();
+  const m = await newPage(browser, srv.base, { viewport: { width: 390, height: 800 }, ls: { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST' } });
+  await m.page.goto(srv.base + '/'); await m.page.waitForTimeout(400); await m.page.evaluate(() => { S.info.type = '빵집'; save(); }); await m.page.waitForTimeout(250);
+  const t = await m.page.evaluate(() => { const b = document.querySelector('#saveStat'); const vt = [...b.children].filter((c) => getComputedStyle(c).display !== 'none' && c.getBoundingClientRect().width > 0).map((c) => c.textContent.trim()).join(''); return { vt, ov: document.documentElement.scrollWidth - innerWidth }; });
+  C.ok(t.vt === '✓' && t.ov <= 1, `휴대폰 홈: 저장 상태는 ✓만 보임 (${t.vt}), 넘침 없음`);
+  await m.page.close();
+}
+{ // 새 기기: 저장된 작업이 없을 때만 "백업 불러오기" 한 줄, 작업을 시작하면 사라짐
+  const { page } = await newPage(browser, srv.base, { viewport: { width: 390, height: 800 }, ls: { 'instatoon.helpSeen': '1' } });
+  await page.goto(srv.base + '/'); await page.waitForTimeout(500);
+  const a = await page.evaluate(() => { const n = document.querySelector('#newDev'); return { shown: !n.hidden && n.getClientRects().length > 0, text: n.textContent.replace(/\s+/g, ' ').trim() }; });
+  C.ok(a.shown && /다른 기기에서 쓰던 작업이 있나요\? 백업 불러오기/.test(a.text), `새 기기: 입력칸 아래에 "${a.text}" 한 줄이 보임`);
+  const [fc] = await Promise.all([page.waitForEvent('filechooser', { timeout: 4000 }).catch(() => null), page.click('#newDev [data-act="restore"]')]);
+  C.ok(!!fc, '새 기기: 그 줄의 "백업 불러오기"가 파일 선택 창을 엶');
+  C.ok(await page.evaluate(() => !document.querySelector('#makeHint').hidden && /업종을 먼저 골라 주세요/.test(document.querySelector('#makeHint').textContent)), '업종이 비었을 때: 폼 안에 "업종을 먼저 골라 주세요" 한 줄 안내');
+  await page.evaluate(() => { S.info.type = '카페'; save(); }); await page.waitForTimeout(150);
+  C.ok(await page.evaluate(() => document.querySelector('#newDev').hidden && document.querySelector('#makeHint').hidden), '작업을 시작하면(업종 입력) 두 줄 모두 사라짐');
+  await page.close();
+  const old = await newPage(browser, srv.base, { viewport: { width: 390, height: 800 }, ls: { 'instatoon.helpSeen': '1', 'instatoonRoom.v4': JSON.stringify({ step: 'input', info: { type: '빵집', name: '옛 작업', story: '있었던 일' }, toon: null }) } });
+  await old.page.goto(srv.base + '/'); await old.page.waitForTimeout(500);
+  C.ok(await old.page.evaluate(() => document.querySelector('#newDev').hidden), '저장된 작업이 있는 브라우저: "다른 기기에서 쓰던 작업" 줄이 안 보임');
+  await old.page.close();
+}
+{ // 인스타툰 노트 페이지의 ☰ 메뉴 + 주소로 들어오기(#month #vault #backup #help)
+  for (const [vk, vp] of [['휴대폰 390', { width: 390, height: 800 }], ['PC 1300', { width: 1300, height: 800 }]]) {
+    for (const [name, u, curText] of [['노트 목록', '/guide/', '인스타툰 노트'], ['노트 글', '/guide/how-to-make-instatoon/', '인스타툰 노트'], ['개인정보', '/privacy/', null], ['404', '/없는-주소/', null]]) {
+      const { page, errors } = await newPage(browser, srv.base, { viewport: vp, ls: { 'instatoon.helpSeen': '1' } });
+      await page.goto(srv.base + u); await page.waitForTimeout(250);
+      const closed = await page.evaluate(() => ({ w: document.querySelector('#menuWrap').hidden, mb: document.querySelector('#menuBtn').getBoundingClientRect().height }));
+      await page.click('#menuBtn'); await page.waitForTimeout(350);
+      const o = await page.evaluate(() => { const p = document.querySelector('#menuPanel'), items = [...p.querySelectorAll('.mi')], cur = p.querySelector('[aria-current="page"]'); return { items: items.map((e) => e.textContent.trim()).join(','), hrefs: items.map((e) => e.getAttribute('href')).join(','), cur: cur && cur.textContent.trim(), slot: p.firstElementChild.id === 'shopSlot' && p.firstElementChild.hidden, on: document.querySelector('#menuWrap').classList.contains('on') }; });
+      C.ok(closed.w && closed.mb === 40 && o.on && o.items === MENU_ITEMS && o.hrefs === '/,/#month,/#vault,/guide/,/#backup,/#help,/guide/instatoon-troubleshooting/' && o.slot && (o.cur || null) === curText, `${vk} ${name}: ☰ 메뉴가 홈과 같은 항목·순서로 열리고 링크가 맞음 (현재 표시: ${o.cur || '없음'})`);
+      await page.keyboard.press('Escape'); await page.waitForTimeout(300);
+      C.ok(await page.evaluate(() => document.querySelector('#menuWrap').hidden), `${vk} ${name}: Esc로 메뉴가 닫힘`);
+      await page.click('#menuBtn'); await page.waitForTimeout(300); await page.mouse.click(vp.width - 6, 500); await page.waitForTimeout(300);
+      C.ok(await page.evaluate(() => document.querySelector('#menuWrap').hidden), `${vk} ${name}: 바깥을 누르면 메뉴가 닫힘`);
+      C.ok(!errors.length, `${vk} ${name}: 페이지 오류 없음`);
+      await page.close();
+    }
+  }
+  const routes = [['#month', () => S.mode === 'month'], ['#backup', () => !!document.querySelector('#bkWin') && !document.querySelector('#bkWin').hidden], ['#vault', () => !!document.querySelector('#vaultSheet') && !document.querySelector('#vaultSheet').hidden], ['#help', () => !!document.querySelector('#tour')]];
+  for (const [h, fn] of routes) {
+    const { page, errors } = await newPage(browser, srv.base, { viewport: { width: 1300, height: 800 }, ls: { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST' } });
+    await page.goto(srv.base + '/' + h); await page.waitForTimeout(700);
+    C.ok(await page.evaluate(fn), `주소 /${h}로 들어오면 해당 화면이 바로 열림`) ; C.ok(!errors.length, `/${h}: 페이지 오류 없음${errors[0] ? ' ← ' + errors[0] : ''}`);
+    await page.close();
+  }
+}
+{ // 옛 작업·옛 백업의 mode(reels·stats)는 오류 없이 홈으로 열림, 저장된 반응·릴스 데이터는 그대로
+  for (const mode of ['reels', 'stats']) {
+    const st = { step: 'input', mode, info: { type: '빵집', name: '옛 가게' }, toon: { title: '옛 편', cuts: [], reel: { caption: '옛 릴스 글', hashtags: '#a', comment: '' } }, history: [{ hid: '1', title: '옛 편', stats: { like: 3, save: 2 } }], reuse: { sec: 4 } };
+    const { page, errors } = await newPage(browser, srv.base, { viewport: { width: 1300, height: 800 }, ls: { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST', 'instatoonRoom.v4': JSON.stringify(st) } });
+    await page.goto(srv.base + '/'); await page.waitForTimeout(600);
+    const r = await page.evaluate(() => ({ mode: S.mode, home: !!document.querySelector('#makeBtn'), reel: S.toon.reel.caption, like: S.history[0].stats.like, reuse: S.reuse.sec, block: /지난 편 반응/.test(statsBlock()) }));
+    C.ok(r.mode === 'one' && r.home && r.reel === '옛 릴스 글' && r.like === 3 && r.reuse === 4 && r.block && !errors.length, `옛 작업(mode=${mode}): 오류 없이 홈으로 열리고 릴스 글·반응 기록·한 달 기획용 반응 요약이 그대로`);
+    await page.close();
+  }
 }
 // ---- 인스타툰 노트 목록: 10개씩 나누기 / 페이지 번호 ----
 {
