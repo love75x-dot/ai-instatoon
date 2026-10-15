@@ -803,32 +803,63 @@ details.artsbox{margin-top:0}
   body.has-dock .toast{bottom:calc(env(safe-area-inset-bottom,0px) + 90px)}
 }
 @media (min-width:981px){.todo.in-side{display:none}}
-/* 홈 머리말 전용: 도구 글자 버튼 · AI 상태 · ⋯ 메뉴 (공통 블록의 .hb·.hnav 위에 얹음) */
-.htools{display:flex;align-items:center;gap:2px;margin-right:6px}
-.ht{display:inline-flex;align-items:center;height:40px;padding:0 12px;border:0;border-radius:999px;background:none;color:var(--muted);font:700 14px/1 var(--sans);text-decoration:none;white-space:nowrap;cursor:pointer}
-.ht:hover{color:var(--ink)}
-.hmenu{display:none;position:relative}
-.hmore{min-width:40px;padding:0 12px;font-size:20px;line-height:1;letter-spacing:0}
-.hpop{position:absolute;right:0;top:calc(100% + 8px);z-index:50;min-width:220px;display:flex;flex-direction:column;gap:2px;padding:8px;background:var(--surface);border:1px solid var(--ink);border-radius:16px}
-.hpop[hidden]{display:none}
-.hpop button,.hpop a{display:flex;align-items:center;width:100%;min-height:44px;padding:0 14px;border:0;border-radius:10px;background:none;color:var(--ink);font:600 15px/1 var(--sans);text-align:left;text-decoration:none;cursor:pointer}
-.hpop button:hover,.hpop a:hover{background:var(--sunken)}
-.hpop .hpri{justify-content:center;background:var(--ink);color:var(--surface);font-weight:700;margin-bottom:6px}
-.hpop .hpri:hover{background:var(--ink);opacity:.86}
-@media (max-width:720px){.htools{display:none}.hmenu{display:block}}
+/* 4b: ☰ 메뉴 · 저장 상태 (머리말) */
+.hleft{display:flex;align-items:center;gap:10px;min-width:0}
+.menubtn{width:40px;height:40px;flex:none;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line-2);border-radius:12px;background:var(--surface);color:var(--ink);font:400 20px/1 var(--sans);cursor:pointer}
+.menubtn:hover{border-color:var(--ink)}
+.hsave{display:inline-flex;align-items:center;gap:4px;height:40px;padding:0 8px;border:0;border-radius:10px;background:none;color:var(--muted);font:600 13px/1 var(--sans);white-space:nowrap;cursor:pointer}
+.hsave:hover{color:var(--ink)}
+.hsave[hidden]{display:none}
+.hsave[data-state="fail"]{color:var(--bad);font-weight:800}
+.hsave .hs-i{font-weight:800}
+@media (max-width:480px){.hsave{padding:0 6px}.hsave[data-state="saved"] .hs-t{display:none}.hsave[data-state="saved"] .hs-i{font-size:15px}}
+.mwrap{position:fixed;inset:0;z-index:80;visibility:hidden}
+.mwrap.on{visibility:visible}
+.mwrap[hidden]{display:none}
+.mbg{position:absolute;inset:0;background:rgba(0,0,0,.4);opacity:0;transition:opacity .18s}
+.mwrap.on .mbg{opacity:1}
+.mpanel{position:absolute;left:0;top:0;bottom:0;width:min(300px,86vw);display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top,0px) + 12px) 12px 24px;overflow:auto;background:var(--surface);border-right:1px solid var(--ink);transform:translateX(-100%);transition:transform .18s}
+.mwrap.on .mpanel{transform:none}
+.mpanel ul{list-style:none;margin:0;padding:0}
+.mpanel hr{border:0;border-top:1px solid var(--line);margin:10px 0}
+.mi{display:flex;align-items:center;width:100%;min-height:48px;padding:0 14px;border:0;border-left:2px solid transparent;border-radius:0 10px 10px 0;background:none;color:var(--muted);font:600 16px/1 var(--sans);text-align:left;text-decoration:none;cursor:pointer}
+.mi:hover{background:var(--sunken);color:var(--ink)}
+.mi[aria-current="page"]{color:var(--ink);font-weight:800;border-left-color:var(--ink)}
+#shopSlot[hidden]{display:none}
+body.menu-open{overflow:hidden}
+@media (prefers-reduced-motion:reduce){.mbg,.mpanel{transition:none}}
 @media (max-width:640px){.btn{max-width:100%;white-space:normal;text-align:left;line-height:1.4}}
 </style>
 
 <div class="wrap">
   <header class="topbar">
-    <button type="button" class="brand" data-act="home" title="처음 화면으로" aria-label="인스타툰 연재실 처음 화면으로 이동"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><b>인스타툰 연재실</b></button>
+    <div class="hleft">
+      <button type="button" class="menubtn" id="menuBtn" aria-label="메뉴 열기" aria-haspopup="dialog" aria-expanded="false" aria-controls="menuPanel"><span aria-hidden="true">☰</span></button>
+      <button type="button" class="brand" data-act="home" title="처음 화면으로" aria-label="인스타툰 연재실 처음 화면으로 이동"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><b>인스타툰 연재실</b></button>
+    </div>
     <nav class="hnav" aria-label="주요 메뉴">
-      <span class="htools"><button type="button" class="ht" data-act="backup">백업 저장</button><button type="button" class="ht" data-act="restore">불러오기</button><a class="ht" href="/guide/instatoon-troubleshooting/">문제 해결</a><button type="button" class="ht" data-act="help">사용 방법</button></span>
-      <span class="hmenu"><button type="button" class="hb hmore" id="hmoreBtn" aria-haspopup="menu" aria-expanded="false" aria-controls="hpop" aria-label="더 보기 메뉴">⋯</button>
-        <div class="hpop" id="hpop" role="menu" hidden><button type="button" class="hpri" role="menuitem" data-act="backup">백업 저장</button><button type="button" role="menuitem" data-act="restore">불러오기</button><button type="button" role="menuitem" data-v="open">캐릭터 보관함</button><a role="menuitem" href="/guide/instatoon-troubleshooting/">문제 해결</a><button type="button" role="menuitem" data-act="help">사용 방법</button></div></span>
+      <button type="button" class="hsave" id="saveStat" data-act="backupWin" data-state="none" hidden><span class="hs-t">저장됨</span><span class="hs-i" aria-hidden="true">✓</span></button>
       <a class="hb" href="/guide/" aria-label="인스타툰 노트"><span class="hp">인스타툰&nbsp;</span>노트</a>
     </nav>
   </header>
+  <div class="mwrap" id="menuWrap" hidden>
+    <div class="mbg" data-menu="close"></div>
+    <nav class="mpanel" id="menuPanel" role="dialog" aria-modal="true" aria-label="메뉴">
+      <div id="shopSlot" hidden></div>
+      <ul>
+        <li><button type="button" class="mi" data-menu="home" data-cur="home">인스타툰 만들기</button></li>
+        <li><button type="button" class="mi" data-menu="month" data-cur="month">한 달 기획</button></li>
+        <li><button type="button" class="mi" data-v="open">캐릭터 보관함</button></li>
+        <li><a class="mi" href="/guide/">인스타툰 노트</a></li>
+      </ul>
+      <hr>
+      <ul>
+        <li><button type="button" class="mi" data-act="backupWin">백업 저장 · 불러오기</button></li>
+        <li><button type="button" class="mi" data-act="helpPanel">사용 방법</button></li>
+        <li><a class="mi" href="/guide/instatoon-troubleshooting/">문제 해결</a></li>
+      </ul>
+    </nav>
+  </div>
   <div class="demo-bar" id="demoBar" hidden></div>
   <section id="help" class="help" hidden></section>
   <div id="keyWrap"></div>
@@ -1141,23 +1172,23 @@ const KEY='instatoonRoom.v4';
 const fixMode=o=>{ if(o&&(o.mode==='reels'||o.mode==='stats')) o.mode='one'; return o; };
 let S=load()||blank(), downloads=null, sample=null, busy=null, pv=0, openCut=0;
 let saveWarned=false;
-kv.onError=e=>{ saveFailed=true; try{ updateSaved(); }catch(_){} if(!saveWarned){ saveWarned=true; try{ toast('브라우저 저장 공간에 저장하지 못했어요. 위쪽 "백업 저장"으로 파일을 받아 두세요'); }catch(__){} } };
-function save(){ try{ syncLinked(); }catch(_){} try{ kv.setItem(KEY,JSON.stringify(S)); lastSavedAt=Date.now(); saveFailed=false; updateSaved(); }catch(_){ saveFailed=true; updateSaved(); if(!saveWarned){ saveWarned=true; try{ toast('브라우저 저장 공간이 가득 차서 이 작업이 새로고침하면 사라질 수 있어요. 위쪽 "백업 저장"으로 파일을 받아 두세요'); }catch(__){} } } }
+kv.onError=e=>{ saveFailed=true; try{ updateSaved(); }catch(_){} if(!saveWarned){ saveWarned=true; try{ toast('브라우저 저장 공간에 저장하지 못했어요. ☰ 메뉴의 "백업 저장"으로 파일을 받아 두세요'); }catch(__){} } };
+function save(){ try{ syncLinked(); }catch(_){} try{ kv.setItem(KEY,JSON.stringify(S)); lastSavedAt=Date.now(); saveFailed=false; markSaving(); updateSaved(); }catch(_){ saveFailed=true; updateSaved(); if(!saveWarned){ saveWarned=true; try{ toast('브라우저 저장 공간이 가득 차서 이 작업이 새로고침하면 사라질 수 있어요. ☰ 메뉴의 "백업 저장"으로 파일을 받아 두세요'); }catch(__){} } } }
 /* ---------- 저장 표시 · 7일 백업 알림 ---------- */
 let lastSavedAt=0, saveFailed=false;
 const BK_LAST='instatoon.lastBackup', BK_BASE='instatoon.backupBase', BK_SNOOZE='instatoon.backupSnooze', DAY=86400000;
 const lsNum=k=>{ try{ return +kv.getItem(k)||0; }catch(_){ return 0; } };
 const lsSet=(k,v)=>{ try{ kv.setItem(k,String(v)); }catch(_){} };
 const hasWork=()=>cuts().length>0||(S.history||[]).length>0||pics().length>0;
-function savedText(){ if(saveFailed) return '저장하지 못했어요 · 위쪽 "백업 저장"으로 파일을 받아 두세요'; if(!lastSavedAt) return hasWork()?'저장돼 있어요':''; const s=Math.floor((Date.now()-lastSavedAt)/1000);
+function savedText(){ if(saveFailed) return '저장하지 못했어요 · ☰ 메뉴의 "백업 저장"으로 파일을 받아 두세요'; if(!lastSavedAt) return hasWork()?'저장돼 있어요':''; const s=Math.floor((Date.now()-lastSavedAt)/1000);
   return s<15?'방금 저장됨':s<60?`${s}초 전 저장됨`:s<3600?`${Math.floor(s/60)}분 전 저장됨`:`${Math.floor(s/3600)}시간 전 저장됨`; }
 function backupDue(){ if(S.demo) return null; const now=Date.now(), snz=lsNum(BK_SNOOZE)>now, vd=!snz&&vaultCount()>0&&lsNum(VAULT_CH)>lsNum(VAULT_BK);
   if(!hasWork()) return vd?{days:0,never:!lsNum(BK_LAST),vault:true}:null;
   if(!lsNum(BK_BASE)) lsSet(BK_BASE,now); const ref=lsNum(BK_LAST)||lsNum(BK_BASE), days=Math.floor((now-ref)/DAY);
   if(days<7||snz) return vd?{days,never:!lsNum(BK_LAST),vault:true}:null; return {days,never:!lsNum(BK_LAST),vault:vd}; }
-function renderSaved(){ const el=$('#savedLine'); if(!el) return; const d=backupDue();
+function renderSaved(){ renderHeadSave(); const el=$('#savedLine'); if(!el) return; const d=backupDue();
   el.innerHTML=`<span id="savedTxt">${esc(savedText())}</span>${d?`<span class="bk" id="bkNote"><span>${d.vault?'새로 저장한 캐릭터가 있어요. 백업 파일에 함께 담아 두세요.':`${d.never?`백업한 적이 없어요(작업한 지 ${d.days}일째).`:`마지막 백업이 ${d.days}일 전이에요.`} 작업이 사라지지 않게 파일로 받아 두세요.`}</span><button type="button" class="btn sm pri" data-act="backup">지금 백업 저장</button><button type="button" class="btn sm ghost" data-act="bkLater">나중에</button></span>`:''}`; }
-function updateSaved(){ const t=$('#savedTxt'); if(t) t.textContent=savedText(); }
+function updateSaved(){ const t=$('#savedTxt'); if(t) t.textContent=savedText(); renderHeadSave(); }
 setInterval(()=>{ updateSaved(); },20000);
 function load(){
   try{
@@ -1393,7 +1424,7 @@ function syncHash(){
   if(location.hash!==want){ try{ (lastSynced===null?history.replaceState:history.pushState).call(history,null,'',location.pathname+location.search+want); }catch(_){} }
   lastSynced=S.step;
 }
-window.addEventListener('popstate',()=>{ if(location.hash===ADM_HASH) return; const st=stepFromHash(); if((S.mode||'one')==='one'&&st===S.step) return; S.mode='one'; S.step=st; lastSynced=st; save(); render0(); renderDock(); window.scrollTo({top:0}); });
+window.addEventListener('popstate',()=>{ if(location.hash===ADM_HASH) return; if(location.hash==='#month'){ if((S.mode||'one')!=='month'){ S.mode='month'; save(); render0(); renderDock(); window.scrollTo({top:0}); } return; } const st=stepFromHash(); if((S.mode||'one')==='one'&&st===S.step) return; S.mode='one'; S.step=st; lastSynced=st; save(); render0(); renderDock(); window.scrollTo({top:0}); });
 let dockIO=null;
 function renderDock(){
   const d=$('#dock'), b=$('#dockBtn'); if(!d||!b) return;
@@ -2790,7 +2821,6 @@ document.addEventListener('input',e=>{ const el=e.target; if(!el.dataset) return
   if(el.dataset.ovc!==undefined){ const [ref,f]=el.dataset.ovc.split(':'), en=slotEntry(ref); if(!en) return; en.ov=en.ov||{}; en.ov.card=en.ov.card||{}; en.ov.card[f]=el.value; save(); return; } });
 document.addEventListener('change',e=>{ const el=e.target; if(el.dataset&&el.dataset.outfit!==undefined){ const en=slotEntry(el.dataset.outfit); if(en){ en.outfit=el.value; save(); } } });
 document.addEventListener('keydown',e=>{ const w=document.getElementById('vaultSheet'); if(w&&!w.hidden&&e.key==='Escape') closeVault(); });
-function closeHmenu(){ const p=document.getElementById('hpop'); if(p) p.hidden=true; const b=document.getElementById('hmoreBtn'); if(b) b.setAttribute('aria-expanded','false'); }
 
 /* ---------- 1단계 인물 칸 ---------- */
 function linkedCardHTML(ref){ const en=slotEntry(ref), r=resolveEntry(en), ch=VAULT.chars[en.id], thumb=ch?(ch.images||{}).ref:null, open=!!OVOPEN[ref], base=r.inVault?snapOf(VAULT.chars[en.id]):(en.snap||{card:{}}), ov=en.ov||{};
@@ -3078,6 +3108,7 @@ document.addEventListener('click',async e=>{
   if(a==='kitCopy'){ const t=postText(); if(!t.trim()){ toast('캡션이 비어 있어요'); return; } return copy(t); }
   if(a==='posted'){ const T=S.toon; T.postedAt=todayStr(); T.kit={...(T.kit||{}),order:true,cap:true}; const x=planItem(); if(x){ x.status='posted'; x.made=true; x.postedAt=T.postedAt; } T.hid=T.hid||Date.now(); let th=''; try{ th=await coverThumb(); }catch(_){} S.history=[{hid:T.hid,title:T.title,date:T.postedAt,thumb:th,link:T.link||'',art:S.info.art,tone:T.tone||'',cuts:cuts().length,type:x?.type||'',goal:x?.goal||'',hook:lines(cuts()[0]?.title).join(' '),stats:(hist().find(h=>h.hid===T.hid)||{}).stats||null},...hist().filter(h=>h.hid!==T.hid)].slice(0,12); save(); vPost(); toast(x?'연재표에도 올림으로 표시했어요':'이번 편을 완료로 표시했어요'); return; }
   if(a==='unposted'){ const T=S.toon; T.postedAt=''; S.history=hist().filter(h=>h.hid!==T.hid); const x=planItem(); if(x){ x.status='art'; x.postedAt=''; } save(); vPost(); return; }
+  if(a==='backupWin') return openBackupWin();
   if(a==='backup') return backupStart();
   if(a==='restore') return $('#backupIn').click();
   if(a==='help') return startTour();
@@ -3811,21 +3842,82 @@ async function admClick(e){ const b=e.target.closest('button,a'); if(!b) return;
   if(a==='export'){ const blob=new Blob([JSON.stringify({prompts:admCustom(),arts:admArtCfg(),manual:admRead(ADM_MAN)},null,1)],{type:'application/json'}), u=URL.createObjectURL(blob), l=document.createElement('a'); l.href=u; l.download='instatoon-prompts.json'; l.click(); setTimeout(()=>URL.revokeObjectURL(u),1000); return; }
   if(a==='import'){ const f=document.createElement('input'); f.type='file'; f.accept='.json,application/json'; f.onchange=async()=>{ try{ const d=JSON.parse(await f.files[0].text()); if(d.prompts&&typeof d.prompts==='object'){ let bad=0; for(const k of Object.keys(PROMPTS)){ if(typeof d.prompts[k]==='string'&&d.prompts[k].trim()&&!await admPut(k,d.prompts[k])) bad++; } if(bad) toast('일부를 저장하지 못했어요'); } if(d.arts&&typeof d.arts==='object'&&!await admArtsPut(d.arts)) toast('그림체를 저장하지 못했어요'); if(d.manual&&typeof d.manual==='object') admWrite(ADM_MAN,d.manual); toast('가져왔어요'); render(); admRender(); }catch(_){ toast('파일을 읽지 못했어요'); } }; f.click(); return; }
 }
-(()=>{ const btn=$('#hmoreBtn'), pop=$('#hpop'); if(!btn||!pop) return;
-  const close=()=>{ pop.hidden=true; btn.setAttribute('aria-expanded','false'); };
-  btn.addEventListener('click',e=>{ e.stopPropagation(); const open=pop.hidden; pop.hidden=!open; btn.setAttribute('aria-expanded',String(open)); });
-  document.addEventListener('click',e=>{ if(!e.target.closest('.hmenu')||e.target.closest('#hpop button,#hpop a')) close(); });
-  document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!pop.hidden){ close(); btn.focus(); } });
-})();
 document.addEventListener('click',e=>{ const a=e.target.closest('[data-admin]'); if(a){ e.preventDefault(); admOpen(); } });
 document.addEventListener('keydown',e=>{ const g=$('#admin')?.dataset.gate; if(e.key==='Enter'&&e.target.closest?.('.adm-gate')&&e.target.tagName==='INPUT'){ const m={create:'pwcreate',login:'pwlogin',change:'pwchange'}[g]; if(m) admPw(m); } if(e.key==='Escape'&&$('#admin')&&!$('#admin').hidden) admClose(); });
 const admHash=()=>{ if(location.hash===ADM_HASH) admOpen(); };
 window.addEventListener('hashchange',admHash); admHash();
 
+/* ================= ☰ 메뉴 · 저장 상태 · 백업 창 (4b) =================
+   머리말은 [☰] 로고 …… [저장 상태] [인스타툰 노트]. 메뉴는 왼쪽에서 열리고, 바깥을 누르거나 Esc를 누르면 닫힌다.
+   메뉴 맨 위 #shopSlot은 4d(가게 전환)가 채울 빈 자리이며 지금은 아무것도 그리지 않는다. */
+let menuTimer=null;
+const menuIsOpen=()=>{ const w=$('#menuWrap'); return !!w&&!w.hidden&&w.classList.contains('on'); };
+function menuMark(){ const cur=(S.mode||'one')==='month'?'month':'home'; document.querySelectorAll('#menuPanel [data-cur]').forEach(b=>{ if(b.dataset.cur===cur) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current'); }); }
+function openMenu(){ const w=$('#menuWrap'), btn=$('#menuBtn'); if(!w||menuIsOpen()) return; clearTimeout(menuTimer); menuMark(); w.hidden=false; document.body.classList.add('menu-open'); if(btn) btn.setAttribute('aria-expanded','true');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>w.classList.add('on'))); setTimeout(()=>{ const f=w.querySelector('.mi'); if(f&&menuIsOpen()) f.focus({preventScroll:true}); },40); }
+function closeMenu(restoreFocus){ const w=$('#menuWrap'), btn=$('#menuBtn'); if(!w||w.hidden) return; w.classList.remove('on'); document.body.classList.remove('menu-open'); if(btn) btn.setAttribute('aria-expanded','false');
+  clearTimeout(menuTimer); menuTimer=setTimeout(()=>{ w.hidden=true; },190); if(restoreFocus!==false&&btn) btn.focus({preventScroll:true}); }
+function closeHmenu(){ closeMenu(false); }
+document.addEventListener('click',e=>{
+  if(e.target.closest('#menuBtn')){ e.preventDefault(); return menuIsOpen()?closeMenu():openMenu(); }
+  if(!e.target.closest('#menuWrap')) return;
+  if(e.target.closest('.mbg')||e.target.closest('[data-menu="close"]')) return closeMenu();
+  const it=e.target.closest('.mi'); if(!it) return;
+  closeMenu(false);
+  if(it.dataset.menu==='home'){ e.preventDefault(); goHome(); } else if(it.dataset.menu==='month'){ e.preventDefault(); goMonth(); } });
+document.addEventListener('keydown',e=>{
+  if(!menuIsOpen()) return;
+  if(e.key==='Escape'){ e.preventDefault(); return closeMenu(); }
+  if(e.key==='Tab'){ const its=[...document.querySelectorAll('#menuPanel .mi')]; if(!its.length) return; const first=its[0], last=its[its.length-1];
+    if(e.shiftKey&&document.activeElement===first){ e.preventDefault(); last.focus(); } else if(!e.shiftKey&&document.activeElement===last){ e.preventDefault(); first.focus(); } } });
+function goMonth(){
+  if((S.mode||'one')==='month'){ window.scrollTo({top:0,behavior:'smooth'}); return; }
+  if(busy||autoCtl){ if(!confirm('지금 AI가 작업 중이에요. 한 달 기획으로 이동하면 진행 중인 작업이 멈춰요. (이미 입력한 내용은 자동 저장돼 있어요) 이동할까요?')) return; try{ busy?.abort(); }catch(_){} try{ autoCtl?.abort(); }catch(_){} }
+  endTour(); $('#help').hidden=true; S.mode='month'; save();
+  try{ history.pushState(null,'',location.pathname+location.search+'#month'); }catch(_){}
+  render(); window.scrollTo({top:0,behavior:'smooth'}); }
+/* 주소 끝(#month·#vault·#backup·#help)으로 들어오는 길: 인스타툰 노트 페이지의 ☰ 메뉴가 쓴다 */
+function routeHash(){
+  const h=location.hash;
+  if(h==='#month'){ if((S.mode||'one')!=='month'){ S.mode='month'; save(); render(); } return true; }
+  if(h==='#vault'||h==='#backup'||h==='#help'){
+    try{ history.replaceState(null,'',location.pathname+location.search); }catch(_){}
+    if(h==='#vault') openVault({}); else if(h==='#backup') openBackupWin(); else toggleHelp(true);
+    return true; }
+  return false; }
+window.addEventListener('hashchange',()=>{ if(location.hash!==ADM_HASH) routeHash(); });
+
+/* ---------- 머리말 저장 상태 ---------- */
+let savingT=null, savingAt=0;
+function markSaving(){ if(kv.mode!=='idb'){ renderHeadSave(); return; } savingAt=Date.now();
+  if(!savingT) savingT=setInterval(()=>{ if((kv.lastWrite||0)>=savingAt||Date.now()-savingAt>4000){ clearInterval(savingT); savingT=null; renderHeadSave(); } },80);
+  renderHeadSave(); }
+function renderHeadSave(){ const b=$('#saveStat'); if(!b) return;
+  const st=saveFailed?'fail':savingT?'saving':(lastSavedAt||hasWork())?'saved':'none';
+  b.dataset.state=st; b.hidden=st==='none';
+  const t=b.querySelector('.hs-t'), i=b.querySelector('.hs-i'); if(t) t.textContent=st==='fail'?'저장 실패':st==='saving'?'저장 중…':'저장됨'; if(i) i.textContent=st==='fail'?'!':st==='saving'?'…':'✓';
+  b.setAttribute('aria-label',(st==='fail'?'저장 실패':st==='saving'?'저장 중':'저장됨')+' · 눌러서 백업 저장·불러오기 열기'); }
+/* ---------- 백업 창: 백업 저장·불러오기를 한곳에서 ---------- */
+function bkAgo(){ const t=lsNum(BK_LAST); if(!t) return '아직 백업한 적이 없어요'; const d=Math.floor((Date.now()-t)/DAY); return d<=0?'마지막 백업: 오늘':'마지막 백업: '+d+'일 전'; }
+function openBackupWin(){
+  let w=document.getElementById('bkWin'); if(!w){ w=document.createElement('div'); w.id='bkWin'; w.className='sheet'; w.setAttribute('role','dialog'); w.setAttribute('aria-modal','true'); w.setAttribute('aria-labelledby','bkw-t'); document.body.appendChild(w); }
+  w.innerHTML=`<div class="sheet-bg" data-bkw="close"></div><div class="sheet-in" role="document"><div class="sheet-h"><h2 id="bkw-t">백업</h2><button type="button" class="btn sm ghost" data-bkw="close" aria-label="닫기">닫기</button></div>
+    <p class="sub" style="margin:0 0 12px">작업은 이 브라우저에만 저장돼요. 다른 기기로 옮기거나 브라우저 기록을 지우기 전에 백업 파일을 받아 두세요.</p>
+    <div class="row"><button type="button" class="btn pri" data-bkw="save">백업 저장</button><button type="button" class="btn" data-bkw="load">불러오기</button></div>
+    <p class="sub" style="margin:12px 0 0">다른 기기에서는 백업 불러오기로 그대로 이어서 할 수 있어요.</p>
+    <p class="sub" id="bkw-last" style="margin:6px 0 0">${esc(bkAgo())}</p></div>`;
+  w.hidden=false; document.body.classList.add('sheet-open'); setTimeout(()=>{ const f=w.querySelector('[data-bkw="save"]'); if(f) f.focus({preventScroll:true}); },30); }
+function closeBackupWin(){ const w=document.getElementById('bkWin'); if(w) w.hidden=true; const k=document.getElementById('keySheet'), v=document.getElementById('vaultSheet'); if((!k||k.hidden)&&(!v||v.hidden)) document.body.classList.remove('sheet-open'); }
+document.addEventListener('click',e=>{ const b=e.target.closest('[data-bkw]'); if(!b) return; e.preventDefault(); const a=b.dataset.bkw; closeBackupWin();
+  if(a==='save') backupStart(); else if(a==='load') $('#backupIn').click(); });
+document.addEventListener('keydown',e=>{ const w=document.getElementById('bkWin'); if(e.key==='Escape'&&w&&!w.hidden) closeBackupWin(); });
+
 /* ================= 시작 ================= */
 applyFontVars();
 applyRatio();
 render();
+routeHash();
+renderHeadSave();
 try{ if(!kv.getItem('instatoon.helpSeen')){ if(hasWork()||S.info.type.trim()||S.info.name.trim()||S.info.story.trim()) kv.setItem('instatoon.helpSeen','1'); else setTimeout(startTour,700); } }catch(_){}
 restoreFonts();
 vaultInit().then(()=>{ try{ if(Object.keys(VAULT.chars).length||Object.keys(VAULT.places).length){ syncLinked(); if(S.step==='input'&&(S.mode||'one')==='one'&&!document.activeElement?.closest?.('input,textarea')) vInput(); } }catch(_){} });
