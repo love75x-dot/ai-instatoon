@@ -35,5 +35,7 @@
     // Turnstile 사이트 키(공개값). 비워 두면 맛보기가 꺼진 채로 동작한다.
     "TURNSTILE_SITEKEY": "0x4AAAAAAFXP01DpggEWmZ9D"
   },
+  // Workers Logs(요청·console.log 기록 보관). 이 값이 없으면 일반 배포 때 대시보드에서 켠 설정이 꺼질 수 있다.
+  "observability": { "enabled": true, "head_sampling_rate": 1 },
   "previews": {}
 }
