@@ -33,7 +33,7 @@
     "GROQ_MODEL": "openai/gpt-oss-120b",
     "OPENROUTER_MODEL": "openrouter/free",
     // Turnstile 사이트 키(공개값). 비워 두면 맛보기가 꺼진 채로 동작한다.
-    "TURNSTILE_SITEKEY": ""
+    "TURNSTILE_SITEKEY": "0x4AAAAAAFXP01DpggEWmZ9D"
   },
   "previews": {}
 }
