@@ -303,6 +303,48 @@ for (const [vk, w] of [['PC 1300', 1300], ['PC 1024', 1024], ['태블릿 768', 7
   }
   sBig.close(); sCat.close(); fs.rmSync(tmp, { recursive: true, force: true });
 }
+{ // 4b 수정: 본문 폭을 위쪽 줄(API 키 줄·단계 탭)과 맞추고, PC·태블릿에서는 1단계 입력칸을 2열로
+  for (const [vk, vp] of [['PC 1300', { width: 1300, height: 900 }], ['태블릿 768', { width: 768, height: 1000 }], ['휴대폰 390', { width: 390, height: 844 }]]) {
+    const { page, errors } = await newPage(browser, srv.base, { viewport: vp, ls: { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST' } });
+    await page.goto(srv.base + '/'); await page.waitForTimeout(500);
+    const edges = () => page.evaluate(() => { const r = (el) => { const b = el.getBoundingClientRect(); return [Math.round(b.left), Math.round(b.right)]; }; const side = document.querySelector('#side'), main = document.querySelector('#main'), key = document.querySelector('#keyBox'), steps = document.querySelector('#steps');
+      const m = r(main), sv = side && !side.hidden && getComputedStyle(side).display !== 'none' && side.getBoundingClientRect().width > 0 ? r(side) : null; return { key: r(key), steps: r(steps), body: [m[0], sv ? Math.max(m[1], sv[1]) : m[1]], ov: document.documentElement.scrollWidth - innerWidth }; });
+    const same = (e, label) => C.ok(Math.abs(e.body[0] - e.key[0]) <= 1 && Math.abs(e.body[1] - e.key[1]) <= 1 && (e.steps[1] === e.steps[0] || (Math.abs(e.steps[0] - e.key[0]) <= 1 && Math.abs(e.steps[1] - e.key[1]) <= 1)) && e.ov <= 1, `${vk} ${label}: 본문 왼쪽·오른쪽 끝이 위쪽 줄(API 키 줄·단계 탭)과 같음 (본문 ${e.body} / 위쪽 ${e.key})`);
+    // 1단계 (비어 있는 상태 = 접힌 칸들)
+    await page.evaluate(() => { S = blank(); S.info.type = '빵집'; S.mode = 'one'; S.step = 'input'; render(); }); await page.waitForTimeout(250);
+    same(await edges(), '1단계');
+    const g = await page.evaluate(() => {
+      const box = (sel) => { const e = document.querySelector(sel); if (!e) return null; const b = e.getBoundingClientRect(); return { l: Math.round(b.left), r: Math.round(b.right), t: Math.round(b.top), w: Math.round(b.width) }; };
+      const dd = (id) => { const e = document.querySelector(id); return e && e.closest('.dd') ? e.closest('.dd').getBoundingClientRect() : null; };
+      const type = document.querySelector('#ind-lb').parentElement.querySelector('.dd'), tb = type.getBoundingClientRect(), nm = box('#i-name'), who = [...document.querySelector('.fform .who').children].map((d) => Math.round(d.getBoundingClientRect().top)),
+        hero = box('#moreHero'), prof = box('.fform .prof'), kind = document.querySelector('.kindrow .dd').getBoundingClientRect(), story = box('#i-story'), panel = box('#main .panel');
+      const longInputs = [...document.querySelectorAll('.fform input.in')].filter((e) => e.getBoundingClientRect().width > 640 && e.getClientRects().length).length;
+      const lefts = [...document.querySelectorAll('.fform > .h, .fform > .g2, .fform > .story, .fform > .kindrow')].filter((e) => e.getClientRects().length).map((e) => Math.round(e.getBoundingClientRect().left));
+      return { typeT: Math.round(tb.top), nameT: nm.t, whoSame: new Set(who).size === 1, hero, prof, kindW: Math.round(kind.width), panelW: panel.w, story, longInputs, lefts, ov: document.documentElement.scrollWidth - innerWidth };
+    });
+    if (vp.width >= 721) {
+      C.ok(Math.abs(g.typeT - g.nameT) <= 2, `${vk} 1단계: 업종 | 브랜드 이름이 한 줄에 나란히`);
+      C.ok(g.whoSame, `${vk} 1단계: 역할·성별·나이가 한 줄`);
+      C.ok(g.hero && g.prof && Math.abs(g.hero.t - g.prof.t) <= 2 && g.prof.l > g.hero.r - 2, `${vk} 1단계: "주인공 모습·컷 수·비율 더 설정하기"와 "브랜드 프로필"이 나란히`);
+      C.ok(g.kindW <= (g.panelW - 56) / 2 + 2, `${vk} 1단계: 대본 유형 선택칸은 절반 폭까지만(${g.kindW}px) — 한 칸이 길게 늘어지지 않음`);
+      C.ok(g.story.w >= (g.panelW - 56) * 0.9, `${vk} 1단계: 있었던 일은 가로 전체(${g.story.w}px)`);
+      C.ok(g.longInputs === 0, `${vk} 1단계: 한 줄 입력칸이 640px보다 길게 늘어지지 않음 (${g.longInputs}개)`);
+      // 열린 칸은 가로 전체로
+      await page.evaluate(() => { document.querySelector('#moreHero').open = true; }); await page.waitForTimeout(150);
+      C.ok(await page.evaluate(() => { const h = document.querySelector('#moreHero').getBoundingClientRect(), p = document.querySelector('#main .panel').getBoundingClientRect(); return h.width > (p.width - 56) * 0.9; }), `${vk} 1단계: 칸을 펼치면 가로 전체로 넓어짐`);
+      await page.evaluate(() => { document.querySelector('#moreHero').open = false; });
+    } else {
+      C.ok(g.typeT < g.nameT && new Set(g.lefts).size === 1 && g.ov <= 1, `${vk} 1단계: 휴대폰은 1열(업종 → 이름 위아래, 칸들의 왼쪽 끝이 모두 같음)`);
+    }
+    // 2단계 · 3단계(그림 전·후) · 한 달 기획
+    await page.evaluate(() => { S = demoState('bakery'); S.demo = false; S.mode = 'one'; S.step = 'edit'; S.toon.pics = []; render(); }); await page.waitForTimeout(250); same(await edges(), '2단계');
+    await page.evaluate(() => { S.step = 'post'; render(); }); await page.waitForTimeout(250); same(await edges(), '3단계(그림 올리기 전)');
+    await page.evaluate(() => { S.toon.pics = ['data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==']; render(); }); await page.waitForTimeout(250); same(await edges(), '3단계(그림을 올린 뒤)');
+    await page.evaluate(() => { S.mode = 'month'; render(); }); await page.waitForTimeout(250); same(await edges(), '한 달 기획');
+    C.ok(!errors.length, `${vk} 폭 맞추기: 페이지 오류 없음${errors[0] ? ' ← ' + errors[0] : ''}`);
+    await page.close();
+  }
+}
 { // 3단계: 한 편을 끝냈을 때 "이 편까지 백업 저장" 안내를 편마다 한 번 (4b)
   const open1 = async () => { const h = await newPage(browser, srv.base, { viewport: { width: 1300, height: 900 }, ls: { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST' } }); await h.page.goto(srv.base + '/'); await h.page.waitForTimeout(400);
     await h.page.evaluate(() => { S = demoState('bakery'); S.demo = false; S.mode = 'one'; S.step = 'post'; S.toon.pics = []; delete S.toon.bkAsk; save(); render(); }); await h.page.waitForTimeout(250); return h; };

@@ -823,7 +823,18 @@ details.artsbox{margin-top:0}
   body.has-dock{padding-bottom:84px}
   body.has-dock .toast{bottom:calc(env(safe-area-inset-bottom,0px) + 90px)}
 }
-.shell.noside{grid-template-columns:minmax(0,760px);justify-content:center}
+/* 4b 수정: 본문 폭 = 위쪽 줄 폭. PC·태블릿(721px~)에서는 1단계 입력칸을 2열로 */
+.fform{display:grid;grid-template-columns:minmax(0,1fr)}
+.fform>.h details.more{margin-top:18px}
+@media (min-width:721px){
+  .fform{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:20px;align-items:start}
+  .fform>*{grid-column:1/-1}
+  .fform>.h{grid-column:auto}
+  .fform>.h:has(>details[open]){grid-column:1/-1}
+  .fform .g2{column-gap:20px}.fform .who{column-gap:20px}
+  .fform .kindrow .dd{max-width:calc(50% - 10px)}
+  .fform input.in:not([type=checkbox]){max-width:620px}
+}
 /* 4b: 머리말 저장 상태 (앱 전용, ☰ 메뉴 CSS는 위 HEADER 블록과 노트 페이지가 같이 씀) */
 .hsave{display:inline-flex;align-items:center;gap:4px;height:40px;padding:0 8px;border:0;border-radius:10px;background:none;color:var(--muted);font:600 13px/1 var(--sans);white-space:nowrap;cursor:pointer}
 .hsave:hover{color:var(--ink)}
@@ -1539,6 +1550,7 @@ function vInput(){
   const i=S.info;
   $('#main').innerHTML=`<section class="panel">
     <div class="ph"><div><span class="stepno"><i class="nb">1</i>1단계 · 내 이야기 적기 </span><h1 class="hero-h">내 이야기를 적으면<br><em>인스타툰 한 편</em>이 나와요</h1><p>업종을 고르고, 있었던 일을 적으면 돼요.</p>${S.demo?'':``}</div></div>
+    <div class="fform">
     ${vaultLinkHTML()}
 
     
@@ -1549,13 +1561,15 @@ function vInput(){
     </div>
     ${S.demo?'':`<details class="demo-more demo-link"><summary>처음이라면 예시 가게로 먼저 체험해 보기</summary><div class="row">${demoPicks()}</div></details>`}
 
+    <div>
     <label class="f">이야기하는 사람 <small>인스타툰 주인공이 돼요 · 말투와 캐릭터 그림에 쓰여요</small></label>
     <div class="who">
       <div>${whoDD('역할',ROLES,i.role,'data-who="role"','data-whoin="role"','직접 입력 (예: 웹디자이너, 팀장)')}</div>
       <div>${whoDD('성별',GENDERS,i.gender,'data-who="gender"','data-whoin="gender"','직접 입력')}</div>
       <div>${whoDD('나이',AGES,i.age,'data-who="age"','data-whoin="age"','직접 입력 (예: 35살)')}</div>
     </div>
-    <details class="more" id="moreHero" ${heroOpen||i.looks||peopleIdx().length>1||getPhoto(0)||(i.subs||[]).length||linkId(0)?'open':''}><summary>주인공 모습·컷 수·비율 더 설정하기 <small>선택 · 비워 두면 AI가 정해요</small></summary><div class="inner">
+    </div>
+    <div class="h"><details class="more" id="moreHero" ${heroOpen||i.looks||peopleIdx().length>1||getPhoto(0)||(i.subs||[]).length||linkId(0)?'open':''}><summary>주인공 모습·컷 수·비율 더 설정하기 <small>선택 · 비워 두면 AI가 정해요</small></summary><div class="inner">
     <div class="vault-h"><b>주인공</b><button type="button" class="btn sm ghost" data-v="open">캐릭터 보관함 열기</button></div>
     ${slotBarHTML('m0')}
     ${linkId(0)?'':`<label class="f" for="i-looks">외모 한 줄 <small>선택 · 예: 단발머리, 동그란 안경, 검은 앞치마</small></label>
@@ -1572,14 +1586,16 @@ function vInput(){
       <div><label class="f">이미지 비율</label>${ddHTML('',Object.entries(RATIOS).map(([k,v])=>`<button class="chip" data-ratio="${k}" aria-pressed="${(i.ratio||'1:1')===k}">${v.name} · ${v.px}</button>`).join(''),{label:'이미지 비율'})}</div>
     </div>
     <p class="sub" style="margin:6px 0 0">컷 수는 10컷 이내가 끝까지 잘 읽혀요. 비율은 처음이면 1:1이 무난해요.</p>
-    </div></details>
+    </div></details></div>
 
-    ${profileHTML()}
+    <div class="h">${profileHTML()}</div>
     ${seriesHTML()}
 
+    <div class="kindrow">
     <label class="f" id="kind-lb">대본 유형 <small>어떤 이야기로 만들지 골라요 · 구성과 말투, 아래 입력칸과 표가 유형에 맞게 바뀌어요</small></label>
     ${ddHTML('',KIND_KEYS.filter(k=>k!=='custom').map(k=>`<button class="chip" data-kind="${k}" aria-pressed="${kindOf()===k}">${KINDS[k].name}</button>`).join(''),{label:'대본 유형',custom:`<label class="dd-cl" for="i-kind">직접 입력</label><input class="in" id="i-kind" data-kindin="1" value="${kindOf()==='custom'?esc(i.kindCustom||''):''}" placeholder="예: 인터뷰형, 퀴즈형">`})}
     <p class="sub" id="kindDesc" style="margin:6px 0 0">${esc(KINDS[kindOf()].desc)}</p>
+    </div>
 
     <div class="story">
       <label class="f" for="i-story">있었던 일 <small>선택 · 적을수록 재밌어져요 · 한두 문장도 괜찮아요</small></label>
@@ -1591,16 +1607,16 @@ function vInput(){
       <textarea class="in" id="i-story" data-info="story" rows="6" placeholder="예)&#10;Q. 언제, 어디서, 누구와 있었던 일인가요?&#10;A. 지난 금요일 밤 9시, 제 작업실에서 첫 의뢰 고객과 화상 미팅을 했어요.&#10;Q. 그때 가장 당황했던 순간은?&#10;A. 마감 하루 전날 고객이 &quot;전부 처음부터 다시요&quot;라고 했어요.">${esc(i.story)}</textarea>
     </div>
 
-    <div data-kfield="offer">
+    <div class="h" data-kfield="offer">
       <label class="f" for="i-offer" id="offerLb">이번에 알리고 싶은 것 <small>선택 · 마지막 컷에 자연스럽게 들어가요</small></label>
       <input class="in" id="i-offer" data-info="offer" value="${esc(i.offer)}" placeholder="예: 10월 한정 가족사진 20% 할인, 네이버 예약">
     </div>
 
-    <details class="more artsbox" id="artsBox"><summary>${sampleOf(i.art)?`<img class="art-thumb" src="${safeUrl(sampleOf(i.art))}" alt="">`:''}<span class="art-sumt"><b>웹툰 테마</b> <small>${esc(artOf().name)} · 모든 컷과 캐릭터에 똑같이 적용돼요 · 눌러서 바꾸기</small></span></summary><div class="inner"><div class="arts">${(()=>{ const vis=artVisible(); if(!vis.some(([k])=>k===i.art)){ i.art=vis[0][0]; save(); }
-      return vis.map(([k,v])=>{ const sm=sampleOf(k), sw=v.c1||v.c2?` style="background:linear-gradient(135deg,${v.c1||'#FFE9A8'},${v.c2||v.c1||'#FFB27A'})"`:''; return `<button class="pick art-${esc(k)}" data-art="${esc(k)}" aria-pressed="${i.art===k}">${sm?`<img class="smp-img" src="${safeUrl(sm)}" alt="${esc(v.name)} 샘플">`:`<span class="sw" aria-hidden="true"${sw}></span>`}<span class="ttl" style="font-size:15px">${esc(v.name)}</span><span class="dsc">${esc(v.desc)}</span></button>`; }).join(''); })()}</div></div></details>
+    <div class="h"><details class="more artsbox" id="artsBox"><summary>${sampleOf(i.art)?`<img class="art-thumb" src="${safeUrl(sampleOf(i.art))}" alt="">`:''}<span class="art-sumt"><b>웹툰 테마</b> <small>${esc(artOf().name)} · 모든 컷과 캐릭터에 똑같이 적용돼요 · 눌러서 바꾸기</small></span></summary><div class="inner"><div class="arts">${(()=>{ const vis=artVisible(); if(!vis.some(([k])=>k===i.art)){ i.art=vis[0][0]; save(); }
+      return vis.map(([k,v])=>{ const sm=sampleOf(k), sw=v.c1||v.c2?` style="background:linear-gradient(135deg,${v.c1||'#FFE9A8'},${v.c2||v.c1||'#FFB27A'})"`:''; return `<button class="pick art-${esc(k)}" data-art="${esc(k)}" aria-pressed="${i.art===k}">${sm?`<img class="smp-img" src="${safeUrl(sm)}" alt="${esc(v.name)} 샘플">`:`<span class="sw" aria-hidden="true"${sw}></span>`}<span class="ttl" style="font-size:15px">${esc(v.name)}</span><span class="dsc">${esc(v.desc)}</span></button>`; }).join(''); })()}</div></div></details></div>
 
-    ${adBoxHTML()}
-    <details class="more">
+    <div class="h">${adBoxHTML()}</div>
+    <div class="h"><details class="more">
       <summary>더 자세히 설정하기</summary>
       <div class="inner">
         <div class="who">
@@ -1617,7 +1633,8 @@ function vInput(){
           <div><label class="f" for="i-action">읽는 사람이 할 행동</label><input class="in" id="i-action" data-info="action" value="${esc(i.action)}" placeholder="예: 프로필 링크에서 예약"></div>
         </div>
       </div>
-    </details>
+    </details></div>
+    </div>
 
     <div class="go-row">
       <button class="btn pri big" data-act="make" id="makeBtn">인스타툰 만들기</button>
@@ -3367,6 +3384,7 @@ const TASTE={cfg:null,token:'',tried:false,wid:null,after:null,provider:''};
 async function tasteInit(){
   if(TASTE.tried||!STANDALONE||!/^https?:$/.test(location.protocol)) return TASTE.cfg; TASTE.tried=true;
   try{ const r=await fetch('/api/ai/config',{cache:'no-store'}); const j=await r.json(); TASTE.cfg=(j&&j.ok&&j.taste&&j.sitekey)?j:null; }catch(_){ TASTE.cfg=null; }
+  try{ refreshKeyLine(); }catch(_){}
   return TASTE.cfg; }
 const tasteOn=task=>!!(TASTE.cfg&&(task==='make'||task==='month')&&!API.ready);
 async function tasteCall(prompt,task,signal){
@@ -3378,7 +3396,7 @@ async function tasteCall(prompt,task,signal){
   if(j.code==='daily'||j.code==='exhausted'){ setTimeout(()=>openTasteEnd(),0); throw {code:'api',message:'오늘 무료 맛보기가 끝났어요. 내 무료 키를 넣으면 계속할 수 있어요.'}; }
   if(j.code==='rate') throw {code:'api',message:'잠깐 뒤에 다시 눌러 주세요. (너무 자주 눌렀어요)'};
   if(j.code==='turnstile') throw {code:'api',message:'사람인지 확인하지 못했어요. 다시 눌러 주세요.'};
-  if(j.code==='unavailable'||r.status>=500){ TASTE.cfg=null; setTimeout(()=>openKeySheet(),0); throw {code:'api',message:'무료 맛보기를 지금은 쓸 수 없어요. 내 무료 키를 넣으면 바로 쓸 수 있어요.'}; }
+  if(j.code==='unavailable'||r.status>=500){ TASTE.cfg=null; try{ refreshKeyLine(); }catch(_){} setTimeout(()=>openKeySheet(),0); throw {code:'api',message:'무료 맛보기를 지금은 쓸 수 없어요. 내 무료 키를 넣으면 바로 쓸 수 있어요.'}; }
   throw {code:'api',message:j.message||'무료 맛보기를 쓰지 못했어요.'};
 }
 function tasteSheetEl(id,label){ let w=document.getElementById(id); if(!w){ w=document.createElement('div'); w.id=id; w.className='sheet'; w.setAttribute('role','dialog'); w.setAttribute('aria-modal','true'); w.setAttribute('aria-labelledby',id+'-t'); document.body.appendChild(w); } return w; }
@@ -3502,7 +3520,8 @@ function autoSection(){
 }
 /* ---------- API 키: 바닥 시트(만들기를 누를 때) · 키 테스트 ---------- */
 let keyAfter=null;
-const keySummary=()=>`API 키 설정 ${API.ready?(AIP()==='claude'?'· Claude 연결됨 ✓':'· 연결됨 ✓'):(S.demo?'· 둘러보기만 하면 필요 없어요':'· 필요해요')}`;
+/* 키가 있으면 "연결됨 ✓", 없으면 무료 맛보기로 만들 수 있다고 알리고, 맛보기가 꺼져 있을 때만 "API 키가 필요해요"(서버 설정을 아직 모르는 동안은 중립 문구) */
+const keySummary=()=>API.ready?`API 키 설정 ${AIP()==='claude'?'· Claude 연결됨 ✓':'· 연결됨 ✓'}`:S.demo?'API 키 설정 · 둘러보기만 하면 필요 없어요':TASTE.cfg?'무료 맛보기로 바로 만들 수 있어요 · 내 키 넣기(선택)':TASTE.tried?'API 키가 필요해요':'API 키 설정';
 function refreshKeyLine(){ const s=document.querySelector('#keyTxt'); if(s) s.textContent=keySummary(); const c=document.querySelector('#keyBox .keychg'); if(c) c.textContent=API.ready?'변경':'설정'; }
 async function testKey(key){
   try{ const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=1',{headers:{'x-goog-api-key':key}}); const j=await r.json().catch(()=>({}));

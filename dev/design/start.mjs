@@ -21,10 +21,10 @@ const vis = (page, sel) => page.evaluate((s) => { const e = document.querySelect
 {
   const { page, errors } = await open(PC, withKey);
   await setState(page, () => { S = demoState('bakery'); S.mode = 'one'; S.step = 'input'; });
-  const sum = await page.evaluate(() => { const m = document.querySelector('#main').getBoundingClientRect(); return { kind: document.querySelector('#side').dataset.kind, sideHidden: document.querySelector('#side').hidden, card: document.querySelectorAll('.sumcard, #sideSummary:not([hidden])').length, phone: !document.querySelector('#phoneWrap').hidden, badge: document.querySelectorAll('#phoneWrap .ex-badge').length, bannerHidden: document.querySelector('#todo').hidden, w: Math.round(m.width), cx: Math.round(m.left + m.width / 2), vw: innerWidth }; });
+  const sum = await page.evaluate(() => { const m = document.querySelector('#main').getBoundingClientRect(); return { kind: document.querySelector('#side').dataset.kind, sideHidden: document.querySelector('#side').hidden, card: document.querySelectorAll('.sumcard, #sideSummary:not([hidden])').length, phone: !document.querySelector('#phoneWrap').hidden, badge: document.querySelectorAll('#phoneWrap .ex-badge').length, bannerHidden: document.querySelector('#todo').hidden, kl: Math.round(document.querySelector('#keyBox').getBoundingClientRect().left), kr: Math.round(document.querySelector('#keyBox').getBoundingClientRect().right), pl: Math.round(m.left), pr: Math.round(m.right) }; });
   C.ok(sum.kind === 'none' && sum.sideHidden && sum.card === 0, 'PC 앱 1단계(4b): "지금 설정" 요약 카드가 없고 오른쪽 패널도 비어 있음');
   C.ok(!sum.phone && sum.badge === 0, 'PC 앱 1단계: 인스타 폰 미리보기와 "예시" 표시가 없음');
-  C.ok(sum.w <= 780 && Math.abs(sum.cx - sum.vw / 2) <= 8, `PC 앱 1단계(4b): 폼이 가운데에 적당한 폭으로 모임 (폭 ${sum.w}px, 가운데 오차 ${Math.abs(sum.cx - sum.vw / 2)}px)`);
+  C.ok(Math.abs(sum.kl - sum.pl) <= 1 && Math.abs(sum.kr - sum.pr) <= 1, `PC 앱 1단계(4b 수정): 입력 상자가 위쪽 줄(API 키 줄)과 같은 폭 — 왼쪽 끝 ${sum.pl}/${sum.kl}px, 오른쪽 끝 ${sum.pr}/${sum.kr}px`);
   C.ok(sum.bannerHidden, 'PC 앱 1단계(4b): 위쪽 "지금 할 일" 배너는 없고, 필수칸 안내는 폼 안 한 줄로 대신함');
   await setState(page, () => { S.step = 'edit'; });
   const sb = await page.evaluate(() => ({ kind: document.querySelector('#side').dataset.kind, items: document.querySelectorAll('#sideStory .sb li').length, cuts: cuts().length, frames: document.querySelectorAll('#sideStory .frame, #sideStory canvas, #sideStory img').length, cap: !!document.querySelector('#capPrev'), count: (document.querySelector('#capPrev .cnt2') || {}).textContent, fold: !!document.querySelector('#capPrev .cap-fold'), hasWho: /사장님|알바생/.test(document.querySelector('#sideStory').textContent) }));
@@ -108,7 +108,7 @@ for (const [vk, vp, want] of [['휴대폰 390', MOB, '툰 만들기'], ['PC 1300
   const { page, errors } = await open(PC, SEEN);
   const reqs = []; page.on('request', (r) => { if (/generativelanguage/.test(r.url())) reqs.push(r.method() + ' ' + r.url().replace(/\?.*/, '')); });
   let line = await page.evaluate(() => ({ text: document.querySelector('#keyTxt').textContent.trim(), open: false }));
-  C.ok(/API 키 설정 · 필요해요/.test(line.text) && !line.open, `키 없음: "API 키 설정" 줄에 "${line.text}" 로 보임`);
+  C.ok(line.text === 'API 키가 필요해요' && !line.open, `키 없음 + 맛보기 꺼짐(서버 설정 없음): 키 줄에 "${line.text}" 로 보임`);
   await setState(page, () => { S = demoState('bakery'); S.mode = 'one'; S.step = 'input'; });
   line = await page.evaluate(() => document.querySelector('#keyTxt').textContent.trim());
   C.ok(/둘러보기만/.test(line) && !/필요해요$/.test(line), `체험 모드: "API 키 필요" 대신 "${line}"`);

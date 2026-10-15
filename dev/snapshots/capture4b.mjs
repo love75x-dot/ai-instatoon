@@ -6,10 +6,11 @@ import { root, serve, launch, newPage } from '../lib/harness.mjs';
 
 const out = path.join(root, 'dev', 'snapshots', '4b-after'); fs.mkdirSync(out, { recursive: true });
 const srv = await serve(); const browser = await launch();
-const VP = { m: { width: 390, height: 844 }, pc: { width: 1300, height: 900 } };
+const VP = { m: { width: 390, height: 844 }, t: { width: 768, height: 1000 }, pc: { width: 1300, height: 900 } };
+const TASTE = (on) => JSON.stringify({ ok: true, taste: on, sitekey: on ? 'S' : '', perDay: { make: 1, month: 1 } });
 const shot = (page, name, o = {}) => page.screenshot({ path: path.join(out, name), type: 'jpeg', quality: 72, ...o });
 for (const [vk, vp] of Object.entries(VP)) {
-  const mk = async (ls = { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST' }) => { const h = await newPage(browser, srv.base, { viewport: vp, ls }); await h.page.goto(srv.base + '/'); await h.page.waitForTimeout(500); return h.page; };
+  const mk = async (ls = { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST' }) => { const h = await newPage(browser, srv.base, { viewport: vp, ls }); await h.page.route('**/api/ai/config', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: TASTE(true) })); await h.page.goto(srv.base + '/'); await h.page.waitForTimeout(500); return h.page; };
   let page = await mk();
   await page.evaluate(() => { S = demoState('bakery'); S.demo = false; S.mode = 'one'; S.step = 'input'; save(); render(); }); await page.waitForTimeout(300);
   await shot(page, `${vk}-10-홈-맨위.jpg`);
@@ -23,6 +24,14 @@ for (const [vk, vp] of Object.entries(VP)) {
   await page.waitForTimeout(400); await shot(page, `${vk}-14-3단계-백업안내.jpg`);
   await page.close();
   page = await mk({ 'instatoon.helpSeen': '1' }); await shot(page, `${vk}-15-새기기-홈.jpg`, { fullPage: true }); await page.close();
+  { // 키 줄 세 가지 상태(맨 위 260px)
+    const clip = { x: 0, y: 0, width: vp.width, height: 260 };
+    for (const [n, on, key] of [['18-키줄-맛보기켜짐', true, false], ['19-키줄-맛보기꺼짐', false, false], ['20-키줄-연결됨', true, true]]) {
+      const h = await newPage(browser, srv.base, { viewport: vp, ls: key ? { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST' } : { 'instatoon.helpSeen': '1' } });
+      await h.page.route('**/api/ai/config', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: TASTE(on) })); await h.page.goto(srv.base + '/'); await h.page.waitForTimeout(700);
+      await shot(h.page, `${vk}-${n}.jpg`, { clip }); await h.page.close();
+    }
+  }
   for (const [n, u] of [['16-노트목록', '/guide/'], ['17-노트글', '/guide/how-to-make-instatoon/']]) {
     const h = await newPage(browser, srv.base, { viewport: vp, ls: { 'instatoon.helpSeen': '1' } }); await h.page.goto(srv.base + u); await h.page.waitForTimeout(400);
     await shot(h.page, `${vk}-${n}-맨위.jpg`, { clip: { x: 0, y: 0, width: vp.width, height: 260 } });

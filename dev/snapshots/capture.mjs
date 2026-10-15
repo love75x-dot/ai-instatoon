@@ -7,7 +7,8 @@ import { root, serve, launch, newPage } from '../lib/harness.mjs';
 const name = process.argv[2] || 'before';
 const out = path.join(root, 'dev', 'snapshots', name); fs.mkdirSync(out, { recursive: true });
 const srv = await serve(); const browser = await launch();
-const VP = { m: { width: 390, height: 844 }, pc: { width: 1300, height: 900 } };
+const VP = { m: { width: 390, height: 844 }, t: { width: 768, height: 1000 }, pc: { width: 1300, height: 900 } };
+const TASTE_ON = JSON.stringify({ ok: true, taste: true, sitekey: 'S', perDay: { make: 1, month: 1 } });
 const shots = [
   ['01-시작', () => { S = blank(); S.step = 'input'; S.mode = 'one'; }],
   ['02-1단계-입력(보리당)', () => { S = demoState('bakery'); S.step = 'input'; S.mode = 'one'; }],
@@ -17,7 +18,8 @@ const shots = [
 ];
 for (const [vk, vp] of Object.entries(VP)) {
   const { page } = await newPage(browser, srv.base, { viewport: vp, ls: { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST' } });
-  await page.goto(srv.base + '/'); await page.waitForTimeout(500);
+  await page.route('**/api/ai/config', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: TASTE_ON }));
+  await page.goto(srv.base + '/'); await page.waitForTimeout(600);
   for (const [n, fn] of shots) {
     await page.evaluate(`(${fn.toString()})(); save(); render();`); await page.waitForTimeout(250);
     await page.screenshot({ path: path.join(out, `${vk}-${n}.jpg`), fullPage: true, type: 'jpeg', quality: 70 });

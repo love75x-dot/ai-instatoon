@@ -28,6 +28,24 @@ const ON = { ok: true, taste: true, sitekey: 'SITE-KEY', perDay: { make: 1, mont
 const okMake = (n, b) => ({ s: 200, b: { ok: true, provider: 'groq', text: JSON.stringify(b.task === 'month' ? monthRes : toon) } });
 const shown = (page, id) => page.evaluate((i) => { const e = document.getElementById(i); return !!e && !e.hidden; }, id);
 
+// 0) API 키 줄 문구: 키가 없어도 맛보기로 만들 수 있다 (4b 수정)
+{
+  const txt = (page) => page.evaluate(() => document.querySelector('#keyTxt').textContent.trim());
+  const on = await open({ cfg: ON, reply: okMake });
+  C.ok(await txt(on.page) === '무료 맛보기로 바로 만들 수 있어요 · 내 키 넣기(선택)', '키 없음 + 맛보기 켜짐: "무료 맛보기로 바로 만들 수 있어요 · 내 키 넣기(선택)"');
+  C.ok(!/필요해요/.test(await on.page.locator('#keyBox').innerText()), '키 없음 + 맛보기 켜짐: 키 줄에 "필요해요"가 없음');
+  await on.page.evaluate(() => { S.demo = true; refreshKeyLine(); }); C.ok(/둘러보기만/.test(await txt(on.page)), '체험 모드: "둘러보기만 하면 필요 없어요"');
+  await on.ctx.close();
+  const off = await open({ cfg: { ok: true, taste: false, sitekey: '' }, reply: okMake });
+  C.ok(await txt(off.page) === 'API 키가 필요해요', '맛보기가 꺼져 있을 때만: "API 키가 필요해요"');
+  await off.ctx.close();
+  const fail = await open({ cfg: 'fail', reply: okMake });
+  C.ok(await txt(fail.page) === 'API 키가 필요해요', '맛보기 설정을 못 받았을 때도: "API 키가 필요해요"');
+  await fail.ctx.close();
+  const keyed = await open({ cfg: ON, key: true, reply: okMake });
+  C.ok(/API 키 설정 · 연결됨/.test(await txt(keyed.page)), '키가 있을 때: "API 키 설정 · 연결됨 ✓"');
+  await keyed.ctx.close();
+}
 // 1) 맛보기 시트 → 확인 → 호출
 {
   const t = await open({ cfg: ON, reply: okMake });
