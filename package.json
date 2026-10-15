@@ -6,7 +6,7 @@
     "build": "node site/build.mjs",
     "guide:new": "node site/guide/new-post.mjs",
     "check": "node site/guide/verify.mjs && node site/guide/track.test.mjs && node site/scan-secrets.mjs && npm run check:app",
-    "check:app": "npm run build && node dev/golden/golden.mjs && node dev/golden/text.mjs && node dev/compat/check.mjs && node dev/compat/storage.mjs && node dev/snapshots/seo.mjs && node dev/design/check.mjs && node dev/design/start.mjs && node dev/design/edit.mjs && node dev/design/vault.mjs && node dev/design/vault2.mjs && node dev/design/series.mjs",
+    "check:app": "npm run build && node dev/golden/golden.mjs && node dev/golden/text.mjs && node dev/compat/check.mjs && node dev/compat/storage.mjs && node dev/snapshots/seo.mjs && node dev/design/check.mjs && node dev/design/start.mjs && node dev/design/edit.mjs && node dev/design/vault.mjs && node dev/design/vault2.mjs && node dev/design/series.mjs && node dev/design/limit.mjs",
     "snapshot": "node dev/snapshots/capture.mjs"
   },
   "devDependencies": {

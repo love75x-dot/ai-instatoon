@@ -1310,7 +1310,7 @@ function applyToon(r){
 }
 async function makeToon(theme){
   const st=$('#st-make');
-  const n=S.info.cuts;
+  const n=S.info.cuts; save();
   const prompt=pFill('make',{n,info:infoBlock(),series:seriesBlock('make'),theme:theme?`\n[이번 편 주제] ${theme}\n`:'',rules:RULES_FN(),shots:SHOTS.join(', '),tagSlots:tagSlots(),fixedCount:fixedTags().length,tagsNote:prof().tags.trim()?`. 고정 해시태그(${prof().tags})와 겹치지 않게`:''});
   try{
     const r=await ask(prompt,st);
@@ -2583,7 +2583,7 @@ function applyMonth(r,dates){
   M.concept=String(r.concept||''); M.items=(r.items||[]).slice(0,dates.length).map((x,k)=>({date:dates[k]||String(x.date||''),type:String(x.type||''),title:String(x.title||''),story:String(x.story||''),goal:String(x.goal||''),cuts:Math.min(10,Math.max(4,Number(x.cuts)||6)),made:false}));
 }
 async function makeMonth(){
-  const M=mo(), st=$('#st-month'), dates=planDates(M.ym,M.freq), [y,m]=M.ym.split('-').map(Number);
+  const M=mo(), st=$('#st-month'), dates=planDates(M.ym,M.freq), [y,m]=M.ym.split('-').map(Number); save();
   const prompt=pFill('month',{year:y,month:m,count:dates.length,info:infoBlock(),memo:M.memo||'(없음)',stats:statsBlock(),series:seriesBlock('month'),dates:dates.join(', ')});
   try{ const r=await ask(prompt,st,`${dates.length}편 기획 중이에요 · 1분 정도 걸려요`);
     applyMonth(r,dates);
@@ -3333,7 +3333,7 @@ async function adMake(){
   st.className='status'; st.innerHTML='<span class="spin"></span> 콘티 표를 만들고 있어요 · 20~40초';
   try{
     let t;
-    if(STANDALONE){ const j=await gcall(API.text,[{text:user}],{temperature:0.8},ctl.signal,adSystem()); t=(j.candidates?.[0]?.content?.parts||[]).map(p=>p.text||'').join(''); }
+    if(STANDALONE){ const j=await gcall(API.text,[{text:user}],{temperature:0.8},ctl.signal,adSystem(),API.alt); t=(j.candidates?.[0]?.content?.parts||[]).map(p=>p.text||'').join(''); }
     else { const r=await sample.json(adSystem()+'\n\n---\n[사용자 입력]\n'+user+'\n\n응답은 JSON {"table":"마크다운 표 전체 문자열"} 형태로만 출력하세요.',{signal:ctl.signal,cache:false}); t=r.table||''; }
     t=String(t).replace(/```(?:markdown)?/g,'').trim();
     if(!t.includes('|')) throw {code:'invalid_json'};
@@ -3344,32 +3344,55 @@ async function adMake(){
 
 /* ================= 파일 버전: Gemini API 연결 ================= */
 const STANDALONE=!window.claude;
+const FREE_TEXT='gemini-3.1-flash-lite', FREE_ALT='gemini-3.5-flash'; /* 기본은 무료 한도가 넉넉한 Flash-Lite, 429가 나면 같은 키로 Flash를 한 번 더 시도 */
 const API={ get key(){ try{ return kv.getItem('instatoon.key')||''; }catch(_){ return ''; } },
-  get text(){ try{ return kv.getItem('instatoon.textModel')||'gemini-3.5-flash'; }catch(_){ return 'gemini-3.5-flash'; } },
+  get text(){ try{ return kv.getItem('instatoon.textModel')||FREE_TEXT; }catch(_){ return FREE_TEXT; } },
+  get alt(){ let m=''; try{ m=kv.getItem('instatoon.textModelAlt')||''; }catch(_){} return m||(API.text===FREE_ALT?FREE_TEXT:FREE_ALT); },
   get image(){ try{ return kv.getItem('instatoon.imageModel')||'gemini-3.1-flash-image'; }catch(_){ return 'gemini-3.1-flash-image'; } } };
 const GURL=m=>`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(m)}:generateContent`;
-function gerrMsg(st,j){ const e=j.error||{}, raw=e.message||'', txt=(e.status||'')+' '+raw;
+/* Gemini 하루 한도는 미국 태평양시 자정에 풀린다. 그 시각을 한국 시간으로 바꿔 쉬운 말로 돌려준다(여름 오후 4시·겨울 오후 5시). */
+function geminiResetKST(now){ now=now||new Date();
+  try{ const parts=(tz,d)=>Object.fromEntries(new Intl.DateTimeFormat('en-US',{timeZone:tz,hourCycle:'h23',year:'numeric',month:'numeric',day:'numeric',hour:'numeric',minute:'numeric'}).formatToParts(d).filter(p=>p.type!=='literal').map(p=>[p.type,+p.value]));
+    const la=parts('America/Los_Angeles',now); let t=null;
+    for(const off of [7,8]){ const c=Date.UTC(la.year,la.month-1,la.day+1,off,0,0), p=parts('America/Los_Angeles',new Date(c)); if(p.hour===0&&p.minute===0){ t=c; break; } }
+    if(t===null) return '';
+    const k=parts('Asia/Seoul',new Date(t)), n=parts('Asia/Seoul',now), dd=Math.round((Date.UTC(k.year,k.month-1,k.day)-Date.UTC(n.year,n.month-1,n.day))/86400000);
+    return (dd<=0?'오늘':dd===1?'내일':k.month+'월 '+k.day+'일')+' '+(k.hour<12?'오전':'오후')+' '+(k.hour%12||12)+'시'+(k.minute?' '+k.minute+'분':''); }
+  catch(_){ return ''; } }
+function gerrMsg(st,j,triedAlt){ const e=j.error||{}, raw=e.message||'', txt=(e.status||'')+' '+raw+' '+JSON.stringify(e.details||'');
   if(st===429||/quota|RESOURCE_EXHAUSTED|rate.?limit/i.test(txt)){
-    const sec=(raw.match(/retry in ([d.]+)s/i)||[])[1];
-    const perDay=/PerDay|per day/i.test(txt), noFree=/limit: 0/i.test(raw);
-    return 'Gemini 사용 한도를 넘었어요. '+(noFree?'이 모델(특히 그림 모델)은 무료 키로는 쓸 수 없어요. aistudio.google.com에서 결제(요금제)를 연결하거나 다른 모델 이름으로 바꿔 주세요.':perDay?'오늘 쓸 수 있는 양을 모두 썼어요. 내일(한국시간 오후 4~5시경 초기화) 다시 하거나, 결제를 연결하면 바로 쓸 수 있어요.':(sec?Math.ceil(+sec)+'초':'1분')+' 뒤에 다시 눌러 주세요. 계속 나오면 하루 한도를 넘긴 거예요(무료는 한도가 작고, 유료는 결제 한도·예산을 확인하세요).')+' 한도 확인: aistudio.google.com/usage';
+    const sec=(raw.match(/retry in ([\d.]+)s/i)||txt.match(/"retryDelay":"([\d.]+)s"/)||[])[1];
+    const perDay=/PerDay|per day/i.test(txt), noFree=/limit: 0/i.test(raw), also=triedAlt?' 다른 무료 모델로도 한 번 더 시도했지만 같이 막혔어요.':'', keep=' 쓰던 내용은 그대로 저장돼 있어요.', at=geminiResetKST();
+    return 'Gemini 사용 한도를 넘었어요. '+(noFree?'이 모델(특히 그림 모델)은 무료 키로는 쓸 수 없어요. aistudio.google.com에서 결제(요금제)를 연결하거나 다른 모델 이름으로 바꿔 주세요.':perDay?'오늘 쓸 수 있는 양을 모두 썼어요.'+(at?' 한국 시간으로 '+at+'에 다시 쓸 수 있어요.':' 내일 오후에 다시 쓸 수 있어요.')+also+' 지금 바로 이어서 하려면 결제를 연결하거나 다른 모델 이름으로 바꿔 주세요.'+keep:(sec?Math.ceil(+sec)+'초':'1분')+' 뒤에 다시 눌러 주세요.'+also+' 계속 나오면 하루 한도를 넘긴 거예요(무료는 한도가 작고, 유료는 결제 한도·예산을 확인하세요).'+keep)+' 한도 확인: aistudio.google.com/usage';
   }
   if(st===503||/overloaded|UNAVAILABLE/i.test(txt)) return 'Gemini 서버가 지금 붐벼요. 잠시 뒤 다시 눌러 주세요.';
   if(st===403||/PERMISSION_DENIED/i.test(txt)) return 'API 키 권한 문제예요. 키가 맞는지, 결제·지역 제한이 없는지 aistudio.google.com에서 확인해 주세요.';
   if(/API key not valid|API_KEY_INVALID/i.test(txt)) return 'API 키가 올바르지 않아요. "API 키 설정"에서 키를 다시 복사해 붙여 넣어 주세요.';
   return raw||('HTTP '+st);
 }
-async function gcall(model,parts,generationConfig,signal,system){
+async function gcall(model,parts,generationConfig,signal,system,alt){
+  try{ return await gcall1(model,parts,generationConfig,signal,system); }
+  catch(e){
+    if(alt&&alt!==model&&e&&e.code==='api'&&e.rate){
+      toast('이 모델은 한도에 걸려서 다른 무료 모델로 한 번 더 시도할게요');
+      try{ return await gcall1(alt,parts,generationConfig,signal,system,true); }
+      catch(e2){ if(e2&&e2.code==='api'&&e2.rate) toast('Gemini 사용 한도를 넘었어요'); throw e2; }
+    }
+    if(e&&e.code==='api'&&e.rate) toast('Gemini 사용 한도를 넘었어요');
+    throw e;
+  }
+}
+async function gcall1(model,parts,generationConfig,signal,system,triedAlt){
   const body={contents:[{role:'user',parts}],generationConfig}; if(system) body.system_instruction={parts:[{text:system}]};
   const r=await fetch(GURL(model),{method:'POST',signal,headers:{'Content-Type':'application/json','x-goog-api-key':API.key},body:JSON.stringify(body)});
   const j=await r.json().catch(()=>({}));
-  if(!r.ok){ const m=gerrMsg(r.status,j); if(r.status===429||/quota|RESOURCE_EXHAUSTED/i.test(j.error?.status+' '+(j.error?.message||''))) toast('Gemini 사용 한도를 넘었어요'); throw {code:'api',status:r.status,message:m,raw:j.error?.message}; }
+  if(!r.ok){ const rate=r.status===429||/quota|RESOURCE_EXHAUSTED/i.test(j.error?.status+' '+(j.error?.message||'')); throw {code:'api',status:r.status,message:gerrMsg(r.status,j,triedAlt),raw:j.error?.message,rate}; }
   return j;
 }
 const geminiSample={ async json(prompt,{signal,images}={}){
   if(!API.key) throw {code:'api',message:'화면 위쪽 "API 키 설정"에서 Gemini API 키를 먼저 넣어 주세요.'};
   try{
-    const j=await gcall(API.text,[{text:prompt},...(images||[]).map(inl)],{responseMimeType:'application/json',temperature:0.9},signal);
+    const j=await gcall(API.text,[{text:prompt},...(images||[]).map(inl)],{responseMimeType:'application/json',temperature:0.9},signal,undefined,API.alt);
     let t=(j.candidates?.[0]?.content?.parts||[]).map(p=>p.text||'').join('').replace(/```json|```/g,'').trim();
     try{ return JSON.parse(t); }catch(_){ const a=t.search(/[\[{]/), b=Math.max(t.lastIndexOf('}'),t.lastIndexOf(']')); if(a>=0&&b>a) return JSON.parse(t.slice(a,b+1)); throw {code:'invalid_json'}; }
   }catch(e){ if(e?.name==='AbortError') throw {code:'cancelled'}; throw e; }
@@ -3468,7 +3491,7 @@ function keySheetHTML(){ return `<div class="sheet-bg" data-sheet="close"></div>
   <p class="sub" style="margin:0 0 12px">AI가 대본을 쓰려면 내 Google 키가 필요해요. <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener"><b>Google AI Studio에서 키 만들기</b></a> → 복사해서 아래에 붙여 넣으세요.</p>
   <label class="f" for="ks-key" style="margin-top:0">Gemini API 키</label>
   <input class="in" id="ks-key" type="password" autocomplete="off" spellcheck="false" placeholder="AIza..." value="${esc(API.key)}">
-  <details class="ks-adv"><summary>고급 설정</summary><label class="f" for="ks-text">대본·기획 모델</label><input class="in" id="ks-text" value="${esc(API.text)}" autocomplete="off" spellcheck="false"><p class="sub" style="margin:6px 0 0">기본값 그대로 쓰면 돼요. 오류가 나면 AI Studio에 보이는 모델 이름으로 바꿔 주세요.</p></details>
+  <details class="ks-adv"><summary>고급 설정</summary><label class="f" for="ks-text">대본·기획 모델</label><input class="in" id="ks-text" value="${esc(API.text)}" autocomplete="off" spellcheck="false"><label class="f" for="ks-alt">한도에 걸리면 대신 쓸 모델</label><input class="in" id="ks-alt" value="${esc(API.alt)}" autocomplete="off" spellcheck="false"><p class="sub" style="margin:6px 0 0">기본값 그대로 쓰면 돼요. 한도(429)가 나면 같은 키로 이 모델을 한 번 더 시도해요. 오류가 나면 AI Studio에 보이는 모델 이름으로 바꿔 주세요.</p></details>
   <div class="status" id="ks-st" role="status" style="margin-top:8px;min-height:20px"></div>
   <div class="row" style="margin-top:12px"><button type="button" class="btn pri" data-sheet="save">저장하고 계속</button><button type="button" class="btn" data-sheet="test">키 테스트</button></div>
   <ul class="ks-notes"><li>키는 <b>이 브라우저에만</b> 저장돼요.</li>
@@ -3484,7 +3507,7 @@ async function keySheetAct(a){
   if(a==='close') return closeKeySheet();
   if(!key){ st.className='status err'; st.textContent='키를 붙여 넣어 주세요'; if(inp) inp.focus(); return; }
   if(a==='test'){ st.className='status'; st.innerHTML='<span class="spin"></span> 확인하는 중'; const r=await testKey(key); st.className='status'+(r.ok?'':' err'); st.textContent=r.msg; return; }
-  try{ kv.setItem('instatoon.key',key); const m=($('#ks-text')?.value||'').trim(); if(m&&m!==API.text) kv.setItem('instatoon.textModel',m); }catch(_){ st.className='status err'; st.textContent='이 브라우저에 저장하지 못했어요'; return; }
+  try{ kv.setItem('instatoon.key',key); const m=($('#ks-text')?.value||'').trim(); if(m&&m!==API.text) kv.setItem('instatoon.textModel',m); const m2=($('#ks-alt')?.value||'').trim(); if(m2&&m2!==API.alt) kv.setItem('instatoon.textModelAlt',m2); }catch(_){ st.className='status err'; st.textContent='이 브라우저에 저장하지 못했어요'; return; }
   const after=keyAfter; closeKeySheet(); const kw=$('#keyWrap'); if(kw) kw.innerHTML=keyBoxHTML(); refreshAi(); toast('연결했어요'); if(after) after();
 }
 document.addEventListener('click',e=>{ const b=e.target.closest('[data-sheet]'); if(!b) return; e.preventDefault(); keySheetAct(b.dataset.sheet); });
