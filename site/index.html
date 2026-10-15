@@ -822,7 +822,6 @@ details.artsbox{margin-top:0}
   <div class="demo-bar" id="demoBar" hidden></div>
   <section id="help" class="help" hidden></section>
   <div id="keyWrap"></div>
-  <nav class="modes" id="modes" aria-label="작업 선택"></nav>
   <nav class="steps" id="steps" aria-label="만드는 순서"></nav>
   <div class="savedline" id="savedLine" role="status"></div>
   <div class="todo" id="todo" role="status" hidden></div>
@@ -1129,6 +1128,7 @@ function blank(){
 
 /* ================= 상태 ================= */
 const KEY='instatoonRoom.v4';
+const fixMode=o=>{ if(o&&(o.mode==='reels'||o.mode==='stats')) o.mode='one'; return o; };
 let S=load()||blank(), downloads=null, sample=null, busy=null, pv=0, openCut=0;
 let saveWarned=false;
 kv.onError=e=>{ saveFailed=true; try{ updateSaved(); }catch(_){} if(!saveWarned){ saveWarned=true; try{ toast('브라우저 저장 공간에 저장하지 못했어요. 위쪽 "백업 저장"으로 파일을 받아 두세요'); }catch(__){} } };
@@ -1151,7 +1151,7 @@ function updateSaved(){ const t=$('#savedTxt'); if(t) t.textContent=savedText();
 setInterval(()=>{ updateSaved(); },20000);
 function load(){
   try{
-    const d=JSON.parse(kv.getItem(KEY)||'null'); if(d&&d.info){ const b=blank(); return {...b,...d,info:{...b.info,...d.info}}; }
+    const d=JSON.parse(kv.getItem(KEY)||'null'); if(d&&d.info){ const b=blank(); return fixMode({...b,...d,info:{...b.info,...d.info}}); }
     const o=JSON.parse(kv.getItem('instatoonRoom.v3')||'null');
     if(o&&o.info){ const b=blank(); b.info={...b.info,type:o.info.type||'',name:o.info.name||'',story:o.info.notes||'',offer:o.info.offer||'',target:o.info.target||'',action:o.info.action||''}; return b; }
   }catch(_){}
@@ -1402,7 +1402,6 @@ function renderDock(){
 document.addEventListener('click',e=>{ const b=e.target.closest('#dockBtn'); if(!b) return; const t=b.dataset.dock==='make'?$('#makeBtn'):document.querySelector('.actions [data-step="post"]'); if(t) t.click(); });
 function go(step){ S.step=step; save(); render(); window.scrollTo({top:0,behavior:'smooth'}); }
 function goHome(){
-  if(reelBusy){ toast('영상을 만드는 중이에요. 끝난 뒤에 이동해 주세요'); return; }
   const working=!!busy||!!autoCtl;
   if(working){ if(!confirm('지금 AI가 작업 중이에요. 처음 화면으로 이동하면 진행 중인 작업이 멈춰요. (이미 입력한 내용은 자동 저장돼 있어요) 이동할까요?')) return; try{ busy?.abort(); }catch(_){} try{ autoCtl?.abort(); }catch(_){} }
   endTour(); $('#help').hidden=true;
@@ -1414,9 +1413,8 @@ function helpGo(k){
     if(k!=='input'&&!cuts().length){ toast('먼저 1단계에서 "인스타툰 만들기"를 눌러 대본을 만들어 주세요'); k='input'; }
     S.mode='one'; S.step=k; } else S.mode=k;
   save(); render(); window.scrollTo({top:0,behavior:'smooth'}); }
-function renderModes(){ const m=S.mode||'one'; $('#modes').innerHTML=[['one','한 편 만들기','내 이야기로 인스타툰 한 편'],['month','한 달 기획','한 달치 연재 주제를 한 번에'],['reels','스토리·릴스','완성 그림으로 영상·스토리'],['stats','반응·댓글','올린 편 반응 기록 · 답글 도우미']].map(([k,t,d])=>`<button class="mode" data-mode2="${k}" aria-pressed="${m===k}"><b>${t}</b><span>${d}</span></button>`).join(''); $('#steps').hidden=m!=='one'; }
 function render(){ render0(); syncHash(); renderDock(); renderSaved(); }
-function render0(){ renderDemo(); renderModes(); if((S.mode||'one')==='month'){ vMonth(); renderPhone(); return; } if(S.mode==='stats'){ vStats(); renderPhone(); return; } if(S.mode==='reels'){ vReels(); renderPhone(); return; } renderSteps(); ({input:vInput,edit:vEdit,post:vPost})[S.step](); renderPhone(); renderSpell(); }
+function render0(){ renderDemo(); const stp=$('#steps'); if(stp) stp.hidden=(S.mode||'one')!=='one'; if((S.mode||'one')==='month'){ vMonth(); renderPhone(); return; } renderSteps(); ({input:vInput,edit:vEdit,post:vPost})[S.step](); renderPhone(); renderSpell(); }
 
 function talk(c){ return lines(c.bubble).slice(0,3).map(l=>{ const m=l.match(/^([^:：]{1,14})[:：]\s*(.+)$/); let who=m?m[1].trim():'', text=m?m[2].trim():l, kind='say';
   const KM=[[/속마음|생각/,'think'],[/외침|소리/,'shout'],[/속삭임|작게/,'whisper'],[/떨림|당황|덜덜/,'shaky']]; for(const [re,kd] of KM){ if(re.test(who)){ kind=kd; who=who.replace(new RegExp('\\(?('+re.source+')\\)?'),'').trim(); break; } }
@@ -2003,7 +2001,7 @@ function vPost(){
   const px=planItem(); if(px&&P.length>=n&&['plan','script'].includes(stOf(px))){ px.status='art'; save(); }
   $('#main').innerHTML=`<section class="panel">
     <div class="ph"><div><span class="stepno"><i class="nb">3</i>3단계 · 그림·저장·올리기 <small>→ 올렸으면 한 편 완성! 더 하려면 위쪽 선택 탭</small></span><h1>그림 만들고 올리기</h1><p>대사·제목·효과음은 고른 테마(${esc(artOf().name)})에 맞는 웹툰 글씨로 그림 안에 함께 그려져요. 아래 순서대로 하면 돼요.</p></div></div>
-    <div class="jump" role="navigation" aria-label="바로 가기">${[['#sec-draw','그림 그리기'],['#kit','게시물 글']].map(([h,t])=>`<button class="chip" data-jump="${h}">${t}</button>`).join('')}<button class="chip" data-mode2="reels" data-src="toon">스토리·릴스 탭 →</button></div>
+    <div class="jump" role="navigation" aria-label="바로 가기">${[['#sec-draw','그림 그리기'],['#kit','게시물 글']].map(([h,t])=>`<button class="chip" data-jump="${h}">${t}</button>`).join('')}</div>
 
     <h2 class="sec" id="sec-draw" style="margin-top:0">그림 그리기</h2>
     ${autoSection()}
@@ -2023,7 +2021,7 @@ function putPic(i,d){ const P=pics(); if(i<P.length) P[i]=d; else P.push(d); }
 async function fitCanvas(src){ const W=1080,H=ratio().h, cv=document.createElement('canvas'); cv.width=W; cv.height=H; const x=cv.getContext('2d'); x.fillStyle='#fff'; x.fillRect(0,0,W,H);
   try{ const im=await getImg(src); const s2=S.info.fit==='contain'?Math.min(W/im.width,H/im.height):Math.max(W/im.width,H/im.height); x.drawImage(im,(W-im.width*s2)/2,(H-im.height*s2)/2,im.width*s2,im.height*s2); }catch(_){} return cv; }
 function listOf(kind){ return kind==='own'?ru().own:pics(); }
-async function addPics(files,kind){ resetReel(); const L=listOf(kind); if(kind!=='own'&&!S.toon){ toast('먼저 대본을 만들어 주세요'); return; }
+async function addPics(files,kind){ const L=listOf(kind); if(kind!=='own'&&!S.toon){ toast('먼저 대본을 만들어 주세요'); return; }
   files=[...files].filter(f=>/^image\//.test(f.type)).sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true})); if(!files.length){ toast('그림 파일(jpg, png)을 골라 주세요'); return; }
   for(const f of files){ try{ L.push(await fileToImg(f)); }catch(_){} }
   try{ kv.setItem(KEY,JSON.stringify(S)); }catch(_){ toast('그림이 많아서 새로고침하면 다시 올려야 할 수 있어요. 저장은 바로 해 두세요'); }
@@ -2325,101 +2323,16 @@ function startDemo(k){ if(S.demo) return; const snap=JSON.stringify(S); let ok=t
   S=demoState(k); pv=0; openCut=0; save(); $('#help').hidden=true; render(); window.scrollTo({top:0,behavior:'smooth'});
   toast(ok?`예시 "${DEMOS[S.demoKey].name}"(으)로 체험을 시작해요`:'체험 중에는 새로고침하지 마세요. 원래 작업이 커서 임시 보관만 해 뒀어요'); }
 function endDemo(){ let snap=demoSaved; try{ snap=kv.getItem('instatoon.demoBackup')||snap; kv.removeItem('instatoon.demoBackup'); }catch(_){}
-  let d=null; try{ d=JSON.parse(snap||'null'); }catch(_){} const b=blank(); S=d&&d.info?{...b,...d,info:{...b.info,...d.info}}:b; delete S.demo; demoSaved=null; pv=0; save(); applyRatio(); render(); window.scrollTo({top:0,behavior:'smooth'}); toast('내 작업으로 돌아왔어요'); }
+  let d=null; try{ d=JSON.parse(snap||'null'); }catch(_){} const b=blank(); S=d&&d.info?fixMode({...b,...d,info:{...b.info,...d.info}}):b; delete S.demo; demoSaved=null; pv=0; save(); applyRatio(); render(); window.scrollTo({top:0,behavior:'smooth'}); toast('내 작업으로 돌아왔어요'); }
 let exCache=null;
 function exampleData(){ if(!exCache){ try{ const d=demoState('bakery'); exCache={name:d.info.name,type:d.info.type,title:d.toon.title,cuts:d.toon.cuts.map(c=>({role:c.role,t:lines(c.title).join(' ')||(talk(c)[0]?talk(c)[0].text:'')})),cap:[...String(d.toon.caption||'').split('\n')[0]].filter(ch=>ch.codePointAt(0)<0x2190||(ch.codePointAt(0)>=0xAC00&&ch.codePointAt(0)<=0xD7A3)).join('').trim()}; }catch(_){ exCache={cuts:[]}; } } return exCache; }
 function renderIntro(){ const first=(S.mode||'one')==='one'&&S.step==='input'; const ex=$('#exSec'), fq=$('#faqSec'); if(ex) ex.hidden=!first; if(fq) fq.hidden=!first; const r=$('#exRes'); if(!r||!first||r.dataset.done) return; const d=exampleData(); if(!d.cuts.length){ if(ex) ex.hidden=true; return; } r.dataset.done='1';
   r.innerHTML=`<p class="exh"><b>${esc(d.title)}</b><span>예시 · ${esc(d.name)}(${esc(d.type)})</span></p><ol class="exl">${d.cuts.map((c,i)=>`<li><span>${i+1}컷 · ${esc(c.role)}</span>${esc(c.t)}</li>`).join('')}</ol><p class="exc">${esc(d.cap)}</p>`; }
 function renderDemo(){ refreshKeyLine(); renderIntro(); const el=$('#demoBar'); if(!el) return; el.hidden=!S.demo; if(S.demo) el.innerHTML=`<span>지금은 예시 "${(DEMOS[S.demoKey]||DEMOS.bakery).name}"(으)로 체험 중이에요. 마음껏 눌러 보세요. 내 작업은 안전하게 따로 보관돼 있어요.</span><button class="btn sm" data-act="demoEnd">체험 끝내고 내 작업으로</button>`; }
 
-/* ================= 스토리·릴스 탭 ================= */
+/* ===== 옛 반응 기록 보조 (4b: 스토리·릴스·반응·댓글 화면은 없앴다) =====
+   이용자가 저장해 둔 데이터(S.history·stats·reuse·toon.reel)는 지우지 않고 저장소·백업 파일에 그대로 둔다. 한 달 기획 요청이 쓰는 statsBlock만 남긴다. */
 function ru(){ return S.reuse=fillDef(S.reuse||{},{storyHead:'새 에피소드 올라왔어요',sec:3,src:'toon',own:[],title:''}); }
-const mediaList=()=>ru().src!=='own'&&pics().length?pics():ru().own;
-const reelTitle=()=>ru().title.trim()||S.toon?.title||'';
-function rt(){ if(S.toon) return S.toon.reel=fillDef(S.toon.reel||{},{caption:'',hashtags:'',comment:''}); return S.reelOwn=fillDef(S.reelOwn||{},{caption:'',hashtags:'',comment:''}); }
-function reelPostText(){ const r=rt(), cta=prof().cta.trim(); let c=r.caption.trim(); if(cta&&!c.includes(cta)) c+=(c?'\n\n':'')+cta; const t=[...new Set([...tagList(prof().tags),...tagList(r.hashtags)])].slice(0,IG_TAGS).join(' '); return c+(t?'\n\n'+t:''); }
-let reelBlob=null, reelExt='mp4', reelUrl='', reelBusy=false;
-function vReels(){ const r=ru(), useT=r.src!=='own'&&pics().length>0, L=mediaList(), R=rt();
-  $('#main').innerHTML=`<section class="panel">
-    <div class="ph"><div><span class="stepno"><i class="nb opt">선택</i>스토리·릴스 <small>← 3단계 이후 필요할 때</small></span><h1>스토리·릴스 만들기</h1><p>완성된 그림만 있으면 돼요. 올린 순서대로 한 장씩 넘어가는 <b>릴스 영상</b>과, 새 편을 알리는 <b>스토리 이미지</b>를 만들어요.</p></div></div>
-    <label class="f" style="margin-top:0">어떤 그림으로 만들까요?</label>
-    <div id="rsrc">${ddHTML('',`<button class="chip" data-rsrc="toon" aria-pressed="${useT}" ${pics().length?'':'disabled'}>이번 편 완성 그림 ${pics().length}장</button><button class="chip" data-rsrc="own" aria-pressed="${!useT}">그림 직접 올리기${r.own.length?` (${r.own.length}장)`:''}</button>`,{label:'그림 출처'})}</div>
-    ${useT?`<p class="sub" style="margin-top:8px">"한 편 만들기"의 그림 그리기에 올린 그림을 그 순서 그대로 써요. 순서를 바꾸려면 그곳에서 바꿔 주세요.</p>`
-      :`<div class="drop" id="rdrop" style="margin-top:10px"><span>그림 파일을 여기로 끌어다 놓거나</span><button class="btn pri" data-act="rup">그림 고르기 (여러 장 가능)</button><span class="status">${r.own.length?`${r.own.length}장 올라가 있어요`:'파일 이름 순서대로 들어가요'}</span></div>`}
-    ${L.length?`<div class="pgrid">${L.map((src,i)=>`<figure class="pth"><img src="${safeUrl(src)}" alt="${i+1}번째 그림" style="object-fit:cover"><figcaption><b>${i+1}</b><span class="grow"></span>${useT?'':`<button class="ib" data-pmove="${i}|-1" data-list="own" ${i?'':'disabled'} aria-label="${i+1}번 앞으로">‹</button><button class="ib" data-pmove="${i}|1" data-list="own" ${i<L.length-1?'':'disabled'} aria-label="${i+1}번 뒤로">›</button><button class="ib" data-pdel="${i}" data-list="own" aria-label="${i+1}번 빼기">×</button>`}</figcaption></figure>`).join('')}</div>`:''}
-    <label class="f" for="rs-title">영상 위에 보일 제목 <small>비우면 이번 편 제목</small></label>
-    <input class="in" id="rs-title" data-reuse="title" value="${esc(r.title)}" placeholder="${esc(S.toon?.title||'예: 오후 3시, 빵이 다 사라졌다')}">
-    <div class="reuse">
-      <div class="rcard"><canvas id="reelCv" width="1080" height="1920" aria-label="릴스 영상 미리보기"></canvas><video id="reelVid" controls playsinline ${reelUrl?'':'hidden'} ${reelUrl?`src="${safeUrl(reelUrl)}"`:''}></video><b>릴스 영상</b>
-        <p>한 장씩 밀려 들어오며 살짝 확대돼요. 소리는 없으니 인스타에서 올릴 때 <b>음악</b>을 붙여 주세요.</p>
-        <div>${ddHTML('',[2,3,4].map(k=>`<button class="chip" data-rsec="${k}" aria-pressed="${r.sec===k}">한 장에 ${k}초</button>`).join(''),{label:'한 장당 시간'})}</div>
-        <div class="row"><button class="btn pri" data-act="reelMake" ${L.length?'':'disabled'}>릴스 영상 만들기</button><button class="btn" data-act="reelDl" ${reelBlob?'':'hidden'}>영상 저장</button></div>
-        <span class="status" id="st-reel">${L.length?`${L.length}장 × ${r.sec}초 = 약 ${L.length*r.sec}초. 만드는 동안 이 화면을 켜 두세요.`:'그림을 먼저 골라 주세요.'}</span></div>
-      <div class="rcard"><canvas id="storyCv" width="1080" height="1920" aria-label="스토리 이미지 미리보기"></canvas><b>스토리 홍보 이미지</b>
-        <p>1번 그림으로 만들어요. 스토리에 올린 뒤 <b>"링크" 스티커</b>로 게시물이나 예약 링크를 붙이면 바로 넘어와요.</p>
-        <label class="f" for="rs-head" style="margin:0">위 문구</label><input class="in" id="rs-head" data-reuse="storyHead" value="${esc(r.storyHead)}" placeholder="새 에피소드 올라왔어요">
-        <button class="btn" data-act="storyDl" ${L.length?'':'disabled'}>스토리 이미지 저장</button></div>
-    </div>
-
-    <h2 class="sec" id="reelText">릴스에 올릴 글 <small style="font-weight:600;color:var(--muted);font-size:13px">게시물 글과 달라요</small></h2>
-    <p class="sub">릴스는 팔로워가 아닌 사람에게 먼저 보여져요. 그래서 첫 줄은 더 짧고 궁금하게, 끝은 "전체 이야기는 프로필 게시물에서"로 이어 줘요.</p>
-    <div class="kit">
-      <div class="kit-copy"><button class="btn pri" data-act="reelCopy">캡션 + 해시태그 한 번에 복사</button><button class="btn" data-act="reelText">${R.caption?'릴스용 글 새로 받기':'릴스용 글 만들기'}</button><span class="status" id="st-rt"></span></div>
-      <label class="f" for="rt-cap">릴스 캡션</label><textarea class="in" id="rt-cap" data-rt="caption" rows="4" placeholder="예: 오후 3시, 빵집이 텅 비었다 😳">${esc(R.caption)}</textarea>
-      <label class="f" for="rt-tag">릴스 해시태그 <small>5개까지 반영돼요 · 프로필 고정 해시태그가 앞에 붙어요</small></label><input class="in" id="rt-tag" data-rt="hashtags" value="${esc(R.hashtags)}" placeholder="#브랜드이름 #분야 #인스타툰">
-      <div class="lab-row"><label class="f" for="rt-cmt">릴스 고정 댓글</label><button class="btn sm" data-act="reelCmtCopy">복사</button></div><textarea class="in" id="rt-cmt" data-rt="comment" rows="2" placeholder="예: 다음 편 예고 👀">${esc(R.comment)}</textarea>
-    </div>
-    <ol class="rhow"><li>"영상 저장"으로 받은 파일을 휴대폰으로 옮겨요.</li><li>인스타 <b>+ → 릴스</b>에서 영상을 고르고 <b>음악</b>을 붙여요.</li><li>커버는 1번 그림 장면으로 고르면 피드에서 눈에 잘 띄어요.</li><li>위 릴스 글을 붙여 넣고 공유한 뒤, 고정 댓글을 달아요.</li><li>스토리는 이미지를 올리고 <b>링크 스티커</b>로 게시물이나 예약 링크를 붙여요.</li></ol>
-  </section>`; previewReuse(); }
-function blurBg(cv){ const b=document.createElement('canvas'); b.width=270; b.height=480; const x=b.getContext('2d'); const s2=Math.max(270/cv.width,480/cv.height)*1.15; x.fillStyle='#222'; x.fillRect(0,0,270,480); x.filter='blur(10px)'; x.drawImage(cv,(270-cv.width*s2)/2,(480-cv.height*s2)/2,cv.width*s2,cv.height*s2); x.filter='none'; x.fillStyle='rgba(0,0,0,.5)'; x.fillRect(0,0,270,480); return b; }
-async function srcCanvas(src){ const im=await getImg(src); const W=1080, H=Math.min(1500,Math.round(W*im.height/im.width)), cv=document.createElement('canvas'); cv.width=W; cv.height=H; const x=cv.getContext('2d'); const s2=Math.max(W/im.width,H/im.height); x.drawImage(im,(W-im.width*s2)/2,(H-im.height*s2)/2,im.width*s2,im.height*s2); return cv; }
-async function reelSlides(){ const out=[]; for(const src of mediaList()){ try{ out.push(await srcCanvas(src)); }catch(_){} } return out.map(cv=>({cv,bg:blurBg(cv)})); }
-function drawReelFrame(ctx,sl,t,D){ const W=1080,H=1920,N=sl.length; ctx.fillStyle='#111'; ctx.fillRect(0,0,W,H); if(!N) return; const i=Math.min(N-1,Math.floor(t/D)), lt=t-i*D, p=Math.min(1,lt/380), e=1-Math.pow(1-p,3);
-  const cur=sl[i].cv, ch=cur.height, y=Math.round((H-ch)/2), z=1+0.04*Math.min(1,lt/D);
-  ctx.drawImage(sl[i].bg,0,0,W,H);
-  if(i>0&&p<1){ const pc=sl[i-1].cv; ctx.drawImage(pc,-W*e,Math.round((H-pc.height)/2),W,pc.height); }
-  ctx.save(); ctx.translate(i>0?W*(1-e):0,0); ctx.beginPath(); ctx.rect(0,y,W,ch); ctx.clip(); const zw=W*z, zh=ch*z; ctx.drawImage(cur,(W-zw)/2,y+(ch-zh)/2,zw,zh); ctx.restore();
-  const bw=(W-80-(N-1)*8)/N; for(let k=0;k<N;k++){ ctx.fillStyle='rgba(255,255,255,.3)'; ctx.fillRect(40+k*(bw+8),70,bw,6); ctx.fillStyle='#fff'; ctx.fillRect(40+k*(bw+8),70,bw*(k<i?1:k>i?0:Math.min(1,lt/D)),6); }
-  ctx.textAlign='center'; ctx.textBaseline='alphabetic'; ctx.fillStyle='#fff'; ctx.font=fspec('title',60);
-  const tl=wrapText(ctx,reelTitle(),W-140).slice(0,2), ty=Math.max(200,y-56); tl.forEach((l,k)=>ctx.fillText(l,W/2,ty-(tl.length-1-k)*74));
-  ctx.font='700 36px "Gothic A1"'; ctx.fillStyle='rgba(255,255,255,.88)'; ctx.fillText(i<N-1?`${i+1} / ${N}`:`${S.info.name||'내 브랜드'} · 전체 이야기는 게시물에서`,W/2,Math.min(H-60,y+ch+86)); }
-async function drawStory(cv){ const W=1080,H=1920, ctx=cv.getContext('2d'); cv.width=W; cv.height=H; ctx.fillStyle='#1b1b1f'; ctx.fillRect(0,0,W,H); const L=mediaList(); if(!L.length) return;
-  const c0=await srcCanvas(L[0]); ctx.drawImage(blurBg(c0),0,0,W,H);
-  const cw=880, ch=Math.round(cw*c0.height/c0.width), x=(W-cw)/2, y=Math.round((H-ch)/2)+60;
-  ctx.save(); ctx.shadowColor='rgba(0,0,0,.45)'; ctx.shadowBlur=50; ctx.shadowOffsetY=16; rrect(ctx,x,y,cw,ch,34); ctx.fillStyle='#fff'; ctx.fill(); ctx.restore();
-  ctx.save(); rrect(ctx,x,y,cw,ch,34); ctx.clip(); ctx.drawImage(c0,x,y,cw,ch); ctx.restore();
-  const head=ru().storyHead.trim()||'새 에피소드 올라왔어요'; await loadFonts({title:head+reelTitle(),sub:'',bubble:'',sfx:''});
-  ctx.textAlign='center'; ctx.font='900 34px "Gothic A1"'; const pw=ctx.measureText('NEW EPISODE').width+56; ctx.fillStyle='#FFD53D'; rrect(ctx,(W-pw)/2,y-250,pw,60,30); ctx.fill(); ctx.fillStyle='#121214'; ctx.textBaseline='middle'; ctx.fillText('NEW EPISODE',W/2,y-220); ctx.textBaseline='alphabetic';
-  ctx.fillStyle='#fff'; let fs=76; ctx.font=fspec('title',fs); while(fs>44&&ctx.measureText(head).width>W-120){ fs-=4; ctx.font=fspec('title',fs); } ctx.fillText(head,W/2,y-100);
-  ctx.font='700 38px "Gothic A1"'; ctx.fillStyle='rgba(255,255,255,.9)'; ctx.fillText(wrapText(ctx,reelTitle(),W-160)[0]||'',W/2,y-40);
-  ctx.font='800 36px "Gothic A1"'; ctx.fillStyle='rgba(255,255,255,.92)'; ctx.fillText(`${S.info.name||'내 브랜드'} 인스타툰 · 게시물에서 끝까지 보기`,W/2,Math.min(H-120,y+ch+110)); }
-async function previewReuse(){ const sc=$('#storyCv'); if(sc) drawStory(sc); const rc=$('#reelCv'); const v=$('#reelVid');
-  if(v&&reelUrl){ v.hidden=false; if(rc) rc.hidden=true; return; }
-  if(rc&&!reelBusy){ const sl=await reelSlides(); drawReelFrame(rc.getContext('2d'),sl,Math.min(ru().sec*1000*0.6,1500),ru().sec*1000); } }
-function resetReel(){ reelBlob=null; if(reelUrl) URL.revokeObjectURL(reelUrl); reelUrl=''; }
-async function makeReel(){ const st=$('#st-reel');
-  if(!window.MediaRecorder||!HTMLCanvasElement.prototype.captureStream){ st.className='status err'; st.textContent='이 브라우저는 영상 만들기를 지원하지 않아요. 크롬 최신 버전에서 열어 주세요.'; return; }
-  const mime=['video/mp4;codecs=avc1.42E01E','video/mp4;codecs=avc1','video/mp4','video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'].find(m=>{ try{ return MediaRecorder.isTypeSupported(m); }catch(_){ return false; } });
-  if(!mime){ st.className='status err'; st.textContent='이 브라우저는 영상 저장 형식을 지원하지 않아요.'; return; }
-  reelBusy=true; resetReel(); st.className='status'; st.innerHTML='<span class="spin"></span> 그림을 준비하는 중';
-  try{ const sl=await reelSlides(); if(!sl.length) throw 0; const D=ru().sec*1000, total=D*sl.length+400;
-    const rc=$('#reelCv'), v=$('#reelVid'); if(v){ v.hidden=true; v.removeAttribute('src'); } rc.hidden=false; const ctx=rc.getContext('2d');
-    drawReelFrame(ctx,sl,0,D); const stream=rc.captureStream(30), rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:6000000}), chunks=[];
-    rec.ondataavailable=e=>{ if(e.data&&e.data.size) chunks.push(e.data); }; const done=new Promise(r=>rec.onstop=r);
-    rec.start(250); const t0=performance.now();
-    await new Promise(res=>{ const tick=()=>{ const t=performance.now()-t0; drawReelFrame(ctx,sl,Math.min(t,total-1),D); const s2=$('#st-reel'); if(s2) s2.innerHTML=`<span class="spin"></span> 영상 만드는 중 ${Math.min(100,Math.round(t/total*100))}% · 이 화면을 켜 두세요`; if(t<total) requestAnimationFrame(tick); else res(); }; requestAnimationFrame(tick); });
-    rec.stop(); await done; stream.getTracks().forEach(t=>t.stop());
-    reelExt=mime.includes('mp4')?'mp4':'webm'; reelBlob=new Blob(chunks,{type:mime.split(';')[0]}); reelUrl=URL.createObjectURL(reelBlob);
-    const v2=$('#reelVid'); if(v2){ v2.src=reelUrl; v2.hidden=false; } rc.hidden=true; const dl=document.querySelector('[data-act="reelDl"]'); if(dl) dl.hidden=false;
-    const s3=$('#st-reel'); s3.className='status'; s3.textContent=`완성! ${Math.round(total/1000)}초 영상 · ${(reelBlob.size/1048576).toFixed(1)}MB${/avc1/.test(mime)?'':' · 이 브라우저는 인스타가 가장 잘 받는 H.264 형식을 못 만들어요. 인스타 앱에 안 올라가면 크롬 최신 버전이나 사파리에서 다시 만들어 주세요.'}`;
-    renderTodo();
-  }catch(e){ const s3=$('#st-reel'); if(s3){ s3.className='status err'; s3.textContent='영상을 만들지 못했어요. 페이지를 새로고침하고 다시 해 주세요.'; } }
-  finally{ reelBusy=false; } }
-async function makeReelText(){ const st=$('#st-rt');
-  const prompt=pFill('reelText',{info:infoBlock(),source:S.toon?`[웹툰 대본]\n${toonText()}\n[게시물 캡션 - 이것과 겹치지 않게]\n${S.toon.caption||'(없음)'}`:`[영상 제목] ${reelTitle()||'(없음)'}`,tagSlots:tagSlots()});
-  try{ const r=await ask(prompt,st,'릴스 글 쓰는 중',null,'quick'); const R=rt(); R.caption=String(r.caption||''); R.hashtags=fitTags(r.hashtags); R.comment=String(r.comment||''); save(); vReels(); toast('릴스용 글을 만들었어요'); }catch(_){} }
-
-/* ================= 반응 기록 ================= */
 const SKEYS=[['reach','도달'],['like','좋아요'],['cmt','댓글'],['save','저장'],['share','공유']];
 const hasStats=h=>!!h.stats&&SKEYS.some(([k])=>Number(h.stats[k])>0);
 const sv=(h,k)=>Number(h.stats?.[k])||0;
@@ -2427,53 +2340,6 @@ const keep=h=>sv(h,'save')+sv(h,'share');
 function statsBlock(){ const H=hist().filter(hasStats); if(!H.length) return '';
   const rows=H.slice(0,10).map(h=>`- ${h.title} / 유형: ${h.type||'-'} / 테마: ${ARTS[h.art]?.name||'-'} / 도달 ${sv(h,'reach')} · 좋아요 ${sv(h,'like')} · 댓글 ${sv(h,'cmt')} · 저장 ${sv(h,'save')} · 공유 ${sv(h,'share')}`).join('\n');
   return `\n[지난 편 반응 - 저장·공유가 많을수록 독자에게 도움이 된 편]\n${rows}\n→ 반응이 좋았던 편과 비슷한 유형·소재를 더 넣고, 약했던 방식은 줄여.\n`; }
-function insHTML(){ const H=hist(), R=H.filter(hasStats); if(!R.length) return `<div class="ins"><h3>아직 적은 반응이 없어요</h3><p style="margin:0">두 편 이상 적으면 어떤 편이 잘 됐는지 비교해 드려요.</p></div>`;
-  const mx=Math.max(1,...R.map(keep)), best=[...R].sort((a,b)=>keep(b)-keep(a)||sv(b,'like')-sv(a,'like'))[0];
-  const grp=(f,name)=>{ const m={}; R.forEach(h=>{ const k=f(h); if(!k) return; (m[k]=m[k]||[]).push(keep(h)); }); const e=Object.entries(m); if(e.length<2) return ''; const avg=e.map(([k,v])=>[k,v.reduce((a,b)=>a+b,0)/v.length,v.length]).sort((a,b)=>b[1]-a[1]); return `<li>${name}별로는 <b>${esc(avg[0][0])}</b> 쪽이 평균 저장+공유 ${avg[0][1].toFixed(1)}로 가장 좋아요 (${avg[0][2]}편 기준).</li>`; };
-  const rate=R.filter(h=>sv(h,'reach')>0).map(h=>[h,keep(h)/sv(h,'reach')*100]).sort((a,b)=>b[1]-a[1]);
-  return `<div class="ins"><h3>무엇이 잘 먹혔을까</h3><ul>
-    <li>저장+공유가 가장 많은 편은 <b>${esc(best.title)}</b>(저장 ${sv(best,'save')} · 공유 ${sv(best,'share')})예요. 저장과 공유는 "다시 보고 싶다, 알려 주고 싶다"는 뜻이라 인스타가 더 멀리 보여 주는 신호예요.</li>
-    ${best.hook?`<li>그 편의 첫 장 제목: "${esc(best.hook)}" — 다음 편 제목을 지을 때 참고하세요.</li>`:''}
-    ${grp(h=>h.type,'이야기 유형')}${grp(h=>ARTS[h.art]?.name,'테마')}${grp(h=>h.goal,'목적')}
-    ${rate.length?`<li>도달 대비 저장+공유 비율이 가장 높은 편: <b>${esc(rate[0][0].title)}</b> (${rate[0][1].toFixed(1)}%)</li>`:''}
-  </ul>
-  <div class="bars" aria-label="편별 저장+공유">${R.map(h=>`<div class="bar"><span title="${esc(h.title)}">${esc(h.title)}</span><i class="${h===best?'top':''}" style="width:${Math.round(keep(h)/mx*100)}%"></i><em>${keep(h)}</em></div>`).join('')}</div>
-  <p class="sub" style="margin:8px 0 0">막대는 편별 저장+공유 수예요. 한 달 기획을 새로 만들면 이 기록이 AI에게 함께 전달돼요.</p>
-  ${S.statsAI?`<div style="margin-top:12px"><b>AI 분석</b><ul>${(S.statsAI.insights||[]).map(x=>`<li>${esc(x)}</li>`).join('')}</ul>${(S.statsAI.next||[]).length?`<b>다음 달에 해 볼 것</b><ul>${S.statsAI.next.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}</div>`:''}</div>`; }
-async function statsAI(){ const H=hist().filter(hasStats); const st=$('#st-sai'); if(H.length<2){ toast('두 편 이상 반응을 적으면 분석할 수 있어요'); return; }
-  const prompt=pFill('stats',{info:infoBlock0(),records:H.map(h=>`- ${h.title} / 첫 장 제목: ${h.hook||'-'} / 유형: ${h.type||'-'} / 목적: ${h.goal||'-'} / 테마: ${ARTS[h.art]?.name||'-'} / 컷 ${h.cuts||'-'} / 도달 ${sv(h,'reach')} 좋아요 ${sv(h,'like')} 댓글 ${sv(h,'cmt')} 저장 ${sv(h,'save')} 공유 ${sv(h,'share')}`).join('\n')});
-  try{ const r=await ask(prompt,st,'반응 분석 중',null,'quick'); S.statsAI={insights:(r.insights||[]).map(String).slice(0,4),next:(r.next||[]).map(String).slice(0,4)}; save(); $('#statsIns').innerHTML=insHTML(); }catch(_){} }
-
-/* ================= 댓글 답글 도우미 ================= */
-let replyOut=null;
-async function makeReply(){ const txt=($('#r-in')?.value||'').trim(), st=$('#st-reply'); if(!txt){ toast('받은 댓글을 먼저 붙여 넣어 주세요'); return; }
-  const h=hist().find(x=>String(x.hid)===($('#r-ep')?.value||''));
-  const prompt=pFill('reply',{info:infoBlock(),episode:h?h.title+(h.hook?` (첫 장: ${h.hook})`:''):'모름',comment:txt});
-  try{ const r=await ask(prompt,st,'답글 쓰는 중',null,'quick'); replyOut={kind:String(r.kind||''),note:String(r.note||''),replies:(r.replies||[]).map(x=>({style:String(x.style||''),text:String(x.text||'')})).filter(x=>x.text).slice(0,3)}; renderReply(); }catch(_){} }
-function renderReply(){ const el=$('#replyOut'); if(!el||!replyOut) return; const R=replyOut;
-  el.innerHTML=`${R.kind?`<div class="row" style="gap:6px"><span class="tag">${esc(R.kind)}</span>${R.note?`<span class="status">${esc(R.note)}</span>`:''}</div>`:''}<div class="rout">${R.replies.map((x,k)=>`<div class="rline"><div><small>${esc(x.style)}</small>${esc(x.text)}</div><button class="btn sm" data-rcopy="${k}">복사</button></div>`).join('')||'<p class="sub">답글을 다는 것보다 숨기거나 신고하는 게 좋아요.</p>'}</div>`; }
-
-function vStats(){ const H=hist();
-  $('#main').innerHTML=`<section class="panel">
-    <div class="ph"><div><span class="stepno"><i class="nb opt">선택</i>반응·댓글 <small>← 올린 뒤 2~3일 지나서</small></span><h1>반응 기록 · 댓글 도우미</h1><p>올린 편의 반응을 적어 두면 무엇이 잘 먹혔는지 보이고, 다음 달 기획에 자동으로 반영돼요.</p></div></div>
-    <div class="callout">숫자는 인스타 앱에서 게시물 아래 <b>"인사이트 보기"</b>를 누르면 나와요 (프로페셔널 계정이어야 보여요). 올리고 <b>2~3일 뒤</b>에 적는 게 정확해요. 모르는 칸은 비워 두세요.</div>
-    ${H.length?`<div class="srows">${H.map(h=>`<div class="srow">${h.thumb?`<img src="${safeUrl(h.thumb)}" alt="">`:'<span class="noth"></span>'}<div><div class="st">${esc(h.title)}</div><div class="sm2">${esc([h.date&&h.date+' 올림',h.type,ARTS[h.art]?.name].filter(Boolean).join(' · '))}${h.link&&/^https?:\/\//.test(h.link)?` · <a href="${esc(h.link)}" target="_blank" rel="noopener">게시물 열기</a>`:''}</div>
-      <div class="snum">${SKEYS.map(([k,n])=>`<label>${n}<input type="number" min="0" inputmode="numeric" data-stat="${h.hid}|${k}" value="${h.stats?.[k]??''}"></label>`).join('')}</div></div></div>`).join('')}</div>`
-      :`<div class="empty" style="margin-top:12px">아직 완성한 편이 없어요.<br>"한 편 만들기"에서 <b>"완성 이미지 전체 저장"</b>을 누르면 그 편이 여기에 자동으로 쌓여요.<br><br><button class="btn" data-mode2="one">한 편 만들기로</button></div>`}
-    <div id="statsIns">${H.length?insHTML():''}</div>
-    ${H.length?`<div class="row" style="margin-top:10px"><button class="btn" data-act="statsAI">AI로 분석 받기</button><span class="status" id="st-sai">두 편 이상 적으면 AI가 다음 달 전략까지 정리해 줘요</span></div>`:''}
-
-    <h2 class="sec">댓글 답글 도우미</h2>
-    <p class="sub">받은 댓글을 붙여 넣으면 브랜드 말투로 답글 3개를 제안해요. 가벼운 AI 호출 한 번이에요.</p>
-    <div class="reply" id="reply">
-      <label class="f" for="r-in" style="margin-top:0">받은 댓글</label><textarea class="in" id="r-in" rows="3" placeholder="예: 여기 주차 되나요?? 빵 너무 맛있어 보여요 ㅠㅠ"></textarea>
-      <label class="f" for="r-ep">어느 편에 달린 댓글인가요? <small>선택</small></label>
-      <select class="in" id="r-ep"><option value="">잘 모르겠어요</option>${H.map(h=>`<option value="${h.hid}">${esc(h.title)}</option>`).join('')}</select>
-      <div class="row" style="margin-top:12px"><button class="btn pri" data-act="reply">답글 3개 받기</button><span class="status" id="st-reply"></span></div>
-      <div id="replyOut"></div>
-      <p class="sub" style="margin:12px 0 0">질문 댓글엔 하루 안에 답하는 게 좋아요. 광고·욕설 댓글은 답글 대신 길게 눌러 숨기거나 신고하세요.</p>
-    </div>
-  </section>`; renderReply(); }
 
 /* ================= 연재 진행판 ================= */
 const STAT={plan:{n:'기획'},script:{n:'대본'},art:{n:'그림'},posted:{n:'완성'}}, STAT_KEYS=Object.keys(STAT);
@@ -2490,16 +2356,8 @@ function todoInfo(){
     if(!M.items.length) return {t:i.type.trim()?'달과 올리는 횟수를 고르고 "한 달 기획 만들기"를 눌러 주세요':'업종을 적어 주세요. 그다음 "한 달 기획 만들기"를 누르면 한 달 연재표가 나와요',go:i.type.trim()?'[data-act="monthMake"]':'#m-type'};
     const nx=nextPlan(); if(!nx) return {t:'이번 달 연재를 모두 올렸어요! 다음 달 기획을 만들어 보세요',done:1};
     const st=stOf(nx.x), late=isLate(nx.x)?' (날짜가 지났어요)':'';
-    const what={plan:'"이 편 만들기"를 누르면 대본까지 자동으로 써요',script:'"한 편 만들기" 탭에서 그림을 그려 주세요',art:'그림 완성! "한 편 만들기" 탭에서 "완성 이미지 전체 저장"을 눌러 주세요'}[st];
+    const what={plan:'"이 편 만들기"를 누르면 대본까지 자동으로 써요',script:'홈에서 그림을 그려 주세요',art:'그림 완성! 홈에서 "완성 이미지 전체 저장"을 눌러 주세요'}[st];
     return {t:`다음 편 ${nx.x.date}${late} "${nx.x.title}" · ${what}`,go:`[data-pk="${nx.k}"]`}; }
-  if(S.mode==='reels'){ const L=mediaList(); if(!L.length) return {t:pics().length?'"이번 편 완성 그림"을 고르거나 그림을 직접 올려 주세요':'완성 그림을 올려 주세요. 올린 순서대로 영상이 넘어가요',go:'#rsrc'};
-    if(!reelBlob) return {t:`그림 ${L.length}장으로 "릴스 영상 만들기"를 눌러 주세요 (약 ${L.length*ru().sec}초)`,go:'[data-act="reelMake"]'};
-    return {t:'영상 저장 후 인스타 릴스에 올리고, 아래 "릴스에 올릴 글"을 복사해 붙여 넣으세요',go:'#reelText',done:1}; }
-  if(S.mode==='stats'){ const H=hist(); if(!H.length) return {t:'아직 완성한 편이 없어요. "한 편 만들기"에서 "완성 이미지 전체 저장"을 누르면 그 편이 여기에 쌓여요'};
-    const due=H.filter(h=>!hasStats(h)&&Date.now()-Number(h.hid)>=2*86400000);
-    if(due.length) return {t:`올린 지 2일이 지난 편 ${due.length}개의 반응을 적어 주세요`,go:`[data-stat^="${due[0].hid}|"]`};
-    if(H.some(h=>!hasStats(h))) return {t:'반응은 올리고 2~3일 뒤에 적어 주세요. 그 사이 댓글에 답글을 달아 보세요',go:'#reply'};
-    return {t:'기록 완료! "AI로 분석 받기"로 다음 달 전략을 받아 보세요',go:'[data-act="statsAI"]'}; }
   const cs=cuts(), n=cs.length, T=S.toon;
   if(S.step==='input'||!n){ if(!i.type.trim()) return {t:'업종을 골라 주세요. 필수는 이것 하나예요',go:'[data-ind]',stage:0};
     return {t:n?'만든 대본이 있어요. 새로 만들거나 "이어서 다듬기"를 눌러 주세요':'있었던 일을 적고 "인스타툰 만들기"를 눌러 주세요 (비워도 돼요)',go:'#makeBtn',stage:0}; }
@@ -2664,7 +2522,7 @@ async function makeBackup(opt){ opt=opt||{img:true};
 }
 async function restoreBackup(file){
   try{ const data=JSON.parse(await file.text()); if(data.app!=='instatoon'||!data.state) throw 0;
-    const b=blank(); S={...b,...data.state,info:{...b.info,...data.state.info}};
+    const b=blank(); S=fixMode({...b,...data.state,info:{...b.info,...data.state.info}});
     const set=(k,v)=>{ try{ v?kv.setItem(k,v):kv.removeItem(k); }catch(_){} };
     [0,1,2].forEach(k=>{ set('instatoon.photo.'+k,data.photos?.[k]||''); setRef(k,data.refs?.[k]||null); });
     Object.entries(data.samples||{}).forEach(([k,v])=>set('instatoon.sample.'+k,v));
@@ -3133,17 +2991,13 @@ document.addEventListener('click',async e=>{
   if(b.dataset.pv){ pv+=+b.dataset.pv; return renderPhone(); }
   if(b.dataset.todo) return goTodo();
   if(b.dataset.tour){ const d=b.dataset.tour; if(d==='end') return endTour(); if(d==='guide'){ endTour(); return toggleHelp(true); } if(d==='next'&&tourI>=TOUR().length-1) return endTour(); tourI+=d==='next'?1:-1; return showTour(d==='prev'?-1:1); }
-  if(b.dataset.pmove||b.dataset.pdel||b.dataset.rsrc) resetReel();
   if(b.dataset.pmove){ const [i,d]=b.dataset.pmove.split('|').map(Number), L=listOf(b.dataset.list), j=i+d; if(j<0||j>=L.length) return; [L[i],L[j]]=[L[j],L[i]]; save(); pv=j; return render(); }
   if(b.dataset.pdel){ const L=listOf(b.dataset.list); L.splice(+b.dataset.pdel,1); if(b.dataset.list!=='own'&&S.toon) S.toon.zipped=false; save(); pv=0; return render(); }
-  if(b.dataset.rsrc){ ru().src=b.dataset.rsrc; save(); return vReels(); }
   if(b.dataset.jump){ const el=document.querySelector(b.dataset.jump); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); return; }
   if(b.dataset.endon){ ec().on=b.dataset.endon==='1'; save(); const g=$('#guideBox'); if(g) g.innerHTML=guideHTML(); renderTodo(); return; }
   if(b.dataset.endst){ ec().style=b.dataset.endst; save(); document.querySelectorAll('[data-endst]').forEach(c=>c.setAttribute('aria-pressed',c.dataset.endst===ec().style)); const pr=$('#endPre'); if(pr) pr.textContent=endPrompt(); refreshEndPv(); return; }
   if(b.dataset.fdel){ S.history=hist().filter(h=>String(h.hid)!==b.dataset.fdel); save(); return vPost(); }
   if(b.dataset.spfix) return applySpell(+b.dataset.spfix);
-  if(b.dataset.rsec){ ru().sec=+b.dataset.rsec; save(); document.querySelectorAll('[data-rsec]').forEach(c=>c.setAttribute('aria-pressed',c.dataset.rsec===b.dataset.rsec)); const s2=$('#st-reel'), nn=mediaList().length; if(s2&&!reelBusy&&nn){ s2.className='status'; s2.textContent=`${nn}장 × ${ru().sec}초 = 약 ${nn*ru().sec}초. 만드는 동안 이 화면을 켜 두세요.`; } renderTodo(); return; }
-  if(b.dataset.rcopy) return copy(replyOut?.replies?.[+b.dataset.rcopy]?.text||'');
   if(b.dataset.pst){ const [k,s2]=b.dataset.pst.split('|'), x=mo().items[+k]; if(x){ x.status=s2; x.made=s2!=='plan'; if(s2==='posted'&&!x.postedAt) x.postedAt=todayStr(); if(s2!=='posted') x.postedAt=''; save(); vMonth(); renderTodo(); } return; }
   if(b.dataset.helpgo) return helpGo(b.dataset.helpgo);
   if(b.dataset.step){ if(b.disabled) return; return go(b.dataset.step); }
@@ -3159,7 +3013,6 @@ document.addEventListener('click',async e=>{
   if(b.dataset.hook){ const k=+b.dataset.hook,c0=cuts()[0]; S.toon.hookIdx=k; c0.title=S.toon.hooks[k]; if(c0.highlight&&!c0.title.includes(c0.highlight)) c0.highlight=''; pv=0; openCut=0; save(); vEdit(); return renderPhone(); }
   if(b.dataset.fix){ const f=S.check.fixes[+b.dataset.fix],c=cuts()[(+f.cut)-1]; if(c&&['title','bubble','sub','sfx'].includes(f.field)){ c[f.field]=f.after; if(f.field==='title'&&c.highlight&&!f.after.includes(c.highlight)) c.highlight=''; f.applied=true; pv=(+f.cut)-1; save(); vEdit(); renderPhone(); toast(`${f.cut}컷에 반영했어요`); } return; }
   if(b.dataset.copy){ markCopied(b); const T=S.toon||{}; const k=b.dataset.copy; if(k.startsWith('sheet-')) return copy(sheetPrompt(+k.slice(6))); if(k.startsWith('alt-')){ const i=+k.slice(4); return copy(altOf(cuts()[i],i)); } if(k.startsWith('cut-')){ const i=+k.slice(4); return copy(cutPrompt(cuts()[i],i)); } return copy({caption:T.caption,hashtags:T.hashtags,comment:T.comment,script:toonText(),sheet:sheetPrompt(),setup:setupPrompt(),fixchar:FIX_CHAR,fixtext:FIX_TEXT,fixtypo:FIX_TYPO,fixratio:FIX_RATIO(),fixstyle:FIX_STYLE,fixlabel:FIX_LABEL,fixdraw:FIX_DRAW(),endp:endPrompt()}[k]||''); }
-  if(b.dataset.mode2){ S.mode=b.dataset.mode2; if(b.dataset.src) ru().src=b.dataset.src; save(); render(); window.scrollTo({top:0,behavior:'smooth'}); return; }
   if(b.dataset.ym){ mo().ym=b.dataset.ym; save(); return vMonth(); }
   if(b.dataset.freq){ mo().freq=+b.dataset.freq; save(); return vMonth(); }
   if(b.dataset.plan) return makeFromPlan(+b.dataset.plan);
@@ -3204,14 +3057,6 @@ document.addEventListener('click',async e=>{
   if(a==='autoStop'){ autoCtl?.abort(); return; }
   if(a==='home') return goHome();
   if(a==='tour') return startTour();
-  if(a==='storyDl'){ const cv=document.createElement('canvas'); await drawStory(cv); return saveFile(`${(S.info.name||'instatoon').replace(/\s+/g,'_')}_스토리.png`, await cvBlob(cv)); }
-  if(a==='reelMake'){ if(reelBusy) return; b.disabled=true; try{ await makeReel(); } finally{ b.disabled=false; } return; }
-  if(a==='reelDl'){ if(!reelBlob) return; return saveFile(`${(S.info.name||'instatoon').replace(/\s+/g,'_')}_릴스.${reelExt}`, reelBlob); }
-  if(a==='statsAI') return run(b,statsAI);
-  if(a==='reelText') return run(b,makeReelText);
-  if(a==='reelCopy'){ const t=reelPostText(); if(!t.trim()){ toast('릴스 캡션이 비어 있어요. "릴스용 글 만들기"를 눌러 보세요'); return; } return copy(t); }
-  if(a==='reelCmtCopy') return copy(rt().comment||'');
-  if(a==='reply') return run(b,makeReply);
   if(a==='demo') return startDemo(b.dataset.ex);
   if(a==='demoEnd') return endDemo();
   if(a==='spell') return run(b,spellCheck);
@@ -3248,9 +3093,6 @@ document.addEventListener('input',e=>{
   if(el.dataset.prof){ prof()[el.dataset.prof]=el.value; save(); return kitCounters(); }
   if(el.dataset.pwho){ const x=mo().items[+el.dataset.pwho]; if(x){ x.who=el.value; save(); } return; }
   if(el.dataset.plink){ const x=mo().items[+el.dataset.plink]; if(x){ x.link=el.value.trim(); save(); } return; }
-  if(el.dataset.stat){ const [hid,k]=el.dataset.stat.split('|'), h=hist().find(x=>String(x.hid)===hid); if(h){ h.stats={...(h.stats||{}),[k]:el.value===''?'':Math.max(0,Number(el.value)||0)}; save(); clearTimeout(window._st); window._st=setTimeout(()=>{ const i2=$('#statsIns'); if(i2) i2.innerHTML=insHTML(); renderTodo(); },250); } return; }
-  if(el.dataset.reuse){ ru()[el.dataset.reuse]=el.value; save(); clearTimeout(window._ru); window._ru=setTimeout(()=>{ if(el.dataset.reuse==='title'&&reelUrl&&!reelBusy){ resetReel(); const v=$('#reelVid'); if(v){ v.hidden=true; v.removeAttribute('src'); } const rc=$('#reelCv'); if(rc) rc.hidden=false; const dl=document.querySelector('[data-act="reelDl"]'); if(dl) dl.hidden=true; } previewReuse(); },300); return; }
-  if(el.dataset.rt){ rt()[el.dataset.rt]=el.value; return save(); }
   if(el.dataset.preck){ const T=S.toon; T.pre={...(T.pre||{}),[el.dataset.preck]:el.checked}; save(); const c=$('#cnt-pre'); if(c) c.textContent=`${preItems().length-preLeft()} / ${preItems().length}`; return renderTodo(); }
   if(el.dataset.end){ ec()[el.dataset.end]=el.value; save(); const pr=$('#endPre'); if(pr) pr.textContent=endPrompt(); refreshEndPv(); return; }
   if(el.dataset.kitck){ const T=S.toon; T.kit={...(T.kit||{}),[el.dataset.kitck]:el.checked}; save(); return kitCounters(); }
@@ -3799,42 +3641,9 @@ JSON 하나로만 답해: {"concept":"","items":[{"date":"","type":"","title":""
     vars:{year:'연도',month:'월',count:'편 수',info:'사업·주인공·이야기 정보 묶음',memo:'내 소재 메모',stats:'지난 반응 기록(있을 때만)',dates:'올리는 날짜들',series:'연재 기억 덩어리(기억이 있을 때만, 없으면 빈칸)'},
     manual:[['year','연도','예: 2026'],['month','월','예: 11'],['count','편 수','예: 8'],['dates','올리는 날짜','예: 11/3, 11/6, 11/10 …'],['memo','소재 메모','선택','ta'],['stats','지난 반응 기록','선택','ta']],auto:{series:''},
     json:true,app:()=>{ const M=mo(), d=planDates(M.ym,M.freq), [y,m]=M.ym.split('-').map(Number); return {year:y,month:m,count:d.length,dates:d.join(', '),memo:M.memo,stats:statsBlock()}; }},
-  reelText:{tab:'reels',name:'릴스 캡션·해시태그·고정 댓글',use:'info',def:`너는 브랜드 인스타 담당이야. 이 인스타툰을 그림이 한 장씩 넘어가는 릴스 영상으로도 올려. 릴스에 붙일 글을 써 줘.
-{{info}}
-{{source}}
-규칙: caption은 첫 줄 20자 이내 궁금증(결말 스포일러 금지), 모두 2~3줄, 마지막 줄은 "전체 이야기는 프로필 게시물에서" 같은 안내. 이모지 1~2개. hashtags는 정확히 {{tagSlots}}개(고정 해시태그와 합쳐 5개), 공백 구분, 분야·브랜드 + 릴스 추천에 맞는 조금 넓은 주제 1~2개. comment는 릴스 고정 댓글 1개(다음 편 예고나 가벼운 질문). 광고 단어·과장 표현 금지, 입력 정보에 없는 사실은 지어내지 않기.
-JSON 하나로만 답해: {"caption":"","hashtags":"","comment":""}`,
-    vars:{info:'사업·주인공·이야기 정보 묶음',source:'웹툰 대본+게시물 캡션 또는 영상 제목',tagSlots:'해시태그 개수'},
-    manual:[['source','웹툰 대본 또는 영상 제목','대본·캡션 또는 영상 제목','ta']],auto:{tagSlots:'5'},
-    json:false,app:()=>({source:S.toon?`[웹툰 대본]\n${toonText()}\n[게시물 캡션 - 이것과 겹치지 않게]\n${S.toon.caption||'(없음)'}`:(reelTitle()?`[영상 제목] ${reelTitle()}`:'')})},
-  stats:{tab:'stats',name:'반응 분석 (운영 코치)',use:'info',def:`너는 인스타툰 운영 코치야. 아래 반응 기록을 보고 무엇이 잘 먹혔는지 운영자가 바로 이해할 말로 분석해.
-{{info}}
-[올린 편 반응]
-{{records}}
-규칙: 숫자에 근거해서만 말하고 편 수가 적으면 "아직 편 수가 적어 참고용"이라고 밝혀. 저장·공유를 가장 중요하게, 그다음 댓글, 좋아요 순으로 봐. 어려운 마케팅 용어 금지. insights 3개(각 60자 이내), next 3개(다음 달에 해 볼 구체적인 것, 각 50자 이내).
-JSON 하나로만 답해: {"insights":["","",""],"next":["","",""]}`,
-    vars:{info:'사업·주인공 정보 묶음',records:'올린 편별 반응 기록'},
-    manual:[['records','올린 편 반응 기록','편별 제목·도달·좋아요·댓글·저장·공유','ta']],auto:{},
-    json:false,app:()=>({records:hist().filter(hasStats).map(h=>`- ${h.title} / 첫 장 제목: ${h.hook||'-'} / 유형: ${h.type||'-'} / 목적: ${h.goal||'-'} / 테마: ${ARTS[h.art]?.name||'-'} / 컷 ${h.cuts||'-'} / 도달 ${sv(h,'reach')} 좋아요 ${sv(h,'like')} 댓글 ${sv(h,'cmt')} 저장 ${sv(h,'save')} 공유 ${sv(h,'share')}`).join('\n')})},
-  reply:{tab:'stats',name:'댓글 답글 3개 쓰기',use:'info',def:`너는 브랜드 인스타 계정의 댓글 담당이야. 받은 댓글에 달 답글 3개를 써 줘.
-{{info}}
-[이 댓글이 달린 편] {{episode}}
-[받은 댓글]
-{{comment}}
-규칙:
-- 먼저 댓글 종류를 판단: 칭찬, 질문, 불만, 장난, 광고·스팸 중 하나.
-- 답글 3개는 방식을 다르게: "짧고 다정하게", "정보 담아서", "재치 있게". 불만이면 세 번째 대신 "정중한 사과 + DM 안내".
-- 브랜드 프로필 말투를 따르고, 답글 하나 80자 이내, 이모지 0~2개. 운영자(브랜드) 입장에서.
-- 입력 정보에 없는 사실(가격, 주차, 영업시간, 재고 등)은 지어내지 말고 "DM 주시면 바로 알려 드릴게요"처럼 확인을 약속해.
-- @아이디는 쓰지 마(앱에서 답글 달기를 누르면 자동으로 붙어요).
-- 광고·스팸이면 replies는 빈 배열, note에 답글 대신 숨기기·신고를 권해.
-- note: 이 댓글을 다룰 때 한 줄 조언(예: 불만이면 공개 답글은 짧게, 자세한 건 DM으로).
-JSON 하나로만 답해: {"kind":"","note":"","replies":[{"style":"","text":""}]}`,
-    vars:{info:'사업·주인공·이야기 정보 묶음',episode:'댓글이 달린 편',comment:'받은 댓글'},
-    manual:[['episode','댓글이 달린 편','선택 · 편 제목'],['comment','받은 댓글','댓글 내용을 붙여 넣기','ta']],auto:{},
-    json:false,app:()=>({episode:hist()[0]?.title||'',comment:''})},
+
 };
-const ADM_TABS=[['one','한 편 만들기'],['month','한 달 기획'],['reels','스토리·릴스'],['stats','반응·댓글'],['art','그림체·테마']];
+const ADM_TABS=[['one','한 편 만들기'],['month','한 달 기획'],['art','그림체·테마']];
 /* 같은 틀을 {{이름}}에 값을 끼워 완성한다. 값 안의 {{...}}는 다시 풀지 않는다 */
 const admCustom=()=>admRead(ADM_KEY);
 function pTpl(id){ const t=admCustom()[id]; return typeof t==='string'&&t.trim()?t:PROMPTS[id].def; }
