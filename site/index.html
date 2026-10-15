@@ -3727,15 +3727,12 @@ const PROMPTS={
 - caption: 인스타 캡션. 첫 줄은 "더 보기"를 누르게 하는 한 줄, 이어서 3~4줄, 마지막 줄 행동 유도. 이모지 2~3개
 - hashtags: 해시태그 정확히 {{tagSlots}}개(인스타는 게시물당 5개까지만 반영돼요. 고정 해시태그 {{fixedCount}}개가 앞에 붙어 합계 5개가 되니, 더도 덜도 말고 {{tagSlots}}개만). 분야·이번 편 주제에 딱 맞는 구체적인 것, 공백 구분{{tagsNote}}
 - comment: 댓글 유도 질문 1개와 운영자 고정 댓글 1개, 줄바꿈 구분
-- reelCaption: 같은 웹툰을 릴스 영상으로 올릴 때의 캡션. 게시물 caption과 다르게 새로. 첫 줄은 20자 이내 궁금증(결말 스포일러 금지), 2~3줄, 마지막 줄은 "전체 이야기는 프로필 게시물에서" 같은 안내. 이모지 1~2개
-- reelHashtags: 릴스용 해시태그 정확히 {{tagSlots}}개(고정 해시태그 {{fixedCount}}개와 합쳐 5개), 공백 구분. 분야·브랜드 + 릴스 추천에 맞는 조금 넓은 주제 1~2개
-- reelComment: 릴스 고정 댓글 1개(다음 편 예고나 가벼운 질문)
 - endHead: 웹툰 맨 뒤 안내 카드의 큰 문구. 이번 편 이야기와 이어지게 두 줄(\n 구분), 한 줄 10자 이내, 광고 단어 금지
 - endBtn: 안내 카드 버튼 문구 12자 이내(읽는 사람이 할 행동, 예: 프로필 링크에서 예약)
 - cast: 주인공 말고 등장하는 인물들의 고정 외모 한 줄(예: 군 장병 5명 - 디지털 무늬 전투복, 짧은 머리, 모자 없음, 가슴에 빨간 명찰). 없으면 ""
 - ideas: 같은 브랜드로 다음에 만들 수 있는 다른 편 주제 3개(각 20자 이내)
 - memory: 이번 편 연재 기억. {"story":"줄거리 2줄 80자 이내","threads":["이번에 새로 남긴 떡밥 최대 2개"],"tone":"말투·관계 변화 한 줄"}
-JSON 하나로만 답해: {"title":"","tone":"","cuts":[{"role":"","shot":"","title":"","highlight":"","sub":"","bubble":"","bubbleSide":"l","sfx":"","direction":"","panels":"","caption":"","extras":""}],"hooks":["","",""],"caption":"","hashtags":"","comment":"","reelCaption":"","reelHashtags":"","reelComment":"","endHead":"","endBtn":"","cast":"","ideas":["","",""],"memory":{"story":"","threads":[],"tone":""}}`,
+JSON 하나로만 답해: {"title":"","tone":"","cuts":[{"role":"","shot":"","title":"","highlight":"","sub":"","bubble":"","bubbleSide":"l","sfx":"","direction":"","panels":"","caption":"","extras":""}],"hooks":["","",""],"caption":"","hashtags":"","comment":"","endHead":"","endBtn":"","cast":"","ideas":["","",""],"memory":{"story":"","threads":[],"tone":""}}`,
     vars:{n:'컷 수',info:'사업·주인공·이야기 정보 묶음',theme:'이번 편 주제 줄(없으면 빈칸)',rules:'아래 "공통 원칙" 틀',shots:'샷 종류 목록',tagSlots:'해시태그 개수',fixedCount:'고정 해시태그 수',tagsNote:'고정 해시태그와 겹치지 않게 하는 문구',series:'연재 기억 덩어리(기억이 있을 때만, 없으면 빈칸)'},
     manual:[['n','컷 수','예: 7'],['theme','이번 편 주제','선택']],auto:{shots:SHOTS.join(', '),tagSlots:'5',fixedCount:'0',tagsNote:'',series:''},
     json:true,app:()=>({n:S.info.cuts,theme:''}),
