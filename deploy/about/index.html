@@ -46,6 +46,24 @@ body{margin:0}
 .hb.pri{background:var(--ink);border-color:var(--ink);color:var(--surface)}
 .hb.pri:hover{opacity:.86}
 @media (max-width:480px){.hp{display:none}.hb{padding:0 14px}.topbar{gap:8px}}
+.hleft{display:flex;align-items:center;gap:10px;min-width:0}
+.menubtn{width:40px;height:40px;flex:none;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line-2);border-radius:12px;background:var(--surface);color:var(--ink);font:400 20px/1 var(--sans);cursor:pointer}
+.menubtn:hover{border-color:var(--ink)}
+.mwrap{position:fixed;inset:0;z-index:80;visibility:hidden}
+.mwrap.on{visibility:visible}
+.mwrap[hidden]{display:none}
+.mbg{position:absolute;inset:0;background:rgba(0,0,0,.4);opacity:0;transition:opacity .18s}
+.mwrap.on .mbg{opacity:1}
+.mpanel{position:absolute;left:0;top:0;bottom:0;width:min(300px,86vw);display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top,0px) + 12px) 12px 24px;overflow:auto;background:var(--surface);border-right:1px solid var(--ink);transform:translateX(-100%);transition:transform .18s}
+.mwrap.on .mpanel{transform:none}
+.mpanel ul{list-style:none;margin:0;padding:0}
+.mpanel hr{border:0;border-top:1px solid var(--line);margin:10px 0}
+.mi{display:flex;align-items:center;width:100%;min-height:48px;padding:0 14px;border:0;border-left:2px solid transparent;border-radius:0 10px 10px 0;background:none;color:var(--muted);font:600 16px/1 var(--sans);text-align:left;text-decoration:none;cursor:pointer}
+.mi:hover{background:var(--sunken);color:var(--ink)}
+.mi[aria-current="page"]{color:var(--ink);font-weight:800;border-left-color:var(--ink)}
+#shopSlot[hidden]{display:none}
+body.menu-open{overflow:hidden}
+@media (prefers-reduced-motion:reduce){.mbg,.mpanel{transition:none}}
 /* HEADER:END */
 .nav{display:flex;flex-wrap:wrap;gap:8px}
 .btn{border:1px solid var(--line-2);background:var(--surface);border-radius:999px;padding:8px 16px;min-height:40px;font-weight:700;font-size:14px;display:inline-flex;align-items:center;text-decoration:none;white-space:nowrap}
@@ -143,20 +161,30 @@ footer .nav a{color:var(--ink-2);text-decoration:none;padding:6px 4px;min-height
 footer .nav a:hover{text-decoration:underline}
 footer p{margin:10px 0 0;font-size:13px}
 </style>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"인스타툰 연재실 소개","url":"https://www.ai-instatoon.com/about/","description":"인스타툰 연재실이 누구를 위해 무엇을 하는 도구인지, 가이드 글을 어떻게 만들고 관리하는지, 이용 전에 알아둘 한계를 소개합니다.","inLanguage":"ko","dateModified":"2026-10-01"}</script><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://www.ai-instatoon.com/"},{"@type":"ListItem","position":2,"name":"인스타툰 연재실 소개","item":"https://www.ai-instatoon.com/about/"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"인스타툰 연재실 소개","url":"https://www.ai-instatoon.com/about/","description":"인스타툰 연재실이 누구를 위해 무엇을 하는 도구인지, 가이드 글을 어떻게 만들고 관리하는지, 이용 전에 알아둘 한계를 소개합니다.","inLanguage":"ko","dateModified":"2026-10-15"}</script><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://www.ai-instatoon.com/"},{"@type":"ListItem","position":2,"name":"인스타툰 연재실 소개","item":"https://www.ai-instatoon.com/about/"}]}</script>
 
 </head>
 <body data-page-type="info" data-slug="about"><a class="skip" href="#main">본문 바로가기</a>
 <div class="hwrap"><header class="topbar">
-<a class="brand" href="/" aria-label="인스타툰 연재실 첫 화면으로"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><b>인스타툰 연재실</b></a>
+<div class="hleft"><button type="button" class="menubtn" id="menuBtn" aria-label="메뉴 열기" aria-haspopup="dialog" aria-expanded="false" aria-controls="menuPanel"><span aria-hidden="true">☰</span></button>
+<a class="brand" href="/" aria-label="인스타툰 연재실 첫 화면으로"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><b>인스타툰 연재실</b></a></div>
 <nav class="hnav" aria-label="주요 메뉴"><a class="hb" href="/guide/" aria-label="인스타툰 노트"><span class="hp">인스타툰&nbsp;</span>노트</a><a class="hb pri" href="/" data-track="cta" data-loc="header" aria-label="인스타툰 만들기"><span class="hp">인스타</span>툰 만들기</a></nav>
-</header></div>
+</header></div><div class="mwrap" id="menuWrap" hidden><div class="mbg"></div><nav class="mpanel" id="menuPanel" role="dialog" aria-modal="true" aria-label="메뉴"><div id="shopSlot" hidden></div>
+<ul><li><a class="mi" href="/">인스타툰 만들기</a></li><li><a class="mi" href="/#month">한 달 기획</a></li><li><a class="mi" href="/#vault">캐릭터 보관함</a></li><li><a class="mi" href="/guide/">인스타툰 노트</a></li></ul><hr>
+<ul><li><a class="mi" href="/#backup">백업 저장 · 불러오기</a></li><li><a class="mi" href="/#help">사용 방법</a></li><li><a class="mi" href="/guide/instatoon-troubleshooting/">문제 해결</a></li></ul></nav></div><script>(function(){var b=document.getElementById('menuBtn'),w=document.getElementById('menuWrap');if(!b||!w)return;var t,on=function(){return !w.hidden&&w.classList.contains('on')};
+function op(){clearTimeout(t);w.hidden=false;document.body.classList.add('menu-open');b.setAttribute('aria-expanded','true');requestAnimationFrame(function(){requestAnimationFrame(function(){w.classList.add('on')})});setTimeout(function(){var f=w.querySelector('.mi');if(f&&on())f.focus({preventScroll:true})},40)}
+function cl(r){w.classList.remove('on');document.body.classList.remove('menu-open');b.setAttribute('aria-expanded','false');clearTimeout(t);t=setTimeout(function(){w.hidden=true},190);if(r!==false)b.focus({preventScroll:true})}
+b.addEventListener('click',function(){on()?cl():op()});
+w.addEventListener('click',function(e){if(e.target.closest('.mbg'))cl();else if(e.target.closest('.mi'))cl(false)});
+document.addEventListener('keydown',function(e){if(!on())return;if(e.key==='Escape'){e.preventDefault();cl();return}
+if(e.key==='Tab'){var a=[].slice.call(w.querySelectorAll('.mi'));if(!a.length)return;var f=a[0],l=a[a.length-1];if(e.shiftKey&&document.activeElement===f){e.preventDefault();l.focus()}else if(!e.shiftKey&&document.activeElement===l){e.preventDefault();f.focus()}}});
+})();</script>
 <main id="main" class="wrap">
 <nav class="crumb" aria-label="현재 위치"><ol><li><a href="/">홈</a></li><li aria-current="page">인스타툰 연재실 소개</li></ol></nav>
 <article class="article">
 <h1>인스타툰 연재실 소개</h1>
 <p class="lead">인스타툰 연재실은 브랜드·매장 운영자, 프리랜서, 크리에이터, 홍보 담당자가 내 이야기를 4~10컷 인스타툰으로 만들 수 있도록 돕는 웹 도구와 가이드를 제공하는 사이트입니다.</p>
-<p class="meta">최종 업데이트 <time datetime="2026-10-01">2026-10-01</time></p>
+<p class="meta">최종 업데이트 <time datetime="2026-10-15">2026-10-15</time></p>
 <section><h2 id="what">무엇을 하는 도구인가</h2><p>분야 하나만 고르면 내가 겪은 일을 바탕으로 대본, 컷 구성, 게시물 캡션, 해시태그, 릴스용 글의 초안을 만들어 줍니다. 한 달 연재표 기획, 완성 그림을 세로 영상과 스토리 이미지로 만드는 기능, 편마다 반응을 기록하는 기능, 댓글 답글 초안 도우미도 있습니다.</p><p>이 도구는 <strong>그림을 대신 그려 주지 않습니다.</strong> 컷별 그림 프롬프트를 정리해 주면 사용자가 ChatGPT 같은 외부 이미지 도구에서 그림을 만들고, 완성 그림은 다시 이 도구에 올려 저장합니다. 사용 순서는 <a href="/guide/how-to-use-instatoon-room/">사용법 글</a>에서 설명합니다.</p></section>
 <section><h2 id="who">누구를 위한 것인가</h2><p>디자인이나 마케팅을 전문으로 하지 않는 운영자와 창작자를 기준으로 만들었습니다. 매장, 프리랜서, 온라인 쇼핑몰, 회사, 개인 크리에이터 등 업종과 분야를 가리지 않습니다.</p></section>
 <section><h2 id="editorial">가이드 글은 어떻게 만들고 관리하나</h2><p>인스타툰 노트는 인스타툰 제작과 브랜드·SNS 운영에 대한 일반적인 설명입니다. 글은 AI 도구의 도움을 받아 작성한 초안을 바탕으로 하며, 다음 원칙으로 관리합니다.</p><ul><li>근거를 확인하지 못한 통계, 검색량, 매출·방문 증가율은 쓰지 않습니다.</li><li>예시로 든 브랜드와 사례는 글에서 &quot;가상&quot;이라고 표시합니다. 실제 고객 사례나 후기를 지어내지 않습니다.</li><li>Instagram, Facebook, Meta Business Suite 같은 외부 서비스의 기능은 자주 바뀌므로 단정하지 않고 공식 도움말 확인을 안내합니다.</li><li>법률·광고·저작권 관련 내용은 일반적인 정보이며 법률 자문이 아닙니다.</li><li>글을 고치면 최종 업데이트 날짜를 바꿉니다.</li></ul><p>잘못된 내용이나 오래된 내용을 발견하면 아래 문의 수단으로 알려 주세요. 문의 수단이 아직 게시되지 않은 동안에는 접수가 어렵습니다.</p></section>

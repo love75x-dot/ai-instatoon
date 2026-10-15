@@ -46,6 +46,24 @@ body{margin:0}
 .hb.pri{background:var(--ink);border-color:var(--ink);color:var(--surface)}
 .hb.pri:hover{opacity:.86}
 @media (max-width:480px){.hp{display:none}.hb{padding:0 14px}.topbar{gap:8px}}
+.hleft{display:flex;align-items:center;gap:10px;min-width:0}
+.menubtn{width:40px;height:40px;flex:none;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line-2);border-radius:12px;background:var(--surface);color:var(--ink);font:400 20px/1 var(--sans);cursor:pointer}
+.menubtn:hover{border-color:var(--ink)}
+.mwrap{position:fixed;inset:0;z-index:80;visibility:hidden}
+.mwrap.on{visibility:visible}
+.mwrap[hidden]{display:none}
+.mbg{position:absolute;inset:0;background:rgba(0,0,0,.4);opacity:0;transition:opacity .18s}
+.mwrap.on .mbg{opacity:1}
+.mpanel{position:absolute;left:0;top:0;bottom:0;width:min(300px,86vw);display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top,0px) + 12px) 12px 24px;overflow:auto;background:var(--surface);border-right:1px solid var(--ink);transform:translateX(-100%);transition:transform .18s}
+.mwrap.on .mpanel{transform:none}
+.mpanel ul{list-style:none;margin:0;padding:0}
+.mpanel hr{border:0;border-top:1px solid var(--line);margin:10px 0}
+.mi{display:flex;align-items:center;width:100%;min-height:48px;padding:0 14px;border:0;border-left:2px solid transparent;border-radius:0 10px 10px 0;background:none;color:var(--muted);font:600 16px/1 var(--sans);text-align:left;text-decoration:none;cursor:pointer}
+.mi:hover{background:var(--sunken);color:var(--ink)}
+.mi[aria-current="page"]{color:var(--ink);font-weight:800;border-left-color:var(--ink)}
+#shopSlot[hidden]{display:none}
+body.menu-open{overflow:hidden}
+@media (prefers-reduced-motion:reduce){.mbg,.mpanel{transition:none}}
 /* HEADER:END */
 .nav{display:flex;flex-wrap:wrap;gap:8px}
 .btn{border:1px solid var(--line-2);background:var(--surface);border-radius:999px;padding:8px 16px;min-height:40px;font-weight:700;font-size:14px;display:inline-flex;align-items:center;text-decoration:none;white-space:nowrap}
@@ -148,9 +166,19 @@ footer p{margin:10px 0 0;font-size:13px}
 </head>
 <body data-page-type="article" data-slug="instagram-reels-vs-feed" data-category="insta"><a class="skip" href="#main">본문 바로가기</a>
 <div class="hwrap"><header class="topbar">
-<a class="brand" href="/" aria-label="인스타툰 연재실 첫 화면으로"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><b>인스타툰 연재실</b></a>
+<div class="hleft"><button type="button" class="menubtn" id="menuBtn" aria-label="메뉴 열기" aria-haspopup="dialog" aria-expanded="false" aria-controls="menuPanel"><span aria-hidden="true">☰</span></button>
+<a class="brand" href="/" aria-label="인스타툰 연재실 첫 화면으로"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><b>인스타툰 연재실</b></a></div>
 <nav class="hnav" aria-label="주요 메뉴"><a class="hb" href="/guide/" aria-label="인스타툰 노트"><span class="hp">인스타툰&nbsp;</span>노트</a><a class="hb pri" href="/" data-track="cta" data-loc="header" aria-label="인스타툰 만들기"><span class="hp">인스타</span>툰 만들기</a></nav>
-</header></div>
+</header></div><div class="mwrap" id="menuWrap" hidden><div class="mbg"></div><nav class="mpanel" id="menuPanel" role="dialog" aria-modal="true" aria-label="메뉴"><div id="shopSlot" hidden></div>
+<ul><li><a class="mi" href="/">인스타툰 만들기</a></li><li><a class="mi" href="/#month">한 달 기획</a></li><li><a class="mi" href="/#vault">캐릭터 보관함</a></li><li><a class="mi" href="/guide/" aria-current="page">인스타툰 노트</a></li></ul><hr>
+<ul><li><a class="mi" href="/#backup">백업 저장 · 불러오기</a></li><li><a class="mi" href="/#help">사용 방법</a></li><li><a class="mi" href="/guide/instatoon-troubleshooting/">문제 해결</a></li></ul></nav></div><script>(function(){var b=document.getElementById('menuBtn'),w=document.getElementById('menuWrap');if(!b||!w)return;var t,on=function(){return !w.hidden&&w.classList.contains('on')};
+function op(){clearTimeout(t);w.hidden=false;document.body.classList.add('menu-open');b.setAttribute('aria-expanded','true');requestAnimationFrame(function(){requestAnimationFrame(function(){w.classList.add('on')})});setTimeout(function(){var f=w.querySelector('.mi');if(f&&on())f.focus({preventScroll:true})},40)}
+function cl(r){w.classList.remove('on');document.body.classList.remove('menu-open');b.setAttribute('aria-expanded','false');clearTimeout(t);t=setTimeout(function(){w.hidden=true},190);if(r!==false)b.focus({preventScroll:true})}
+b.addEventListener('click',function(){on()?cl():op()});
+w.addEventListener('click',function(e){if(e.target.closest('.mbg'))cl();else if(e.target.closest('.mi'))cl(false)});
+document.addEventListener('keydown',function(e){if(!on())return;if(e.key==='Escape'){e.preventDefault();cl();return}
+if(e.key==='Tab'){var a=[].slice.call(w.querySelectorAll('.mi'));if(!a.length)return;var f=a[0],l=a[a.length-1];if(e.shiftKey&&document.activeElement===f){e.preventDefault();l.focus()}else if(!e.shiftKey&&document.activeElement===l){e.preventDefault();f.focus()}}});
+})();</script>
 <main id="main" class="wrap">
 <nav class="crumb" aria-label="현재 위치"><ol><li><a href="/">홈</a></li><li><a href="/guide/">인스타툰 노트</a></li><li aria-current="page">인스타그램 릴스와 피드 콘텐츠는 어떻게 다를까?</li></ol></nav>
 <article class="article">
@@ -167,7 +195,7 @@ footer p{margin:10px 0 0;font-size:13px}
 <section><h2 id="s5">하나의 소재를 릴스로 만드는 방법</h2><ol><li>앞 3초에 결과나 질문을 먼저 보여준다.</li><li>관리법 세 가지를 장면 세 개로 촬영한다.</li><li>화면 속 자막은 한 줄로 짧게.</li><li>마지막 장면에 한 줄 안내.</li></ol></section>
 <section><h2 id="s6">인스타툰을 다른 콘텐츠로 확장하기</h2><p>인스타툰 한 편을 만들어 두면 컷을 그대로 활용할 수 있습니다. 컷별 이미지를 약 1~2초씩 이어 붙이고 대사를 자막으로 옮기면 영상형으로 재활용할 수 있어요. 반대로 릴스에서 반응이 있던 소재를 인스타툰으로 풀어 쓰는 것도 가능합니다. Facebook까지 확장하는 방법은 <a href="/guide/instagram-facebook-content/">Instagram과 Facebook 함께 운영하기</a>를 참고하세요.</p></section>
 <section><h2 id="s7">어떤 소재를 어디에 올릴까: 선택 기준</h2><div class="tbl"><table><thead><tr><th scope="col">질문</th><th scope="col">예라면</th><th scope="col">아니라면</th></tr></thead><tbody><tr><td>움직이는 장면이 핵심인가(만드는 과정, 변화)</td><td>릴스 우선</td><td>피드(이미지) 우선</td></tr><tr><td>나중에 다시 찾아볼 정보인가(가격표, 이용 방법)</td><td>피드 우선</td><td>릴스도 가능</td></tr><tr><td>글자로 정확히 전달해야 하는가(주의사항, 조건)</td><td>피드 우선</td><td>릴스도 가능</td></tr><tr><td>이야기와 대사로 보여주는 것인가</td><td>인스타툰(피드)</td><td>사진 한 장 또는 짧은 영상</td></tr></tbody></table></div></section>
-<section><h2 id="s8">인스타툰으로 릴스를 만드는 현실적인 순서</h2><ol><li>완성된 인스타툰 이미지를 같은 순서로 준비한다.</li><li>한 장당 몇 초 보여줄지 정한다(대사가 긴 컷은 더 오래).</li><li>영상 위 제목과 마지막 장 안내를 정한다.</li><li>영상 파일을 저장하고 인스타그램 앱에서 직접 올린다.</li></ol><p>인스타툰 연재실의 &quot;스토리·릴스&quot; 탭은 완성 그림을 세로 영상(1080×1920)으로 이어 붙이고 스토리용 이미지도 만들어 줍니다. 영상이 만들어지는 데 실제 재생 시간만큼 걸리고, 브라우저에 따라 파일 형식이 달라질 수 있어 인스타그램 앱에서 정상 업로드되는지는 한 번 직접 확인하세요.</p><aside class="callout warn"><b>주의</b><p>음악, 효과음, 폰트는 권리 문제가 있을 수 있어요. <a href="/guide/instagram-content-copyright/">저작권 확인 가이드</a>를 먼저 확인하세요.</p></aside></section>
+<section><h2 id="s8">인스타툰으로 릴스를 만드는 현실적인 순서</h2><ol><li>완성된 인스타툰 이미지를 같은 순서로 준비한다.</li><li>한 장당 몇 초 보여줄지 정한다(대사가 긴 컷은 더 오래).</li><li>영상 위 제목과 마지막 장 안내를 정한다.</li><li>영상 파일을 저장하고 인스타그램 앱에서 직접 올린다.</li></ol><p>인스타툰 연재실은 그림을 영상으로 이어 붙여 주지 않습니다. 완성한 그림은 휴대폰의 영상 편집 앱이나 인스타그램 앱의 릴스 만들기에서 순서대로 이어 붙이고, 영상이 만들어진 뒤에는 인스타그램 앱에서 정상적으로 올라가는지 한 번 직접 확인하세요.</p><aside class="callout warn"><b>주의</b><p>음악, 효과음, 폰트는 권리 문제가 있을 수 있어요. <a href="/guide/instagram-content-copyright/">저작권 확인 가이드</a>를 먼저 확인하세요.</p></aside></section>
 <section class="summary"><h2>이 글에서 기억할 내용</h2><ul><li>피드는 저장해 두고 다시 보는 정보·이야기에, 릴스는 움직임과 분위기에 알맞다.</li><li>하나의 소재를 두 형식으로 바꾸면 재료 수집 부담이 줄어든다.</li><li>인스타툰 컷은 릴스 장면으로 이어 붙일 수 있다.</li><li>기능 이름·노출 방식은 변경될 수 있어 공식 안내를 확인한다.</li></ul></section>
 <section class="cta"><h2>인스타툰을 직접 만들어보고 싶다면?</h2><p>인스타툰 연재실에서 내가 겪은 이야기를 인스타툰 콘텐츠로 만들어보세요.</p><a class="btn big" href="/" data-track="cta" data-loc="article_bottom">인스타툰 만들기</a></section>
 </article>

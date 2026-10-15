@@ -46,6 +46,24 @@ body{margin:0}
 .hb.pri{background:var(--ink);border-color:var(--ink);color:var(--surface)}
 .hb.pri:hover{opacity:.86}
 @media (max-width:480px){.hp{display:none}.hb{padding:0 14px}.topbar{gap:8px}}
+.hleft{display:flex;align-items:center;gap:10px;min-width:0}
+.menubtn{width:40px;height:40px;flex:none;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line-2);border-radius:12px;background:var(--surface);color:var(--ink);font:400 20px/1 var(--sans);cursor:pointer}
+.menubtn:hover{border-color:var(--ink)}
+.mwrap{position:fixed;inset:0;z-index:80;visibility:hidden}
+.mwrap.on{visibility:visible}
+.mwrap[hidden]{display:none}
+.mbg{position:absolute;inset:0;background:rgba(0,0,0,.4);opacity:0;transition:opacity .18s}
+.mwrap.on .mbg{opacity:1}
+.mpanel{position:absolute;left:0;top:0;bottom:0;width:min(300px,86vw);display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top,0px) + 12px) 12px 24px;overflow:auto;background:var(--surface);border-right:1px solid var(--ink);transform:translateX(-100%);transition:transform .18s}
+.mwrap.on .mpanel{transform:none}
+.mpanel ul{list-style:none;margin:0;padding:0}
+.mpanel hr{border:0;border-top:1px solid var(--line);margin:10px 0}
+.mi{display:flex;align-items:center;width:100%;min-height:48px;padding:0 14px;border:0;border-left:2px solid transparent;border-radius:0 10px 10px 0;background:none;color:var(--muted);font:600 16px/1 var(--sans);text-align:left;text-decoration:none;cursor:pointer}
+.mi:hover{background:var(--sunken);color:var(--ink)}
+.mi[aria-current="page"]{color:var(--ink);font-weight:800;border-left-color:var(--ink)}
+#shopSlot[hidden]{display:none}
+body.menu-open{overflow:hidden}
+@media (prefers-reduced-motion:reduce){.mbg,.mpanel{transition:none}}
 /* HEADER:END */
 .nav{display:flex;flex-wrap:wrap;gap:8px}
 .btn{border:1px solid var(--line-2);background:var(--surface);border-radius:999px;padding:8px 16px;min-height:40px;font-weight:700;font-size:14px;display:inline-flex;align-items:center;text-decoration:none;white-space:nowrap}
@@ -148,9 +166,19 @@ footer p{margin:10px 0 0;font-size:13px}
 </head>
 <body data-page-type="article" data-slug="instatoon-storytelling" data-category="toon"><a class="skip" href="#main">본문 바로가기</a>
 <div class="hwrap"><header class="topbar">
-<a class="brand" href="/" aria-label="인스타툰 연재실 첫 화면으로"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><b>인스타툰 연재실</b></a>
+<div class="hleft"><button type="button" class="menubtn" id="menuBtn" aria-label="메뉴 열기" aria-haspopup="dialog" aria-expanded="false" aria-controls="menuPanel"><span aria-hidden="true">☰</span></button>
+<a class="brand" href="/" aria-label="인스타툰 연재실 첫 화면으로"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><b>인스타툰 연재실</b></a></div>
 <nav class="hnav" aria-label="주요 메뉴"><a class="hb" href="/guide/" aria-label="인스타툰 노트"><span class="hp">인스타툰&nbsp;</span>노트</a><a class="hb pri" href="/" data-track="cta" data-loc="header" aria-label="인스타툰 만들기"><span class="hp">인스타</span>툰 만들기</a></nav>
-</header></div>
+</header></div><div class="mwrap" id="menuWrap" hidden><div class="mbg"></div><nav class="mpanel" id="menuPanel" role="dialog" aria-modal="true" aria-label="메뉴"><div id="shopSlot" hidden></div>
+<ul><li><a class="mi" href="/">인스타툰 만들기</a></li><li><a class="mi" href="/#month">한 달 기획</a></li><li><a class="mi" href="/#vault">캐릭터 보관함</a></li><li><a class="mi" href="/guide/" aria-current="page">인스타툰 노트</a></li></ul><hr>
+<ul><li><a class="mi" href="/#backup">백업 저장 · 불러오기</a></li><li><a class="mi" href="/#help">사용 방법</a></li><li><a class="mi" href="/guide/instatoon-troubleshooting/">문제 해결</a></li></ul></nav></div><script>(function(){var b=document.getElementById('menuBtn'),w=document.getElementById('menuWrap');if(!b||!w)return;var t,on=function(){return !w.hidden&&w.classList.contains('on')};
+function op(){clearTimeout(t);w.hidden=false;document.body.classList.add('menu-open');b.setAttribute('aria-expanded','true');requestAnimationFrame(function(){requestAnimationFrame(function(){w.classList.add('on')})});setTimeout(function(){var f=w.querySelector('.mi');if(f&&on())f.focus({preventScroll:true})},40)}
+function cl(r){w.classList.remove('on');document.body.classList.remove('menu-open');b.setAttribute('aria-expanded','false');clearTimeout(t);t=setTimeout(function(){w.hidden=true},190);if(r!==false)b.focus({preventScroll:true})}
+b.addEventListener('click',function(){on()?cl():op()});
+w.addEventListener('click',function(e){if(e.target.closest('.mbg'))cl();else if(e.target.closest('.mi'))cl(false)});
+document.addEventListener('keydown',function(e){if(!on())return;if(e.key==='Escape'){e.preventDefault();cl();return}
+if(e.key==='Tab'){var a=[].slice.call(w.querySelectorAll('.mi'));if(!a.length)return;var f=a[0],l=a[a.length-1];if(e.shiftKey&&document.activeElement===f){e.preventDefault();l.focus()}else if(!e.shiftKey&&document.activeElement===l){e.preventDefault();f.focus()}}});
+})();</script>
 <main id="main" class="wrap">
 <nav class="crumb" aria-label="현재 위치"><ol><li><a href="/">홈</a></li><li><a href="/guide/">인스타툰 노트</a></li><li aria-current="page">인스타툰 스토리 만드는 방법: 평범한 일상을 콘텐츠로 바꾸기</li></ol></nav>
 <article class="article">
@@ -168,7 +196,7 @@ footer p{margin:10px 0 0;font-size:13px}
 <section><h2 id="s6">하나의 사건을 여러 편으로 나누기</h2><p>한 사건에서도 각도를 바꾸면 다른 편이 됩니다.</p><div class="tbl"><table><thead><tr><th scope="col">각도</th><th scope="col">예: 신메뉴 개발 사건</th></tr></thead><tbody><tr><td>시작</td><td>왜 이 메뉴를 만들게 됐는지</td></tr><tr><td>과정</td><td>시행착오 세 번</td></tr><tr><td>손님 반응</td><td>처음 맛본 손님의 한마디</td></tr><tr><td>정보</td><td>맛있게 먹는 방법·재료 소개</td></tr></tbody></table></div></section>
 <section><h2 id="s7">시리즈 콘텐츠 만들기</h2><ul><li>제목에 고정 형식 넣기 (예: &quot;사장님의 하루 #3&quot;)</li><li>같은 주인공, 같은 배경 유지</li><li>마지막 컷에 다음 편 힌트 한 줄</li><li>월 단위로 주제 한 줄씩 미리 적어두기</li></ul><aside class="callout tip"><b>실전 팁</b><p>주 1편을 약속하기 어렵다면 격주나 월 2편으로 시작해도 괜찮습니다. 지키기 쉬운 주기가 오래 갑니다.</p></aside></section>
 <section><h2 id="s8">소재 메모를 이야기로 바꾸는 예</h2><p>한 줄 메모가 어떻게 4컷 이야기가 되는지 과정을 보면 방법이 분명해집니다. 아래는 가상의 안경점입니다.</p><div class="example"><b>예시 · 메모 → 이야기</b><p>메모: &quot;손님이 안경을 맞추고 일주일 뒤에 다시 와서, 처음엔 어지러웠는데 이제 괜찮다고 했다&quot;</p><p>질문: 이 일에서 다른 손님이 알아야 할 것은? → 새 안경은 적응 기간이 필요할 수 있다는 점</p><p>이야기: 컷 1 안경을 쓰고 갸웃하는 손님 / 컷 2 &quot;어지러워요&quot; / 컷 3 사장님이 며칠은 짧게 자주 써 보라고 안내 / 컷 4 일주일 뒤 웃으며 재방문</p></div><aside class="callout warn"><b>주의</b><p>의학적 판단이 필요한 내용은 단정하지 말고 &quot;사람마다 다를 수 있어요, 불편이 계속되면 매장에 문의해 주세요&quot;처럼 안내로 마무리하세요.</p></aside></section>
-<section><h2 id="s9">소재가 떨어졌을 때 쓰는 질문 다섯 가지</h2><ol><li>이번 주에 손님이 가장 많이 했던 질문은?</li><li>오늘 직원끼리 웃었던 일은?</li><li>처음 일할 때와 지금 달라진 습관은?</li><li>단골이 꼭 시키는 메뉴나 요청은?</li><li>비 오는 날, 손님이 없는 날, 바쁜 날 중 한 장면을 고른다면?</li></ol><p>다섯 질문에 한 줄씩만 답해도 한 달 치 소재가 생깁니다. 인스타툰 연재실의 &quot;한 달 기획&quot; 탭은 이런 소재 메모를 넣으면 날짜별 연재표로 정리해 줍니다. 단, AI가 제안한 소재는 우리 가게에 실제로 있었던 일인지 사장님이 확인해야 합니다.</p></section>
+<section><h2 id="s9">소재가 떨어졌을 때 쓰는 질문 다섯 가지</h2><ol><li>이번 주에 손님이 가장 많이 했던 질문은?</li><li>오늘 직원끼리 웃었던 일은?</li><li>처음 일할 때와 지금 달라진 습관은?</li><li>단골이 꼭 시키는 메뉴나 요청은?</li><li>비 오는 날, 손님이 없는 날, 바쁜 날 중 한 장면을 고른다면?</li></ol><p>다섯 질문에 한 줄씩만 답해도 한 달 치 소재가 생깁니다. 인스타툰 연재실의 ☰ 메뉴에서 &quot;한 달 기획&quot;을 열고 이런 소재 메모를 넣으면 날짜별 연재표로 정리해 줍니다. 단, AI가 제안한 소재는 우리 가게에 실제로 있었던 일인지 사장님이 확인해야 합니다.</p></section>
 <section class="summary"><h2>이 글에서 기억할 내용</h2><ul><li>이야기는 &quot;예상과 달랐던 순간&quot;에서 만들어진다.</li><li>고객 질문, 사장님의 경험, 실수담은 꾸미지 않아도 쓸 수 있는 소재다.</li><li>한 사건을 여러 각도로 나누면 한 편이 아니라 시리즈가 된다.</li><li>소재 메모를 한곳에 모아두면 업로드 전날 막히지 않는다.</li></ul></section>
 <section class="cta"><h2>인스타툰을 직접 만들어보고 싶다면?</h2><p>인스타툰 연재실에서 내가 겪은 이야기를 인스타툰 콘텐츠로 만들어보세요.</p><a class="btn big" href="/" data-track="cta" data-loc="article_bottom">인스타툰 만들기</a></section>
 </article>

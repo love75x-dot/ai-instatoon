@@ -46,6 +46,24 @@ body{margin:0}
 .hb.pri{background:var(--ink);border-color:var(--ink);color:var(--surface)}
 .hb.pri:hover{opacity:.86}
 @media (max-width:480px){.hp{display:none}.hb{padding:0 14px}.topbar{gap:8px}}
+.hleft{display:flex;align-items:center;gap:10px;min-width:0}
+.menubtn{width:40px;height:40px;flex:none;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line-2);border-radius:12px;background:var(--surface);color:var(--ink);font:400 20px/1 var(--sans);cursor:pointer}
+.menubtn:hover{border-color:var(--ink)}
+.mwrap{position:fixed;inset:0;z-index:80;visibility:hidden}
+.mwrap.on{visibility:visible}
+.mwrap[hidden]{display:none}
+.mbg{position:absolute;inset:0;background:rgba(0,0,0,.4);opacity:0;transition:opacity .18s}
+.mwrap.on .mbg{opacity:1}
+.mpanel{position:absolute;left:0;top:0;bottom:0;width:min(300px,86vw);display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top,0px) + 12px) 12px 24px;overflow:auto;background:var(--surface);border-right:1px solid var(--ink);transform:translateX(-100%);transition:transform .18s}
+.mwrap.on .mpanel{transform:none}
+.mpanel ul{list-style:none;margin:0;padding:0}
+.mpanel hr{border:0;border-top:1px solid var(--line);margin:10px 0}
+.mi{display:flex;align-items:center;width:100%;min-height:48px;padding:0 14px;border:0;border-left:2px solid transparent;border-radius:0 10px 10px 0;background:none;color:var(--muted);font:600 16px/1 var(--sans);text-align:left;text-decoration:none;cursor:pointer}
+.mi:hover{background:var(--sunken);color:var(--ink)}
+.mi[aria-current="page"]{color:var(--ink);font-weight:800;border-left-color:var(--ink)}
+#shopSlot[hidden]{display:none}
+body.menu-open{overflow:hidden}
+@media (prefers-reduced-motion:reduce){.mbg,.mpanel{transition:none}}
 /* HEADER:END */
 .nav{display:flex;flex-wrap:wrap;gap:8px}
 .btn{border:1px solid var(--line-2);background:var(--surface);border-radius:999px;padding:8px 16px;min-height:40px;font-weight:700;font-size:14px;display:inline-flex;align-items:center;text-decoration:none;white-space:nowrap}
@@ -148,9 +166,19 @@ footer p{margin:10px 0 0;font-size:13px}
 </head>
 <body data-page-type="article" data-slug="meta-business-suite-guide" data-category="meta"><a class="skip" href="#main">본문 바로가기</a>
 <div class="hwrap"><header class="topbar">
-<a class="brand" href="/" aria-label="인스타툰 연재실 첫 화면으로"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><b>인스타툰 연재실</b></a>
+<div class="hleft"><button type="button" class="menubtn" id="menuBtn" aria-label="메뉴 열기" aria-haspopup="dialog" aria-expanded="false" aria-controls="menuPanel"><span aria-hidden="true">☰</span></button>
+<a class="brand" href="/" aria-label="인스타툰 연재실 첫 화면으로"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><b>인스타툰 연재실</b></a></div>
 <nav class="hnav" aria-label="주요 메뉴"><a class="hb" href="/guide/" aria-label="인스타툰 노트"><span class="hp">인스타툰&nbsp;</span>노트</a><a class="hb pri" href="/" data-track="cta" data-loc="header" aria-label="인스타툰 만들기"><span class="hp">인스타</span>툰 만들기</a></nav>
-</header></div>
+</header></div><div class="mwrap" id="menuWrap" hidden><div class="mbg"></div><nav class="mpanel" id="menuPanel" role="dialog" aria-modal="true" aria-label="메뉴"><div id="shopSlot" hidden></div>
+<ul><li><a class="mi" href="/">인스타툰 만들기</a></li><li><a class="mi" href="/#month">한 달 기획</a></li><li><a class="mi" href="/#vault">캐릭터 보관함</a></li><li><a class="mi" href="/guide/" aria-current="page">인스타툰 노트</a></li></ul><hr>
+<ul><li><a class="mi" href="/#backup">백업 저장 · 불러오기</a></li><li><a class="mi" href="/#help">사용 방법</a></li><li><a class="mi" href="/guide/instatoon-troubleshooting/">문제 해결</a></li></ul></nav></div><script>(function(){var b=document.getElementById('menuBtn'),w=document.getElementById('menuWrap');if(!b||!w)return;var t,on=function(){return !w.hidden&&w.classList.contains('on')};
+function op(){clearTimeout(t);w.hidden=false;document.body.classList.add('menu-open');b.setAttribute('aria-expanded','true');requestAnimationFrame(function(){requestAnimationFrame(function(){w.classList.add('on')})});setTimeout(function(){var f=w.querySelector('.mi');if(f&&on())f.focus({preventScroll:true})},40)}
+function cl(r){w.classList.remove('on');document.body.classList.remove('menu-open');b.setAttribute('aria-expanded','false');clearTimeout(t);t=setTimeout(function(){w.hidden=true},190);if(r!==false)b.focus({preventScroll:true})}
+b.addEventListener('click',function(){on()?cl():op()});
+w.addEventListener('click',function(e){if(e.target.closest('.mbg'))cl();else if(e.target.closest('.mi'))cl(false)});
+document.addEventListener('keydown',function(e){if(!on())return;if(e.key==='Escape'){e.preventDefault();cl();return}
+if(e.key==='Tab'){var a=[].slice.call(w.querySelectorAll('.mi'));if(!a.length)return;var f=a[0],l=a[a.length-1];if(e.shiftKey&&document.activeElement===f){e.preventDefault();l.focus()}else if(!e.shiftKey&&document.activeElement===l){e.preventDefault();f.focus()}}});
+})();</script>
 <main id="main" class="wrap">
 <nav class="crumb" aria-label="현재 위치"><ol><li><a href="/">홈</a></li><li><a href="/guide/">인스타툰 노트</a></li><li aria-current="page">Meta Business Suite란? 소상공인을 위한 SNS 콘텐츠 관리 기초</li></ol></nav>
 <article class="article">
@@ -170,7 +198,7 @@ footer p{margin:10px 0 0;font-size:13px}
 <section><h2 id="s8">인스타툰 콘텐츠를 활용하는 방법</h2><ul><li>인스타툰 시리즈를 일정에 맞춰 정리해 두기</li><li>인사이트에서 인스타툰과 일반 사진 게시물의 반응을 비교하기</li><li>캡션 템플릿을 정해서 올릴 때마다 빠르게 작성하기</li></ul></section>
 <section><h2 id="s9">사용 전에 확인할 사항</h2><ul class="chk"><li>내 계정 유형이 사용 조건에 맞는지</li><li>여러 사람이 관리할 때 권한을 어떻게 나눌지</li><li>개인정보가 포함된 메시지를 안전하게 다루는지</li><li>현재 공식 도움말과 화면 구성이 이 글과 다르지 않은지</li></ul><aside class="callout warn"><b>주의</b><p>Meta 서비스의 기능, 정책, 이름은 자주 바뀔 수 있습니다. 이 글은 일반적인 안내이며, 최신 내용은 반드시 Meta 고객센터와 도움말에서 확인하세요.</p></aside></section>
 <section><h2 id="s10">도구를 쓰기 전에 정리해 둘 것(체크리스트)</h2><ul class="chk"><li>Facebook 페이지와 Instagram 계정의 관리자가 누구인지</li><li>계정 로그인 정보를 공유하지 않고 권한 부여 방식으로 나누는지</li><li>자주 오는 문의에 대한 답변 문구가 준비돼 있는지</li><li>게시 일정표(요일별 주제)가 있는지</li></ul></section>
-<section><h2 id="s11">인사이트를 볼 때의 원칙</h2><ul><li>한 번의 결과로 결론 내리지 말고 비슷한 게시물끼리 비교한다</li><li>숫자의 정의는 Meta의 도움말에서 확인한다</li><li>반응이 낮은 게시물도 삭제하기 전에 어떤 점이 달랐는지 기록한다</li></ul><p>인스타툰 연재실의 &quot;반응·댓글&quot; 탭에서도 편마다 도달·좋아요·댓글·저장·공유를 직접 기록해 비교할 수 있습니다. 이 숫자는 사용자가 직접 입력하는 값이며 Instagram과 자동 연동되지 않습니다.</p></section>
+<section><h2 id="s11">인사이트를 볼 때의 원칙</h2><ul><li>한 번의 결과로 결론 내리지 말고 비슷한 게시물끼리 비교한다</li><li>숫자의 정의는 Meta의 도움말에서 확인한다</li><li>반응이 낮은 게시물도 삭제하기 전에 어떤 점이 달랐는지 기록한다</li></ul><p>인스타툰 연재실에는 반응을 기록하는 화면이 없습니다. 편마다 도달·좋아요·댓글·저장·공유를 스프레드시트나 메모에 직접 옮겨 적어 비교하세요. 이 숫자는 Instagram이 보여 주는 값을 직접 옮겨 적는 것이며 자동으로 연동되지 않습니다.</p></section>
 <section class="summary"><h2>이 글에서 기억할 내용</h2><ul><li>Meta Business Suite는 Facebook·Instagram 비즈니스 계정을 함께 관리하는 도구다.</li><li>게시물, 일정, 메시지, 인사이트 확인이 대표 용도다.</li><li>지원 기능과 메뉴 위치는 바뀔 수 있어 공식 도움말을 기준으로 한다.</li><li>인스타툰 콘텐츠도 다른 게시물처럼 일정에 맞춰 관리할 수 있다.</li></ul></section>
 <section class="cta"><h2>인스타툰을 직접 만들어보고 싶다면?</h2><p>인스타툰 연재실에서 내가 겪은 이야기를 인스타툰 콘텐츠로 만들어보세요.</p><a class="btn big" href="/" data-track="cta" data-loc="article_bottom">인스타툰 만들기</a></section>
 </article>
