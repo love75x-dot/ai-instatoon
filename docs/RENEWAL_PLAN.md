@@ -212,7 +212,7 @@
 | 단계 | 내용 | 상태 | 브랜치 | 미리보기 주소 |
 |---|---|---|---|---|
 | 4a | 캐릭터 보관함 (+백업·내보내기·첨부 목록·문장 승인 반영) | **미리보기** (origin에 푸시됨, PR 없음). 사장님이 미리보기에서 백업 시험을 마치고 "병합"이라고 하면 병합. `deploy/`·`package-lock.json`은 커밋하지 않음 | `renewal-4a-vault` | https://renewal-4a-vault-ai-instatoon.love75x.workers.dev/ (2026-10-15 확인: 열림, 보관함 코드 포함, noindex) |
-| 4c | 무료 맛보기 AI(/api/ai Worker)·토큰 줄이기·이용자 키 429 재시도·운영자 Claude 모드·연재 기억 | **일부 승인** (아래 "4c 승인 상태" 참고). 코드 없음. 4a 병합 뒤 `main`에서 브랜치 생성 | `renewal-4c-ai` (아직 안 만듦) | 없음. 브랜치 푸시 후 `https://<브랜치>-ai-instatoon.love75x.workers.dev/` 형식(긴 이름 줄임 여부는 확인 필요) |
+| 4c | 무료 맛보기 AI(/api/ai Worker)·토큰 줄이기·이용자 키 429 재시도·운영자 Claude 모드·연재 기억 | **미리보기** (구현·자동 검사 통과, 승인·설정 대기. 아래 "4c 구현 기록") | `renewal-4c-ai` (origin에 푸시됨) | https://renewal-4c-ai-ai-instatoon.love75x.workers.dev/ (2026-10-15 확인: 열림, `/api/ai/config` 응답함, 맛보기는 비밀값 설정 전이라 꺼짐) |
 | 4b | ☰ 메뉴 + 홈 간소화 + 반응·댓글/스토리·릴스/지금 설정 탭 없애기 + 백업이 묻히지 않게 + 메뉴 맨 위 `#shopSlot` 빈 자리 | **화면 초안 승인 대기** (지시문 수령, 아래 "4b 범위" 참고. 4c 다음에 시작) | `renewal-4b-simple` (아직 안 만듦) | 없음 |
 | 4d | 가게(작업 공간) 전환·가게별 백업·가게별 Claude 추정 사용액 | **승인됨**, 시작 전 (4b 다음) | `renewal-4d-shops` (아직 안 만듦) | 없음 |
 | 4e | 다음 항목 복사·젠스파크 전용 모드·모바일/PC 구분 (옛 `renewal-4-copy`) | **시작 전** (4d 다음) | `renewal-4e-copy` (이름은 시작 때 확정) | 없음 |
@@ -244,7 +244,7 @@
   - 기존 골든 영향: `make`·`month` 요청 문장은 지금 골든(`dev/golden`, 3단계 그림 프롬프트 전용)에 없으므로 **바뀌는 기존 골든 시나리오는 0개**. 대신 `make`·`month` 현재 문장을 먼저 기준으로 저장하고(변경 전 스냅샷), 새 골든(`연재기억_없음`·`연재기억_있음` 등)에서 차이가 `memory` 요청 줄과 `[연재 기억]` 덩어리뿐임을 확인한다.
   - 처리방침: "사람이 직접 일하는 봇을 막기 위해"를 "자동 프로그램(봇)이 무료 체험을 남용하지 못하게 하려고"로 바꾼다. 나머지 문장은 초안 그대로.
 - **최종 승인 대기:** 무료 경로 짧은 판 `rules`·`flow`의 품질(보리당 비교). 비교는 사장님 키로 돌리는 `dev/compare/` 스크립트로 한다(키는 채팅에 붙이지 않음).
-- **사장님 몫(차례가 되면 화면 기준으로 한 단계씩 안내):** Google·Groq·OpenRouter 키 1개씩, Cloudflare Secret 4개, Turnstile, KV `AI_QUOTA`. Gemini 오류 문구·aistudio 사용량 화면은 사장님이 확인해서 따로 전달.
+- **사장님 몫(차례가 되면 화면 기준으로 한 단계씩 안내):** Google·Groq·OpenRouter 키 1개씩, Cloudflare Secret 4개, Turnstile (KV `AI_QUOTA`는 Durable Object로 대체되어 불필요, 아래 "4c 구현 기록" 참고). Gemini 오류 문구·aistudio 사용량 화면은 사장님이 확인해서 따로 전달.
 
 #### 4d 승인 상태 (2026-10-15)
 - 승인: 새로고침 전환 / 저장 줄에 가게 이름 / 보관함 가져오기는 복사 / 가게가 여럿일 때 옛 백업은 "새 가게로 추가" 기본 / 가게 수 상한 없이 저장 공간 표시 / **가게별 Claude 추정 사용액을 가게 목록에 작게 표시**(데이터: 가게별 월별 토큰 기반 추정액, 가게 키 `instatoon.usage@id`).
@@ -391,3 +391,14 @@
   - **검사:** 기존 골든 불변(가게 1개일 때 프롬프트 동일), 새 `dev/design/shops.mjs`에서 A·B 가게의 표식(상호·주인공·보관함 ID·장소·연재 기억·브랜드 말투)이 프롬프트 전체에 서로 섞이지 않는지·A 복귀 시 처음과 같은지 확인, 호환 검사에 옛 데이터·옛 백업이 "내 가게"로 들어가는 항목과 v2 왕복 추가.
 - 2026-10-15 (사장님 결정 · 순서와 승인): 순서 **4a 병합 → 4c → 4b(`renewal-4b-simple`) → 4d → 4e**. 옛 4단계(`renewal-4-copy`: 다음 항목 복사·젠스파크 전용 모드·모바일/PC 구분)는 4e로 분리. 4b 범위는 "☰ 메뉴 + 홈 간소화 + 반응·댓글/스토리·릴스/지금 설정 탭 없애기 + 백업이 묻히지 않게 + #shopSlot 빈 자리"(상세 지시문은 기록에 없어 재전달 요청 중). 4a는 사장님이 미리보기에서 백업 시험을 마치고 "병합"이라고 하면 병합하며 `deploy/`·`package-lock.json`은 커밋하지 않음. 4c: 무료 경로 한정 짧은 판 rules·flow는 조건부 승인(Claude·유료 키는 원래 문장, 출력 형식 동일, 보리당 비교 후 최종 승인), 맛보기 make·month 1인 하루 1편·약한 문장 검사 승인, 연재 기억 문장·처리방침 초안은 검토 중. 4d: 다섯 가지 모두 승인 + 가게별 Claude 추정 사용액 표시.
 - 2026-10-15 (4c 문장 승인): 위 4c 승인 상태 참고. 연재 기억 `memory` 출력 요청은 첫 편부터 항상(약 150토큰), `[연재 기억]` 입력만 기억이 있을 때. 연재 기억 보기·수정·삭제 목록(편별 한 줄, 기본 접힘)을 만든다. 저장: `S.series[]`(편마다 `{hid,title,story,threads[],tone,at}`, 최대 20편 보관, 요청에는 최근 3편만). 4d에서 가게별로 분리됨(`S` 안이라 자동).
+
+- 2026-10-15 (4c 구현 기록 · `renewal-4c-ai`):
+  - **구현한 것:** ① `make`·`month` 글 프롬프트 골든(`dev/golden/text.mjs`, 변경 전 기준 저장 후 `memory` 요청·연재 기억 덩어리만 차이) ② 연재 기억(`S.series` 최대 20편, 요청에는 최근 3편, 목록 보기·수정·삭제 접힘, `memory`는 첫 편부터 항상 요청) ③ 이용자 키 429 → 같은 키로 다른 무료 모델 1회 재시도 + 한국 시간 초기화 안내(태평양시 자정, 여름 오후 4시·겨울 오후 5시) + 요청 전 입력 저장 + 기존 `retry in [d.]` 정규식 오타 수정 ④ 운영자 Claude 모드(고급 설정 AI 종류, 기획·대본 `claude-sonnet-5-5`·나머지 `claude-haiku-5-5`, `effort: low`, 브라우저 직접 호출 헤더, `instatoon.usage`에 월별·가게(`s1`)별 토큰 합계 → 추정 금액) ⑤ 무료 맛보기 Worker·화면 ⑥ 짧은 지시문(꺼 둠) + 비교 스크립트 ⑦ 개인정보처리방침 "3. 무료 체험" 절(승인 문장, 봇 문구 수정 반영).
+  - **기본 무료 모델:** `gemini-3.1-flash-lite`(공식 문서에서 정식 ID 확인: ai.google.dev/gemini-api/docs/models/gemini-3.1-flash-lite). 예비(429 시) `gemini-3.5-flash`. `gemini-3.5-flash-lite`는 검색에서 확인되지 않아 쓰지 않음. 키 시트 고급 설정에서 둘 다 바꿀 수 있음.
+  - **설계 변경(사장님 몫 줄임):** 하루 한도 저장소를 KV(`AI_QUOTA`) 대신 **Durable Object**(SQLite, `QUOTA`)로 했다. KV는 네임스페이스 ID를 설정 파일에 써야 해서 사장님 설정 단계가 늘고, DO는 ID 없이 `wrangler.jsonc`의 `migrations`만으로 생성됨. 입력·결과는 저장하지 않고 "IP 해시+날짜별 횟수·공급자별 하루 사용량·429 잠금 시각"만 저장, 하루(한국 시간 자정)가 지나면 지움.
+  - **Worker 동작:** `/api/ai`(POST, make·month만)·`/api/ai/config`(GET). 검사 순서 출처(허용 도메인) → 크기 → 작업 이름 → 요청 문장 첫 줄(앱의 make·month 고정 문장)·출력 형식 표지·길이(9,000자) → Turnstile → IP 분당 제한(Rate Limiting 바인딩 5회/60초) → 1인 하루 한도(make 1·month 1, `TASTE_MAKE_PER_DAY`·`TASTE_MONTH_PER_DAY`) → Gemini → Groq(`openai/gpt-oss-120b`, reasoning low, 출력 3,500토큰) → OpenRouter(`openrouter/free`). 429면 그 공급자를 응답의 대기 시간만큼 건너뜀, 공급자별 하루 상한(`GEMINI_DAILY_CAP` 400·`GROQ_DAILY_CAP` 18·`OPENROUTER_DAILY_CAP` 45), JSON·`cuts`/`items` 형식이 어긋난 답은 다음 공급자로, 모두 실패하면 503 `exhausted`이며 그날의 1편은 환불. 공개 설정은 비밀값을 싣지 않고, `TURNSTILE_SITEKEY`가 비어 있거나 AI 키가 하나도 없으면 맛보기가 꺼진다(화면에는 지금처럼 키 시트).
+  - **검증:** `node worker/test.mjs` 50개, 로컬 `wrangler dev` 실제 실행(정적 에셋·`run_worker_first`·DO·Turnstile 공식 테스트 키·가짜 키 → 503 `exhausted`·임의 문장 400) 확인, `wrangler deploy --dry-run` 통과, 미리보기 배포에서 `/api/ai/config` 응답 확인. `npm run check` 868항목 통과(기존 골든 33개 불변, 글 골든 11개).
+  - **짧은 지시문:** `SHORT_PACK=false`(꺼 둠, 최종 승인 전). 켜면 맛보기와 "유료 키" 체크를 하지 않은 Gemini 키에서만 쓰고, Claude·유료 키 체크 시에는 지금 문장 그대로. 길이 효과는 요청 5,229자 → 4,722자(약 10%). 큰 절감은 모델 변경(Flash-Lite)·출력 상한·릴스 글 요청 제거(승인 대기, 약 330자)에서 나온다.
+  - **Claude 모드 미적용 항목:** 서버측 `fallbacks`(안전 거절 시 다른 모델) 파라미터는 실제 키로 시험하지 못해 넣지 않음(거절 응답은 "AI가 이 내용으로는 답하지 않았어요"로 안내). CORS 사전 요청은 2026-10-15 실제 확인, 실제 호출은 사장님 키로 한 번 확인 필요.
+  - **남은 승인·설정:** ① 짧은 지시문 최종 승인(비교 스크립트 결과) ② `make` 릴스 글 요청 제거 문장 승인 ③ 사장님 설정(아래 단계) ④ 비밀값을 넣은 뒤 미리보기에서 맛보기 실제 시험.
+  - **사장님 설정 단계(KV 제거로 수정됨):** (1) Gemini 키 1개(운영용 계정 하나, 결제 연결 없음) → Cloudflare Worker `ai-instatoon` → Settings → Variables and Secrets → `GEMINI_KEY`(Secret) (2) Groq 키 → `GROQ_KEY` (3) OpenRouter 키 → `OPENROUTER_KEY` (4) Cloudflare Turnstile 사이트 추가(도메인 `www.ai-instatoon.com`, Managed) → 시크릿 키를 `TURNSTILE_SECRET`(Secret)으로, **사이트 키(공개값)는 `wrangler.jsonc`의 `TURNSTILE_SITEKEY`에 넣어 커밋**(사장님이 알려 주시면 제가 넣음) (5) 미리보기에서 시험 후 병합. 키는 채팅에 붙이지 않고 Cloudflare 화면에만 입력.
