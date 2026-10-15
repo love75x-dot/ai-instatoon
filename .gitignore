@@ -20,3 +20,6 @@ skills-lock.json
 
 # wrangler 로컬 실행 캐시
 .wrangler/
+
+# 비교 결과(대본 본문 포함, 키는 없음)
+dev/compare/out/

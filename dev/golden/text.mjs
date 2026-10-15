@@ -33,6 +33,8 @@ const result = await page.evaluate(async () => {
     '연재기억_끝나지않은편_제외': async () => { base(); S.toon.sid = 'cur'; S.toon.pics = []; S.series = [
       { sid: 'a1', title: '지난 편', story: '지난 편 줄거리', threads: ['떡밥 하나'], tone: '', cast: ['사장님_A'], at: 1760000000000 },
       { sid: 'cur', title: '지금 만들던 편', story: '이 편은 다시 만드는 중이라 요청에서 빠져야 한다', threads: ['빠져야 할 떡밥'], tone: '', cast: [], at: 1760100000000 }]; return { make: await grabMake() }; },
+    '짧은판_만들기': async () => { base(); PACK_FORCE = true; try { return { make: await grabMake() }; } finally { PACK_FORCE = null; } },
+    '짧은판_대본유형_광고': async () => { base(); S.info.kind = 'ad'; const a = await grabMake(); PACK_FORCE = true; try { return { 원래판: a, 짧은판: await grabMake() }; } finally { PACK_FORCE = null; } },
     '한달기획_기본': async () => { base(); return { month: await grabMonth() }; },
     '한달기획_메모': async () => { base(); mo().memo = '단골 할머니가 매주 오심. 소금빵이 품절된 날 생긴 일.'; return { month: await grabMonth() }; },
   };
