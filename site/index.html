@@ -181,6 +181,7 @@ details.more summary::-webkit-details-marker{display:none}
 details.more summary::after{content:"＋";color:var(--muted)}
 details.more[open] summary::after{content:"－"}
 details.more .inner{padding-bottom:16px}
+.serl{list-style:none;margin:0;padding:0}.serl li{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line);font-size:14px;line-height:1.55}.serl li:first-child{border-top:0}.serl .sd{flex:none;width:38px;color:var(--muted);font-weight:700}.serl .stx{flex:1;min-width:0}.serl .stx em{font-style:normal;color:var(--muted)}.serl li.ed{display:block}.serl .ib{flex:none;min-width:36px;min-height:36px;border:0;background:none;color:var(--muted);font-size:17px;cursor:pointer}
 details.more label.f:first-child{margin-top:0}
 .go-row{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:24px}
 
@@ -1210,6 +1211,55 @@ async function ask(prompt,statusEl,msg='AI가 인스타툰을 쓰고 있어요 �
     throw e;
   }finally{ busy=null; }
 }
+/* ================= 연재 기억 (4c) =================
+   한 편을 만들 때 AI가 줄거리·떡밥·말투를 함께 돌려주면(memory) S.series에 쌓고(최대 20편), 다음 편 기획·한 달 기획 요청에 최근 3편만 짧게 붙인다.
+   기억이 없으면 요청 문장은 이전과 한 글자도 다르지 않다. 아직 끝나지 않은 편(그림을 다 올리지 않았고 게시 표시도 안 한 편)을 다시 만들면 그 편의 기억은 새 기억으로 바뀐다. */
+const SERIES_MAX=20, SERIES_SEND=3;
+function finishedToon(T){ return !!(T&&(T.postedAt||(Array.isArray(T.cuts)&&T.cuts.length&&pics().length>=T.cuts.length))); }
+function seriesList(){ const a=(S.series=Array.isArray(S.series)?S.series:[]).slice(), l=a[a.length-1], T=S.toon; if(T&&l&&l.sid&&l.sid===T.sid&&!finishedToon(T)) a.pop(); return a; }
+const serCut=(t,n)=>{ t=String(t||'').replace(/\s+/g,' ').trim(); return t.length>n?t.slice(0,n-1)+'…':t; };
+function seriesBlock(kind){
+  const a=seriesList().slice(-SERIES_SEND); if(!a.length) return '';
+  const recent=a.map((e,i)=>`${i+1}) ${serCut(e.story,60)}`).join(' '), th=[...new Set(a.flatMap(e=>e.threads||[]).map(x=>serCut(x,40)).filter(Boolean))].slice(-3);
+  const thLine=th.length?'\n남은 떡밥: '+th.join(' / '):'';
+  if(kind==='month') return '\n[연재 기억 - 이어지는 이야기로 기획하고, 남은 떡밥은 편에 나눠 풀 것]\n최근 줄거리: '+recent+thLine;
+  const last=a[a.length-1], cast=(last.cast||[]).filter(Boolean), tone=serCut(last.tone,60);
+  const castLine=cast.length||tone?'\n등장인물: '+cast.join(', ')+(tone?(cast.length?' ':'')+'(말투·관계: '+tone+')':''):'';
+  return '\n[연재 기억 - 지난 편과 이어지게 쓰고, 아래 설정을 어기지 말 것]\n최근 줄거리: '+recent+castLine+thLine;
+}
+function castNow(){ const o=peopleIdx().map(k=>linkId(k)||person(k).role||whoLabel(k)); (S.info.subs||[]).forEach((e,j)=>{ if(subActive(j)) o.push((e&&e.id)||('조연 '+(j+1))); }); return [...new Set(o.map(x=>String(x||'').trim()).filter(Boolean))]; }
+function recordSeries(m,prevDone,prevSid){
+  const T=S.toon; if(!T) return; T.sid=T.sid||('m'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36));
+  S.series=Array.isArray(S.series)?S.series:[];
+  const l=S.series[S.series.length-1];
+  if(l&&prevSid&&l.sid===prevSid&&!prevDone) S.series.pop();
+  if(!m||typeof m!=='object'||!String(m.story||'').trim()) return;
+  S.series.push({sid:T.sid,title:String(T.title||''),story:serCut(m.story,120),threads:(Array.isArray(m.threads)?m.threads:[]).map(x=>serCut(x,40)).filter(Boolean).slice(0,2),tone:serCut(m.tone,60),cast:castNow(),at:Date.now()});
+  while(S.series.length>SERIES_MAX) S.series.shift();
+}
+let serOpen=false, serEdit='';
+function seriesHTML(){
+  const a=S.series||[]; if(!a.length) return '';
+  const n=seriesList().slice(-SERIES_SEND).length, dt=t=>{ const d=new Date(t); return (d.getMonth()+1)+'/'+d.getDate(); };
+  const row=e=>{ const ed=serEdit===e.sid, id=esc(e.sid), th=(e.threads||[]).length?` <em>떡밥: ${esc(e.threads.join(' / '))}</em>`:'';
+    return ed?`<li class="ed"><b>${esc(dt(e.at))} · ${esc(e.title||'이번 편')}</b>
+        <label class="f" for="sf-s-${id}">줄거리</label><textarea class="in" id="sf-s-${id}" rows="2" data-serf="story" data-sid="${id}">${esc(e.story)}</textarea>
+        <label class="f" for="sf-t-${id}">남은 떡밥 <small>쉼표로 구분</small></label><input class="in" id="sf-t-${id}" data-serf="threads" data-sid="${id}" value="${esc((e.threads||[]).join(', '))}">
+        <label class="f" for="sf-o-${id}">말투·관계</label><input class="in" id="sf-o-${id}" data-serf="tone" data-sid="${id}" value="${esc(e.tone||'')}">
+        <div class="row" style="margin-top:8px"><button type="button" class="btn sm" data-ser="done">완료</button></div></li>`
+      :`<li><span class="sd">${esc(dt(e.at))}</span><span class="stx"><b>${esc(e.title||'이번 편')}</b> — ${esc(e.story)}${th}</span><button type="button" class="ib" data-ser="edit" data-sid="${id}" aria-label="수정">✎</button><button type="button" class="ib" data-ser="del" data-sid="${id}" aria-label="지우기">×</button></li>`; };
+  return `<details class="more ser" id="serBox" ${serOpen?'open':''}><summary>연재 기억 <small>${a.length}편 저장 · 다음 편 기획에 최근 ${n}편이 쓰여요</small></summary><div class="inner">
+    <p class="sub" style="margin-top:0">한 편을 만들 때마다 줄거리·남은 떡밥·말투를 한 줄씩 기억해 두었다가 다음 편과 한 달 기획에 짧게 알려 줘요. 틀린 내용은 고치거나 지우세요.</p>
+    <ul class="serl">${[...a].reverse().map(row).join('')}</ul>
+  </div></details>`;
+}
+function serRefresh(){ const b=$('#serBox'); if(!b) return; const t=document.createElement('div'); t.innerHTML=seriesHTML(); const nb=t.firstElementChild; if(nb) b.replaceWith(nb); else b.remove(); }
+document.addEventListener('toggle',e=>{ if(e.target.id==='serBox') serOpen=e.target.open; },true);
+document.addEventListener('click',e=>{ const b=e.target.closest('[data-ser]'); if(!b) return; e.preventDefault(); const a=b.dataset.ser, sid=b.dataset.sid;
+  if(a==='edit') serEdit=sid; else if(a==='done') serEdit=''; else if(a==='del'){ if(!confirm('이 편의 연재 기억을 지울까요? 다음 편 기획에서 빠져요.')) return; S.series=(S.series||[]).filter(x=>x.sid!==sid); if(serEdit===sid) serEdit=''; save(); }
+  serOpen=true; serRefresh(); });
+document.addEventListener('input',e=>{ const el=e.target; if(!el.dataset||!el.dataset.serf) return; const x=(S.series||[]).find(y=>y.sid===el.dataset.sid); if(!x) return; const f=el.dataset.serf;
+  if(f==='threads') x.threads=el.value.split(/[,，\n]/).map(t=>t.trim()).filter(Boolean).slice(0,2); else x[f]=el.value; save(); });
 function prof(){ return S.profile=fillDef(S.profile||{},{voice:'',banned:'',tags:'',cta:'',loc:'',collab:'',bio:'',logo:''}); }
 function profBlock(){ const p=prof(), o=[]; if(p.voice.trim()) o.push(`브랜드 말투(캡션·내레이션·고정 댓글에 적용): ${p.voice}`); if(p.banned.trim()) o.push(`절대 쓰지 말 것(대본·캡션·해시태그 모두): ${p.banned}`); if(p.cta.trim()) o.push(`예약·문의 안내(마지막 컷과 캡션의 행동 유도는 이 안내와 맞게, 다른 방법을 지어내지 말 것): ${p.cta}`); return o.length?`\n[브랜드 프로필 - 꼭 지키기]\n${o.join('\n')}`:''; }
 const bannedHits=t=>prof().banned.split(/[,\n]/).map(x=>x.trim()).filter(Boolean).filter(w=>String(t||'').includes(w));
@@ -1251,10 +1301,12 @@ function applyToon(r){
 async function makeToon(theme){
   const st=$('#st-make');
   const n=S.info.cuts;
-  const prompt=pFill('make',{n,info:infoBlock(),theme:theme?`\n[이번 편 주제] ${theme}\n`:'',rules:RULES_FN(),shots:SHOTS.join(', '),tagSlots:tagSlots(),fixedCount:fixedTags().length,tagsNote:prof().tags.trim()?`. 고정 해시태그(${prof().tags})와 겹치지 않게`:''});
+  const prompt=pFill('make',{n,info:infoBlock(),series:seriesBlock('make'),theme:theme?`\n[이번 편 주제] ${theme}\n`:'',rules:RULES_FN(),shots:SHOTS.join(', '),tagSlots:tagSlots(),fixedCount:fixedTags().length,tagsNote:prof().tags.trim()?`. 고정 해시태그(${prof().tags})와 겹치지 않게`:''});
   try{
     const r=await ask(prompt,st);
+    const prevDone=finishedToon(S.toon), prevSid=S.toon&&S.toon.sid;
     applyToon(r);
+    recordSeries(r.memory,prevDone,prevSid);
     S.check=null; pv=0; openCut=0; S.step='edit'; save(); render(); window.scrollTo({top:0,behavior:'smooth'}); toast('완성! 오른쪽에서 넘겨 보세요');
   }catch(_){}
 }
@@ -1459,6 +1511,7 @@ function vInput(){
     </div></details>
 
     ${profileHTML()}
+    ${seriesHTML()}
 
     <label class="f" id="kind-lb">대본 유형 <small>어떤 이야기로 만들지 골라요 · 구성과 말투, 아래 입력칸과 표가 유형에 맞게 바뀌어요</small></label>
     ${ddHTML('',KIND_KEYS.filter(k=>k!=='custom').map(k=>`<button class="chip" data-kind="${k}" aria-pressed="${kindOf()===k}">${KINDS[k].name}</button>`).join(''),{label:'대본 유형',custom:`<label class="dd-cl" for="i-kind">직접 입력</label><input class="in" id="i-kind" data-kindin="1" value="${kindOf()==='custom'?esc(i.kindCustom||''):''}" placeholder="예: 인터뷰형, 퀴즈형">`})}
@@ -2521,7 +2574,7 @@ function applyMonth(r,dates){
 }
 async function makeMonth(){
   const M=mo(), st=$('#st-month'), dates=planDates(M.ym,M.freq), [y,m]=M.ym.split('-').map(Number);
-  const prompt=pFill('month',{year:y,month:m,count:dates.length,info:infoBlock(),memo:M.memo||'(없음)',stats:statsBlock(),dates:dates.join(', ')});
+  const prompt=pFill('month',{year:y,month:m,count:dates.length,info:infoBlock(),memo:M.memo||'(없음)',stats:statsBlock(),series:seriesBlock('month'),dates:dates.join(', ')});
   try{ const r=await ask(prompt,st,`${dates.length}편 기획 중이에요 · 1분 정도 걸려요`);
     applyMonth(r,dates);
     save(); vMonth(); toast('한 달 연재표를 만들었어요'); }catch(_){}
@@ -3456,7 +3509,7 @@ const MANUAL_BASE=[...INFO_FIELDS.map(([k])=>k)];
 /* 프롬프트 목록. def=기본 틀, vars=틀 안에서 쓰는 {{이름}} 설명, manual=직접 입력 칸, auto=직접 입력에서 고정으로 들어가는 값, app()=앱의 현재 값 */
 const PROMPTS={
   make:{tab:'one',name:'대본 한 편 쓰기',use:'info rules',def:`너는 브랜드·콘텐츠 홍보용 인스타툰 작가야. 아래 정보로 {{n}}컷 인스타툰 한 편을 완성해.
-{{info}}
+{{info}}{{series}}
 {{theme}}
 {{rules}}
 
@@ -3487,9 +3540,10 @@ const PROMPTS={
 - endBtn: 안내 카드 버튼 문구 12자 이내(읽는 사람이 할 행동, 예: 프로필 링크에서 예약)
 - cast: 주인공 말고 등장하는 인물들의 고정 외모 한 줄(예: 군 장병 5명 - 디지털 무늬 전투복, 짧은 머리, 모자 없음, 가슴에 빨간 명찰). 없으면 ""
 - ideas: 같은 브랜드로 다음에 만들 수 있는 다른 편 주제 3개(각 20자 이내)
-JSON 하나로만 답해: {"title":"","tone":"","cuts":[{"role":"","shot":"","title":"","highlight":"","sub":"","bubble":"","bubbleSide":"l","sfx":"","direction":"","panels":"","caption":"","extras":""}],"hooks":["","",""],"caption":"","hashtags":"","comment":"","reelCaption":"","reelHashtags":"","reelComment":"","endHead":"","endBtn":"","cast":"","ideas":["","",""]}`,
-    vars:{n:'컷 수',info:'사업·주인공·이야기 정보 묶음',theme:'이번 편 주제 줄(없으면 빈칸)',rules:'아래 "공통 원칙" 틀',shots:'샷 종류 목록',tagSlots:'해시태그 개수',fixedCount:'고정 해시태그 수',tagsNote:'고정 해시태그와 겹치지 않게 하는 문구'},
-    manual:[['n','컷 수','예: 7'],['theme','이번 편 주제','선택']],auto:{shots:SHOTS.join(', '),tagSlots:'5',fixedCount:'0',tagsNote:''},
+- memory: 이번 편 연재 기억. {"story":"줄거리 2줄 80자 이내","threads":["이번에 새로 남긴 떡밥 최대 2개"],"tone":"말투·관계 변화 한 줄"}
+JSON 하나로만 답해: {"title":"","tone":"","cuts":[{"role":"","shot":"","title":"","highlight":"","sub":"","bubble":"","bubbleSide":"l","sfx":"","direction":"","panels":"","caption":"","extras":""}],"hooks":["","",""],"caption":"","hashtags":"","comment":"","reelCaption":"","reelHashtags":"","reelComment":"","endHead":"","endBtn":"","cast":"","ideas":["","",""],"memory":{"story":"","threads":[],"tone":""}}`,
+    vars:{n:'컷 수',info:'사업·주인공·이야기 정보 묶음',theme:'이번 편 주제 줄(없으면 빈칸)',rules:'아래 "공통 원칙" 틀',shots:'샷 종류 목록',tagSlots:'해시태그 개수',fixedCount:'고정 해시태그 수',tagsNote:'고정 해시태그와 겹치지 않게 하는 문구',series:'연재 기억 덩어리(기억이 있을 때만, 없으면 빈칸)'},
+    manual:[['n','컷 수','예: 7'],['theme','이번 편 주제','선택']],auto:{shots:SHOTS.join(', '),tagSlots:'5',fixedCount:'0',tagsNote:'',series:''},
     json:true,app:()=>({n:S.info.cuts,theme:''}),
     toLine:{theme:v=>`\n[이번 편 주제] ${v}\n`}},
   rewrite:{tab:'one',name:'컷 하나만 다시 쓰기',use:'info rules',def:`인스타툰의 {{cutNo}}컷만 다시 써. 요청: {{how}}
@@ -3537,7 +3591,7 @@ JSON 하나로만 답해: {"scores":[{"name":"","score":4,"comment":""}],"summar
 
 [내 소재 메모]
 {{memo}}
-{{stats}}
+{{stats}}{{series}}
 [올리는 날짜] {{dates}}
 
 규칙:
@@ -3551,8 +3605,8 @@ JSON 하나로만 답해: {"scores":[{"name":"","score":4,"comment":""}],"summar
 - goal: 공감, 정보, 신뢰, 홍보 중 하나. cuts: 4~10 중 추천 컷 수.
 - concept: 이번 달 연재 콘셉트 한 줄.
 JSON 하나로만 답해: {"concept":"","items":[{"date":"","type":"","title":"","story":"","goal":"","cuts":6}]}`,
-    vars:{year:'연도',month:'월',count:'편 수',info:'사업·주인공·이야기 정보 묶음',memo:'내 소재 메모',stats:'지난 반응 기록(있을 때만)',dates:'올리는 날짜들'},
-    manual:[['year','연도','예: 2026'],['month','월','예: 11'],['count','편 수','예: 8'],['dates','올리는 날짜','예: 11/3, 11/6, 11/10 …'],['memo','소재 메모','선택','ta'],['stats','지난 반응 기록','선택','ta']],auto:{},
+    vars:{year:'연도',month:'월',count:'편 수',info:'사업·주인공·이야기 정보 묶음',memo:'내 소재 메모',stats:'지난 반응 기록(있을 때만)',dates:'올리는 날짜들',series:'연재 기억 덩어리(기억이 있을 때만, 없으면 빈칸)'},
+    manual:[['year','연도','예: 2026'],['month','월','예: 11'],['count','편 수','예: 8'],['dates','올리는 날짜','예: 11/3, 11/6, 11/10 …'],['memo','소재 메모','선택','ta'],['stats','지난 반응 기록','선택','ta']],auto:{series:''},
     json:true,app:()=>{ const M=mo(), d=planDates(M.ym,M.freq), [y,m]=M.ym.split('-').map(Number); return {year:y,month:m,count:d.length,dates:d.join(', '),memo:M.memo,stats:statsBlock()}; }},
   reelText:{tab:'reels',name:'릴스 캡션·해시태그·고정 댓글',use:'info',def:`너는 브랜드 인스타 담당이야. 이 인스타툰을 그림이 한 장씩 넘어가는 릴스 영상으로도 올려. 릴스에 붙일 글을 써 줘.
 {{info}}
