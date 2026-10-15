@@ -191,6 +191,7 @@ details.more summary::-webkit-details-marker{display:none}
 details.more summary::after{content:"＋";color:var(--muted)}
 details.more[open] summary::after{content:"－"}
 details.more .inner{padding-bottom:16px}
+.tsteps{margin:0;padding-left:20px;font-size:14px;line-height:1.75}
 .serl{list-style:none;margin:0;padding:0}.serl li{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line);font-size:14px;line-height:1.55}.serl li:first-child{border-top:0}.serl .sd{flex:none;width:38px;color:var(--muted);font-weight:700}.serl .stx{flex:1;min-width:0}.serl .stx em{font-style:normal;color:var(--muted)}.serl li.ed{display:block}.serl .ib{flex:none;min-width:36px;min-height:36px;border:0;background:none;color:var(--muted);font-size:17px;cursor:pointer}
 details.more label.f:first-child{margin-top:0}
 .go-row{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:24px}
@@ -2593,7 +2594,7 @@ async function makeFromPlan(k){
   const x=mo().items[k]; if(!x) return;
   S.info.story=`이번 편 주제: ${x.title}\n줄거리: ${x.story}`; S.info.cuts=x.cuts||S.info.cuts; S.mode='one'; S.step='input'; save(); render(); window.scrollTo({top:0,behavior:'smooth'});
   const btn=$('#makeBtn'); if(!btn||!S.info.type.trim()){ toast('업종을 확인하고 "인스타툰 만들기"를 눌러 주세요'); return; }
-  await run(btn,()=>makeToon(x.title)); if(cuts().length){ x.made=true; x.status='script'; x.postedAt=''; S.planRef={ym:mo().ym,k,title:x.title}; save(); renderTodo(); }
+  await run(btn,()=>makeToon(x.title),'make'); if(cuts().length){ x.made=true; x.status='script'; x.postedAt=''; S.planRef={ym:mo().ym,k,title:x.title}; save(); renderTodo(); }
 }
 
 
@@ -3098,7 +3099,9 @@ document.addEventListener('input',e=>{ const el=e.target; if(!el.dataset||el.dat
   S.info.kindCustom=el.value; S.info.kind=el.value.trim()?'custom':'daily'; save();
   document.querySelectorAll('[data-kind]').forEach(c=>c.setAttribute('aria-pressed','false')); applyKind(true); });
 function updateMake(){ const b=$('#makeBtn'),s=$('#st-make'); if(!b) return; const ok=!!S.info.type.trim(); if(s&&!busy) { s.className='status'; s.textContent=''; } }
-async function run(btn,fn){ if(busy){ toast('아직 만드는 중이에요'); return; } if(STANDALONE&&!API.ready&&btn.dataset.act!=='zip'){ openKeySheet(()=>run(btn,fn)); return; } btn.disabled=true; try{ await fn(); } finally{ if(document.body.contains(btn)) btn.disabled=false; renderPhone(); } }
+async function run(btn,fn,task){ if(busy){ toast('아직 만드는 중이에요'); return; } if(STANDALONE&&!API.ready&&btn.dataset.act!=='zip'){
+    if(task&&!TASTE.token){ await tasteInit(); if(tasteOn(task)){ openTasteSheet(()=>run(btn,fn,task)); return; } }
+    if(!(task&&TASTE.token)){ openKeySheet(()=>run(btn,fn,task)); return; } } btn.disabled=true; try{ await fn(); } finally{ if(document.body.contains(btn)) btn.disabled=false; renderPhone(); } }
 document.addEventListener('click',async e=>{
   const b=e.target.closest('button'); if(!b) return;
   if(cutAction(b)) return;
@@ -3157,16 +3160,16 @@ document.addEventListener('click',async e=>{
   if(b.dataset.lm){ S.info.letterMode=b.dataset.lm; save(); return refreshLetter(true); }
   if(b.dataset.font){ S.info.fonts={...DEF_FONTS,...(S.info.fonts||{}),[fontTab]:b.dataset.font}; save(); return refreshLetter(false); }
   if(b.dataset.regen){ const i=+b.dataset.regen; if(peopleIdx().some(k=>!refOf(k))){ toast('주인공 기준 이미지를 먼저 올려 주세요'); return; } autoCtl=new AbortController(); try{ if(i<cuts().length) await drawOne(i,autoCtl.signal); else await drawEndOne(autoCtl.signal); toast(`${i+1}번 그림을 다시 그렸어요`); }catch(e){ toast(e.message||'다시 그리지 못했어요'); } autoCtl=null; vPost(); return renderPhone(); }
-  if(b.dataset.idea){ const d=S.toon.ideas[+b.dataset.idea]; return run(b,()=>makeToon(d)); }
+  if(b.dataset.idea){ const d=S.toon.ideas[+b.dataset.idea]; return run(b,()=>makeToon(d),'make'); }
   const a=b.dataset.act; if(!a) return;
   if(a==='logoUp'){ const inp=document.createElement('input'); inp.type='file'; inp.accept='image/png,image/jpeg,image/webp'; inp.onchange=async()=>{ const fl=inp.files[0]; if(!fl) return; try{ prof().logo=await fileToLogo(fl); save(); render(); toast('로고를 저장했어요'); }catch(_){ toast('이미지를 읽지 못했어요. PNG나 JPG 파일을 골라 주세요'); } }; inp.click(); return; }
   if(a==='logoDel'){ prof().logo=''; save(); render(); return; }
   if(a==='copyReset'){ resetCopied(); toast('복사 표시를 지웠어요'); return; }
-  if(a==='make'){ if(!S.info.type.trim()){ toast('업종을 먼저 골라 주세요. 필수는 이것 하나예요'); const lb=$('#ind-lb'); if(lb){ lb.scrollIntoView({behavior:'smooth',block:'center'}); const box=lb.parentElement; box.classList.add('flash'); setTimeout(()=>box.classList.remove('flash'),1800); } return; } resetCopied(); return run(b,()=>makeToon()); }
+  if(a==='make'){ if(!S.info.type.trim()){ toast('업종을 먼저 골라 주세요. 필수는 이것 하나예요'); const lb=$('#ind-lb'); if(lb){ lb.scrollIntoView({behavior:'smooth',block:'center'}); const box=lb.parentElement; box.classList.add('flash'); setTimeout(()=>box.classList.remove('flash'),1800); } return; } resetCopied(); return run(b,()=>makeToon(),'make'); }
   if(a==='adMake') return run(b,()=>adMake());
   if(a==='adCopy') return copy(adS().table);
   if(a==='adToStory'){ const x=adS(), i=S.info; i.story=(i.story.trim()?i.story.trimEnd()+'\n\n':'')+'['+KINDS[kindOf()].table.name+' 10P 참고]\n'+x.table; if(kindOf()==='ad'){ if(!i.target.trim()) i.target=x.target; if(!i.offer.trim()) i.offer=x.benefit; } save(); toast('이야기 칸에 넣었어요'); return vInput(); }
-  if(a==='remake'){ resetCopied(); return run(b,()=>makeToon()); }
+  if(a==='remake'){ resetCopied(); return run(b,()=>makeToon(),'make'); }
   if(a==='blank') return blankToon();
   if(a==='tReset'){ Object.assign(S.info,{titleScale:100,titleColor:'',tOutline:'',tShadow:undefined,tTilt:0,hl:'marker',hlColor:''}); save(); return refreshLetter(true); }
   if(a==='fontUp'){ return $('#fontIn').click(); }
@@ -3201,7 +3204,7 @@ document.addEventListener('click',async e=>{
   if(a==='helpClose') return toggleHelp(false);
   if(a==='helpPanel') return toggleHelp(true);
   if(a==='moreHooks') return run(b,moreHooks);
-  if(a==='monthMake') return run(b,makeMonth);
+  if(a==='monthMake') return run(b,makeMonth,'month');
   if(a==='monthCopy'){ const M=mo(); return copy(`${M.ym} 인스타툰 연재표\n${M.concept}\n\n`+M.items.map(x=>`${x.date} [${x.type}] ${x.title}\n${x.story}`).join('\n\n')); }
   if(a==='padd'){ const k=[1,2].find(k=>!S.info[pkey(k)]?.on); if(k){ setPerson(k,{role:k===1?'직원':'알바생',gender:'',age:'',looks:'',...(S.info[pkey(k)]||{}),on:true}); save(); } return vInput(); }
   if(a==='sampleMake') return run(b,makeSample);
@@ -3393,8 +3396,11 @@ async function gcall1(model,parts,generationConfig,signal,system,triedAlt){
 /* AI가 돌려준 글에서 JSON을 꺼낸다(Gemini·Claude 공통) */
 function parseAIJson(raw){ const t=String(raw||'').replace(/```json|```/g,'').trim();
   try{ return JSON.parse(t); }catch(_){ const a=t.search(/[\[{]/), b=Math.max(t.lastIndexOf('}'),t.lastIndexOf(']')); if(a>=0&&b>a){ try{ return JSON.parse(t.slice(a,b+1)); }catch(__){} } throw {code:'invalid_json'}; } }
-const geminiSample={ async json(prompt,{signal,images}={}){
-  if(!API.key) throw {code:'api',message:'화면 위쪽 "API 키 설정"에서 Gemini API 키를 먼저 넣어 주세요.'};
+const geminiSample={ async json(prompt,{signal,images,task}={}){
+  if(!API.key){
+    if((task==='make'||task==='month')&&TASTE.token&&TASTE.cfg){ try{ return await tasteCall(prompt,task,signal); }catch(e){ if(e&&e.name==='AbortError') throw {code:'cancelled'}; throw e; } }
+    throw {code:'api',message:'화면 위쪽 "API 키 설정"에서 Gemini API 키를 먼저 넣어 주세요.'};
+  }
   try{
     const j=await gcall(API.text,[{text:prompt},...(images||[]).map(inl)],{responseMimeType:'application/json',temperature:0.9},signal,undefined,API.alt);
     return parseAIJson((j.candidates?.[0]?.content?.parts||[]).map(p=>p.text||'').join(''));
@@ -3451,7 +3457,68 @@ async function testClaudeKey(key){
     return {ok:false,msg:claudeErr(r.status,j,r.headers.get('retry-after'))}; }
   catch(_){ return {ok:false,msg:'Claude에 연결하지 못했어요. 인터넷 연결을 확인해 주세요'}; } }
 /* 선택한 AI(Gemini/Claude)로 보낸다. 요청 문장과 결과 처리는 둘이 같다. */
-const aiSample={ json(prompt,o){ return (AIP()==='claude'?claudeSample:geminiSample).json(prompt,o); } };
+const aiSample={ json(prompt,o){ const taste=!API.ready&&o&&o.task&&TASTE.token; return (AIP()==='claude'&&!taste?claudeSample:geminiSample).json(prompt,o); } };
+/* ================= 0원 맛보기 (4c) =================
+   내 AI 키가 없을 때만, 운영자 무료 키로 "인스타툰 한 편(make)"과 "한 달 기획(month)"을 1인 하루 한도 안에서 만들어 볼 수 있다.
+   사이트 서버(/api/ai)가 Turnstile·분당 제한·하루 한도를 확인하고 Gemini → Groq → OpenRouter 순서로 시도한다. 키는 서버 비밀값에만 있다.
+   서버에 입력 내용은 저장하지 않는다. 서버가 꺼져 있거나 설정이 없으면(사이트 키 없음) 이 기능은 보이지 않고 지금처럼 "API 키 설정"이 열린다. */
+const TASTE={cfg:null,token:'',tried:false,wid:null,after:null,provider:''};
+async function tasteInit(){
+  if(TASTE.tried||!STANDALONE||!/^https?:$/.test(location.protocol)) return TASTE.cfg; TASTE.tried=true;
+  try{ const r=await fetch('/api/ai/config',{cache:'no-store'}); const j=await r.json(); TASTE.cfg=(j&&j.ok&&j.taste&&j.sitekey)?j:null; }catch(_){ TASTE.cfg=null; }
+  return TASTE.cfg; }
+const tasteOn=task=>!!(TASTE.cfg&&(task==='make'||task==='month')&&!API.ready);
+async function tasteCall(prompt,task,signal){
+  const ts=TASTE.token; TASTE.token=''; /* 확인 토큰은 한 번만 쓸 수 있어요 */
+  let r; try{ r=await fetch('/api/ai',{method:'POST',signal,headers:{'content-type':'application/json'},body:JSON.stringify({task,prompt,ts})}); }
+  catch(e){ if(e&&e.name==='AbortError') throw e; throw {code:'api',message:'무료 맛보기에 연결하지 못했어요. 인터넷 연결을 확인해 주세요.'}; }
+  const j=await r.json().catch(()=>({}));
+  if(r.ok&&j.ok){ TASTE.provider=j.provider||''; try{ toast('무료 맛보기로 만들었어요'); }catch(_){} return parseAIJson(j.text); }
+  if(j.code==='daily'||j.code==='exhausted'){ setTimeout(()=>openTasteEnd(),0); throw {code:'api',message:'오늘 무료 맛보기가 끝났어요. 내 무료 키를 넣으면 계속할 수 있어요.'}; }
+  if(j.code==='rate') throw {code:'api',message:'잠깐 뒤에 다시 눌러 주세요. (너무 자주 눌렀어요)'};
+  if(j.code==='turnstile') throw {code:'api',message:'사람인지 확인하지 못했어요. 다시 눌러 주세요.'};
+  if(j.code==='unavailable'||r.status>=500){ TASTE.cfg=null; setTimeout(()=>openKeySheet(),0); throw {code:'api',message:'무료 맛보기를 지금은 쓸 수 없어요. 내 무료 키를 넣으면 바로 쓸 수 있어요.'}; }
+  throw {code:'api',message:j.message||'무료 맛보기를 쓰지 못했어요.'};
+}
+function tasteSheetEl(id,label){ let w=document.getElementById(id); if(!w){ w=document.createElement('div'); w.id=id; w.className='sheet'; w.setAttribute('role','dialog'); w.setAttribute('aria-modal','true'); w.setAttribute('aria-labelledby',id+'-t'); document.body.appendChild(w); } return w; }
+function tasteClose(){ for(const id of ['tasteSheet','tasteEnd']){ const w=document.getElementById(id); if(w) w.hidden=true; } if(window.turnstile&&TASTE.wid!=null){ try{ turnstile.remove(TASTE.wid); }catch(_){} TASTE.wid=null; } const k=document.getElementById('keySheet'); if(!k||k.hidden) document.body.classList.remove('sheet-open'); }
+function openTasteSheet(after){
+  TASTE.after=after||null; TASTE.token='';
+  const w=tasteSheetEl('tasteSheet');
+  w.innerHTML=`<div class="sheet-bg" data-taste="close"></div><div class="sheet-in" role="document">
+    <div class="sheet-h"><h2 id="tasteSheet-t">키 없이 무료로 만들어 보기</h2><button type="button" class="btn sm ghost" data-taste="close" aria-label="닫기">닫기</button></div>
+    <p class="sub" style="margin:0 0 12px">내 AI 키가 없어도 <b>하루 한 번</b> 인스타툰 한 편(또는 한 달 기획)을 무료로 만들어 볼 수 있어요. 아래 확인이 끝나면 버튼이 켜져요.</p>
+    <div id="ts-box" style="min-height:70px"></div>
+    <div class="status" id="ts-st" role="status" style="min-height:20px"></div>
+    <div class="row" style="margin-top:8px"><button type="button" class="btn pri" id="taste-go" data-taste="go" disabled>무료로 만들기</button><button type="button" class="btn" data-taste="key">내 키로 쓰기</button></div>
+    <ul class="ks-notes"><li>입력한 내용은 <b>무료 AI 서비스(Google Gemini · Groq · OpenRouter)</b>로 전달돼 글을 만드는 데 쓰여요. 무료 서비스는 입력과 결과를 서비스 개선·학습에 쓰거나 사람이 읽고 검토할 수 있어요. <b>개인정보와 비밀 내용은 넣지 마세요.</b></li>
+    <li>이 사이트는 입력 내용과 결과를 서버에 <b>저장하지 않아요.</b> <a href="/privacy/" target="_blank" rel="noopener">개인정보처리방침</a></li></ul></div>`;
+  w.hidden=false; document.body.classList.add('sheet-open');
+  const draw=()=>{ const box=document.getElementById('ts-box'); if(!box||!window.turnstile||!TASTE.cfg) return;
+    if(TASTE.wid!=null){ try{ turnstile.remove(TASTE.wid); }catch(_){} }
+    TASTE.wid=turnstile.render(box,{sitekey:TASTE.cfg.sitekey,theme:'light',language:'ko',
+      callback:t=>{ TASTE.token=t; const b=document.getElementById('taste-go'); if(b) b.disabled=false; const s=document.getElementById('ts-st'); if(s) s.textContent=''; },
+      'expired-callback':()=>{ TASTE.token=''; const b=document.getElementById('taste-go'); if(b) b.disabled=true; },
+      'error-callback':()=>{ const s=document.getElementById('ts-st'); if(s){ s.className='status err'; s.textContent='확인을 불러오지 못했어요. 잠시 뒤 다시 열어 주세요. 계속 안 되면 "내 키로 쓰기"를 눌러 주세요.'; } } }); };
+  if(window.turnstile) draw(); else if(!document.getElementById('tsScript')){ const sc=document.createElement('script'); sc.id='tsScript'; sc.src='https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'; sc.async=true; sc.onload=draw; sc.onerror=()=>{ const s=document.getElementById('ts-st'); if(s){ s.className='status err'; s.textContent='확인을 불러오지 못했어요. 인터넷 연결을 확인해 주세요.'; } }; document.head.appendChild(sc); }
+}
+function openTasteEnd(){
+  const w=tasteSheetEl('tasteEnd');
+  w.innerHTML=`<div class="sheet-bg" data-taste="close"></div><div class="sheet-in" role="document">
+    <div class="sheet-h"><h2 id="tasteEnd-t">오늘 무료 맛보기가 끝났어요</h2><button type="button" class="btn sm ghost" data-taste="close" aria-label="닫기">닫기</button></div>
+    <p class="sub" style="margin:0 0 10px"><b>내 무료 키를 넣으면 계속할 수 있어요.</b> 키는 3단계면 만들 수 있고, 결제 정보는 필요 없어요.</p>
+    <ol class="tsteps"><li><a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener"><b>aistudio.google.com/apikey</b></a>에 들어가 구글 계정으로 로그인해요.</li>
+    <li><b>"API 키 만들기"</b>를 눌러 키를 만들어요.</li>
+    <li>키를 복사해서 이 사이트의 <b>"API 키 설정"</b>에 붙여 넣어요.</li></ol>
+    <p class="sub" style="margin:8px 0 0">그림이 필요하면 <a href="/guide/gemini-api-key-setup-guide/">자세한 설명 글</a>을 봐 주세요. 내일 다시 오면 무료 맛보기를 또 쓸 수 있어요.</p>
+    <div class="row" style="margin-top:12px"><button type="button" class="btn pri" data-taste="key">내 키 넣기</button><button type="button" class="btn" data-taste="close">닫기</button></div></div>`;
+  w.hidden=false; document.body.classList.add('sheet-open');
+}
+document.addEventListener('click',e=>{ const b=e.target.closest('[data-taste]'); if(!b) return; e.preventDefault(); const a=b.dataset.taste;
+  if(a==='close'){ TASTE.after=null; return tasteClose(); }
+  if(a==='key'){ TASTE.after=null; tasteClose(); return openKeySheet(); }
+  if(a==='go'){ if(!TASTE.token) return; const f=TASTE.after; TASTE.after=null; const t=TASTE.token; tasteClose(); TASTE.token=t; if(f) f(); } });
+document.addEventListener('keydown',e=>{ if(e.key!=='Escape') return; const a=document.getElementById('tasteSheet'), b=document.getElementById('tasteEnd'); if((a&&!a.hidden)||(b&&!b.hidden)){ TASTE.after=null; tasteClose(); } });
 async function gimage(parts,signal){
   if(!API.key) throw {code:'api',message:'API 키를 먼저 넣어 주세요.'};
   let j;
@@ -3922,7 +3989,7 @@ restoreFonts();
 vaultInit().then(()=>{ try{ if(Object.keys(VAULT.chars).length||Object.keys(VAULT.places).length){ syncLinked(); if(S.step==='input'&&(S.mode||'one')==='one'&&!document.activeElement?.closest?.('input,textarea')) vInput(); } }catch(_){} });
 try{ if(kv.notice==='migrated') setTimeout(()=>toast('기존 작업을 새 저장소로 안전하게 옮겼어요 ✓'),600); }catch(_){}
 (async()=>{
-  if(STANDALONE){ sample=aiSample; $('#keyWrap').innerHTML=keyBoxHTML(); refreshAi(); return; }
+  if(STANDALONE){ sample=aiSample; $('#keyWrap').innerHTML=keyBoxHTML(); refreshAi(); if(!API.ready) tasteInit(); return; }
   try{ sample=await window.claude?.use?.('sample')||null; }catch(_){ sample=null; }
   try{ downloads=await window.claude?.use?.('downloads')||null; }catch(_){ downloads=null; }
   refreshAi();
