@@ -200,6 +200,7 @@ details.more summary::after{content:"＋";color:var(--muted)}
 details.more[open] summary::after{content:"－"}
 details.more .inner{padding-bottom:16px}
 .tsteps{margin:0;padding-left:20px;font-size:14px;line-height:1.75}
+.bkask{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;margin:12px 0;padding:10px 14px;border:1px solid var(--line-2);border-radius:12px;background:var(--sunken);font-size:14px;font-weight:600}.bkask-b{display:flex;gap:8px;flex-wrap:wrap}
 .mkhint{margin:8px 0 0;font-size:13.5px;font-weight:700;color:var(--ink-2)}.mkhint[hidden],.newdev[hidden]{display:none}.newdev{margin:10px 0 0}
 .serl{list-style:none;margin:0;padding:0}.serl li{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line);font-size:14px;line-height:1.55}.serl li:first-child{border-top:0}.serl .sd{flex:none;width:38px;color:var(--muted);font-weight:700}.serl .stx{flex:1;min-width:0}.serl .stx em{font-style:normal;color:var(--muted)}.serl li.ed{display:block}.serl .ib{flex:none;min-width:36px;min-height:36px;border:0;background:none;color:var(--muted);font-size:17px;cursor:pointer}
 details.more label.f:first-child{margin-top:0}
@@ -2024,7 +2025,8 @@ function vPost(){
   const P=pics(), need=n+(ec().on?1:0), fit=S.info.fit==='contain'?'contain':'cover';
   const px=planItem(); if(px&&P.length>=n&&['plan','script'].includes(stOf(px))){ px.status='art'; save(); }
   $('#main').innerHTML=`<section class="panel">
-    <div class="ph"><div><span class="stepno"><i class="nb">3</i>3단계 · 그림·저장·올리기 <small>→ 올렸으면 한 편 완성! 더 하려면 위쪽 선택 탭</small></span><h1>그림 만들고 올리기</h1><p>대사·제목·효과음은 고른 테마(${esc(artOf().name)})에 맞는 웹툰 글씨로 그림 안에 함께 그려져요. 아래 순서대로 하면 돼요.</p></div></div>
+    <div class="ph"><div><span class="stepno"><i class="nb">3</i>3단계 · 그림·저장·올리기 <small>→ 올렸으면 한 편 완성!</small></span><h1>그림 만들고 올리기</h1><p>대사·제목·효과음은 고른 테마(${esc(artOf().name)})에 맞는 웹툰 글씨로 그림 안에 함께 그려져요. 아래 순서대로 하면 돼요.</p></div></div>
+    ${bkAskHTML()}
     <div class="jump" role="navigation" aria-label="바로 가기">${[['#sec-draw','그림 그리기'],['#kit','게시물 글']].map(([h,t])=>`<button class="chip" data-jump="${h}">${t}</button>`).join('')}</div>
 
     <h2 class="sec" id="sec-draw" style="margin-top:0">그림 그리기</h2>
@@ -2049,7 +2051,7 @@ async function addPics(files,kind){ const L=listOf(kind); if(kind!=='own'&&!S.to
   files=[...files].filter(f=>/^image\//.test(f.type)).sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true})); if(!files.length){ toast('그림 파일(jpg, png)을 골라 주세요'); return; }
   for(const f of files){ try{ L.push(await fileToImg(f)); }catch(_){} }
   try{ kv.setItem(KEY,JSON.stringify(S)); }catch(_){ toast('그림이 많아서 새로고침하면 다시 올려야 할 수 있어요. 저장은 바로 해 두세요'); }
-  pv=0; render(); toast(`${files.length}장을 순서대로 넣었어요`); }
+  pv=0; render(); toast(`${files.length}장을 순서대로 넣었어요`); if(kind!=='own'&&cuts().length&&pics().length>=cuts().length) bkAskTrigger(); }
 
 /* ================= 게시 준비 키트 ================= */
 const IG_CAP=2200, IG_TAGS=5;
@@ -2076,7 +2078,7 @@ function kitChecks(){ const p=prof(), n=cuts().length; return [
   ['cmt','올린 뒤 첫 댓글을 달고 고정했어요'] ]; }
 function kitHTML(){ const T=S.toon, cs=cuts(), p=prof(), fixed=tagList(p.tags);
   return `<h2 class="sec" id="kit">인스타 게시물(웹툰)에 올릴 글</h2>
-  <p class="sub">웹툰 그림 여러 장을 한 게시물로 올릴 때 붙여 넣을 글이에요. 인스타 계정과 연결되는 기능은 아니고, 복사해서 쓰면 돼요. <b>릴스에 올릴 글은 "스토리·릴스" 탭에 따로 있어요.</b></p>
+  <p class="sub">웹툰 그림 여러 장을 한 게시물로 올릴 때 붙여 넣을 글이에요. 인스타 계정과 연결되는 기능은 아니고, 복사해서 쓰면 돼요.</p>
   <div class="kit">
     <div class="kit-copy"><button class="btn pri" data-act="kitCopy">캡션 + 해시태그 한 번에 복사</button><span class="status">인스타의 "문구 입력" 칸에 그대로 붙여 넣으면 돼요</span></div>
     <div class="kwarn" id="kitWarn" hidden></div>
@@ -2418,22 +2420,22 @@ function helpHTML(){
       <li class="hstep"><span class="hnum" aria-hidden="true">1</span><div><h3>내 이야기 적기 <small>화면 번호 1</small></h3><dl>
         <div><dt>이 단계에서 할 일</dt><dd>웹툰 테마를 고르고, 분야를 선택하고, 주인공(최대 3명)과 있었던 일을 적어요. 적을수록 재밌어져요. 다 적었으면 <b>"인스타툰 만들기"</b>를 눌러요. 30초~1분 뒤 대본이 나와요.</dd></div>
         <div><dt>다음 단계로 넘어가는 조건</dt><dd>분야를 하나 골라 "인스타툰 만들기"가 눌리고, 대본이 만들어지면 2단계가 열려요.</dd></div>
-        <div><dt>이동할 위치</dt><dd><button class="btn sm" data-helpgo="input">한 편 만들기 탭 → 1단계로 이동</button></dd></div></dl></div></li>
+        <div><dt>이동할 위치</dt><dd><button class="btn sm" data-helpgo="input">1단계로 이동</button></dd></div></dl></div></li>
       <li class="harrow" aria-hidden="true">↓</li>
       <li class="hstep"><span class="hnum" aria-hidden="true">2</span><div><h3>대본 다듬기 <small>화면 번호 2</small></h3><dl>
         <div><dt>이 단계에서 할 일</dt><dd>스토리보드를 읽어 보며 컷의 제목·대사를 고쳐요. "이 컷 고치기"로 AI에게 부탁할 수도 있어요. 가격·날짜 같은 숫자는 직접 확인해요.</dd></div>
         <div><dt>다음 단계로 넘어가는 조건</dt><dd>"그림 그리기 전에 확인" 목록의 경고를 확인하고 대본이 마음에 들면 <b>"다 됐어요, 그림 그리러 →"</b>를 눌러요.</dd></div>
-        <div><dt>이동할 위치</dt><dd><button class="btn sm" data-helpgo="edit">한 편 만들기 탭 → 2단계로 이동</button></dd></div></dl></div></li>
+        <div><dt>이동할 위치</dt><dd><button class="btn sm" data-helpgo="edit">2단계로 이동</button></dd></div></dl></div></li>
       <li class="harrow" aria-hidden="true">↓</li>
       <li class="hstep"><span class="hnum" aria-hidden="true">3</span><div><h3>그림 받고 저장·올리기 <small>화면 번호 3</small></h3><dl>
         <div><dt>이 단계에서 할 일</dt><dd>3단계 화면의 <b>그림 그리기</b>에서 이미지 AI(ChatGPT 등)에 프롬프트를 한 컷씩 붙여 넣어 그림을 받고, 받은 그림을 올려 zip으로 저장해요. 이어서 <b>게시물 글</b>의 캡션·해시태그를 복사해 인스타그램에 올려요.</dd></div>
         <div><dt>다음 단계로 넘어가는 조건</dt><dd>모든 컷 그림을 올려 저장하고, 인스타에 올린 뒤 <b>"올렸어요"</b>를 누르면 한 편이 완성돼요. 다음 편은 "다음 편 만들기"로 이어가요.</dd></div>
-        <div><dt>이동할 위치</dt><dd><button class="btn sm" data-helpgo="post">한 편 만들기 탭 → 3단계로 이동</button></dd></div></dl></div></li>
+        <div><dt>이동할 위치</dt><dd><button class="btn sm" data-helpgo="post">3단계로 이동</button></dd></div></dl></div></li>
       <li class="harrow" aria-hidden="true">↓ <small style="font-size:12px;font-weight:700">필요할 때만</small></li>
       <li class="hstep opt"><span class="hnum" aria-hidden="true">＋</span><div><h3>그 밖의 기능 <small>선택 · 번호 없음</small></h3><dl>
-        <div><dt>이 단계에서 할 일</dt><dd>한 편이 끝난 뒤 필요한 것만 골라 써요. 한 달 치 주제를 미리 짜거나, 완성 그림으로 릴스·스토리를 만들거나, 올린 편의 반응을 기록해요.</dd></div>
-        <div><dt>다음 단계로 넘어가는 조건</dt><dd>1~3단계로 한 편을 올린 뒤에 해요. 반응 기록은 올리고 2~3일 지난 뒤가 좋아요. 끝나면 다시 1단계로 돌아가요.</dd></div>
-        <div><dt>이동할 위치</dt><dd><button class="btn sm" data-helpgo="month">한 달 기획 탭</button><button class="btn sm" data-helpgo="reels">스토리·릴스 탭</button><button class="btn sm" data-helpgo="stats">반응·댓글 탭</button></dd></div></dl></div></li>
+        <div><dt>이 단계에서 할 일</dt><dd>한 편이 끝난 뒤 필요하면 ☰ 메뉴의 "한 달 기획"으로 한 달 치 주제를 미리 짜요.</dd></div>
+        <div><dt>다음 단계로 넘어가는 조건</dt><dd>1~3단계로 한 편을 올린 뒤에 해요. 끝나면 다시 ☰ 메뉴의 "인스타툰 만들기"로 돌아와요.</dd></div>
+        <div><dt>이동할 위치</dt><dd><button class="btn sm" data-helpgo="month">한 달 기획 열기</button></dd></div></dl></div></li>
     </ol>
     <div class="hextra">
       <div class="hcard"><span class="hn">저장소 상태</span><p id="kvInfo">${esc(storageInfoText())}</p></div>
@@ -2468,7 +2470,7 @@ function vMonth(){
     <label class="f" for="m-memo">이야기 소재 메모 <small>선택 · 생각나는 에피소드를 줄마다 적어 두면 섞어서 써요</small></label>
     <textarea class="in" id="m-memo" data-month="memo" rows="4" placeholder="예) 입대 전날 밤 찾아온 가족&#10;단골 할머니가 두고 간 손편지&#10;사진 찍을 때 제일 많이 받는 질문: 몇 명까지 되나요?">${esc(M.memo)}</textarea>
     ${profileHTML()}
-    <p class="sub" style="margin-top:8px">테마(${esc(artOf().name)})와 주인공 설정은 "한 편 만들기" 첫 화면의 설정을 그대로 써요.</p>
+    <p class="sub" style="margin-top:8px">테마(${esc(artOf().name)})와 주인공 설정은 홈(인스타툰 만들기) 첫 화면의 설정을 그대로 써요.</p>
     <div class="go-row"><button class="btn pri big" data-act="monthMake" ${i.type.trim()?'':'disabled'}>${M.items.length?'한 달 기획 다시 만들기':'한 달 기획 만들기'}</button><span class="status" id="st-month">${i.type.trim()?'':'업종을 먼저 적어 주세요'}</span></div>
     ${M.items.length?`
       <h2 class="sec">${Number(M.ym.slice(5))}월 연재표</h2>
@@ -3086,7 +3088,7 @@ document.addEventListener('click',async e=>{
   if(a==='endUp'){ endPick=true; feedPick=false; refPick=null; photoPick=null; upMany=false; return pickFile(false); }
   if(a==='endAI') return run(b,async()=>{ if(!API.key){ toast('Gemini API 키를 먼저 넣어 주세요'); return; } const st=$('#st-end'); if(st){ st.className='status'; st.innerHTML='<span class="spin"></span> 안내 카드 그리는 중 · 10~40초'; } try{ ec().img=await gimage(endImageParts()); save(); refreshEnd(); }catch(e){ const s3=$('#st-end'); if(s3){ s3.className='status err'; s3.textContent=e.message||'그리지 못했어요'; } } });
   if(a==='endDl'){ const cv=document.createElement('canvas'); await drawEnd(cv); return saveFile(`${(S.info.name||'instatoon').replace(/\s+/g,'_')}_${cuts().length+1}_안내.png`, await cvBlob(cv)); }
-  if(a==='kitCopy'){ const t=postText(); if(!t.trim()){ toast('캡션이 비어 있어요'); return; } return copy(t); }
+  if(a==='kitCopy'){ const t=postText(); if(!t.trim()){ toast('캡션이 비어 있어요'); return; } setTimeout(bkAskTrigger,0); return copy(t); }
   if(a==='posted'){ const T=S.toon; T.postedAt=todayStr(); T.kit={...(T.kit||{}),order:true,cap:true}; const x=planItem(); if(x){ x.status='posted'; x.made=true; x.postedAt=T.postedAt; } T.hid=T.hid||Date.now(); let th=''; try{ th=await coverThumb(); }catch(_){} S.history=[{hid:T.hid,title:T.title,date:T.postedAt,thumb:th,link:T.link||'',art:S.info.art,tone:T.tone||'',cuts:cuts().length,type:x?.type||'',goal:x?.goal||'',hook:lines(cuts()[0]?.title).join(' '),stats:(hist().find(h=>h.hid===T.hid)||{}).stats||null},...hist().filter(h=>h.hid!==T.hid)].slice(0,12); save(); vPost(); toast(x?'연재표에도 올림으로 표시했어요':'이번 편을 완료로 표시했어요'); return; }
   if(a==='unposted'){ const T=S.toon; T.postedAt=''; S.history=hist().filter(h=>h.hid!==T.hid); const x=planItem(); if(x){ x.status='art'; x.postedAt=''; } save(); vPost(); return; }
   if(a==='backupWin') return openBackupWin();
@@ -3868,6 +3870,10 @@ function routeHash(hh){
   return false; }
 window.addEventListener('hashchange',()=>{ if(location.hash!==ADM_HASH) routeHash(); });
 
+/* ---------- 3단계: 한 편을 끝냈을 때(그림을 다 올렸거나 캡션을 복사) "이 편까지 백업 저장" 안내 — 편마다 한 번 ---------- */
+function bkAskHTML(){ const T=S.toon; if(!T||S.demo||T.bkAsk!=='shown') return ''; return `<div class="bkask" id="bkAsk" role="status"><span>이 편까지 백업 저장해 둘까요?</span><span class="bkask-b"><button type="button" class="btn sm pri" data-bkask="save">이 편까지 백업 저장</button><button type="button" class="btn sm ghost" data-bkask="later">나중에</button></span></div>`; }
+function bkAskTrigger(){ const T=S.toon; if(!T||S.demo||T.bkAsk||S.step!=='post') return; T.bkAsk='shown'; save(); if($('#bkAsk')) return; const j=document.querySelector('#main .jump'); if(j) j.insertAdjacentHTML('beforebegin',bkAskHTML()); }
+document.addEventListener('click',e=>{ const b=e.target.closest('[data-bkask]'); if(!b) return; e.preventDefault(); const T=S.toon; if(T){ T.bkAsk=b.dataset.bkask==='save'?'done':'later'; save(); } const el=$('#bkAsk'); if(el) el.remove(); if(b.dataset.bkask==='save') backupStart(); });
 /* ---------- 머리말 저장 상태 ---------- */
 let savingT=null, savingAt=0;
 function markSaving(){ if(kv.mode!=='idb'){ renderHeadSave(); return; } savingAt=Date.now();

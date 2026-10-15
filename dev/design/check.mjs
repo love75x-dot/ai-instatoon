@@ -303,6 +303,35 @@ for (const [vk, w] of [['PC 1300', 1300], ['PC 1024', 1024], ['태블릿 768', 7
   }
   sBig.close(); sCat.close(); fs.rmSync(tmp, { recursive: true, force: true });
 }
+{ // 3단계: 한 편을 끝냈을 때 "이 편까지 백업 저장" 안내를 편마다 한 번 (4b)
+  const open1 = async () => { const h = await newPage(browser, srv.base, { viewport: { width: 1300, height: 900 }, ls: { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST' } }); await h.page.goto(srv.base + '/'); await h.page.waitForTimeout(400);
+    await h.page.evaluate(() => { S = demoState('bakery'); S.demo = false; S.mode = 'one'; S.step = 'post'; S.toon.pics = []; delete S.toon.bkAsk; save(); render(); }); await h.page.waitForTimeout(250); return h; };
+  const addAll = (page) => page.evaluate(async () => { const mk = () => new Promise((res) => { const c = document.createElement('canvas'); c.width = c.height = 8; c.getContext('2d').fillStyle = '#888'; c.getContext('2d').fillRect(0, 0, 8, 8); c.toBlob(res, 'image/png'); }); const fs = []; for (let i = 0; i < cuts().length; i++) fs.push(new File([await mk()], `${i + 1}.png`, { type: 'image/png' })); await addPics(fs, 'toon'); });
+  const a = await open1();
+  C.ok(await a.page.evaluate(() => !document.querySelector('#bkAsk')), '3단계: 그림을 올리기 전에는 백업 안내가 없음');
+  await a.page.evaluate(async () => { const c = document.createElement('canvas'); c.width = c.height = 8; const b = await new Promise((r) => c.toBlob(r, 'image/png')); await addPics([new File([b], '1.png', { type: 'image/png' })], 'toon'); });
+  C.ok(await a.page.evaluate(() => !document.querySelector('#bkAsk') && cuts().length > pics().length), '3단계: 그림을 일부만 올렸을 때는 아직 안내하지 않음');
+  await addAll(a.page); await a.page.waitForTimeout(250);
+  const t1 = await a.page.evaluate(() => { const e = document.querySelector('#bkAsk'); return { shown: !!e, text: e && e.innerText.replace(/\s+/g, ' '), flag: S.toon.bkAsk, btns: e && [...e.querySelectorAll('button')].map((b) => b.textContent.trim()).join(',') }; });
+  C.ok(t1.shown && t1.flag === 'shown' && t1.btns === '이 편까지 백업 저장,나중에', `3단계: 그림을 다 올리면 "이 편까지 백업 저장" 안내가 한 번 뜸 (${t1.btns})`);
+  await a.page.click('#bkAsk [data-bkask="later"]'); await a.page.waitForTimeout(150);
+  C.ok(await a.page.evaluate(() => !document.querySelector('#bkAsk') && S.toon.bkAsk === 'later'), '"나중에"를 누르면 안내가 사라지고 이 편에서는 기록됨');
+  await addAll(a.page); await a.page.evaluate(() => { render(); }); await a.page.waitForTimeout(250); await a.page.evaluate(() => { const b = document.querySelector('[data-act="kitCopy"]'); if (b) b.click(); }); await a.page.waitForTimeout(250);
+  C.ok(await a.page.evaluate(() => !document.querySelector('#bkAsk') && S.toon.bkAsk === 'later'), '"나중에" 뒤에는 그림을 다시 올리거나 캡션을 복사해도 이 편에서 다시 안 뜸');
+  await a.ctx.close();
+  const b = await open1();
+  await b.page.evaluate(() => { const bt = document.querySelector('[data-act="kitCopy"]'); if (bt) bt.click(); }); await b.page.waitForTimeout(300);
+  C.ok(await b.page.evaluate(() => !!document.querySelector('#bkAsk') && S.toon.bkAsk === 'shown'), '3단계: 캡션을 복사해도 안내가 한 번 뜸');
+  const [dl] = await Promise.all([b.page.waitForEvent('download', { timeout: 4000 }).catch(() => null), b.page.click('#bkAsk [data-bkask="save"]')]);
+  C.ok(!!dl && await b.page.evaluate(() => !document.querySelector('#bkAsk') && S.toon.bkAsk === 'done'), '"이 편까지 백업 저장"을 누르면 백업 파일이 내려받아지고 안내가 사라짐');
+  await b.page.evaluate(() => { render(); }); await b.page.waitForTimeout(200);
+  C.ok(await b.page.evaluate(() => !document.querySelector('#bkAsk')), '백업한 편은 다시 안내하지 않음');
+  await b.ctx.close();
+  const d = await open1(); await d.page.evaluate(() => { S.demo = true; save(); }); await addAll(d.page); await d.page.waitForTimeout(250);
+  C.ok(await d.page.evaluate(() => !document.querySelector('#bkAsk') && !S.toon.bkAsk), '체험(예시) 모드에서는 백업 안내가 뜨지 않음');
+  C.ok(d.errors.length === 0, '백업 안내: 페이지 오류 없음' + (d.errors[0] ? ' ← ' + d.errors[0] : ''));
+  await d.ctx.close();
+}
 await browser.close(); srv.close();
 console.log(C.fail ? `\n[FAIL] 디자인 기준 ${C.fail}건 실패` : '\n[PASS] 디자인 기준 전부 통과');
 process.exit(C.fail ? 1 : 0);
