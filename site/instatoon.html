@@ -1183,19 +1183,19 @@ const ROLES=['대표','사장님','직원','알바생','프리랜서','1인 사�
 const GENDERS=['여성','남성','상관없음'];
 const AGES=['10대','20대','30대','40대','50대','60대 이상'];
 const ARTS={
-  chibi:{name:'귀여운 2~3등신',letter:{title:'굵고 둥근 검은 고딕 제목체에 두꺼운 흰 외곽선',bubble:'흰 둥근 말풍선, 검은 테두리, 검은 둥근 고딕체',sfx:'빨간 굵은 글씨, 흰 외곽선, 살짝 기울임',hl:'강조 단어 아래 부드러운 노란 형광펜'},desc:'큰 머리·작은 몸, 굵은 외곽선, 부드러운 단색. 가장 무난한 인스타툰',prompt:'한국 인스타툰 치비 그림체. 머리가 크고 몸이 작은 2~3등신, 굵고 깔끔한 검은 외곽선, 부드러운 단색 채색, 볼터치, 과장되고 귀여운 표정.',bg:'배경은 연한 회색 톤으로 단순하게, 인물과 중요한 소품만 컬러로.'},
-  mono:{name:'흑백 + 포인트 컬러',letter:{title:'검은 굵은 고딕 제목체, 위쪽 흰 여백에 깔끔하게',bubble:'흰 타원 말풍선, 가는 검은 테두리, 깔끔한 고딕체',sfx:'크고 거친 검은 붓글씨 효과음, 기울임',hl:'강조 단어만 굵게'},desc:'회색 톤 만화에 옷 하나만 파스텔 색. 감정 연출이 진해요',prompt:'흑백 한국 웹툰 그림체에 포인트 컬러 하나(주인공 옷만 연한 파스텔 색). 깔끔한 펜 선, 회색 톤과 스크린톤 음영, 4~5등신의 자연스러운 비율, 긴장하면 얼굴 그늘·세로 빗금, 놀라면 집중선. 표정 변화가 풍부하고 극적.',bg:'배경은 회색 톤 펜화로 자세히, 주인공 옷의 포인트 색만 컬러로.'},
-  deadpan:{name:'시크한 무표정 치비',letter:{title:'짙은 갈색 둥근 손글씨 제목',bubble:'흰 둥근 말풍선, 갈색 가는 테두리, 둥근 손글씨',sfx:'작은 갈색 손글씨 효과음',hl:'강조 단어만 연한 분홍색'},desc:'반쯤 감긴 눈, 동물 귀 후드 같은 포인트 의상. 조연·마스코트에 좋아요',prompt:'시크한 무표정 치비 그림체. 반쯤 감긴 졸린 눈, 작은 입, 은은한 볼터치, 동물 귀 후드티 같은 귀여운 포인트 의상, 가는 외곽선과 부드러운 채색.',bg:'배경은 흰색 위주로 단순하게, 소품만 가볍게 채색.'},
-  doodle:{name:'동글동글 손그림 일상툰',letter:{title:'짙은 회갈색 마커 손글씨 제목',bubble:'손으로 그린 삐뚤한 둥근 말풍선, 마커 손글씨',sfx:'작은 마커 손글씨 효과음',hl:'강조 없이 담백하게'},desc:'동그란 얼굴, 점 눈, 마커 느낌 선, 여백 많은 담백한 그림',prompt:'아주 단순한 손그림 일상툰 그림체. 동그란 얼굴, 점 눈, 작은 입, 두께가 일정한 부드러운 짙은 회갈색 마커 선, 연한 파스텔 단색 채색, 따뜻하고 담백한 분위기.',bg:'배경은 거의 그리지 않고 흰 여백을 넉넉하게.'},
-  pastel:{name:'풀컬러 파스텔 일러스트',letter:{title:'분홍 파스텔 둥근 글씨, 흰 테두리와 갈색 외곽선으로 스티커처럼',bubble:'흰 둥근 말풍선, 갈색 테두리, 둥근 고딕체',sfx:'파스텔 색 둥근 글씨, 반짝이와 함께',hl:'강조 단어만 진한 분홍색'},desc:'배경까지 꽉 찬 밝은 컬러, 반짝이 효과. 첫 장·광고 장면에 좋아요',prompt:'밝은 풀컬러 파스텔 일러스트 그림체. 동글동글 귀여운 인물, 부드러운 그림자, 따뜻한 햇살 느낌, 반짝이와 하트 효과, 광고 포스터처럼 화사함.',bg:'배경까지 자세하고 화사하게 풀컬러로.'},
-  sketch:{name:'펜 크로키 + 포인트 색',letter:{title:'검은 펜 손글씨 제목',bubble:'펜으로 그린 말풍선, 펜 손글씨',sfx:'빨간 펜 손글씨 효과음',hl:'강조 단어만 빨간색'},desc:'펜으로 빠르게 그린 선과 빗금, 빨간 포인트 하나',prompt:'펜 크로키 느낌의 스케치 그림체. 가는 검은 펜 선과 빗금 음영, 자연스럽게 거친 선, 색은 거의 없이 포인트 색(빨강) 하나만, 볼에 진한 홍조.',bg:'배경은 펜 빗금으로 가볍게, 포인트 색 소품만 칠하기.'},
-  shonen:{name:'열혈 소년 모험 만화',letter:{title:'거칠고 굵은 먹 붓글씨, 뾰족한 폭발 모양 흰 박스 안에',bubble:'뾰족한 외침 말풍선, 굵은 붓글씨',sfx:'아주 크고 굵은 먹 붓글씨 효과음, 속도선과 함께',hl:'강조 단어만 더 크게'},desc:'역동적인 포즈, 굵은 선, 스피드라인, 불타는 눈빛. 신나고 박력 있는 전개',prompt:'90~2000년대 일본 소년 모험 만화 느낌의 오리지널 그림체. 굵고 힘 있는 먹선, 역동적인 포즈와 과감한 원근, 스피드라인과 충격 효과, 열혈 표정, 선명한 원색 채색과 셀 음영. 특정 작품의 캐릭터나 의상은 따라 하지 말 것.',bg:'배경은 속도감 있는 효과선과 간단한 공간 묘사로.'},
-  dark:{name:'거칠고 어두운 액션 만화',letter:{title:'거친 먹 붓글씨, 번진 잉크 질감의 검은 제목',bubble:'거친 선의 흰 말풍선, 굵은 고딕체',sfx:'긁힌 듯한 흰 붓글씨 효과음',hl:'강조 단어만 탁한 붉은색'},desc:'거친 펜선, 진한 먹 그림자, 날카로운 눈매. 시크하고 긴장감 넘치는 톤',prompt:'현대 청년 액션 만화 느낌의 오리지널 그림체. 거칠고 빠른 펜선, 진한 먹 그림자와 흑백 대비, 날카로운 눈매와 무심한 표정, 가끔 탁한 붉은 포인트 색. 피나 잔인한 장면 없이 분위기로만 긴장감. 특정 작품의 캐릭터는 따라 하지 말 것.',bg:'배경은 거친 먹선과 어두운 톤으로.'},
-  family:{name:'가족 코믹 애니',letter:{title:'통통하고 둥근 갈색 글씨에 두꺼운 흰 외곽선',bubble:'흰 둥근 말풍선, 굵은 갈색 테두리, 둥근 고딕체',sfx:'통통한 원색 둥근 글씨 효과음',hl:'강조 단어만 주황색'},desc:'단순하고 굵은 선, 큰 얼굴·짧은 팔다리, 과장된 개그 표정',prompt:'가족 코믹 TV 애니메이션 느낌의 오리지널 그림체. 아주 단순하고 굵은 외곽선, 큰 얼굴과 짧은 팔다리, 과장된 개그 표정(눈이 점이나 선이 됨), 밝은 원색의 평면 채색, 그림자 거의 없음. 특정 작품의 캐릭터는 따라 하지 말 것.',bg:'배경은 단순한 평면 색과 굵은 선으로.'},
-  shoujo:{name:'반짝이는 순정 만화',letter:{title:'가늘고 우아한 글씨, 주변에 작은 꽃과 반짝이',bubble:'구름 모양 말풍선, 가는 테두리, 가는 글씨',sfx:'작고 가는 필기체 느낌 글씨',hl:'강조 단어 옆에 작은 반짝이'},desc:'큰 눈과 반짝이, 꽃 배경 톤. 설레고 감성적인 장면에 좋아요',prompt:'순정 만화 느낌의 그림체. 크고 반짝이는 눈동자와 긴 속눈썹, 가늘고 섬세한 선, 부드러운 파스텔 채색, 꽃·반짝이·빛망울 배경 톤.',bg:'배경은 꽃과 빛망울 톤으로 몽글몽글하게.'},
-  retro:{name:'레트로 90년대 애니',letter:{title:'레트로 간판 느낌의 굵은 글씨, 크림색 리본 띠 위에',bubble:'흰 둥근 말풍선, 갈색 테두리, 굵은 고딕체',sfx:'두꺼운 레트로 글씨에 그림자',hl:'강조 단어만 주황색'},desc:'셀 채색, 살짝 바랜 색감과 필름 질감. 추억 감성',prompt:'1990년대 셀 애니메이션 느낌의 그림체. 선명한 셀 채색과 두 단계 음영, 살짝 바랜 따뜻한 색감, 옅은 필름 그레인, 둥글고 커다란 눈.',bg:'배경은 수채 느낌 배경화 위에 셀 캐릭터를 얹은 듯이.'},
-  cg3d:{name:'3D 애니메이션 영화',letter:{title:'흰색 둥근 입체 글씨, 강조 단어만 주황색, 양옆에 짧은 반짝 선',bubble:'흰 둥근 말풍선, 갈색 테두리, 둥근 고딕체',sfx:'입체감 있는 둥근 글씨',hl:'강조 단어만 주황색'},desc:'둥글둥글 입체감, 부드러운 조명. 가족 영화 같은 따뜻함',prompt:'3D 애니메이션 영화 느낌의 그림체. 둥글고 부드러운 입체 형태, 큰 눈, 매끈한 질감, 따뜻한 조명과 부드러운 그림자, 살짝 과장된 비율.',bg:'배경도 입체적으로, 얕은 심도로 흐리게.'},
-  mascot:{name:'2등신 동물 마스코트',letter:{title:'짙은 갈색 둥근 손글씨 제목',bubble:'흰 둥근 말풍선, 갈색 테두리, 둥근 손글씨',sfx:'작고 둥근 손글씨 효과음',hl:'강조 단어만 연한 주황색'},desc:'강아지·고양이 같은 단순한 캐릭터로 의인화. 굵은 선, 따뜻한 색',prompt:'단순한 2등신 동물 마스코트 그림체. 둥근 얼굴의 강아지·고양이 같은 캐릭터로 사람을 의인화, 굵고 부드러운 외곽선, 따뜻한 단색 채색, 작은 점 눈과 큰 볼터치.',bg:'배경은 단순한 단색 면과 간단한 소품으로.'},
+  chibi:{name:'귀여운 2~3등신',letter:{title:'굵고 둥근 검은 고딕 제목체에 두꺼운 흰 외곽선',bubble:'흰 둥근 말풍선, 검은 테두리, 검은 둥근 고딕체',sfx:'빨간 굵은 글씨, 흰 외곽선, 살짝 기울임',hl:'강조 단어 아래 부드러운 노란 형광펜'},desc:'큰 머리·작은 몸, 굵은 외곽선, 부드러운 단색. 가장 무난한 인스타툰',prompt:'한국 인스타툰 치비 그림체. 머리가 크고 몸이 작은 2~3등신, 굵고 깔끔한 검은 외곽선, 부드러운 단색 채색, 볼터치, 과장되고 귀여운 표정.',bg:'배경은 연한 회색 톤으로 단순하게, 인물과 중요한 소품만 컬러로.',gsStyle:'선: 굵고 깔끔한 검은 외곽선, 굵기 일정\n색: 부드러운 단색 채색, 볼에 분홍 볼터치\n비율: 2~3등신, 머리 크고 몸 작게, 큰 표정\n배경: 연한 회색 톤으로 단순하게, 인물과 소품만 컬러\n그림자: 거의 없이 은은한 단색 음영만\n쓰지 말 것: 사실적 비율, 가는 선, 순정만화풍 반짝이 눈, 3D 질감'},
+  mono:{name:'흑백 + 포인트 컬러',letter:{title:'검은 굵은 고딕 제목체, 위쪽 흰 여백에 깔끔하게',bubble:'흰 타원 말풍선, 가는 검은 테두리, 깔끔한 고딕체',sfx:'크고 거친 검은 붓글씨 효과음, 기울임',hl:'강조 단어만 굵게'},desc:'회색 톤 만화에 옷 하나만 파스텔 색. 감정 연출이 진해요',prompt:'흑백 한국 웹툰 그림체에 포인트 컬러 하나(주인공 옷만 연한 파스텔 색). 깔끔한 펜 선, 회색 톤과 스크린톤 음영, 4~5등신의 자연스러운 비율, 긴장하면 얼굴 그늘·세로 빗금, 놀라면 집중선. 표정 변화가 풍부하고 극적.',bg:'배경은 회색 톤 펜화로 자세히, 주인공 옷의 포인트 색만 컬러로.',gsStyle:'선: 깔끔한 검은 펜 선, 인물 선은 또렷하게\n색: 흑백 회색 톤, 주인공 옷 하나만 연한 파스텔 색\n비율: 4~5등신 자연스러운 비율, 표정 변화 크게\n배경: 회색 톤 펜화로 자세히, 포인트 색 외엔 컬러 금지\n그림자: 스크린톤 음영, 긴장하면 얼굴 그늘과 세로 빗금\n쓰지 말 것: 전체 컬러 채색, 치비 비율, 둥글고 굵은 선'},
+  deadpan:{name:'시크한 무표정 치비',letter:{title:'짙은 갈색 둥근 손글씨 제목',bubble:'흰 둥근 말풍선, 갈색 가는 테두리, 둥근 손글씨',sfx:'작은 갈색 손글씨 효과음',hl:'강조 단어만 연한 분홍색'},desc:'반쯤 감긴 눈, 동물 귀 후드 같은 포인트 의상. 조연·마스코트에 좋아요',prompt:'시크한 무표정 치비 그림체. 반쯤 감긴 졸린 눈, 작은 입, 은은한 볼터치, 동물 귀 후드티 같은 귀여운 포인트 의상, 가는 외곽선과 부드러운 채색.',bg:'배경은 흰색 위주로 단순하게, 소품만 가볍게 채색.',gsStyle:'선: 가는 외곽선, 부드럽고 둥근 선\n색: 부드러운 파스텔 채색, 은은한 볼터치\n비율: 치비 비율, 반쯤 감긴 졸린 눈, 작은 입\n배경: 흰색 위주로 단순하게, 소품만 가볍게 채색\n그림자: 거의 없이 아주 옅은 음영\n쓰지 말 것: 큰 눈, 활짝 웃는 과장된 표정, 굵은 검은 선, 복잡한 배경'},
+  doodle:{name:'동글동글 손그림 일상툰',letter:{title:'짙은 회갈색 마커 손글씨 제목',bubble:'손으로 그린 삐뚤한 둥근 말풍선, 마커 손글씨',sfx:'작은 마커 손글씨 효과음',hl:'강조 없이 담백하게'},desc:'동그란 얼굴, 점 눈, 마커 느낌 선, 여백 많은 담백한 그림',prompt:'아주 단순한 손그림 일상툰 그림체. 동그란 얼굴, 점 눈, 작은 입, 두께가 일정한 부드러운 짙은 회갈색 마커 선, 연한 파스텔 단색 채색, 따뜻하고 담백한 분위기.',bg:'배경은 거의 그리지 않고 흰 여백을 넉넉하게.',gsStyle:'선: 두께 일정한 짙은 회갈색 마커 선, 손으로 그린 느낌\n색: 연한 파스텔 단색 채색, 따뜻하고 담백하게\n비율: 동그란 얼굴, 점 눈, 작은 입, 아주 단순한 몸\n배경: 거의 그리지 않고 흰 여백을 넉넉하게\n그림자: 그림자 없이 평면으로\n쓰지 말 것: 사실적 묘사, 세밀한 음영, 굵은 검은 외곽선, 꽉 찬 배경'},
+  pastel:{name:'풀컬러 파스텔 일러스트',letter:{title:'분홍 파스텔 둥근 글씨, 흰 테두리와 갈색 외곽선으로 스티커처럼',bubble:'흰 둥근 말풍선, 갈색 테두리, 둥근 고딕체',sfx:'파스텔 색 둥근 글씨, 반짝이와 함께',hl:'강조 단어만 진한 분홍색'},desc:'배경까지 꽉 찬 밝은 컬러, 반짝이 효과. 첫 장·광고 장면에 좋아요',prompt:'밝은 풀컬러 파스텔 일러스트 그림체. 동글동글 귀여운 인물, 부드러운 그림자, 따뜻한 햇살 느낌, 반짝이와 하트 효과, 광고 포스터처럼 화사함.',bg:'배경까지 자세하고 화사하게 풀컬러로.',gsStyle:'선: 부드럽고 가는 윤곽선, 선보다 색으로 표현\n색: 밝은 풀컬러 파스텔, 따뜻한 햇살 색감\n비율: 동글동글 귀여운 인물, 큰 눈\n배경: 배경까지 자세하고 화사하게 풀컬러\n그림자: 부드러운 그림자, 반짝이와 하트 효과\n쓰지 말 것: 흑백 톤, 거친 선, 어두운 색감, 평면 단색 배경'},
+  sketch:{name:'펜 크로키 + 포인트 색',letter:{title:'검은 펜 손글씨 제목',bubble:'펜으로 그린 말풍선, 펜 손글씨',sfx:'빨간 펜 손글씨 효과음',hl:'강조 단어만 빨간색'},desc:'펜으로 빠르게 그린 선과 빗금, 빨간 포인트 하나',prompt:'펜 크로키 느낌의 스케치 그림체. 가는 검은 펜 선과 빗금 음영, 자연스럽게 거친 선, 색은 거의 없이 포인트 색(빨강) 하나만, 볼에 진한 홍조.',bg:'배경은 펜 빗금으로 가볍게, 포인트 색 소품만 칠하기.',gsStyle:'선: 가는 검은 펜 선, 자연스럽게 거친 선\n색: 색은 거의 없이 포인트 색(빨강) 하나만\n비율: 자연스러운 비율, 볼에 진한 홍조\n배경: 펜 빗금으로 가볍게, 포인트 색 소품만 칠하기\n그림자: 가는 빗금으로 음영\n쓰지 말 것: 전체 컬러 채색, 매끈한 선, 3D 질감'},
+  shonen:{name:'열혈 소년 모험 만화',letter:{title:'거칠고 굵은 먹 붓글씨, 뾰족한 폭발 모양 흰 박스 안에',bubble:'뾰족한 외침 말풍선, 굵은 붓글씨',sfx:'아주 크고 굵은 먹 붓글씨 효과음, 속도선과 함께',hl:'강조 단어만 더 크게'},desc:'역동적인 포즈, 굵은 선, 스피드라인, 불타는 눈빛. 신나고 박력 있는 전개',prompt:'90~2000년대 일본 소년 모험 만화 느낌의 오리지널 그림체. 굵고 힘 있는 먹선, 역동적인 포즈와 과감한 원근, 스피드라인과 충격 효과, 열혈 표정, 선명한 원색 채색과 셀 음영. 특정 작품의 캐릭터나 의상은 따라 하지 말 것.',bg:'배경은 속도감 있는 효과선과 간단한 공간 묘사로.',gsStyle:'선: 굵고 힘 있는 먹선, 속도선과 충격 효과\n색: 선명한 원색 채색, 셀 음영\n비율: 역동적인 포즈와 과감한 원근, 열혈 표정\n배경: 속도감 있는 효과선과 간단한 공간 묘사\n그림자: 셀 음영(2단계)\n쓰지 말 것: 치비 비율, 파스텔 톤, 순정만화풍 반짝이, 특정 작품 캐릭터·의상'},
+  dark:{name:'거칠고 어두운 액션 만화',letter:{title:'거친 먹 붓글씨, 번진 잉크 질감의 검은 제목',bubble:'거친 선의 흰 말풍선, 굵은 고딕체',sfx:'긁힌 듯한 흰 붓글씨 효과음',hl:'강조 단어만 탁한 붉은색'},desc:'거친 펜선, 진한 먹 그림자, 날카로운 눈매. 시크하고 긴장감 넘치는 톤',prompt:'현대 청년 액션 만화 느낌의 오리지널 그림체. 거칠고 빠른 펜선, 진한 먹 그림자와 흑백 대비, 날카로운 눈매와 무심한 표정, 가끔 탁한 붉은 포인트 색. 피나 잔인한 장면 없이 분위기로만 긴장감. 특정 작품의 캐릭터는 따라 하지 말 것.',bg:'배경은 거친 먹선과 어두운 톤으로.',gsStyle:'선: 거칠고 빠른 펜선, 선 굵기 변화 크게\n색: 흑백 대비 중심, 가끔 탁한 붉은 포인트 색\n비율: 날카로운 눈매, 무심한 표정, 성인 청년 비율\n배경: 거친 먹선과 어두운 톤\n그림자: 진한 먹 그림자, 강한 명암 대비\n쓰지 말 것: 밝은 파스텔 톤, 귀여운 치비, 피·잔인한 장면, 특정 작품 캐릭터'},
+  family:{name:'가족 코믹 애니',letter:{title:'통통하고 둥근 갈색 글씨에 두꺼운 흰 외곽선',bubble:'흰 둥근 말풍선, 굵은 갈색 테두리, 둥근 고딕체',sfx:'통통한 원색 둥근 글씨 효과음',hl:'강조 단어만 주황색'},desc:'단순하고 굵은 선, 큰 얼굴·짧은 팔다리, 과장된 개그 표정',prompt:'가족 코믹 TV 애니메이션 느낌의 오리지널 그림체. 아주 단순하고 굵은 외곽선, 큰 얼굴과 짧은 팔다리, 과장된 개그 표정(눈이 점이나 선이 됨), 밝은 원색의 평면 채색, 그림자 거의 없음. 특정 작품의 캐릭터는 따라 하지 말 것.',bg:'배경은 단순한 평면 색과 굵은 선으로.',gsStyle:'선: 아주 단순하고 굵은 외곽선\n색: 밝은 원색의 평면 채색\n비율: 큰 얼굴, 짧은 팔다리, 눈이 점이나 선이 되는 개그 표정\n배경: 단순한 평면 색과 굵은 선\n그림자: 그림자 거의 없이 평면으로\n쓰지 말 것: 세밀한 음영, 사실적 비율, 가는 선, 특정 작품 캐릭터'},
+  shoujo:{name:'반짝이는 순정 만화',letter:{title:'가늘고 우아한 글씨, 주변에 작은 꽃과 반짝이',bubble:'구름 모양 말풍선, 가는 테두리, 가는 글씨',sfx:'작고 가는 필기체 느낌 글씨',hl:'강조 단어 옆에 작은 반짝이'},desc:'큰 눈과 반짝이, 꽃 배경 톤. 설레고 감성적인 장면에 좋아요',prompt:'순정 만화 느낌의 그림체. 크고 반짝이는 눈동자와 긴 속눈썹, 가늘고 섬세한 선, 부드러운 파스텔 채색, 꽃·반짝이·빛망울 배경 톤.',bg:'배경은 꽃과 빛망울 톤으로 몽글몽글하게.',gsStyle:'선: 가늘고 섬세한 선, 긴 속눈썹\n색: 부드러운 파스텔 채색\n비율: 크고 반짝이는 눈동자, 갸름한 날씬한 비율\n배경: 꽃·반짝이·빛망울로 몽글몽글하게\n그림자: 부드럽고 옅은 음영, 빛망울\n쓰지 말 것: 굵은 선, 치비 비율, 거친 펜선, 진한 먹 그림자'},
+  retro:{name:'레트로 90년대 애니',letter:{title:'레트로 간판 느낌의 굵은 글씨, 크림색 리본 띠 위에',bubble:'흰 둥근 말풍선, 갈색 테두리, 굵은 고딕체',sfx:'두꺼운 레트로 글씨에 그림자',hl:'강조 단어만 주황색'},desc:'셀 채색, 살짝 바랜 색감과 필름 질감. 추억 감성',prompt:'1990년대 셀 애니메이션 느낌의 그림체. 선명한 셀 채색과 두 단계 음영, 살짝 바랜 따뜻한 색감, 옅은 필름 그레인, 둥글고 커다란 눈.',bg:'배경은 수채 느낌 배경화 위에 셀 캐릭터를 얹은 듯이.',gsStyle:'선: 또렷한 셀 윤곽선\n색: 선명한 셀 채색, 살짝 바랜 따뜻한 색감, 옅은 필름 그레인\n비율: 둥글고 커다란 눈, 90년대 애니 비율\n배경: 수채 느낌 배경화 위에 셀 캐릭터를 얹은 듯이\n그림자: 두 단계 셀 음영\n쓰지 말 것: 매끈한 3D 질감, 형광 색감, 최신 디지털 느낌'},
+  cg3d:{name:'3D 애니메이션 영화',letter:{title:'흰색 둥근 입체 글씨, 강조 단어만 주황색, 양옆에 짧은 반짝 선',bubble:'흰 둥근 말풍선, 갈색 테두리, 둥근 고딕체',sfx:'입체감 있는 둥근 글씨',hl:'강조 단어만 주황색'},desc:'둥글둥글 입체감, 부드러운 조명. 가족 영화 같은 따뜻함',prompt:'3D 애니메이션 영화 느낌의 그림체. 둥글고 부드러운 입체 형태, 큰 눈, 매끈한 질감, 따뜻한 조명과 부드러운 그림자, 살짝 과장된 비율.',bg:'배경도 입체적으로, 얕은 심도로 흐리게.',gsStyle:'선: 선 없이 입체 형태로 표현\n색: 둥글고 매끈한 질감, 따뜻한 조명 색\n비율: 큰 눈, 살짝 과장된 비율, 부드러운 입체 형태\n배경: 얕은 심도로 흐리게 입체적인 배경\n그림자: 따뜻한 조명과 부드러운 그림자\n쓰지 말 것: 외곽선 그림, 평면 셀 채색, 손그림 질감, 흑백 톤'},
+  mascot:{name:'2등신 동물 마스코트',letter:{title:'짙은 갈색 둥근 손글씨 제목',bubble:'흰 둥근 말풍선, 갈색 테두리, 둥근 손글씨',sfx:'작고 둥근 손글씨 효과음',hl:'강조 단어만 연한 주황색'},desc:'강아지·고양이 같은 단순한 캐릭터로 의인화. 굵은 선, 따뜻한 색',prompt:'단순한 2등신 동물 마스코트 그림체. 둥근 얼굴의 강아지·고양이 같은 캐릭터로 사람을 의인화, 굵고 부드러운 외곽선, 따뜻한 단색 채색, 작은 점 눈과 큰 볼터치.',bg:'배경은 단순한 단색 면과 간단한 소품으로.',gsStyle:'선: 굵고 부드러운 외곽선\n색: 따뜻한 단색 채색, 큰 볼터치\n비율: 2등신, 둥근 얼굴의 강아지·고양이 같은 동물 캐릭터, 작은 점 눈\n배경: 단순한 단색 면과 간단한 소품\n그림자: 거의 없이 단색으로\n쓰지 말 것: 사실적 동물 묘사, 사람 얼굴 비율, 가는 선, 복잡한 배경'},
 };
 const LAYOUTS={auto:'AI가 알아서',single:'한 장에 한 장면',multi:'한 장에 2~3칸 나누기'};
 const DETAILS=[
@@ -1213,7 +1213,7 @@ function applyRatio(){ const r=ratio(); document.documentElement.style.setProper
 const artOf=()=>ARTS[S.info.art]||ARTS.chibi;
 /* 관리자가 고친 그림체 설정: over(기본 그림체 수정) · custom(새로 추가) · hidden(숨김). 기본값은 ARTS_DEF에 보관 */
 const ARTS_DEF=JSON.parse(JSON.stringify(ARTS)), ART_CFG={over:{},custom:{},hidden:[]}, ART_LS='instatoon.admin.arts';
-const ART_FIELDS=['name','desc','prompt','bg'], ART_LETTERS=['title','bubble','sfx','hl'];
+const ART_FIELDS=['name','desc','prompt','bg','gsStyle'], ART_LETTERS=['title','bubble','sfx','hl'];
 function artMerge(base,o){ const r=JSON.parse(JSON.stringify(base)); if(!o||typeof o!=='object') return r;
   ART_FIELDS.forEach(f=>{ if(typeof o[f]==='string'&&o[f].trim()) r[f]=o[f]; });
   r.letter={...(base.letter||{})}; ART_LETTERS.forEach(f=>{ const t=o.letter&&o.letter[f]; if(typeof t==='string'&&t.trim()) r.letter[f]=t; });
@@ -1222,7 +1222,7 @@ function applyArts(cfg){ const c=cfg&&typeof cfg==='object'?cfg:{};
   ART_CFG.over=c.over&&typeof c.over==='object'?c.over:{}; ART_CFG.custom=c.custom&&typeof c.custom==='object'?c.custom:{}; ART_CFG.hidden=Array.isArray(c.hidden)?c.hidden:[];
   Object.keys(ARTS).forEach(k=>delete ARTS[k]);
   Object.entries(ARTS_DEF).forEach(([k,v])=>{ ARTS[k]=artMerge(v,ART_CFG.over[k]); });
-  Object.entries(ART_CFG.custom).forEach(([k,v])=>{ if(ARTS[k]||!v||!v.name||!v.prompt) return; ARTS[k]=artMerge({name:'',desc:'',prompt:'',bg:'',letter:ARTS_DEF.chibi.letter},v); ARTS[k].custom=true; }); }
+  Object.entries(ART_CFG.custom).forEach(([k,v])=>{ if(ARTS[k]||!v||!v.name||!v.prompt) return; ARTS[k]=artMerge({name:'',desc:'',prompt:'',bg:'',gsStyle:'',letter:ARTS_DEF.chibi.letter},v); ARTS[k].custom=true; }); }
 const artVisible=()=>{ const v=Object.entries(ARTS).filter(([k])=>!ART_CFG.hidden.includes(k)); return v.length?v:Object.entries(ARTS); };
 try{ applyArts(JSON.parse(kv.getItem(ART_LS)||'null')); }catch(_){}
 const BUILTIN_SAMPLES={"chibi":"assets/samples/chibi.jpg","mono":"assets/samples/mono.jpg","deadpan":"assets/samples/deadpan.jpg","doodle":"assets/samples/doodle.jpg","pastel":"assets/samples/pastel.jpg","sketch":"assets/samples/sketch.jpg","shonen":"assets/samples/shonen.jpg","dark":"assets/samples/dark.jpg","family":"assets/samples/family.jpg","shoujo":"assets/samples/shoujo.jpg","retro":"assets/samples/retro.jpg","cg3d":"assets/samples/cg3d.jpg","mascot":"assets/samples/mascot.jpg"};
@@ -3848,18 +3848,18 @@ async function admPw(a){ const el=admEl(), v=id=>$('#'+id)?.value||'', err=t=>{ 
   if(a==='pwreset'){ if(!confirm('비밀번호와 저장한 프롬프트가 모두 지워져요. 계속할까요?')) return; try{ [ADM_PW,ADM_KEY,ADM_MAN].forEach(k=>kv.removeItem(k)); sessionStorage.removeItem(ADM_SES); }catch(_){} return admGate('create'); }
   if(a==='lock'){ try{ sessionStorage.removeItem(ADM_SES); }catch(_){} admClose(); return toast('잠갔어요'); } }
 /* ----- 그림체·테마 탭 ----- */
-const ART_LABELS={name:['이름','예: 파스텔 수채화'],desc:['한 줄 설명 (이용자 선택 화면에 보여요)','예: 따뜻하고 부드러운 수채 느낌'],prompt:['그림체 지시문 (AI 그림 프롬프트에 들어가요)','화풍·선·채색·인물 비율·표정을 구체적으로. 특정 작품 캐릭터는 따라 하지 말라고 적어 주세요'],bg:['배경 지시문','예: 배경은 단순한 단색 면으로']};
+const ART_LABELS={name:['이름','예: 파스텔 수채화'],desc:['한 줄 설명 (이용자 선택 화면에 보여요)','예: 따뜻하고 부드러운 수채 느낌'],prompt:['그림체 지시문 (AI 그림 프롬프트에 들어가요)','화풍·선·채색·인물 비율·표정을 구체적으로. 특정 작품 캐릭터는 따라 하지 말라고 적어 주세요'],gsStyle:['젠스파크용 그림체 6줄 (선·색·비율·배경·그림자·쓰지 말 것)','선: …\n색: …\n비율: …\n배경: …\n그림자: …\n쓰지 말 것: …'],bg:['배경 지시문','예: 배경은 단순한 단색 면으로']};
 const ART_LET_LABELS={title:'제목 글자 모양',bubble:'말풍선 모양',sfx:'효과음 글자',hl:'강조 표시'};
 const admArtCfg=()=>JSON.parse(JSON.stringify({over:ART_CFG.over,custom:ART_CFG.custom,hidden:ART_CFG.hidden}));
 async function admArtsPut(cfg){
   try{ kv.setItem(ART_LS,JSON.stringify(cfg)); }catch(_){ toast('저장 공간이 가득 차서 저장하지 못했어요'); return false; } applyArts(cfg); return true; }
-function admArtForm(k,isNew){ const base=isNew?{name:'',desc:'',prompt:'',bg:'',letter:{}}:(ARTS[k]||{letter:{}}), builtin=!isNew&&!!ARTS_DEF[k], def=builtin?ARTS_DEF[k]:null;
+function admArtForm(k,isNew){ const base=isNew?{name:'',desc:'',prompt:'',bg:'',gsStyle:'',letter:{}}:(ARTS[k]||{letter:{}}), builtin=!isNew&&!!ARTS_DEF[k], def=builtin?ARTS_DEF[k]:null;
   const f=(id,l,ph,v,ta)=>`<div><label class="f" for="aa-${id}">${esc(l)}</label>${ta?`<textarea class="in" id="aa-${id}" data-af="${id}" rows="${ta}" placeholder="${esc(ph||'')}">${esc(v||'')}</textarea>`:`<input class="in" id="aa-${id}" data-af="${id}" value="${esc(v||'')}" placeholder="${esc(ph||'')}">`}</div>`;
   const hid=ART_CFG.hidden.includes(k), st=isNew?'새 그림체':builtin?(ART_CFG.over[k]?'기본 그림체 · 수정됨':'기본 그림체'):'추가한 그림체';
   return `<section class="adm-card" data-akey="${esc(k)}" data-anew="${isNew?1:0}"><h3>${isNew?'새 그림체 추가':esc(base.name)} <small>${st}${hid?' · 지금 숨김':''}</small></h3>
     <p class="sub" style="margin-top:0">여기서 저장한 내용은 <b>이 브라우저에만</b> 남아요. 이미 만들고 있는 편에도 바뀐 지시문이 적용돼요.</p>
     <div class="g2">${f('name',...ART_LABELS.name,base.name)}${f('desc',...ART_LABELS.desc,base.desc)}</div>
-    ${f('prompt',...ART_LABELS.prompt,base.prompt,5)}${f('bg',...ART_LABELS.bg,base.bg,2)}
+    ${f('prompt',...ART_LABELS.prompt,base.prompt,5)}${f('bg',...ART_LABELS.bg,base.bg,2)}${f('gsStyle',...ART_LABELS.gsStyle,base.gsStyle,6)}
     <label class="f">글자 모양 <small>비워 두면 기본(귀여운 2~3등신)의 글자 모양을 써요</small></label>
     <div class="g2">${ART_LETTERS.map(l=>f('l_'+l,ART_LET_LABELS[l],'',(base.letter||{})[l]||'')).join('')}</div>
     <div class="row" style="margin-top:10px;gap:12px;align-items:center"><label class="f" style="margin:0">선택 화면 견본 색</label><input type="color" data-af="c1" value="${base.c1||'#FFE9A8'}" aria-label="견본 색 1"><input type="color" data-af="c2" value="${base.c2||'#FFB27A'}" aria-label="견본 색 2"><small class="status">견본 이미지가 없을 때 이 색이 보여요${builtin?' (기본 그림체는 기존 견본 유지)':''}</small></div>
@@ -4174,6 +4174,7 @@ function gsLetterSummary(m){ const L=letterSpec();
     `  · 효과음: ${L.sfx}. 소리 나는 곳 옆에 그림의 일부로.`,
     `  · 자막: 흰 네모 칸에 검은 테두리, 검은 고딕체, 컷 왼쪽 모서리.`,
     `  · 글씨체·글자 크기·말풍선 모양은 ${m}장 모두 똑같이.`].join('\n'); }
+const gsStyleLines=()=>{ const t=String(artOf().gsStyle||'').trim(); return t?t.split('\n').map(x=>'  '+x.trim()).join('\n'):''; };
 function gsCutBlock(c,i,plan){
   const here=gsCutCodes(c), L=[`${i+1}장 · ${c.role||'컷'}`];
   const names=here.map(code=>{ const o=effOutfit(c,code); return gsName(code)+(o?`(${outfitText(o)})`:''); });
@@ -4203,6 +4204,7 @@ function gsCutBlock(c,i,plan){
     if(c.sfx) t.push(`효과음: "${c.sfx}"`);
     if(c.caption) t.push(`자막 박스(흰 네모에 검은 테두리, 왼쪽): "${c.caption}"`);
     L.push('- 글자(정확히 이대로):', ...t.map(x=>'    '+x)); }
+  L.push(`- [테마: ${artOf().name} 그림체 유지]`);
   return L.join('\n'); }
 function gsPrompt(idxs){ const cs=cuts(), n=cs.length, m=idxs.length, a=idxs[0], z=idxs[m-1];
   const plan=gsPlan(idxs), codes=gsCodesFor(idxs), only=gsText()==='only';
@@ -4213,11 +4215,11 @@ function gsPrompt(idxs){ const cs=cuts(), n=cs.length, m=idxs.length, a=idxs[0],
   const lock=lockTail().trim();
   const det=DETAILS.filter(([k])=>detailOn(k)).map(([,nm,h])=>`${nm}(${h})`).join(', ');
   return `[작업]
-아래 내용으로 인스타툰 ${m}장을 순서대로, 한 장씩 따로 만들어 주세요.${n>m?` (전체 ${n}장 중 ${a+1}~${z+1}장이에요.${a>0?' 앞 묶음과 같은 인물·그림체로 이어서 그려 주세요.':''})`:''}
+아래 내용으로 인스타툰 ${m}장을 순서대로, 한 장씩 따로 만들어 주세요.${n>m?` (전체 ${n}장 중 ${a+1}~${z+1}장이에요.${a>0?' 앞 묶음과 같은 인물·그림체로 이어서 그려 주세요.':''})`:''}${a>0?'\n앞 묶음에서 그린 그림이 아니라 아래 [공통 설정]의 그림체를 기준으로 그려 주세요.':''}
 
 [공통 설정]
 - 비율: ${gsRatioName()}, ${m}장 모두 똑같이. 윗부분 4분의 1은 제목 자리로 비교적 비워 두세요. 그림 바깥에 검은 테두리 선은 넣지 마세요.
-- 그림체: ${artOf().prompt}
+- 그림체(테마: ${artOf().name}): ${artOf().prompt}${gsStyleLines()?'\n'+gsStyleLines():''}
 - 배경: ${S.info.type||'작업'} 공간. ${artOf().bg}
 - 디테일: ${det||'기본'}. 표정·손짓·소품을 살려 장면이 살아 있게.
 - 등장인물(첨부한 이미지 번호 순서대로):
@@ -4229,6 +4231,7 @@ ${idxs.map(i=>gsCutBlock(cs[i],i,plan)).join('\n\n')}
 
 [마무리]
 - 모든 장에서 인물의 얼굴·머리 모양·옷·체형을 첨부 이미지와 똑같이 유지하고, 인물끼리 섞지 마세요.
+- 첨부 이미지는 얼굴·머리·옷·체형을 참고하는 용도예요. 그림체(선·색·비율)는 [공통 설정]의 테마(${artOf().name})를 따르고, 첨부 이미지와 다르면 테마를 우선하세요.
 - ${m}장 모두 같은 그림체와 같은 비율로 그려 주세요.${only?'':'\n- 글자는 따옴표 안 문구만, 한 글자도 바꾸지 말고 한글 그대로 정확히 넣어 주세요.\n- 같은 대사·효과음을 한 장 안에서 두 번 쓰지 마세요.'}`; }
 /* ---------- 캐릭터 준비 (가이드 §4~6) ---------- */
 function gsReady(code){ const e=codeEntry(code), ch=e&&VAULT.chars[e.id], im=(ch&&ch.images)||{}; return {has:!!ch, ref:!!im.ref, turn:!!im.turn, expr:!!im.expr}; }
@@ -4237,7 +4240,7 @@ function gsSheet(code){ const d=gsDesc(code), card=gsCardText(code), keep=gsKeep
   return `[캐릭터 카드]\n${gsName(code)} ${d}${card?`\n- ${card.split(' / ').join('\n- ')}`:''}${keep?`\n- 절대 바뀌면 안 되는 것: ${keep}`:''}`; }
 function gsPrep(code,kind){ const g=`[그림체] ${artOf().prompt}`, card=gsSheet(code);
   if(kind==='ref') return `${g}\n${card}\n\n위 캐릭터의 단독 기준 이미지를 그려주세요. (비율 1:1 또는 3:4)\n- 정면을 똑바로 보는 무릎 위 구도\n- 차렷 자세, 팔은 자연스럽게 내림, 손이 얼굴이나 몸을 가리지 않음\n- 무표정에 가까운 기본 표정, 입 다문 상태\n- 균일하고 밝은 정면 조명, 강한 그림자 없음\n- 순백색 단색 배경\n- 캐릭터 1명만, 소품·텍스트·워터마크 없음`;
-  if(kind==='turn') return `[이미지1]은 캐릭터 레퍼런스입니다. 얼굴, 헤어, 체형, 의상, 색상, 선화 스타일을 100% 동일하게 유지하세요.\n${g}\n${card}\n\n캐릭터 설정 시트를 만들어주세요. (비율 16:9)\n- 가로로 긴 한 장에 전신 4개를 같은 크기로 나란히 배치\n- 순서: 정면 / 3/4 측면 / 완전 측면 / 뒷모습\n- 모든 포즈는 차렷 자세, 같은 키와 비율, 발끝이 같은 선에 맞춤\n- 흰 배경, 균일한 조명, 텍스트·라벨 없음`;
+  if(kind==='turn') return `[이미지1]은 캐릭터 레퍼런스입니다. 얼굴, 헤어, 체형, 의상, 색상을 100% 동일하게 유지하세요.\n${g}\n${card}\n\n캐릭터 설정 시트를 만들어주세요. (비율 16:9)\n- 가로로 긴 한 장에 전신 4개를 같은 크기로 나란히 배치\n- 순서: 정면 / 3/4 측면 / 완전 측면 / 뒷모습\n- 모든 포즈는 차렷 자세, 같은 키와 비율, 발끝이 같은 선에 맞춤\n- 흰 배경, 균일한 조명, 텍스트·라벨 없음`;
   return `[이미지1]은 캐릭터 레퍼런스입니다. 얼굴형, 눈, 헤어를 정확히 유지하세요.\n${g}\n\n같은 캐릭터의 표정 시트를 만들어주세요. (비율 1:1)\n- 3x3 격자, 정면 얼굴 클로즈업(어깨 위) 9개\n- 표정: 기본 / 미소 / 활짝 웃음 / 화남 / 슬픔 / 놀람 / 당황 / 부끄러움(볼 홍조) / 진지함\n- 모든 칸 같은 얼굴 크기와 각도\n- 흰 배경, 텍스트 없음`; }
 const GS_KIND={ref:['00_기준','기준 이미지'],turn:['01_턴어라운드','턴어라운드 시트'],expr:['02_표정','표정 시트']};
 function gsCopyText(k){

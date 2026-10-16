@@ -41,11 +41,14 @@ const result = await page.evaluate(() => {
   base(); vault(true); S.toon.cuts.forEach((c) => { c.direction = '텅 빈 진열대 풍경'; c.bubble = ''; }); out['등장_짐작불가'] = { 첫묶음: gsPrompt(gsBundles()[0]) };
   base(); vault(true); S.toon.cuts[2].panels = '위 큰 칸 전신, 아래 작은 칸 놀란 얼굴'; out['칸나누기_고른장'] = { 첫묶음: gsPrompt(gsBundles()[0]) };
   base(); S.info.cast = '단골 할머니(흰 파마머리)'; S.toon.cuts[4].chars = ['p0', 'cast']; out['조연설정_장별'] = { 첫묶음: gsPrompt(gsBundles()[0]) };
+  base(); vault(true); S.info.art = 'shonen'; { const t = gsPrompt(gsBundles()[0]); out['테마_열혈소년'] = { 공통설정: t.split('[장별 내용]')[0], 첫장: t.split('[장별 내용]')[1].split('\n\n')[0], 마무리: t.split('[마무리]')[1] }; }
   base();
+  out.__styles = Object.entries(ARTS_DEF).map(([k, v]) => [k, v.gsStyle || '']);
   return out;
 });
 await browser.close(); srv.close();
 if (errors.length) { console.log('[FAIL] 페이지 오류:', errors.slice(0, 3)); process.exit(1); }
+const styles = result.__styles; delete result.__styles;
 const json = JSON.stringify(result, null, 2) + '\n';
 if (update) { fs.writeFileSync(file, json); console.log('젠스파크 골든 갱신:', path.relative(root, file), `(${(json.length / 1024).toFixed(0)}KB)`); process.exit(0); }
 if (!fs.existsSync(file)) { console.log('[FAIL] 젠스파크 골든 파일이 없어요. --update 로 처음 만드세요.'); process.exit(1); }
@@ -61,6 +64,24 @@ walk(gold, result, '');
 // 규칙: 인물 이름은 대괄호, 카드가 있으면 카드 칸, 없으면 외모 한 줄, 4:5도 3:4로
 const w = result['글자같이_카드있음_4:5→3:4'].첫묶음, nc = result['글자같이_카드없음'].첫묶음;
 const must = [[/비율: 3:4 세로/.test(w) && !/4:5/.test(w), '4:5를 골라도 젠스파크 프롬프트는 3:4'], [/\n- 등장: \[사장님_A\], \[알바생_B\]/.test(w), '장별 등장인물이 [대괄호]'], [/카드: 얼굴형 .* \/ 대표 색 /.test(w), '카드가 있으면 등장인물에 카드 칸'], [!/카드:/.test(nc), '카드가 없으면 카드 줄 없이 외모 한 줄'], [(w.match(/한 장에 한 장면만\(칸 나누기 없이\)/g) || []).length === 6 && /같은 대사·효과음을 한 장 안에서 두 번 쓰지 마세요/.test(w), '칸 나누기를 안 고른 장마다 "한 장에 한 장면만", 마무리에 같은 대사·효과음 중복 금지'], [(result['칸나누기_고른장'].첫묶음.match(/한 장에 한 장면만/g) || []).length === 5 && /3장[\s\S]*- 칸 나누기: 위 큰 칸 전신/.test(result['칸나누기_고른장'].첫묶음), '칸 나누기를 고른 장은 그 문장 그대로, 한 장면만 줄은 넣지 않음'], [/_00_기준/.test(result['캐릭터준비_보관함없음'].기준) === false, '프롬프트 본문에는 파일 이름을 넣지 않음']];
+// 테마별 gsStyle: 선/색/비율/배경/그림자/쓰지 말 것 6줄, 300자 이내 (13개 전부)
+const GS_KEYS = ['선', '색', '비율', '배경', '그림자', '쓰지 말 것'];
+for (const [k, v] of styles) {
+  const ls = v.split('\n'); const okLines = ls.length === 6 && ls.every((l, i) => l.startsWith(GS_KEYS[i] + ': ') && l.length > GS_KEYS[i].length + 3);
+  if (!okLines) { diffs++; console.log(`[DIFF] 규칙 위반: ${k} gsStyle은 선/색/비율/배경/그림자/쓰지 말 것 6줄이어야 해요`); }
+  if (v.length > 300) { diffs++; console.log(`[DIFF] 규칙 위반: ${k} gsStyle ${v.length}자 (300자 이내)`); }
+}
+if (styles.length < 13) { diffs++; console.log(`[DIFF] 규칙 위반: 기본 테마 ${styles.length}개 (13개여야 해요)`); }
+const two = result['8장_2묶음'];
+const more = [
+  [(w.match(/\[테마: 귀여운 2~3등신 그림체 유지\]/g) || []).length === 6, '컷마다 끝에 [테마: OO 그림체 유지] 한 줄'],
+  [/- 그림체\(테마: 귀여운 2~3등신\): /.test(w) && /\n  선: .*\n  색: .*\n  비율: .*\n  배경: .*\n  그림자: .*\n  쓰지 말 것: /.test(w), '그림체 줄에 테마 이름과 gsStyle 6줄'],
+  [/첨부 이미지는 얼굴·머리·옷·체형을 참고하는 용도예요\. 그림체\(선·색·비율\)는 \[공통 설정\]의 테마\(귀여운 2~3등신\)를 따르고, 첨부 이미지와 다르면 테마를 우선/.test(w), '마무리: 첨부는 외형 참고용, 그림체는 테마 우선'],
+  [/앞 묶음에서 그린 그림이 아니라 아래 \[공통 설정\]의 그림체를 기준으로/.test(two.마지막묶음) && !/앞 묶음에서 그린 그림이 아니라/.test(two.첫묶음), '두 번째 묶음부터 앞 묶음 그림이 아니라 공통 설정 그림체 기준'],
+  [!/선화 스타일/.test(result['캐릭터준비'].턴어라운드), '턴어라운드 프롬프트에 선화 스타일을 넣지 않음'],
+  [!/한 장에 한 장면만[^\n]*테마/.test(w), '테마 줄이 "한 장에 한 장면만" 줄과 겹치지 않음'],
+];
+for (const [ok, m] of more) if (!ok) { diffs++; console.log('[DIFF] 규칙 위반:', m); }
 for (const [ok, m] of must) if (!ok) { diffs++; console.log('[DIFF] 규칙 위반:', m); }
 if (diffs) { console.log(`\n[FAIL] 젠스파크 프롬프트 ${diffs}곳이 골든과 달라요. 의도한 변경이면 이유를 먼저 보고하고 승인받으세요.`); process.exit(1); }
 console.log('[PASS] 젠스파크 프롬프트 골든 일치 (시나리오 ' + Object.keys(gold).length + '개)');
