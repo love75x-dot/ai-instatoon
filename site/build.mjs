@@ -41,6 +41,8 @@ for (const f of ['favicon.svg', 'favicon.ico', 'favicon-32x32.png', 'apple-touch
 // 이미지(샘플 그림·공유 이미지·아이콘)와 홈 화면 추가용 manifest
 fs.cpSync(path.join(here, 'assets'), path.join(dep, 'assets'), { recursive: true });
 fs.copyFileSync(path.join(here, 'manifest.webmanifest'), path.join(dep, 'manifest.webmanifest'));
-console.log('instatoon.html, deploy/index.html, deploy/favicon.* · apple-touch-icon.png · assets/ · manifest 생성 완료');
+// 보안 헤더(Cloudflare 에셋 헤더 파일): 손으로 관리하는 원본은 site/_headers, 배포 폴더로는 여기서 복사한다(deploy/는 git에 두지 않는다)
+fs.copyFileSync(path.join(here, '_headers'), path.join(dep, '_headers'));
+console.log('instatoon.html, deploy/index.html, deploy/favicon.* · apple-touch-icon.png · assets/ · manifest · _headers 생성 완료');
 
 await import('./guide/build-guide.mjs');

@@ -20,8 +20,8 @@
 **빌드 설정(Cloudflare Workers Builds)**
 - Build command: `npm run build`(= `node site/build.mjs`: `site/index.html` → `deploy/`, 가이드·sitemap·robots·404 생성). Production, Previews 둘 다 동일.
 - 배포 명령: main → `npx wrangler deploy`, 그 외 브랜치 → `npx wrangler preview`(`wrangler.jsonc`의 `previews: {}` 블록 필요). `wrangler`는 devDependency.
-- 정적 에셋: `deploy/`, `html_handling: auto-trailing-slash`, `not_found_handling: 404-page`(커스텀 404 사용).
-- 보안 헤더 4개(nosniff, Referrer-Policy, X-Frame-Options DENY, Permissions-Policy)는 `deploy/_headers`(Vercel 시절 `vercel.json`과 동일했고, 그 파일은 정리하며 삭제함).
+- 정적 에셋: `deploy/`(빌드 결과라 **git에 두지 않음**, `.gitignore`. 로컬에서 보려면 먼저 `npm run build`), `html_handling: auto-trailing-slash`, `not_found_handling: 404-page`(커스텀 404 사용).
+- 보안 헤더 4개(nosniff, Referrer-Policy, X-Frame-Options DENY, Permissions-Policy)는 `site/_headers`(빌드가 `deploy/_headers`로 복사. Vercel 시절 `vercel.json`과 동일했고, 그 파일은 정리하며 삭제함).
 
 **관리자 서버 기능 제거**
 - 서버 저장(`/api/prompts`)과 관리자 서버 기능을 제거. 사이트는 서버·DB 없이 브라우저(localStorage)만 사용. #room 화면에 서버 문구 없음.
