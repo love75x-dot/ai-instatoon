@@ -254,7 +254,7 @@
 - `ADM_PW`(`instatoon.admin.pw`): 로컬 관리자 화면(프롬프트·테마 편집, `#admin` 해시)의 비밀번호 잠금에서 **지금도 사용 중**. 그대로 두고 읽기·쓰기 모두 유지.
 - 저장 키 중 문서에 없던 것: `instatoon.copied`, `instatoon.admin.arts/prompts/manual/pw`(+세션 `instatoon.admin.ok`). 호환 검사는 코드에서 뽑은 키 전체를 기준으로 함.
 - 첫 방문(`instatoon.helpSeen` 없음)이면 둘러보기가 앱 단계를 1단계로 되돌림 → **2단계에서 수정 예정**. 그때까지 검사는 기존 이용자처럼 `helpSeen=1`을 깔고 실행.
-- `npm install`이 만드는 `package-lock.json`은 저장소에 원래 없었음. Cloudflare 빌드 동작을 바꾸지 않으려고 커밋하지 않음.
+- `npm install`이 만드는 `package-lock.json`은 처음엔 저장소에 없었고 Cloudflare 빌드 동작을 바꾸지 않으려고 커밋하지 않았음. **2026-10-16 이후로는 커밋돼 있음**(푸터 반영 커밋 `8ec9396`에 실수로 함께 들어갔고, 그 뒤 빌드·배포가 모두 성공해 그대로 두기로 함 — 재현 가능한 빌드, lockfileVersion 3·92개 패키지·wrangler 4.149.0·playwright-core 1.64.0 고정).
 
 ## 리뉴얼 최종 정리 (0~5단계 완료 · 2026-10-16)
 
