@@ -91,6 +91,7 @@
 | 테스트 | Node.js + Playwright(Chromium, 헤드리스) — 개발용, 사이트에는 포함 안 됨 | 확인 필요(환경 기본 설치본 사용) |
 
 ### 외부 URL 전체
+> **2026-10-16 이후 글꼴은 직접 호스팅**: Pretendard·Gothic A1(800)·Black Han Sans·Gaegu(700)는 `site/assets/fonts/`의 woff2를 쓰고(OFL 라이선스 동봉), 아래 Google Fonts·jsDelivr 주소는 더 이상 쓰지 않는다. 남은 외부 요청은 JSZip(cdnjs)과 Turnstile뿐. 글꼴을 다시 받으려면 `node dev/tools/fetch-fonts.mjs`, 첫 화면 preload 목록은 `node dev/tools/measure-fonts.mjs`.
 - JSZip: `https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js`
 - Google Fonts preconnect: `https://fonts.googleapis.com`, `https://fonts.gstatic.com`
 - Google Fonts CSS (한 줄 그대로):

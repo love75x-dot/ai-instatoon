@@ -279,7 +279,7 @@
 **`deploy/` 처리(2026-10-16 승인):** 빌드 결과라 git에서 뺐다(`.gitignore`). 손으로 관리하던 보안 헤더 파일은 `site/_headers`로 옮기고 빌드가 `deploy/_headers`로 복사한다. 미리보기와 운영 모두 홈·노트·이미지·manifest·404에서 헤더 4개(nosniff, Referrer-Policy, X-Frame-Options DENY, Permissions-Policy)가 그대로임을 확인. 로컬에서 `deploy/`가 필요하면 먼저 `npm run build`.
 
 ### 남은 과제 (우선순위 순)
-1. **글꼴 직접 호스팅(LCP 개선, 사장님이 나중 과제로 지정):** 지금 Pretendard(jsDelivr)·Google Fonts를 외부에서 받아 글꼴이 바뀌는 순간 글자가 다시 그려져 LCP가 6초대. 사용하는 글자만 담은 woff2를 `site/assets/fonts/`에 두고 `font-display: swap`·`preload`로 직접 제공(가능하면 `size-adjust`로 바뀔 때 흔들림 없이). `privacy` 페이지의 외부 요청 안내 문장도 함께 고쳐야 함. 그 뒤 Lighthouse 재측정.
+1. ~~글꼴 직접 호스팅(LCP 개선)~~ → **2026-10-16 완료**(아래 6단계 기록). 남은 LCP(약 6.4초)는 글꼴이 아니라 첫 화면을 그리는 데 드는 계산(스타일·레이아웃 약 1.1초, 큰 한 파일 앱)이 대부분이라, 더 줄이려면 첫 화면 HTML 미리 그리기·스크립트 줄이기·CSS 정리가 필요(새 과제).
 2. **운영자 이름·문의처:** 정해지면 `site/site-info.json`의 `operatorName`과 `contactUrl`(https 링크) 또는 `contactEmail`에 넣고 빌드 → 푸터·사용 방법·소개·개인정보처리방침에 자동 반영(지금은 비어 있어 날짜만 보임).
 3. **예시 그림 6장:** `site/assets/examples/`에 받으면 "사용 방법"의 "이렇게 나와요" 갤러리(WebP 변환·크기 줄이기)와 공유 이미지를 마지막 그림으로 교체(`site/site-meta.mjs`의 `OG_IMAGE`). 지금 공유 이미지는 흑백 심플 PNG.
 4. **카카오톡 미리보기 캐시:** 공유 이미지를 바꾸거나 처음 배포한 뒤 카카오 공유 디버거(developers.kakao.com/tool/clear/og)에서 주소를 한 번 갱신. 실제 카카오톡·인스타 DM에 붙여 보는 확인은 사장님 몫(검사로는 태그와 이미지만 확인).
@@ -526,3 +526,11 @@
   - **카카오 공유 카드 이미지 안 나오던 문제 해결됨 (원인: head/body 태그 누락).** 앱 홈 HTML에 `</head>`와 `<body>`가 없어서 브라우저는 알아서 처리했지만 카카오톡 미리보기 프로그램이 머리 부분을 제대로 못 읽었던 것이 원인 — **확인됨**(2026-10-16 사장님이 카카오톡에서 v2 카드 이미지가 정상으로 나오는 것을 확인). 빌드(`site/build.mjs`)가 `</head>`와 `<body>`를 명시하도록 고치고, `og:image:secure_url`과 `<link rel="image_src">`도 추가(노트 페이지 포함). Cloudflare(Bot Fight Mode 등)는 원인이 아니었음(카카오 UA 요청이 홈·그림 모두 200).
   - **공유 이미지 v2 적용 (캐릭터 2명 네 칸 + 검은고딕/주아 글꼴):** 사장님이 만든 `site/assets/og/og-v2.png`(1200×630 PNG, 약 362KB)로 `site/site-meta.mjs`의 `OG_IMAGE`를 교체. og:image·og:image:secure_url·image_src·twitter:image가 모두 새 파일을 가리키고 크기 1200×630·type image/png도 확인(앱 홈·노트 목록·노트 글). 이전 흑백 심플 이미지 `og-default.png`는 지우지 않고 파일로 남김. 대체 텍스트도 새 문구로 바꿈. 이미지 크기 검사 한도는 300KB → 600KB로 조정(`dev/design/trust.mjs`).
   - **카카오 쪽:** 이미지 주소가 `og-default.png` → `og-v2.png`로 바뀌었으므로 카카오 공유 디버거에서 홈 주소 캐시를 한 번 더 초기화하면 새 그림이 보임.
+- 2026-10-16 (6단계 · 글꼴 직접 호스팅, 브랜치 `renewal-6-fonts`):
+  - **한 일:** Pretendard Variable(화면 글꼴, 글자 구간별 woff2 92개)과 그림 글자용 글꼴(Gothic A1 **800만**·Black Han Sans·Gaegu 700, woff2 276개)을 `site/assets/fonts/`로 옮김(도구 `dev/tools/fetch-fonts.mjs`). 모든 @font-face가 `font-display: swap`. 외부(jsDelivr·Google Fonts) 요청과 preconnect 제거. Gothic A1은 코드가 쓰는 굵기(800)만 받아 파일 수를 줄임.
+  - **첫 화면 preload:** 앱 홈을 실제로 열어 받은 Pretendard 글자 조각만(휴대폰·PC 합쳐 12개, 313KB) `<link rel="preload">`, 노트 페이지는 목록·글 공통 11개(280KB)(`site/font-preload.json`, 도구 `dev/tools/measure-fonts.mjs`). 앱 홈은 Pretendard CSS를 페이지 안에 넣어 요청 한 번을 줄이고, 그림 글자용 CSS는 늦게(`media=print`→`all`) 불러옴. 그림 글자용 글꼴은 첫 화면에 안 써서 preload 안 함. 글꼴 파일은 1년 캐시(`immutable`, `site/_headers`, 글꼴을 바꾸면 폴더 이름을 바꿀 것), CSS는 매번 확인.
+  - **라이선스:** Pretendard·Black Han Sans·Gaegu·Gothic A1 모두 SIL Open Font License 1.1이라 직접 호스팅(재배포)이 가능. 조건(원본 그대로, 저작권·라이선스 문구 동봉)에 맞춰 `site/assets/fonts/licenses/`에 OFL 문서 4개와 README를 둠. 개인정보처리방침의 외부 요청 안내도 "글꼴은 직접 제공, 남은 외부는 cdnjs(JSZip)·Turnstile"로 고침.
+  - **Lighthouse(모바일, 미리보기끼리 같은 조건, 3회 중간값):** 바꾸기 전(main 미리보기) 성능 63·64·66 → **중간값 64**, LCP 6.5·6.5·6.6초 → **6.5초**. 바꾼 뒤(이 브랜치 미리보기) 성능 58·69·68 → **중간값 68**, LCP 6.9·6.3·6.4초 → **6.4초**. 전송량 779KB → 704KB, CLS 0.031 → 0~0.031. 성능은 중간값 +4점, LCP는 거의 그대로(관찰한 "요소 그리기 지연"은 1.4초 → 0.8초로 줄었지만 시뮬레이션 LCP는 첫 화면 계산에 묶여 있음). 바꾸기 전 점수는 시간대에 따라 63~73으로 흔들려 한 번 값은 믿기 어렵고, 바꾼 뒤 첫 측정 1회(58)는 느린 응답 때문에 낮게 나온 이상값.
+  - **글자 확인:** 앱 홈(휴대폰·PC)과 노트 글(휴대폰)을 바꾸기 전·후 미리보기에서 화면 캡처해 비교 → **픽셀까지 완전히 같음**(글자 깨짐 없음). 보안 헤더 4개는 홈·글꼴 파일·CSS·노트·404 모두 4/4.
+  - **검사:** 새 `dev/design/fonts.mjs`(외부 글꼴 주소 없음·모든 @font-face swap·woff2 파일 실재·preload 목록과 일치하고 모두 실제로 쓰임·경고 없음·캐시 헤더·그림 글자 글꼴 3종 로드·캔버스 그리기). 시험용 서버가 CSS·woff2 형식을 몰라 글꼴이 안 불러와지던 것도 함께 고침(`dev/lib/harness.mjs`). `npm run check` 1141개 통과.
+  - **`site/instatoon.html`(파일 버전):** 글꼴·샘플 그림이 `/assets/…` 주소라 디스크에서 직접 열면(file://) 글꼴·샘플이 기본으로 보임(남은 과제 9번과 같은 이유).
