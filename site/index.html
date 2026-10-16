@@ -110,7 +110,10 @@ li.flash{animation:seqflash .9s}
 .skip{position:absolute;left:-999px}.skip:focus{left:8px;top:8px;z-index:200;padding:8px 12px;border:1px solid var(--ink);border-radius:8px;background:var(--surface);color:var(--ink)}
 .gfoot .fmeta{margin:14px 0 0;font-size:13px;color:var(--muted)}.gfoot .fmeta a{color:var(--ink-2)}
 .htrust{margin-top:14px;padding:14px 16px;border:1px solid var(--line);border-radius:12px}.htrust h3{margin:0 0 4px;font-size:15px}.htrust p{margin:0 0 12px;font-size:14px;color:var(--ink-2)}.htrust p:last-child{margin-bottom:0}
+/* 첫 화면 레이아웃 흔들림(CLS) 줄이기: 자바스크립트가 그리기 전에도 단계 표시줄·본문 자리를 미리 잡아 둔다 */
 #main:empty{min-height:100vh}
+#keyWrap:empty{min-height:64px}
+#steps:empty{min-height:69px}@media (max-width:640px){#steps:empty{min-height:41px}}
 /* 가게(4d) */
 .shopbtn{min-height:40px;margin-bottom:6px;border-bottom:1px solid var(--line);font-size:13px;font-weight:600;justify-content:space-between;gap:8px}
 .shwrap{margin-bottom:8px}.shrow{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:12px;padding:2px 6px 2px 2px;background:var(--surface)}
