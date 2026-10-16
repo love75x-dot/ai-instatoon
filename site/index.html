@@ -74,6 +74,36 @@ body{margin:0}
 body.menu-open{overflow:hidden}
 @media (prefers-reduced-motion:reduce){.mbg,.mpanel{transition:none}}
 /* HEADER:END */
+/* 젠스파크 · 다음 항목 복사 · 폭별 배치 (4e) */
+.gtabs{display:flex;gap:6px;margin:0 0 12px;border-bottom:1px solid var(--line)}
+.gtab{min-height:44px;padding:0 14px;border:0;border-bottom:2px solid transparent;background:none;color:var(--muted);font:700 15px/1 var(--sans);cursor:pointer}
+.gtab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+.seq{position:sticky;top:0;z-index:20;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;align-items:center;margin:0 0 12px;padding:10px 12px;background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.seq[hidden]{display:none}
+.seq-t{display:flex;gap:10px;align-items:baseline;min-width:0}
+.seq-n{font-weight:800}.seq-l{min-width:0;overflow:hidden;color:var(--muted);font-size:13px;text-overflow:ellipsis;white-space:nowrap}
+.seq-p{grid-column:1/-1;order:3;height:6px;overflow:hidden;border-radius:3px;background:var(--sunken)}
+.seq-p i{display:block;width:0;height:100%;background:var(--ink);transition:width .2s}
+.seq-b{display:flex;gap:6px;grid-column:2;grid-row:1}
+li.now{outline:2px solid var(--ink);outline-offset:3px;border-radius:10px}
+li.flash{animation:seqflash .9s}
+@keyframes seqflash{from{background:var(--accent-soft)}to{background:transparent}}
+.gsbox{display:grid;gap:14px}
+.gs-chk,.gs-txt,.gs-more,.gs-fix,.gs-char{padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.gs-chk ul{margin:6px 0 0 18px;padding:0}.gs-chk li{margin:3px 0}
+.gs-h{margin:6px 0 0;font:800 17px/1.3 var(--sans)}
+.gs-opt{display:flex;gap:10px;align-items:flex-start;margin:8px 0 0;cursor:pointer}.gs-opt input{margin-top:4px}
+.gs-char-h{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center}
+.gs-ok{color:#1a7f37;font-weight:700}.gs-part{color:#9a6700;font-weight:700}.gs-no{color:#b42318;font-weight:700}
+.gs-char + .gs-char{margin-top:8px}
+@media (min-width:981px){.pgrid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (min-width:721px) and (max-width:980px){.pgrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:720px){
+  .pgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .seq{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:60;grid-template-columns:minmax(0,1fr);margin:0;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));border-width:1px 0 0;border-radius:14px 14px 0 0}
+  .seq-b{grid-column:1;grid-row:auto}.seq-b .btn{flex:1;justify-content:center;min-height:44px}
+  #main:has(#seqBar:not([hidden])){padding-bottom:150px}
+}
 /* 가게(4d) */
 .shopbtn{min-height:40px;margin-bottom:6px;border-bottom:1px solid var(--line);font-size:13px;font-weight:600;justify-content:space-between;gap:8px}
 .shwrap{margin-bottom:8px}.shrow{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:12px;padding:2px 6px 2px 2px;background:var(--surface)}
@@ -1242,7 +1272,7 @@ const COPIED=(()=>{ try{ return new Set(JSON.parse(kv.getItem('instatoon.copied'
 function saveCopied(){ try{ kv.setItem('instatoon.copied',JSON.stringify([...COPIED])); }catch(_){} }
 function applyCopied(){ document.querySelectorAll('[data-copy]').forEach(b=>{ const on=COPIED.has(b.dataset.copy), has=b.classList.contains('copied'), box=b.closest('li,.tip,.alt-row');
   if(on&&!has){ b.dataset.label=b.textContent; b.classList.add('copied'); b.textContent='✓ 복사함'; if(box) box.classList.add('copied-box'); }
-  else if(!on&&has){ b.classList.remove('copied'); b.textContent=b.dataset.label||'복사'; if(box) box.classList.remove('copied-box'); } }); }
+  else if(!on&&has){ b.classList.remove('copied'); b.textContent=b.dataset.label||'복사'; if(box) box.classList.remove('copied-box'); } }); try{ seqRefresh(); }catch(_){} }
 function markCopied(b){ COPIED.add(b.dataset.copy); saveCopied(); applyCopied(); }
 function resetCopied(){ COPIED.clear(); saveCopied(); applyCopied(); }
 { let q=0; new MutationObserver(()=>{ if(q) return; q=setTimeout(()=>{ q=0; applyCopied(); },30); }).observe(document.body,{childList:true,subtree:true}); }
@@ -2054,13 +2084,13 @@ function refreshLetter(full){ applyFontVars(); if(full){ const lb=$('#letterBox'
   const gb=$('#guideBox'); if(gb) gb.innerHTML=guideHTML(); drawAll(); renderPhone(); }
 function guideHTML(){ const cs=cuts(); return `    <div class="row" style="margin-bottom:8px"><span class="status">ChatGPT에 보낸 항목은 <b>✓ 복사함</b>으로 표시돼요</span><button class="btn sm ghost" data-act="copyReset" style="margin-left:auto">표시 지우기</button></div>
     <ol class="guide">
-      ${peopleIdx().map(k=>`<li><div class="gh"><b>${whoLabel(k)} 캐릭터 만들기</b><span class="tag">처음 한 번만</span><button class="btn sm" data-copy="sheet-${k}">복사</button></div>
+      ${peopleIdx().map(k=>`<li><div class="gh"><b>${whoLabel(k)} 캐릭터 만들기</b><span class="tag">처음 한 번만</span><button class="btn sm" data-copy="sheet-${k}" data-seq="1">복사</button></div>
         <p>${getPhoto(k)?`<b>1단계에서 올린 사진을 첨부</b>하고 보내세요. `:''}마음에 드는 결과가 나오면 <b>이미지를 저장</b>해 두세요. 이미 캐릭터 이미지가 있으면 건너뛰어요.</p>
         <pre>${esc(sheetPrompt(k))}</pre></li>`).join('')}
-      <li><div class="gh"><b>규칙 알려주기</b><button class="btn sm" data-copy="setup">복사</button></div>
+      <li><div class="gh"><b>규칙 알려주기</b><button class="btn sm" data-copy="setup" data-seq="1">복사</button></div>
         <p><b>캐릭터 이미지${hasP2()?` ${peopleIdx().length}장(주인공부터 순서대로)`:''}을 첨부</b>하고 이 메시지를 함께 보내세요. "준비됐어요"라고 답하면 다음으로 넘어가요.</p>
         ${attachBoxHTML()}<pre>${esc(setupPrompt())}</pre></li>
-      ${cs.map((c,i)=>`<li><div class="gh"><b>${i+1}컷 그리기</b><span class="tag">${esc(c.role)}</span><button class="btn sm" data-copy="cut-${i}">복사</button></div><pre>${esc(cutPrompt(c,i))}</pre></li>`).join('')}
+      ${cs.map((c,i)=>`<li><div class="gh"><b>${i+1}컷 그리기</b><span class="tag">${esc(c.role)}</span><button class="btn sm" data-copy="cut-${i}" data-seq="1">복사</button></div><pre>${esc(cutPrompt(c,i))}</pre></li>`).join('')}
       ${endLi()}
     </ol>
     <p class="sub" style="margin-top:12px">한 메시지에 한 컷만 보내세요. 그림이 이상하게 나오면 위쪽 <a href="/guide/instatoon-troubleshooting/" target="_blank" rel="noopener"><b>"문제 해결"</b></a> 글에서 보낼 문장을 찾아 복사해 쓰세요.</p>
@@ -2077,15 +2107,17 @@ function vPost(){
     <div class="jump" role="navigation" aria-label="바로 가기">${[['#sec-draw','그림 그리기'],['#kit','게시물 글']].map(([h,t])=>`<button class="chip" data-jump="${h}">${t}</button>`).join('')}</div>
 
     <h2 class="sec" id="sec-draw" style="margin-top:0">그림 그리기</h2>
-    ${autoSection()}
-    <p class="sub"><b>ChatGPT로 그리기</b> · <a href="https://chatgpt.com/" target="_blank" rel="noopener">chatgpt.com</a>에서 <b>새 대화창 하나</b>를 열고, 아래 순서대로 한 번에 하나씩 붙여 넣으세요.</p>
-    <div id="guideBox">${guideHTML()}</div>
+    ${gsTabsHTML()}
+    ${gsMode()==='gs'?'':autoSection()}
+    ${gsMode()==='gs'?'<p class="sub"><b>젠스파크로 그리기</b> · <a href="https://www.genspark.ai/" target="_blank" rel="noopener">genspark.ai</a>의 AI 이미지에서, 아래 묶음을 순서대로 한 번에 하나씩 붙여 넣으세요.</p>':'<p class="sub"><b>ChatGPT로 그리기</b> · <a href="https://chatgpt.com/" target="_blank" rel="noopener">chatgpt.com</a>에서 <b>새 대화창 하나</b>를 열고, 아래 순서대로 한 번에 하나씩 붙여 넣으세요.</p>'}
+    ${seqBarHTML()}
+    <div id="guideBox">${gsMode()==='gs'?gsHTML():guideHTML()}</div>
 
     ${kitHTML()}
 
     <div class="actions"><button class="btn ghost" data-step="edit">← 대본 다듬기</button><span class="grow"></span><button class="btn acc" data-act="next">다음 편 만들기 (등장인물 유지)</button></div>
   </section>`;
-  kitCounters();
+  kitCounters(); applyCopied();
 }
 
 /* ================= 완성 그림 목록 ================= */
@@ -3144,7 +3176,7 @@ document.addEventListener('click',async e=>{
   if(b.dataset.cuts){ S.info.cuts=+b.dataset.cuts; save(); document.querySelectorAll('[data-cuts]').forEach(c=>c.setAttribute('aria-pressed',+c.dataset.cuts===S.info.cuts)); return renderPhone(); }
   if(b.dataset.hook){ const k=+b.dataset.hook,c0=cuts()[0]; S.toon.hookIdx=k; c0.title=S.toon.hooks[k]; if(c0.highlight&&!c0.title.includes(c0.highlight)) c0.highlight=''; pv=0; openCut=0; save(); vEdit(); return renderPhone(); }
   if(b.dataset.fix){ const f=S.check.fixes[+b.dataset.fix],c=cuts()[(+f.cut)-1]; if(c&&['title','bubble','sub','sfx'].includes(f.field)){ c[f.field]=f.after; if(f.field==='title'&&c.highlight&&!f.after.includes(c.highlight)) c.highlight=''; f.applied=true; pv=(+f.cut)-1; save(); vEdit(); renderPhone(); toast(`${f.cut}컷에 반영했어요`); } return; }
-  if(b.dataset.copy){ markCopied(b); const T=S.toon||{}; const k=b.dataset.copy; if(k.startsWith('sheet-')) return copy(sheetPrompt(+k.slice(6))); if(k.startsWith('alt-')){ const i=+k.slice(4); return copy(altOf(cuts()[i],i)); } if(k.startsWith('cut-')){ const i=+k.slice(4); return copy(cutPrompt(cuts()[i],i)); } return copy({caption:T.caption,hashtags:T.hashtags,comment:T.comment,script:toonText(),sheet:sheetPrompt(),setup:setupPrompt(),fixchar:FIX_CHAR,fixtext:FIX_TEXT,fixtypo:FIX_TYPO,fixratio:FIX_RATIO(),fixstyle:FIX_STYLE,fixlabel:FIX_LABEL,fixdraw:FIX_DRAW(),endp:endPrompt()}[k]||''); }
+  if(b.dataset.copy){ markCopied(b); const T=S.toon||{}; const k=b.dataset.copy; if(k.startsWith('gs')) return copy(gsCopyText(k)); if(k.startsWith('sheet-')) return copy(sheetPrompt(+k.slice(6))); if(k.startsWith('alt-')){ const i=+k.slice(4); return copy(altOf(cuts()[i],i)); } if(k.startsWith('cut-')){ const i=+k.slice(4); return copy(cutPrompt(cuts()[i],i)); } return copy({caption:T.caption,hashtags:T.hashtags,comment:T.comment,script:toonText(),sheet:sheetPrompt(),setup:setupPrompt(),fixchar:FIX_CHAR,fixtext:FIX_TEXT,fixtypo:FIX_TYPO,fixratio:FIX_RATIO(),fixstyle:FIX_STYLE,fixlabel:FIX_LABEL,fixdraw:FIX_DRAW(),endp:endPrompt()}[k]||''); }
   if(b.dataset.ym){ mo().ym=b.dataset.ym; save(); return vMonth(); }
   if(b.dataset.freq){ mo().freq=+b.dataset.freq; save(); return vMonth(); }
   if(b.dataset.plan) return makeFromPlan(+b.dataset.plan);
@@ -4108,6 +4140,166 @@ document.addEventListener('click',e=>{ const b=e.target.closest('[data-v]'); if(
   if(b.dataset.v==='cp'){ VS.view='copy'; VS.msg=''; VS.copySel=new Set(); return vRender(); }
   if(b.dataset.v==='cpgo') return vaultCopyFromShop(); });
 shopSlotRender();
+
+
+/* ================= 젠스파크 · 다음 항목 복사 · 모바일/PC 구분 (4e) =================
+   3단계 "그림 그리기"에 (1) 진행 줄 + "복사하고 다음으로" (2) 탭 "ChatGPT·Gemini | 젠스파크" (3) 폭별 배치를 더한다.
+   기존 ChatGPT·Gemini 순서와 문장은 그대로. 젠스파크 문장은 docs/GENSPARK_GUIDE.md를 따르고, 새 골든(dev/golden/genspark.json)으로 따로 지킨다.
+   - 한 번에 6장씩 묶어서(기본) / 전체 한 번에 / 컷별로 복사. 비율은 3:4 세로(앱에서 4:5를 골라도 3:4, 1:1은 1:1 그대로).
+   - 글자: "글자도 같이"(기본) / "그림만". 이 사이트에는 올린 그림 위에 글자를 얹어 저장하는 기능이 없다(compose가 올린 그림이 있으면 글자를 그리지 않고 끝남).
+   - 인물은 항상 [사장님_A]처럼 대괄호, 파일 이름은 대괄호 없이 기존 규칙 그대로. 보관함 캐릭터 카드가 있으면 등장인물 항목에 카드 칸을 넣고, 없으면 외모 한 줄. */
+const GS_PER=6;
+const gsMode=()=>S.info.gsMode==='gs'?'gs':'std';
+const gsText=()=>S.info.gsText==='only'?'only':'with';
+const gsRatioName=()=>S.info.ratio==='1:1'?'1:1 정사각형':'3:4 세로';
+const slotRefOf=code=>code[0]==='p'?'m'+code.slice(1):code;
+const gsName=code=>'['+(code[0]==='p'?(linkId(+code.slice(1))||whoLabel(+code.slice(1))):(()=>{ const e=subEntry(+code.slice(1)); return e&&e.id?e.id:'조연 '+(+code.slice(1)+1); })())+']';
+const gsBare=code=>gsName(code).slice(1,-1);
+function gsDesc(code){ if(code[0]==='p') return whoKo(+code.slice(1)); const e=subEntry(+code.slice(1)); if(!e) return ''; if(e.id) return subDesc(resolveEntry(e)); const l=e.local||{}; return String(l.looks||l.role||'').trim(); }
+const GS_CARD=[['face','얼굴형'],['eyes','눈'],['hair','헤어'],['body','체형'],['feature','고유 특징'],['hex','대표 색']];
+function gsCardText(code){ const c=cardOfSlot(slotRefOf(code))||{}; return GS_CARD.filter(([k])=>String(c[k]||'').trim()).map(([k,n])=>`${n} ${String(c[k]).trim()}`).join(' / '); }
+const gsKeep=code=>String((cardOfSlot(slotRefOf(code))||{}).keep||'').trim();
+function gsBundles(){ const n=cuts().length, out=[]; for(let i=0;i<n;i+=GS_PER) out.push(Array.from({length:Math.min(GS_PER,n-i)},(_,j)=>i+j)); return out; }
+function gsCodesFor(idxs){ const cs=cuts(), set=new Set(); idxs.forEach(i=>cutCodes(cs[i]).forEach(c=>set.add(c))); return ['p0','p1','p2','s0','s1','s2'].filter(c=>set.has(c)&&(c[0]==='p'?peopleIdx().includes(+c.slice(1)):!!subEntry(+c.slice(1)))); }
+function gsAttNums(P,label){ return P.files.concat(P.extras).filter(f=>f.label===label).map(f=>f.n?`${f.n}번 ${f.missing?'(이미지 없음 · 직접 첨부)':f.kind}`:f.kind); }
+const gsSide=(i,n)=>n<2?[]:n===2?['화면 왼쪽','화면 오른쪽']:n===3?['화면 왼쪽','화면 가운데','화면 오른쪽']:n===4?['화면 왼쪽','화면 중간 왼쪽','화면 중간 오른쪽','화면 오른쪽']:[];
+function gsLetterSummary(m){ const L=letterSpec();
+  return [`글자: 아래 [장별 내용]의 "글자" 줄에 적은 문구만, 한 글자도 바꾸지 말고 한글 그대로 정확히 넣어 주세요. 그 밖의 글자·영어·이름표는 넣지 마세요.`,
+    `  · 제목: 위쪽 가운데, ${L.title}. ${L.hl}.`,
+    `  · 말풍선: ${L.bubble}. 꼬리는 말하는 사람 입 쪽으로 짧게(속마음은 뭉게구름, 외침은 가장자리가 뾰족한 폭발형, 속삭임은 점선, 떨림은 물결 테두리).`,
+    `  · 효과음: ${L.sfx}. 소리 나는 곳 옆에 그림의 일부로.`,
+    `  · 자막: 흰 네모 칸에 검은 테두리, 검은 고딕체, 컷 왼쪽 모서리.`,
+    `  · 글씨체·글자 크기·말풍선 모양은 ${m}장 모두 똑같이.`].join('\n'); }
+function gsCutBlock(c,i,P,codes){
+  const here=cutCodes(c).filter(x=>x!=='cast'&&codes.includes(x)), L=[`${i+1}장 · ${c.role||'컷'}`];
+  const names=here.map(code=>{ const o=effOutfit(c,code); return gsName(code)+(o?`(${outfitText(o)})`:''); });
+  const cast=(c.chars||[]).includes('cast')&&castPromptCast()?[castPromptCast()]:[];
+  if(names.length||cast.length) L.push(`- 등장: ${names.concat(cast).join(', ')}`);
+  const sd=gsSide(i,here.length); if(sd.length) L.push(`- 배치: ${here.map((code,j)=>`${gsName(code)} ${sd[j]}`).join(', ')}`);
+  L.push(`- 구도: ${c.shot||'미디엄샷'}`, `- 장면: ${c.direction||'(장면 설명을 적어 주세요)'}`);
+  if(CUT_EXTRA_PROMPT){
+    if(String(c.emotion||'').trim()) L.push(`- 표정·감정: ${c.emotion.trim()}`);
+    const pn=cutPlace(i), pf=pn&&P.files.find(f=>f.label==='장소_'+pn);
+    const bg=[String(c.place||'').trim(), c.sameBg&&i>0?'앞 장과 같은 장소·조명·소품 배치 유지':'', pf?`${pf.n}번 장소_${pn} 이미지와 같은 공간`:''].filter(Boolean).join(' · '); if(bg) L.push(`- 배경·시간대: ${bg}`);
+    if(i>0&&String(c.diff||'').trim()) L.push(`- 앞 장과 달라진 점: ${c.diff.trim()}`);
+    if(String(c.avoid||'').trim()) L.push(`- 그리지 말 것: ${c.avoid.trim()}`); }
+  if(c.panels) L.push(`- 칸 나누기: ${c.panels}`);
+  if(c.extras) L.push(`- 디테일: ${c.extras}${gsText()==='only'?' (글자로 된 부분은 빼고 그림만)':''}`);
+  if(c.sfx) L.push('- 연출: 긴장감 있는 집중선 효과'+(gsText()==='only'?'(글자 없이)':''));
+  const tk=talk(c);
+  if(gsText()==='only'){
+    const gap=[c.title?'위쪽 4분의 1(제목 자리)':'', tk.length?`말풍선 ${tk.length}개 자리(말하는 인물 머리 근처)`:'', c.caption?'왼쪽 가운데(자막 박스 자리)':''].filter(Boolean);
+    L.push(gap.length?`- 여백: ${gap.join(', ')}`:'- 여백: 글자 자리는 따로 없어요', '- 글자는 넣지 마세요.');
+  } else {
+    const tl=lines(c.title), t=[];
+    t.push(c.title?`제목(위쪽 가운데${tl.length>1?', 두 줄':''}): ${tl.map(l=>`"${l}"`).join(' / ')}`:'제목 없음(대사 중심 장, 위쪽도 그림으로 채워요)');
+    if(c.highlight&&c.title) t.push(`노란 형광펜 강조: "${c.highlight}"`);
+    if(c.sub) t.push(`작은 글씨(제목 아래): "${c.sub}"`);
+    tk.forEach((x,k)=>t.push(`${({think:'생각 말풍선(뭉게구름 모양, 동그라미 꼬리)',shout:'외침 말풍선(가장자리 뾰족한 폭발형, 글씨 크고 굵게)',whisper:'속삭임 말풍선(점선 테두리, 글씨 작게)',shaky:'떨림 말풍선(물결치는 테두리, 글씨 끝이 떨리게)'})[x.kind]||'말풍선'} ${k+1}${x.who?` - ${x.who}의 말, 꼬리는 ${x.who} 쪽`:''}: "${x.text}"`));
+    if(c.sfx) t.push(`효과음: "${c.sfx}"`);
+    if(c.caption) t.push(`자막 박스(흰 네모에 검은 테두리, 왼쪽): "${c.caption}"`);
+    L.push('- 글자(정확히 이대로):', ...t.map(x=>'    '+x)); }
+  return L.join('\n'); }
+function gsPrompt(idxs){ const cs=cuts(), n=cs.length, m=idxs.length, a=idxs[0], z=idxs[m-1];
+  const items=bundleItems(idxs), P=planFor(items), codes=gsCodesFor(idxs), only=gsText()==='only';
+  const ppl=codes.map(code=>{ const nm=gsName(code), bare=gsBare(code), card=gsCardText(code), keep=gsKeep(code), at=gsAttNums(P,bare);
+    return [`  ${nm} ${gsDesc(code)}`, card?`    카드: ${card}`:'', at.length?`    첨부: ${at.join(', ')}`:'', keep?`    절대 유지: ${keep}`:''].filter(Boolean).join('\n'); }).join('\n');
+  const places=P.files.filter(f=>f.label&&f.label.startsWith('장소_')).map(f=>`  ${f.n}번 ${f.label}(배경 기준 이미지${VAULT.places[f.label.slice(3)]&&VAULT.places[f.label.slice(3)].desc?`: ${VAULT.places[f.label.slice(3)].desc}`:''})`).join('\n');
+  const castTx=cs.some(c=>(c.chars||[]).includes('cast'))&&castPromptCast()?`\n- 조연: ${castPromptCast()}. 처음부터 끝까지 옷·머리·모자를 똑같이 유지해 주세요.`:'';
+  const lock=lockTail().trim();
+  const det=DETAILS.filter(([k])=>detailOn(k)).map(([,nm,h])=>`${nm}(${h})`).join(', ');
+  return `[작업]
+아래 내용으로 인스타툰 ${m}장을 순서대로, 한 장씩 따로 만들어 주세요.${n>m?` (전체 ${n}장 중 ${a+1}~${z+1}장이에요.${a>0?' 앞 묶음과 같은 인물·그림체로 이어서 그려 주세요.':''})`:''}
+
+[공통 설정]
+- 비율: ${gsRatioName()}, ${m}장 모두 똑같이. 윗부분 4분의 1은 제목 자리로 비교적 비워 두세요. 그림 바깥에 검은 테두리 선은 넣지 마세요.
+- 그림체: ${artOf().prompt}
+- 배경: ${S.info.type||'작업'} 공간. ${artOf().bg}
+- 디테일: ${det||'기본'}. 표정·손짓·소품을 살려 장면이 살아 있게.
+- 등장인물(첨부한 이미지 번호 순서대로):
+${ppl||'  (등장인물 없음)'}${places?`\n- 장소:\n${places}`:''}${castTx}${lock?`\n- ${lock.replace(/\n/g,'\n  ')}`:''}
+- ${only?'글자: 그림 안에 글자, 숫자, 말풍선, 간판 글씨, 이름표는 넣지 마세요. 대사는 제가 따로 얹어요.':gsLetterSummary(m)}
+
+[장별 내용]
+${idxs.map(i=>gsCutBlock(cs[i],i,P,codes)).join('\n\n')}
+
+[마무리]
+- 모든 장에서 인물의 얼굴·머리 모양·옷·체형을 첨부 이미지와 똑같이 유지하고, 인물끼리 섞지 마세요.
+- ${m}장 모두 같은 그림체와 같은 비율로 그려 주세요.${only?'':'\n- 글자는 따옴표 안 문구만, 한 글자도 바꾸지 말고 한글 그대로 정확히 넣어 주세요.'}`; }
+/* ---------- 캐릭터 준비 (가이드 §4~6) ---------- */
+function gsReady(code){ const e=codeEntry(code), ch=e&&VAULT.chars[e.id], im=(ch&&ch.images)||{}; return {has:!!ch, ref:!!im.ref, turn:!!im.turn, expr:!!im.expr}; }
+function gsNeed(code){ const r=gsReady(code), need=[]; if(!r.ref) need.push('ref'); if(!r.turn) need.push('turn'); if(!r.expr) need.push('expr'); return need; }
+function gsSheet(code){ const d=gsDesc(code), card=gsCardText(code), keep=gsKeep(code);
+  return `[캐릭터 카드]\n${gsName(code)} ${d}${card?`\n- ${card.split(' / ').join('\n- ')}`:''}${keep?`\n- 절대 바뀌면 안 되는 것: ${keep}`:''}`; }
+function gsPrep(code,kind){ const g=`[그림체] ${artOf().prompt}`, card=gsSheet(code);
+  if(kind==='ref') return `${g}\n${card}\n\n위 캐릭터의 단독 기준 이미지를 그려주세요. (비율 1:1 또는 3:4)\n- 정면을 똑바로 보는 무릎 위 구도\n- 차렷 자세, 팔은 자연스럽게 내림, 손이 얼굴이나 몸을 가리지 않음\n- 무표정에 가까운 기본 표정, 입 다문 상태\n- 균일하고 밝은 정면 조명, 강한 그림자 없음\n- 순백색 단색 배경\n- 캐릭터 1명만, 소품·텍스트·워터마크 없음`;
+  if(kind==='turn') return `[이미지1]은 캐릭터 레퍼런스입니다. 얼굴, 헤어, 체형, 의상, 색상, 선화 스타일을 100% 동일하게 유지하세요.\n${g}\n${card}\n\n캐릭터 설정 시트를 만들어주세요. (비율 16:9)\n- 가로로 긴 한 장에 전신 4개를 같은 크기로 나란히 배치\n- 순서: 정면 / 3/4 측면 / 완전 측면 / 뒷모습\n- 모든 포즈는 차렷 자세, 같은 키와 비율, 발끝이 같은 선에 맞춤\n- 흰 배경, 균일한 조명, 텍스트·라벨 없음`;
+  return `[이미지1]은 캐릭터 레퍼런스입니다. 얼굴형, 눈, 헤어를 정확히 유지하세요.\n${g}\n\n같은 캐릭터의 표정 시트를 만들어주세요. (비율 1:1)\n- 3x3 격자, 정면 얼굴 클로즈업(어깨 위) 9개\n- 표정: 기본 / 미소 / 활짝 웃음 / 화남 / 슬픔 / 놀람 / 당황 / 부끄러움(볼 홍조) / 진지함\n- 모든 칸 같은 얼굴 크기와 각도\n- 흰 배경, 텍스트 없음`; }
+const GS_KIND={ref:['00_기준','기준 이미지'],turn:['01_턴어라운드','턴어라운드 시트'],expr:['02_표정','표정 시트']};
+function gsCopyText(k){
+  if(k==='gs-all') return gsPrompt(cuts().map((_,i)=>i));
+  if(k.startsWith('gs-b')){ const b=gsBundles()[+k.slice(4)]; return b?gsPrompt(b):''; }
+  if(k.startsWith('gs-cut-')) return gsPrompt([+k.slice(7)]);
+  if(k.startsWith('gsprep-')){ const m=k.match(/^gsprep-([ps]\d)-(ref|turn|expr)$/); return m?gsPrep(m[1],m[2]):''; }
+  return ''; }
+/* ---------- 젠스파크 탭 화면 ---------- */
+function gsAttachHTML(idxs){ const P=planFor(bundleItems(idxs)), all=P.files.concat(P.extras), real=all.filter(f=>!f.missing); if(!all.length&&!P.miss.length) return '';
+  const notes=[]; if(P.dropped.length) notes.push(`참조 이미지가 ${ATT_MAX}장을 넘지 않게 ${P.dropped.map(d=>d.kind).filter((v,i,a)=>a.indexOf(v)===i).join('·')} ${P.dropped.length}장을 뺐어요.`);
+  if(P.need) notes.push(`기준·의상·장소 이미지만으로도 ${P.total}장이라 한 번에 첨부하기 어려워요. 장수를 나눠 따로 만들어 주세요.`);
+  if(P.people>=5) notes.push(`인물이 ${P.people}명이에요. 장을 나누는 걸 추천해요.`);
+  if(P.miss.length) notes.push(`기준 이미지가 없는 인물이 있어요: ${P.miss.join(', ')}`);
+  return `<div class="attbox"><div class="lab-row"><b>이 묶음에 첨부할 이미지 ${real.length}장 <small>(최대 ${ATT_MAX}장)</small></b>${real.length?`<button type="button" class="btn sm" data-gs="dl" data-b="${esc(idxs.join(','))}">한 번에 내려받기</button>`:''}</div>
+    <ol class="attl">${all.map(f=>`<li><span class="ref">${vThumb(f.im,f.label)}</span><span class="vrow-m"><b>${f.n?`${f.n}번 · `:''}${esc(f.file||f.label)}</b><small>${f.missing?'':`${esc(f.label)} · `}${esc(f.kind)}</small></span></li>`).join('')}</ol>
+    ${notes.map(t=>`<p class="cwarn" role="status">${esc(t)}</p>`).join('')}</div>`; }
+function gsPrepHTML(){ const codes=gsCodesFor(cuts().map((_,i)=>i)); if(!codes.length) return '';
+  const rows=codes.map(code=>{ const r=gsReady(code), need=gsNeed(code), nm=gsBare(code);
+    const st=!need.length?`<span class="gs-ok">준비됨 ✓ <small>(기준·턴어라운드·표정)</small></span>`:r.ref?`<span class="gs-part">기준 이미지만 있어요 <small>— ${need.map(k=>GS_KIND[k][1]).join('·')}을(를) 만들어 주세요</small></span>`:`<span class="gs-no">기준 이미지가 없어요 <small>— 아래 순서로 만들어 주세요</small></span>`;
+    const pr=need.map(k=>`<li><div class="gh"><b>${esc(nm)} ${GS_KIND[k][1]} 만들기</b><span class="tag">${k==='turn'?'16:9':k==='expr'?'1:1':'1:1 또는 3:4'}</span><button class="btn sm" data-copy="gsprep-${code}-${k}" data-seq="1">복사</button></div>
+      <p class="sub" style="margin:2px 0 6px">${k==='ref'?'마음에 드는 1장만 확정하세요.':'기준 이미지를 [이미지1]로 첨부하고 보내세요.'} 저장 이름: <b>${esc(nm)}_${GS_KIND[k][0]}.png</b></p><pre>${esc(gsPrep(code,k))}</pre></li>`).join('');
+    return `<div class="gs-char"><div class="gs-char-h"><b>${esc(nm)}</b>${st}</div>${pr?`<ol class="guide" style="margin-top:8px">${pr}</ol><p class="sub" style="margin:6px 0 0">만든 이미지는 위 이름으로 저장해 두고, ☰ 메뉴의 <b>캐릭터 보관함</b>에 올려 두면 다음 편부터 이 단계를 건너뛰어요.</p>`:''}</div>`; }).join('');
+  return `<h3 class="gs-h">1. 캐릭터 준비</h3>${rows}`; }
+function gsHTML(){ const bs=gsBundles(), n=cuts().length, only=gsText()==='only';
+  const ratioNote=S.info.ratio==='4:5'?` 앱에서는 4:5로 골랐지만 젠스파크에는 4:5가 없어서 3:4로 만들어요. 올릴 때 위아래가 조금 잘릴 수 있어요.`:S.info.ratio==='1:1'?' 앱에서 고른 1:1 그대로 만들어요.':'';
+  return `<div class="gsbox">
+    <div class="gs-chk"><b>시작 전 체크</b><ul>
+      <li>모델은 <b>Nano Banana Pro</b>를 직접 고르세요(자동 선택 X). 한 작품은 처음부터 끝까지 같은 모델로 해요.</li>
+      <li>비율은 <b>${gsRatioName()}</b>으로 고르세요.${esc(ratioNote)}</li>
+      <li>참조 이미지는 한 번에 최대 <b>${ATT_MAX}장</b>까지 올릴 수 있어요. 아래 묶음마다 올릴 이미지를 정리해 뒀어요.</li></ul></div>
+    <div class="gs-txt" role="radiogroup" aria-label="글자 처리"><b>글자</b>
+      <label class="gs-opt"><input type="radio" name="gsText" data-gs="text" value="with" ${only?'':'checked'}> <span><b>글자도 같이 그리기</b> <small>(기본)</small><br><small>제목·대사·효과음까지 그림에 함께 그려요. 글자는 GPT Image가 더 정확해요. 틀리면 젠스파크의 Edit Text로 고쳐요.</small></span></label>
+      <label class="gs-opt"><input type="radio" name="gsText" data-gs="text" value="only" ${only?'checked':''}> <span><b>그림만 그리기</b><br><small>글자 없이 그림만 받아요. <b>이 사이트에는 올린 그림 위에 글자를 얹는 기능이 없어요.</b> 대사는 젠스파크 AI 디자이너나 캔바 같은 편집 도구에서 직접 얹어 주세요.</small></span></label></div>
+    ${gsPrepHTML()}
+    <h3 class="gs-h">${gsCodesFor(cuts().map((_,i)=>i)).length?'2':'1'}. 그림 만들기 <small>(${GS_PER}장씩 나눠 보내요)</small></h3>
+    <p class="sub" style="margin:0 0 8px">${bs.length>1?`전체 ${n}장을 ${bs.length}묶음으로 나눴어요. `:''}묶음마다 <b>새 대화</b>가 아니라 같은 작품 폴더에서, 같은 모델로 보내세요. 인물이 달라 보이면 기준 이미지를 [이미지1]로 다시 첨부하세요.</p>
+    <ol class="guide">${bs.map((b,k)=>`<li><div class="gh"><b>${b[0]+1}${b.length>1?`~${b[b.length-1]+1}`:''}장 보내기</b><span class="tag">${b.length}장</span><button class="btn sm" data-copy="gs-b${k}" data-seq="1">복사</button></div>${gsAttachHTML(b)}<pre>${esc(gsPrompt(b))}</pre></li>`).join('')}</ol>
+    <div class="gs-more"><b>보조</b><span class="sub">필요할 때만 쓰세요.</span>
+      <div class="row" style="margin-top:6px"><button class="btn sm" data-copy="gs-all">젠스파크 전체 한 번에 복사 (${n}장)</button></div>
+      <details style="margin-top:8px"><summary class="sub" style="cursor:pointer">컷별 젠스파크용 복사</summary><div class="row" style="margin-top:6px;gap:6px">${cuts().map((_,i)=>`<button class="btn sm" data-copy="gs-cut-${i}">${i+1}장</button>`).join('')}</div></details></div>
+    <div class="gs-fix"><b>그림이 마음에 안 들 때</b><ul class="sub" style="margin:4px 0 0 18px">
+      <li>어색한 장만 다시 만들고, 거의 맞는데 한 부분만 틀리면 다시 뽑지 말고 <b>선택 영역 편집</b>으로 그 부분만 고치세요.</li>
+      <li>얼굴이 달라지면 기준 이미지를 [이미지1]로 다시 첨부하고, 여러 인물이 섞이면 화면 위치(왼쪽/오른쪽)를 적어 보내세요.</li>
+      ${only?'':'<li>글자가 틀리게 들어가면 Edit Text로 그 글자만 고치세요.</li>'}</ul></div>
+  </div>`; }
+function gsTabsHTML(){ const g=gsMode()==='gs';
+  return `<div class="gtabs" role="tablist" aria-label="그림 그리는 곳"><button type="button" role="tab" class="gtab" data-gs="mode" data-v="std" aria-selected="${!g}">ChatGPT·Gemini</button><button type="button" role="tab" class="gtab" data-gs="mode" data-v="gs" aria-selected="${g}">젠스파크</button></div>`; }
+function seqBarHTML(){ return `<div class="seq" id="seqBar" role="region" aria-label="복사 진행"><div class="seq-t"><span class="seq-n" id="seqN"></span><span class="seq-l" id="seqL"></span></div><div class="seq-p" aria-hidden="true"><i id="seqP"></i></div><div class="seq-b"><button type="button" class="btn" data-act="seqPrev" id="seqPrev">이전</button><button type="button" class="btn pri" data-act="seqNext" id="seqGo">복사하고 다음으로 →</button></div></div>`; }
+function seqButtons(){ return [...document.querySelectorAll('#guideBox [data-seq]')]; }
+function seqRefresh(){ const bar=document.getElementById('seqBar'); if(!bar) return; const bs=seqButtons(), done=bs.filter(b=>COPIED.has(b.dataset.copy)).length, nx=bs.find(b=>!COPIED.has(b.dataset.copy));
+  bar.hidden=!bs.length; document.querySelectorAll('#guideBox li.now').forEach(l=>l.classList.remove('now')); if(nx){ const li=nx.closest('li'); if(li) li.classList.add('now'); }
+  const set=(id,t)=>{ const e=document.getElementById(id); if(e) e.textContent=t; };
+  const nli=nx&&nx.closest('li'), nlb=nli&&nli.querySelector('.gh b');
+  set('seqN',`${done} / ${bs.length}`); set('seqL',nx?'다음: '+(nlb?nlb.textContent:''):'모두 복사했어요');
+  const p=document.getElementById('seqP'); if(p) p.style.width=(bs.length?Math.round(done/bs.length*100):0)+'%';
+  const go=document.getElementById('seqGo'); if(go){ go.disabled=!nx; go.textContent=nx?'복사하고 다음으로 →':'다 보냈어요 ✓'; } const pv=document.getElementById('seqPrev'); if(pv) pv.disabled=!done&&!!nx; }
+function seqFlash(btn){ const li=btn&&btn.closest('li'); if(!li) return; li.scrollIntoView({behavior:'smooth',block:'center'}); li.classList.add('flash'); setTimeout(()=>li.classList.remove('flash'),900); }
+document.addEventListener('click',e=>{ const b=e.target.closest('[data-gs],[data-act="seqNext"],[data-act="seqPrev"]'); if(!b) return;
+  if(b.dataset.act==='seqNext'){ e.preventDefault(); const nx=seqButtons().find(x=>!COPIED.has(x.dataset.copy)); if(!nx) return toast('모두 복사했어요'); nx.click();
+    setTimeout(()=>{ seqRefresh(); const n2=seqButtons().find(x=>!COPIED.has(x.dataset.copy)); if(n2) seqFlash(n2); },80); return; }
+  if(b.dataset.act==='seqPrev'){ e.preventDefault(); const bs=seqButtons(), nx=bs.findIndex(x=>!COPIED.has(x.dataset.copy)), i=nx<0?bs.length-1:nx-1; if(i>=0) seqFlash(bs[i]); return; }
+  const a=b.dataset.gs;
+  if(a==='mode'){ e.preventDefault(); S.info.gsMode=b.dataset.v==='gs'?'gs':'std'; save(); if(S.step==='post') vPost(); return; }
+  if(a==='text'){ S.info.gsText=b.value==='only'?'only':'with'; save(); const gb=document.getElementById('guideBox'); if(gb){ gb.innerHTML=gsHTML(); applyCopied(); } return; }
+  if(a==='dl'){ e.preventDefault(); const idxs=String(b.dataset.b||'').split(',').map(Number).filter(x=>x>=0), P=planFor(bundleItems(idxs)); downloadFiles(P.files.concat(P.extras).filter(f=>!f.missing)); } });
 
 /* ================= 시작 ================= */
 const BOOT_HASH=location.hash;
