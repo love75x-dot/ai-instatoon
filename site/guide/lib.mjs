@@ -7,6 +7,7 @@ export const DATE = '2026-10-01'; // 글에 published/modified가 없을 때의 
 import { gaSnippet } from '../analytics.mjs';
 import { OG_IMAGE, ogImageUrl, THEME_COLOR, footerMetaHtml } from '../site-meta.mjs';
 import { guideFontHead } from '../fonts.mjs';
+import { exampleData } from '../examples.mjs';
 
 export const CATS = {
   toon: { name: '인스타툰 가이드', desc: '인스타툰의 개념, 구성, 스토리 만드는 법' },
@@ -27,6 +28,8 @@ export const warn = (t) => ({ t: 'warn', v: t });
 export const ex = (title, ...lines) => ({ t: 'ex', title, v: lines });
 export const table = (head, ...rows) => ({ t: 'table', head, rows });
 export const sec = (h, ...blocks) => ({ h, blocks });
+/* 예시 갤러리(반찬가게 사장님의 하루): site/assets/examples/examples.json 한 곳의 그림·글을 그대로 쓴다 */
+export const gallery = () => ({ t: 'gallery' });
 
 export const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 // 본문 인라인: **굵게**, [[slug|텍스트]] 내부 링크
@@ -48,6 +51,10 @@ function block(b) {
     case 'warn': return `<aside class="callout warn"><b>주의</b><p>${inline(b.v)}</p></aside>`;
     case 'ex': return `<div class="example"><b>예시 · ${inline(b.title)}</b>${b.v.map((l) => `<p>${inline(l)}</p>`).join('')}</div>`;
     case 'table': return `<div class="tbl"><table><thead><tr>${b.head.map((x) => `<th scope="col">${inline(x)}</th>`).join('')}</tr></thead><tbody>${b.rows.map((r) => `<tr>${r.map((x) => `<td>${inline(x)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+    case 'gallery': {
+      const E = exampleData(); if (!E) return '';
+      return `<figure class="gal"><div class="gal-g">${E.cuts.map((c) => `<figure class="gal-f"><img src="/assets/examples/${c.file}-360.webp" srcset="/assets/examples/${c.file}-360.webp 360w, /assets/examples/${c.file}-720.webp 720w" sizes="(min-width:721px) 220px, 46vw" width="${E.w}" height="${E.h}" loading="lazy" decoding="async" alt="${esc(c.alt)}"><figcaption><b>${c.n}컷 · ${esc(c.role)}</b>${esc(c.cap)}</figcaption></figure>`).join('')}</div><figcaption class="gal-n"><b>${esc(E.title)}</b> · ${esc(E.sub)}. ${esc(E.note)}</figcaption></figure>`;
+    }
     default: throw new Error('unknown block ' + b.t);
   }
 }
@@ -128,6 +135,9 @@ main{padding-bottom:56px}
 .callout{border-radius:12px;padding:12px 18px;margin:0 0 20px;font-size:15.5px;line-height:1.7}
 .callout b{display:block;font-size:13.5px;margin-bottom:2px}.callout p{margin:0}
 .callout.tip,.callout.warn{background:var(--sunken)}.callout.warn{border-left:3px solid var(--ink);border-radius:0 12px 12px 0}
+.gal{margin:0 0 22px}.gal-g{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.gal-f{margin:0}.gal-f img{display:block;width:100%;height:auto;aspect-ratio:1;object-fit:cover;border:1px solid var(--line);border-radius:12px;background:var(--sunken)}
+.gal-f figcaption{margin-top:6px;font-size:13px;line-height:1.45;color:var(--muted)}.gal-f figcaption b{display:block;color:var(--ink);font-size:13.5px}.gal-n{margin-top:12px;font-size:13.5px;line-height:1.6;color:var(--muted)}.gal-n b{color:var(--ink)}
+@media (max-width:720px){.gal-g{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}}
 .example{border:1px dashed var(--line-2);border-radius:12px;padding:14px 18px 4px;margin:0 0 20px;font-size:15.5px;line-height:1.75}
 .example>b{display:block;font-size:13.5px;color:var(--muted);margin-bottom:6px}
 .tbl{overflow-x:auto;margin:0 0 20px;-webkit-overflow-scrolling:touch}

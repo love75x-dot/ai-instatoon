@@ -13,3 +13,8 @@ export function exampleGalleryLine() {
   for (const c of E.cuts || []) if (!c.alt || !c.cap || !c.role) throw new Error(`예시 ${c.n}컷에 role·cap·alt가 모두 있어야 해요`);
   return `const EXAMPLES=${JSON.stringify(E).replace(/</g, '\\u003c')};`;
 }
+
+/* 노트 글(가이드)에서 쓰는 같은 데이터. 없으면 null */
+export function exampleData() {
+  try { const { _설명, ...E } = JSON.parse(fs.readFileSync(path.join(dir, 'examples.json'), 'utf8')); return E.cuts && E.cuts.length ? E : null; } catch { return null; }
+}
