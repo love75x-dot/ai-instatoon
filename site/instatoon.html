@@ -124,6 +124,7 @@ li.flash{animation:seqflash .9s}
 #main:empty{min-height:100vh}
 #keyWrap:empty{min-height:64px}
 #steps:empty{min-height:69px}@media (max-width:640px){#steps:empty{min-height:41px}}
+.aicnt{margin:0 0 12px;font-size:13px;color:var(--muted)}
 /* 예시 갤러리 */
 .exgal{margin:0 0 10px}.exgal>.exg{margin:12px 0 0}
 .exg-h{margin:0 0 10px;display:flex;flex-direction:column;gap:2px;font-size:16px}.exg-h span{font-size:13px;color:var(--muted);font-weight:500}
@@ -1355,8 +1356,12 @@ const RULES_FN=()=>{
   const body=tpl.replace(/\{\{(\w+)\}\}/g,(m,k)=>k==='storymode'?sm:k==='flow'?(sh?FLOW_SHORT:pTpl('flow')):m);
   const n=sh?'9':'10';
   return body+(kr?'\n'+n+'. [대본 유형] '+kr+' 이 항목이 위 2번·6번의 광고 단어·행동 유도 규칙과 다르면 '+n+'번을 우선한다.':''); };
+/* 이번 편 AI 호출 횟수: 화면 안에서만 세고 저장하지 않는다(저장된 작업·백업 형식은 그대로). 새 편을 만들 때 0으로, "통째로 다시 만들기"는 이어서 센다. 직접 고치는 건 세지 않는다. */
+let aiCalls=0, aiKeep=false;
+function renderAiCount(){ const el=document.getElementById('aiCnt'); if(!el) return; el.hidden=!aiCalls; el.textContent=aiCalls?`이번 편에서 AI를 ${aiCalls}번 불렀어요 · 직접 고치는 건 세지 않아요`:''; }
 async function ask(prompt,statusEl,msg='AI가 인스타툰을 쓰고 있어요 · 보통 30초~1분',imgs,tier,task){
   if(!sample) throw {code:'no_ai'};
+  aiCalls++; try{ renderAiCount(); }catch(_){}
   const ctl=new AbortController(); busy=ctl; renderPhone();
   if(statusEl){ statusEl.className='status'; statusEl.innerHTML=`<span class="spin"></span> ${msg}`; }
   try{ const o={signal:ctl.signal,cache:false}; if(tier&&!STANDALONE) o.modelTier=tier; if(task&&STANDALONE) o.task=task; if(imgs&&imgs.length) o.images=STANDALONE?imgs:imgs.map(dataUrlToBlob); const r=await sample.json(prompt,o); if(statusEl) statusEl.textContent=''; return r; }
@@ -1453,6 +1458,7 @@ function applyToon(r){
       caption:String(r.caption||''),hashtags:fitTags(r.hashtags),comment:String(r.comment||''),reel:{caption:String(r.reelCaption||''),hashtags:fitTags(r.reelHashtags||''),comment:String(r.reelComment||'')},endHead:fixNL(r.endHead||''),endBtn:String(r.endBtn||''),cast:String(r.cast||''),ideas:(r.ideas||[]).map(String).slice(0,3)};
 }
 async function makeToon(theme){
+  if(!aiKeep) aiCalls=0; aiKeep=false;
   const st=$('#st-make');
   const n=S.info.cuts; save();
   const prompt=pFill('make',{n,info:infoBlock(),series:seriesBlock('make'),theme:theme?`\n[이번 편 주제] ${theme}\n`:'',rules:RULES_FN(),shots:SHOTS.join(', '),tagSlots:tagSlots(),fixedCount:fixedTags().length,tagsNote:prof().tags.trim()?`. 고정 해시태그(${prof().tags})와 겹치지 않게`:''});
@@ -1576,7 +1582,7 @@ function renderPhone(){
   if(kind==='phone') renderPhoneCard();
   const sm=$('#storyM'); if(sm) sm.innerHTML=storyHTML();
   const cp=$('#capPrev'); if(cp) cp.outerHTML=captionPreviewHTML();
-  renderTodo(); renderDock();
+  renderTodo(); renderDock(); renderAiCount();
 }
 function renderPhoneCard(){
   const P=pics(), cs=cuts(), useP=P.length>0, n=useP?P.length:cs.length, name=S.info.name||'내작업';
@@ -1835,6 +1841,7 @@ function vEdit(){
   $('#main').innerHTML=`<section class="panel">
     <div class="ph"><div><span class="stepno"><i class="nb">2</i>2단계 · 대본 다듬기 </span><h1>${esc(T.title)}</h1><p>${T.tone?esc(T.tone)+' · ':''}${n}컷 · 컷을 눌러 문구를 고칠 수 있어요. 스토리보드에 바로 반영돼요.</p></div>
       <div class="row"><button class="btn" data-act="remake">통째로 다시 만들기</button></div></div>
+    <p class="aicnt" id="aiCnt" hidden></p>
     <div class="status" id="st-make" style="margin:-8px 0 10px"></div>
     ${T.ideas?.length?`<p class="sub" style="margin:0">이 주제로 다시 만들기</p><div class="ideas" style="margin-bottom:18px">${T.ideas.map((d,k)=>`<button class="chip" data-idea="${k}">${esc(d)}</button>`).join('')}</div>`:''}
 
@@ -2118,6 +2125,7 @@ function vPost(){
   $('#main').innerHTML=`<section class="panel">
     <div class="ph"><div><span class="stepno"><i class="nb">3</i>3단계 · 그림·저장·올리기 <small>→ 올렸으면 한 편 완성!</small></span><h1>그림 만들고 올리기</h1><p>대사·제목·효과음은 고른 테마(${esc(artOf().name)})에 맞는 웹툰 글씨로 그림 안에 함께 그려져요. 아래 순서대로 하면 돼요.</p></div></div>
     ${bkAskHTML()}
+    <p class="aicnt" id="aiCnt" hidden></p>
     <div class="jump" role="navigation" aria-label="바로 가기">${[['#sec-draw','그림 그리기'],['#kit','게시물 글']].map(([h,t])=>`<button class="chip" data-jump="${h}">${t}</button>`).join('')}</div>
 
     <h2 class="sec" id="sec-draw" style="margin-top:0">그림 그리기</h2>
@@ -3245,7 +3253,7 @@ document.addEventListener('click',async e=>{
   if(a==='logoDel'){ prof().logo=''; save(); render(); return; }
   if(a==='copyReset'){ resetCopied(); toast('복사 표시를 지웠어요'); return; }
   if(a==='make'){ if(!S.info.type.trim()){ toast('업종을 먼저 골라 주세요. 필수는 이것 하나예요'); const lb=$('#ind-lb'); if(lb){ lb.scrollIntoView({behavior:'smooth',block:'center'}); const box=lb.parentElement; box.classList.add('flash'); setTimeout(()=>box.classList.remove('flash'),1800); } return; } resetCopied(); return run(b,()=>makeToon(),'make'); }
-  if(a==='remake'){ resetCopied(); return run(b,()=>makeToon(),'make'); }
+  if(a==='remake'){ resetCopied(); aiKeep=true; return run(b,()=>makeToon(),'make'); }
   if(a==='blank') return blankToon();
   if(a==='tReset'){ Object.assign(S.info,{titleScale:100,titleColor:'',tOutline:'',tShadow:undefined,tTilt:0,hl:'marker',hlColor:''}); save(); return refreshLetter(true); }
   if(a==='fontUp'){ return $('#fontIn').click(); }
