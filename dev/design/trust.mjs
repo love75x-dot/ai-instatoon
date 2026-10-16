@@ -17,6 +17,19 @@ C.ok(dateRe.test(fm(home)) && dateRe.test(fm(guide)) && dateRe.test(fm(trouble))
 C.ok(!/<time/.test(fm(home) + fm(guide)), '푸터 날짜는 일반 글자(허브의 글 날짜 목록과 섞이지 않음)');
 const siteInfo = JSON.parse(fs.readFileSync(path.join(root, 'site', 'site-info.json'), 'utf8'));
 if (!siteInfo.operatorName && !siteInfo.contactEmail && !siteInfo.contactUrl) C.ok(!/운영:|문의:/.test(fm(home)), '운영자·문의가 비어 있으면 그 항목은 보이지 않음(가짜 값 없음)');
+// 실제 값이 들어 있으면 푸터(앱 홈·노트 목록·노트 글)와 안내 페이지에 그대로 보이고, 이메일은 mailto 링크
+if (siteInfo.operatorName || siteInfo.contactEmail || siteInfo.contactUrl) {
+  const href = siteInfo.contactUrl || (siteInfo.contactEmail ? 'mailto:' + siteInfo.contactEmail : '');
+  const privacy = dep('privacy/index.html');
+  for (const [n, h] of [['앱 홈', fm(home)], ['노트 목록', fm(guide)], ['노트 글', fm(trouble)]])
+    C.ok((!siteInfo.operatorName || h.includes('운영: ' + siteInfo.operatorName)) && (!href || h.includes(`<a href="${href}"`)), `${n} 푸터에 운영자·문의(링크)가 보임`);
+  C.ok(!siteInfo.contactEmail || privacy.includes(`mailto:${siteInfo.contactEmail}`), '개인정보처리방침에도 같은 문의 이메일(mailto)');
+}
+// 미리보기 프로그램을 위해 머리·본문을 명시적으로 나눔(</head>가 <body>보다 앞) + 공유 이미지 태그 묶음
+{ const hi = home.indexOf('</head>'), bi = home.indexOf('<body>');
+  C.ok(hi > 0 && bi > hi && home.indexOf('class="skip"') > bi, '앱 홈: </head>와 <body>를 명시적으로 나눔');
+  C.ok(/og:image:secure_url/.test(home) && /rel="image_src"/.test(home) && /og:image:type" content="image\/png"/.test(home) && /og:image:width" content="1200"/.test(home) && /og:image:height" content="630"/.test(home), '앱 홈: og:image 와 type·width·height·secure_url·image_src 태그가 모두 있음');
+  C.ok(home.indexOf('og:image"') < 4096, 'og:image 태그가 문서 맨 앞 4KB 안에 있음(앞부분만 읽는 미리보기 프로그램 대비)'); }
 const probe = (info, date) => { const f = path.join(process.env.TEMP || '/tmp', '_siteinfo_probe.json'); fs.writeFileSync(f, JSON.stringify(info));
   const r = spawnSync(process.execPath, ['-e', `import('${path.join(root, 'site', 'site-meta.mjs').replace(/\\/g, '/').replace(/^([A-Za-z]):/, 'file:///$1:')}').then(m=>console.log(JSON.stringify({f:m.footerMetaHtml(),a:m.appSiteInfoLine()})))`], { env: { ...process.env, SITE_INFO_FILE: f, BUILD_DATE: date || '' }, encoding: 'utf8' });
   fs.rmSync(f, { force: true }); return r; };

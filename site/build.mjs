@@ -23,11 +23,12 @@ const head = [
   '<link rel="canonical" href="https://www.ai-instatoon.com/">',
   '<meta property="og:type" content="website"><meta property="og:site_name" content="인스타툰 연재실"><meta property="og:locale" content="ko_KR">',
   '<meta property="og:title" content="인스타툰 연재실"><meta property="og:description" content="분야와 내 이야기만 입력하면 인스타툰 기획·대본·컷 구성까지 정리해 주는 도구."><meta property="og:url" content="https://www.ai-instatoon.com/">',
-  `<meta property="og:image" content="${ogImageUrl}"><meta property="og:image:type" content="image/png"><meta property="og:image:width" content="${OG_IMAGE.width}"><meta property="og:image:height" content="${OG_IMAGE.height}"><meta property="og:image:alt" content="${OG_IMAGE.alt}">`,
+  `<meta property="og:image" content="${ogImageUrl}"><meta property="og:image:type" content="image/png"><meta property="og:image:width" content="${OG_IMAGE.width}"><meta property="og:image:height" content="${OG_IMAGE.height}"><meta property="og:image:alt" content="${OG_IMAGE.alt}"><meta property="og:image:secure_url" content="${ogImageUrl}"><link rel="image_src" href="${ogImageUrl}">`,
   `<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="${SITE_NAME}"><meta name="twitter:description" content="분야와 내 이야기만 입력하면 인스타툰 기획·대본·컷 구성까지 정리해 주는 도구."><meta name="twitter:image" content="${ogImageUrl}"><meta name="twitter:image:alt" content="${OG_IMAGE.alt}">`,
   gaSnippet(gaId(), { content_group: '인스타툰 제작 도구' }), // 측정 ID가 설정돼 있을 때만 삽입
 ].filter(Boolean).join(NL) + NL;
-const out = head + src + '\n</body>\n</html>\n';
+// 머리(<head>)와 본문(<body>)을 명시적으로 나눈다: 브라우저는 알아서 처리하지만, 미리보기를 만드는 프로그램(카카오톡 등)이 머리 끝을 못 찾지 않게
+const out = head + src.replace('<a class="skip" href="#main">', () => '</head>\n<body>\n<a class="skip" href="#main">') + '\n</body>\n</html>\n';
 
 const js = [...src.matchAll(/<script(?: type="text\/plain" id="appjs")?>([\s\S]*?)<\/script>/g)].map(m => m[1]).join('\n');
 new vm.Script(js); // 문법 오류면 여기서 예외
