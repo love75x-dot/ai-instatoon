@@ -39,6 +39,7 @@ const result = await page.evaluate(() => {
   base(); S.info.p2.on = false; S.toon.cuts.forEach((c) => { c.chars = ['p0']; }); vault(true); out['주인공1명'] = { 첫묶음: gsPrompt(gsBundles()[0]).split('[장별 내용]')[0] };
   base(); vault(true); S.toon.cuts[0].chars = ['p0']; S.toon.cuts[3].chars = ['p1']; S.toon.cuts[2].direction = '계산대 모니터 앞에서 얼굴을 바짝 대고 있다.'; S.toon.cuts[2].bubble = ''; out['등장_고른인물과_짐작'] = { 첫묶음: gsPrompt(gsBundles()[0]) };
   base(); vault(true); S.toon.cuts.forEach((c) => { c.direction = '텅 빈 진열대 풍경'; c.bubble = ''; }); out['등장_짐작불가'] = { 첫묶음: gsPrompt(gsBundles()[0]) };
+  base(); vault(true); S.toon.cuts[2].panels = '위 큰 칸 전신, 아래 작은 칸 놀란 얼굴'; out['칸나누기_고른장'] = { 첫묶음: gsPrompt(gsBundles()[0]) };
   base(); S.info.cast = '단골 할머니(흰 파마머리)'; S.toon.cuts[4].chars = ['p0', 'cast']; out['조연설정_장별'] = { 첫묶음: gsPrompt(gsBundles()[0]) };
   base();
   return out;
@@ -59,7 +60,7 @@ const walk = (a, b, p) => {
 walk(gold, result, '');
 // 규칙: 인물 이름은 대괄호, 카드가 있으면 카드 칸, 없으면 외모 한 줄, 4:5도 3:4로
 const w = result['글자같이_카드있음_4:5→3:4'].첫묶음, nc = result['글자같이_카드없음'].첫묶음;
-const must = [[/비율: 3:4 세로/.test(w) && !/4:5/.test(w), '4:5를 골라도 젠스파크 프롬프트는 3:4'], [/\n- 등장: \[사장님_A\], \[알바생_B\]/.test(w), '장별 등장인물이 [대괄호]'], [/카드: 얼굴형 .* \/ 대표 색 /.test(w), '카드가 있으면 등장인물에 카드 칸'], [!/카드:/.test(nc), '카드가 없으면 카드 줄 없이 외모 한 줄'], [/_00_기준/.test(result['캐릭터준비_보관함없음'].기준) === false, '프롬프트 본문에는 파일 이름을 넣지 않음']];
+const must = [[/비율: 3:4 세로/.test(w) && !/4:5/.test(w), '4:5를 골라도 젠스파크 프롬프트는 3:4'], [/\n- 등장: \[사장님_A\], \[알바생_B\]/.test(w), '장별 등장인물이 [대괄호]'], [/카드: 얼굴형 .* \/ 대표 색 /.test(w), '카드가 있으면 등장인물에 카드 칸'], [!/카드:/.test(nc), '카드가 없으면 카드 줄 없이 외모 한 줄'], [(w.match(/한 장에 한 장면만\(칸 나누기 없이\)/g) || []).length === 6 && /같은 대사·효과음을 한 장 안에서 두 번 쓰지 마세요/.test(w), '칸 나누기를 안 고른 장마다 "한 장에 한 장면만", 마무리에 같은 대사·효과음 중복 금지'], [(result['칸나누기_고른장'].첫묶음.match(/한 장에 한 장면만/g) || []).length === 5 && /3장[\s\S]*- 칸 나누기: 위 큰 칸 전신/.test(result['칸나누기_고른장'].첫묶음), '칸 나누기를 고른 장은 그 문장 그대로, 한 장면만 줄은 넣지 않음'], [/_00_기준/.test(result['캐릭터준비_보관함없음'].기준) === false, '프롬프트 본문에는 파일 이름을 넣지 않음']];
 for (const [ok, m] of must) if (!ok) { diffs++; console.log('[DIFF] 규칙 위반:', m); }
 if (diffs) { console.log(`\n[FAIL] 젠스파크 프롬프트 ${diffs}곳이 골든과 달라요. 의도한 변경이면 이유를 먼저 보고하고 승인받으세요.`); process.exit(1); }
 console.log('[PASS] 젠스파크 프롬프트 골든 일치 (시나리오 ' + Object.keys(gold).length + '개)');

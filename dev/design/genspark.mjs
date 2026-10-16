@@ -45,6 +45,13 @@ await pg.locator('.gtab[data-v="gs"]').click(); await pg.waitForTimeout(300);
 const tx = await pg.locator('#guideBox').innerText();
 C.ok(/Nano Banana Pro/.test(tx) && /3:4 세로/.test(tx) && /최대 14장/.test(tx), '젠스파크 탭: 시작 전 체크(모델·비율·참조 14장)');
 C.ok(/4:5로 골랐지만 젠스파크에는 4:5가 없어서 3:4/.test(tx), '앱에서 4:5를 골랐으면 3:4로 만든다는 안내');
+// 젠스파크는 프롬프트의 비율이 아니라 화면의 비율 설정을 따른다: 눈에 띄는 안내가 맨 위와 복사 버튼 바로 옆에 있어야 함
+const rn = await pg.locator('.gs-ratio').count();
+C.ok(rn === 2 && /젠스파크 화면에서 비율을 3:4로 바꿨나요\?/.test(tx) && /화면의 비율 설정/.test(tx) && /기준 1:1 · 턴어라운드 16:9 · 표정 1:1/.test(tx), `비율 안내: 맨 위 큰 안내 + 묶음마다 복사 버튼 옆 한 줄 (${rn}곳), 기준 1:1·턴어라운드 16:9·컷 3:4가 다르다는 설명`);
+C.ok(await pg.locator('.gs-ratio:not(.sm)').evaluate((e) => parseFloat(getComputedStyle(e).borderTopWidth) >= 2) && await pg.locator('li:has([data-copy="gs-b0"]) .gs-ratio.sm').count() === 1, '큰 안내는 굵은 테두리로 눈에 띄고, 6장씩 복사 버튼과 같은 묶음 안에 안내가 있음');
+C.ok(/그림 크기: 기준 이미지 1:1 · 턴어라운드 16:9 · 표정 시트 1:1/.test(tx), '캐릭터 준비 제목 아래에도 그림 크기 한 줄');
+const gp = await pg.evaluate(() => gsPrompt(gsBundles()[0]));
+C.ok(/한 장에 한 장면만\(칸 나누기 없이\)/.test(gp) && /같은 대사·효과음을 한 장 안에서 두 번 쓰지 마세요/.test(gp), '칸 나누기를 안 고른 장에는 "한 장에 한 장면만", 마무리에 중복 금지');
 C.ok(await pg.locator('input[name="gsText"][value="with"]').isChecked() && /이 사이트에는 올린 그림 위에 글자를 얹는 기능이 없어요/.test(tx), '글자 기본은 "글자도 같이", "그림만"에는 사이트에 글자 얹기 기능이 없다는 안내');
 C.ok(/사장님_A[\s\S]*준비됨 ✓/.test(tx) && /알바생_B[\s\S]*기준 이미지만 있어요[\s\S]*턴어라운드 시트·표정 시트/.test(tx), '캐릭터 준비 상태: 사장님_A 준비됨 ✓, 알바생_B는 기준만 있어 턴어라운드·표정 시트를 안내');
 C.ok(await pg.locator('[data-copy^="gsprep-"]').count() === 2 && !/사장님_A 턴어라운드 시트 만들기/.test(tx), '준비된 인물은 건너뛰고, 없는 시트 프롬프트(알바생_B 2개)만 보여 줌');

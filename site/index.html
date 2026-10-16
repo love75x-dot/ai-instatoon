@@ -75,6 +75,8 @@ body.menu-open{overflow:hidden}
 @media (prefers-reduced-motion:reduce){.mbg,.mpanel{transition:none}}
 /* HEADER:END */
 #adSlot[hidden]{display:none}
+.gs-ratio{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border:2px solid var(--ink);border-radius:12px;background:var(--accent-soft);font-size:14px;line-height:1.5}
+.gs-ratio.sm{flex-direction:row;padding:8px 12px;margin:8px 0 0;border-width:1px;font-size:13.5px}
 /* 젠스파크 · 다음 항목 복사 · 폭별 배치 (4e) */
 .gtabs{display:flex;gap:6px;margin:0 0 12px;border-bottom:1px solid var(--line)}
 .gtab{min-height:44px;padding:0 14px;border:0;border-bottom:2px solid transparent;background:none;color:var(--muted);font:700 15px/1 var(--sans);cursor:pointer}
@@ -4190,7 +4192,7 @@ function gsCutBlock(c,i,plan){
     const bg=[String(c.place||'').trim(), c.sameBg&&i>0?'앞 장과 같은 장소·조명·소품 배치 유지':'', pf?`${pf.n}번 장소_${pn} 이미지와 같은 공간`:''].filter(Boolean).join(' · '); if(bg) L.push(`- 배경·시간대: ${bg}`);
     if(i>0&&String(c.diff||'').trim()) L.push(`- 앞 장과 달라진 점: ${c.diff.trim()}`);
     if(String(c.avoid||'').trim()) L.push(`- 그리지 말 것: ${c.avoid.trim()}`); }
-  if(c.panels) L.push(`- 칸 나누기: ${c.panels}`);
+  if(c.panels) L.push(`- 칸 나누기: ${c.panels}`); else L.push('- 한 장에 한 장면만(칸 나누기 없이)');
   if(c.extras) L.push(`- 디테일: ${c.extras}${gsText()==='only'?' (글자로 된 부분은 빼고 그림만)':''}`);
   if(c.sfx) L.push('- 연출: 긴장감 있는 집중선 효과'+(gsText()==='only'?'(글자 없이)':''));
   const tk=talk(c);
@@ -4232,7 +4234,7 @@ ${idxs.map(i=>gsCutBlock(cs[i],i,plan)).join('\n\n')}
 
 [마무리]
 - 모든 장에서 인물의 얼굴·머리 모양·옷·체형을 첨부 이미지와 똑같이 유지하고, 인물끼리 섞지 마세요.
-- ${m}장 모두 같은 그림체와 같은 비율로 그려 주세요.${only?'':'\n- 글자는 따옴표 안 문구만, 한 글자도 바꾸지 말고 한글 그대로 정확히 넣어 주세요.'}`; }
+- ${m}장 모두 같은 그림체와 같은 비율로 그려 주세요.${only?'':'\n- 글자는 따옴표 안 문구만, 한 글자도 바꾸지 말고 한글 그대로 정확히 넣어 주세요.\n- 같은 대사·효과음을 한 장 안에서 두 번 쓰지 마세요.'}`; }
 /* ---------- 캐릭터 준비 (가이드 §4~6) ---------- */
 function gsReady(code){ const e=codeEntry(code), ch=e&&VAULT.chars[e.id], im=(ch&&ch.images)||{}; return {has:!!ch, ref:!!im.ref, turn:!!im.turn, expr:!!im.expr}; }
 function gsNeed(code){ const r=gsReady(code), need=[]; if(!r.ref) need.push('ref'); if(!r.turn) need.push('turn'); if(!r.expr) need.push('expr'); return need; }
@@ -4264,10 +4266,13 @@ function gsPrepHTML(){ const codes=gsCodesFor(cuts().map((_,i)=>i)); if(!codes.l
     const pr=need.map(k=>`<li><div class="gh"><b>${esc(nm)} ${GS_KIND[k][1]} 만들기</b><span class="tag">${k==='turn'?'16:9':k==='expr'?'1:1':'1:1 또는 3:4'}</span><button class="btn sm" data-copy="gsprep-${code}-${k}" data-seq="1">복사</button></div>
       <p class="sub" style="margin:2px 0 6px">${k==='ref'?'마음에 드는 1장만 확정하세요.':'기준 이미지를 [이미지1]로 첨부하고 보내세요.'} 저장 이름: <b>${esc(nm)}_${GS_KIND[k][0]}.png</b></p><pre>${esc(gsPrep(code,k))}</pre></li>`).join('');
     return `<div class="gs-char"><div class="gs-char-h"><b>${esc(nm)}</b>${st}</div>${pr?`<ol class="guide" style="margin-top:8px">${pr}</ol><p class="sub" style="margin:6px 0 0">만든 이미지는 위 이름으로 저장해 두고, ☰ 메뉴의 <b>캐릭터 보관함</b>에 올려 두면 다음 편부터 이 단계를 건너뛰어요.</p>`:''}</div>`; }).join('');
-  return `<h3 class="gs-h">1. 캐릭터 준비</h3>${rows}`; }
+  return `<h3 class="gs-h">1. 캐릭터 준비</h3><p class="sub" style="margin:0 0 8px">그림 크기: 기준 이미지 <b>1:1</b> · 턴어라운드 <b>16:9</b> · 표정 시트 <b>1:1</b> — 컷(${gsRatioShort()})과 달라서 만들 때마다 젠스파크 화면의 비율을 바꿔 주세요.</p>${rows}`; }
+const gsRatioShort=()=>S.info.ratio==='1:1'?'1:1':'3:4';
+function gsRatioNote(sm){ const r=gsRatioShort(); return sm?`<p class="gs-ratio sm" role="note"><b>복사하기 전에 — 젠스파크 화면에서 비율을 ${r}로 바꿨나요?</b></p>`:`<div class="gs-ratio" role="note"><b>젠스파크 화면에서 비율을 ${r}로 바꿨나요?</b><span>프롬프트에 비율을 써도 젠스파크는 <b>화면의 비율 설정</b>을 따라요. 캐릭터 준비는 기준 1:1 · 턴어라운드 16:9 · 표정 1:1이고, 컷은 ${r}라서 이미지를 만들 때마다 비율을 바꿔 주세요.</span></div>`; }
 function gsHTML(){ const bs=gsBundles(), n=cuts().length, only=gsText()==='only';
   const ratioNote=S.info.ratio==='4:5'?` 앱에서는 4:5로 골랐지만 젠스파크에는 4:5가 없어서 3:4로 만들어요. 올릴 때 위아래가 조금 잘릴 수 있어요.`:S.info.ratio==='1:1'?' 앱에서 고른 1:1 그대로 만들어요.':'';
   return `<div class="gsbox">
+    ${gsRatioNote(false)}
     <div class="gs-chk"><b>시작 전 체크</b><ul>
       <li>모델은 <b>Nano Banana Pro</b>를 직접 고르세요(자동 선택 X). 한 작품은 처음부터 끝까지 같은 모델로 해요.</li>
       <li>비율은 <b>${gsRatioName()}</b>으로 고르세요.${esc(ratioNote)}</li>
@@ -4278,7 +4283,7 @@ function gsHTML(){ const bs=gsBundles(), n=cuts().length, only=gsText()==='only'
     ${gsPrepHTML()}
     <h3 class="gs-h">${gsCodesFor(cuts().map((_,i)=>i)).length?'2':'1'}. 그림 만들기 <small>(${GS_PER}장씩 나눠 보내요)</small></h3>
     <p class="sub" style="margin:0 0 8px">${bs.length>1?`전체 ${n}장을 ${bs.length}묶음으로 나눴어요. `:''}묶음마다 <b>새 대화</b>가 아니라 같은 작품 폴더에서, 같은 모델로 보내세요. 인물이 달라 보이면 기준 이미지를 [이미지1]로 다시 첨부하세요.</p>
-    <ol class="guide">${bs.map((b,k)=>`<li><div class="gh"><b>${b[0]+1}${b.length>1?`~${b[b.length-1]+1}`:''}장 보내기</b><span class="tag">${b.length}장</span><button class="btn sm" data-copy="gs-b${k}" data-seq="1">복사</button></div>${gsAttachHTML(b)}<pre>${esc(gsPrompt(b))}</pre></li>`).join('')}</ol>
+    <ol class="guide">${bs.map((b,k)=>`<li><div class="gh"><b>${b[0]+1}${b.length>1?`~${b[b.length-1]+1}`:''}장 보내기</b><span class="tag">${b.length}장</span><button class="btn sm" data-copy="gs-b${k}" data-seq="1">복사</button></div>${gsRatioNote(true)}${gsAttachHTML(b)}<pre>${esc(gsPrompt(b))}</pre></li>`).join('')}</ol>
     <div class="gs-more"><b>보조</b><span class="sub">필요할 때만 쓰세요.</span>
       <div class="row" style="margin-top:6px"><button class="btn sm" data-copy="gs-all">젠스파크 전체 한 번에 복사 (${n}장)</button></div>
       <details style="margin-top:8px"><summary class="sub" style="cursor:pointer">컷별 젠스파크용 복사</summary><div class="row" style="margin-top:6px;gap:6px">${cuts().map((_,i)=>`<button class="btn sm" data-copy="gs-cut-${i}">${i+1}장</button>`).join('')}</div></details></div>
