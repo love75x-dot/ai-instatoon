@@ -5,6 +5,7 @@ export const cfg = { ga: '' }; // build-guide.mjs가 설정 (GA4 측정 ID, 없�
 export const DATE = '2026-10-01'; // 글에 published/modified가 없을 때의 기본값 (글별로 articles-*.mjs에서 지정)
 
 import { gaSnippet } from '../analytics.mjs';
+import { OG_IMAGE, ogImageUrl, THEME_COLOR, footerMetaHtml } from '../site-meta.mjs';
 
 export const CATS = {
   toon: { name: '인스타툰 가이드', desc: '인스타툰의 개념, 구성, 스토리 만드는 법' },
@@ -189,9 +190,11 @@ footer{border-top:1px solid var(--line);padding:26px 0 40px;font-size:14px;color
 footer .nav a{color:var(--ink-2);text-decoration:none;padding:6px 4px;min-height:40px;display:inline-flex;align-items:center}
 footer .nav a:hover{text-decoration:underline}
 footer p{margin:10px 0 0;font-size:13px}
+footer .fmeta a{color:var(--ink-2)}
 `;
 
-const FONTS = '<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">';
+/* 글꼴 CSS는 화면 그리기를 막지 않게 불러온다(다 받으면 적용, 받는 동안은 기본 글꼴) */
+const FONTS = '<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" media="print" onload="this.media=\'all\'"><noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"></noscript>';
 
 const MENU_JS = `(function(){var b=document.getElementById('menuBtn'),w=document.getElementById('menuWrap');if(!b||!w)return;var t,on=function(){return !w.hidden&&w.classList.contains('on')};
 function op(){clearTimeout(t);w.hidden=false;document.body.classList.add('menu-open');b.setAttribute('aria-expanded','true');requestAnimationFrame(function(){requestAnimationFrame(function(){w.classList.add('on')})});setTimeout(function(){var f=w.querySelector('.mi');if(f&&on())f.focus({preventScroll:true})},40)}
@@ -215,7 +218,8 @@ export const header = (cur) => `<a class="skip" href="#main">본문 바로가기
 </header></div>${menuHtml(cur)}<script>${MENU_JS}</script>`;
 
 export const footer = `<footer><div class="wrap"><nav class="nav" aria-label="푸터 메뉴"><a href="/guide/">인스타툰 노트</a><a href="/" data-track="cta" data-loc="footer">인스타툰 만들기</a><a href="/about/">소개</a><a href="/privacy/">개인정보처리방침</a><a href="/terms/">이용안내</a><a href="/sitemap.xml">사이트맵</a></nav>
-<p>© ${SITE} · 이 사이트의 가이드는 일반적인 정보 제공을 위한 것이며, 서비스 기능과 정책은 각 서비스의 공식 안내에서 확인해 주세요.</p></div></footer>`;
+<p>© ${SITE} · 이 사이트의 가이드는 일반적인 정보 제공을 위한 것이며, 서비스 기능과 정책은 각 서비스의 공식 안내에서 확인해 주세요.</p>
+<p class="fmeta">${footerMetaHtml()}</p></div></footer>`;
 
 export function head({ title, desc, canonical, type, extra = '', body = '', ga = {} }) {
   return `<!doctype html>
@@ -237,9 +241,18 @@ export function head({ title, desc, canonical, type, extra = '', body = '', ga =
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(desc)}">
 <meta property="og:url" content="${canonical}">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="${ogImageUrl}">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="${OG_IMAGE.width}">
+<meta property="og:image:height" content="${OG_IMAGE.height}">
+<meta property="og:image:alt" content="${esc(OG_IMAGE.alt)}">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${esc(title)}">
 <meta name="twitter:description" content="${esc(desc)}">
+<meta name="twitter:image" content="${ogImageUrl}">
+<meta name="twitter:image:alt" content="${esc(OG_IMAGE.alt)}">
+<meta name="theme-color" content="${THEME_COLOR}">
+<link rel="manifest" href="/manifest.webmanifest">
 ${FONTS}
 <style>${CSS}</style>
 ${extra}

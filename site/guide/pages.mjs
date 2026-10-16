@@ -4,12 +4,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ORIGIN, SITE, cfg, head, header, footer, ld, esc, inline, trackJs, bodyAttr } from './lib.mjs';
+import { siteInfo, contactParts } from '../site-meta.mjs';
 
-const here = path.dirname(fileURLToPath(import.meta.url));
-const info = (() => { try { return JSON.parse(fs.readFileSync(path.join(here, '..', 'site-info.json'), 'utf8')); } catch { return {}; } })();
-export const siteInfo = { operatorName: String(info.operatorName || '').trim(), contactEmail: String(info.contactEmail || '').trim(), adsensePublisherId: String(info.adsensePublisherId || '').trim() };
-if (siteInfo.contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(siteInfo.contactEmail)) throw new Error('site-info.json contactEmail 형식 오류');
-if (siteInfo.adsensePublisherId && !/^pub-\d{10,20}$/.test(siteInfo.adsensePublisherId)) throw new Error('site-info.json adsensePublisherId는 pub-숫자 형식');
+export { siteInfo };
 
 const P = (t) => `<p>${inline(t)}</p>`;
 const UL = (...a) => `<ul>${a.map((x) => `<li>${inline(x)}</li>`).join('')}</ul>`;
@@ -17,8 +14,8 @@ const S = (id, h, ...body) => `<section><h2 id="${id}">${esc(h)}</h2>${body.join
 const TBL = (head_, ...rows) => `<div class="tbl"><table><thead><tr>${head_.map((x) => `<th scope="col">${inline(x)}</th>`).join('')}</tr></thead><tbody>${rows.map((r) => `<tr>${r.map((x) => `<td>${inline(x)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
 const UPDATED = '2026-10-15';
 
-const contactBlock = siteInfo.contactEmail
-  ? `<p>문의: <a href="mailto:${esc(siteInfo.contactEmail)}">${esc(siteInfo.contactEmail)}</a></p>`
+const contactBlock = contactParts()
+  ? `<p>문의: <a href="${esc(contactParts().href)}">${esc(contactParts().text)}</a></p>`
   : P('문의 수단은 운영자가 확정되는 대로 이 페이지에 게시합니다. 아직 게시되지 않았으므로 현재는 이 사이트를 통한 문의 접수 경로가 없습니다.');
 const operatorLine = siteInfo.operatorName ? P(`운영: ${siteInfo.operatorName}`) : '';
 
