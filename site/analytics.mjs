@@ -1,5 +1,5 @@
 // GA4 설정. 측정 ID는 비밀값이 아니지만 코드에 박지 않고 설정으로 받는다.
-// 우선순위: 환경변수 GA_MEASUREMENT_ID(Vercel 프로젝트 설정) > site/analytics.config.json
+// 우선순위: 환경변수 GA_MEASUREMENT_ID(Cloudflare Workers Builds의 빌드 변수) > site/analytics.config.json
 // ID가 없거나 형식이 틀리면 GA 스크립트를 아예 넣지 않는다(가짜 ID 금지).
 import fs from 'node:fs';
 import path from 'node:path';

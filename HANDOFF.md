@@ -21,7 +21,7 @@
 - Build command: `npm run build`(= `node site/build.mjs`: `site/index.html` → `deploy/`, 가이드·sitemap·robots·404 생성). Production, Previews 둘 다 동일.
 - 배포 명령: main → `npx wrangler deploy`, 그 외 브랜치 → `npx wrangler preview`(`wrangler.jsonc`의 `previews: {}` 블록 필요). `wrangler`는 devDependency.
 - 정적 에셋: `deploy/`, `html_handling: auto-trailing-slash`, `not_found_handling: 404-page`(커스텀 404 사용).
-- 보안 헤더 4개(nosniff, Referrer-Policy, X-Frame-Options DENY, Permissions-Policy)는 `deploy/_headers`(Vercel 시절 `vercel.json`과 동일).
+- 보안 헤더 4개(nosniff, Referrer-Policy, X-Frame-Options DENY, Permissions-Policy)는 `deploy/_headers`(Vercel 시절 `vercel.json`과 동일했고, 그 파일은 정리하며 삭제함).
 
 **관리자 서버 기능 제거**
 - 서버 저장(`/api/prompts`)과 관리자 서버 기능을 제거. 사이트는 서버·DB 없이 브라우저(localStorage)만 사용. #room 화면에 서버 문구 없음.
@@ -32,8 +32,8 @@
 - **X-Robots-Tag(noindex)는 어디에도 붙어 있으면 안 됨.** 전환 직후 홈·`/guide/`·404에서 없음을 확인했음. 이후 Cloudflare 설정을 바꾼 뒤에도 `curl -sI`로 재확인.
 
 **남은 할 일**
-1. **Vercel 정리(며칠 안정 확인 뒤):** ① Vercel 프로젝트 Domains에서 `www.ai-instatoon.com`·`ai-instatoon.com` 제거 → ② Settings → Git에서 Disconnect(GitHub의 Vercel 앱 권한도 정리) → ③ Environment Variables 삭제(Cloudflare에서 필요한 값이 없는지 확인 후). 그 뒤 `vercel.json`, `.vercel/` 정리 PR.
-2. 롤백이 필요하면: Cloudflare에서 Worker Custom domain 제거 → `www` CNAME을 Vercel 값으로 복원(Vercel을 지우기 전까지만 가능).
+1. **Vercel 정리: 완료(2026-10-16).** Vercel 프로젝트(도메인·Git 연결·환경변수)를 사장님이 삭제했고, `vercel.json`·`.vercel/`·`.env.local`(VERCEL_OIDC_TOKEN만 있던 파일)도 정리함. `.env.local`·`.vercel`은 git에 커밋된 적 없음.
+2. 롤백: Vercel 프로젝트를 지웠으므로 Vercel로는 되돌릴 수 없음(Cloudflare 안에서 이전 배포로만 되돌림).
 3. Search Console: 소유권 확인 TXT가 Cloudflare DNS에 있는지, sitemap 재제출.
 
 ---
