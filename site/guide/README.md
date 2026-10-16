@@ -25,7 +25,7 @@ related 3~4개 아님, 본문이 지나치게 짧음, TODO가 남은 글, 성과
 - 내용을 고치면 `modified: 'YYYY-MM-DD'`를 갱신, 실제 공개일은 `published`.
 
 ## Google Analytics 4
-- 측정 ID(`G-XXXXXXXXXX`)는 Cloudflare 빌드 변수(Workers Builds → Settings → Variables) `GA_MEASUREMENT_ID` 또는 `site/analytics.config.json`의 `measurementId`.
+- 측정 ID(`G-XXXXXXXXXX`) 넣는 곳(둘 중 하나): ① `site/analytics.config.json`의 `measurementId`에 적고 커밋·병합(가장 간단) ② Cloudflare 대시보드 → Workers & Pages → ai-instatoon → Settings → Build의 "Variables and secrets"(빌드 변수)에 `GA_MEASUREMENT_ID` 추가 후 다시 배포. 환경변수가 파일보다 우선.
   비어 있으면 GA 스크립트가 아예 들어가지 않는다. (측정 ID는 공개돼도 되는 값이며 API 키가 아니다.)
 - 자동 수집: 페이지뷰, 활성 사용자, 참여 시간(GA4 기본). 글별 성과는 페이지 경로(`/guide/<slug>/`)와
   `content_group`(카테고리) 매개변수로 구분.

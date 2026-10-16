@@ -76,7 +76,7 @@ export const pages = [
         P('자동 프로그램(봇)이 무료 체험을 남용하지 못하게 하려고 Cloudflare Turnstile을 사용하며, 이 과정에서 Cloudflare가 접속 정보를 처리할 수 있습니다.')),
       S('image', '4. 이미지 생성', P('이 사이트는 그림을 직접 생성하지 않습니다. 사용자가 프롬프트를 복사해 ChatGPT 등 외부 서비스에 붙여 넣는 경우 그 서비스의 개인정보 처리 방침이 적용됩니다.')),
       S('external', '5. 외부 리소스 요청', P('화면 글꼴은 이 사이트에서 직접 제공하므로 글꼴을 위해 외부 서버에 접속하지 않습니다. 다만 기능에 따라 브라우저가 다음 외부 서버에서 스크립트를 불러옵니다. 이 과정에서 사용자의 IP 주소, 브라우저 정보 등이 해당 서비스 제공자에게 전달될 수 있습니다.'),
-        UL('cdnjs.cloudflare.com: 압축 파일 생성(JSZip) 스크립트', 'challenges.cloudflare.com: 무료 체험을 쓸 때만 불러오는 자동 프로그램(봇) 확인(Turnstile)')),
+        UL(...(cfg.ga ? ['googletagmanager.com·google-analytics.com: 방문 통계(Google Analytics 4, 아래 "방문 통계" 항목 참고)'] : []), 'cdnjs.cloudflare.com: 압축 파일 생성(JSZip) 스크립트', 'challenges.cloudflare.com: 무료 체험을 쓸 때만 불러오는 자동 프로그램(봇) 확인(Turnstile)')),
       S('hosting', '6. 호스팅과 접속 기록', P('이 사이트는 Cloudflare를 통해 제공됩니다. 호스팅 서비스는 서비스 제공과 보안을 위해 접속 로그(IP 주소, 요청 시각, 브라우저 정보 등)를 처리할 수 있으며, 운영자는 이 로그를 사용자 식별 목적으로 사용하지 않습니다. 구체적인 처리 방식은 호스팅 제공자의 정책을 따릅니다.')),
       gaParagraph(),
       S('ads', '7. 광고', P(`현재(${UPDATED} 기준) 이 사이트에는 광고가 게재되어 있지 않습니다.`),
