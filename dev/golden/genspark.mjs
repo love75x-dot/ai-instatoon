@@ -37,6 +37,8 @@ const result = await page.evaluate(() => {
   base(); vault(true); out['캐릭터준비'] = { 필요: ['p0', 'p1'].map((c) => gsNeed(c).join('+') || '없음'), 기준: gsPrep('p1', 'ref'), 턴어라운드: gsPrep('p0', 'turn'), 표정: gsPrep('p1', 'expr') };
   base(); out['캐릭터준비_보관함없음'] = { 필요: gsNeed('p0').join('+'), 기준: gsPrep('p0', 'ref') };
   base(); S.info.p2.on = false; S.toon.cuts.forEach((c) => { c.chars = ['p0']; }); vault(true); out['주인공1명'] = { 첫묶음: gsPrompt(gsBundles()[0]).split('[장별 내용]')[0] };
+  base(); vault(true); S.toon.cuts[0].chars = ['p0']; S.toon.cuts[3].chars = ['p1']; S.toon.cuts[2].direction = '계산대 모니터 앞에서 얼굴을 바짝 대고 있다.'; S.toon.cuts[2].bubble = ''; out['등장_고른인물과_짐작'] = { 첫묶음: gsPrompt(gsBundles()[0]) };
+  base(); vault(true); S.toon.cuts.forEach((c) => { c.direction = '텅 빈 진열대 풍경'; c.bubble = ''; }); out['등장_짐작불가'] = { 첫묶음: gsPrompt(gsBundles()[0]) };
   base(); S.info.cast = '단골 할머니(흰 파마머리)'; S.toon.cuts[4].chars = ['p0', 'cast']; out['조연설정_장별'] = { 첫묶음: gsPrompt(gsBundles()[0]) };
   base();
   return out;

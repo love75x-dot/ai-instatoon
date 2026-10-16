@@ -51,6 +51,9 @@ C.ok(await pg.locator('[data-copy^="gsprep-"]').count() === 2 && !/사장님_A �
 C.ok(/알바생_B_01_턴어라운드\.png/.test(tx), '저장 이름은 대괄호 없이 기존 규칙(알바생_B_01_턴어라운드.png)');
 C.ok(await pg.locator('#guideBox [data-copy^="gs-b"]').count() === 1 && /1~6장 보내기/.test(tx), '6장이면 묶음 1개(1~6장)');
 C.ok(/이 묶음에 첨부할 이미지 \d+장/.test(tx), '묶음마다 첨부할 이미지 목록');
+const attl = await pg.locator('#guideBox .attl li b').allInnerTexts();
+C.ok(attl.length === 4 && attl.slice(0, 3).every((t) => /^[123]번 · 사장님_A_0[012]_/.test(t)) && /^4번 · 알바생_B_00_기준/.test(attl[3]), `첨부 목록은 인물별로 묶음: 1~3번 사장님_A(기준·턴어라운드·표정), 4번 알바생_B 기준 (${attl.join(' / ')})`);
+C.ok(/첨부: 1번 기준 이미지, 2번 턴어라운드, 3번 표정 시트/.test(await pg.evaluate(() => gsPrompt(gsBundles()[0]))), '프롬프트의 첨부 번호도 같은 순서');
 const seqGs = await pg.locator('#guideBox [data-seq]').count();
 C.ok(seqGs === 3, `젠스파크 진행 줄은 준비 프롬프트 2개 + 묶음 1개 = ${seqGs}`);
 await pg.locator('#seqGo').click(); await pg.waitForTimeout(200); await pg.locator('#seqGo').click(); await pg.waitForTimeout(200); await pg.locator('#seqGo').click(); await pg.waitForTimeout(250);

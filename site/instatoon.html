@@ -2986,10 +2986,11 @@ function outfitSelHTML(c,i){ const o=[]; (c.chars||[]).forEach(code=>{ const e=c
 document.addEventListener('change',e=>{ const el=e.target; if(!el.dataset||el.dataset.coutfit===undefined) return; const j=el.dataset.coutfit.indexOf('|'), i=+el.dataset.coutfit.slice(0,j), code=el.dataset.coutfit.slice(j+1), c=cuts()[i]; if(!c) return;
   c.outfit=c.outfit||{}; if(el.value) c.outfit[code]=el.value; else delete c.outfit[code]; if(!Object.keys(c.outfit).length) delete c.outfit; save(); refreshCut(i); renderPhone(); });
 /* 프롬프트 첨부 줄과 같은 순서의 이미지 목록 항목: 주연 → 이미지 있는 조연 → (켜졌을 때) 컷에서 쓰는 의상 시트 → 컷에서 쓰는 장소 */
-function bundleItems(idxs){ const cs=cuts(), codes=new Set(), it=[]; idxs.forEach(i=>cutCodes(cs[i]).forEach(c=>codes.add(c)));
+function bundleItems(idxs){ return bundleItemsBy(idxs,c=>cutCodes(c)); }
+function bundleItemsBy(idxs,codesOf){ const cs=cuts(), codes=new Set(), it=[]; idxs.forEach(i=>codesOf(cs[i]).forEach(c=>codes.add(c)));
   peopleIdx().forEach(k=>{ if(codes.has('p'+k)) it.push({t:'p',k}); });
   (S.info.subs||[]).forEach((e,j)=>{ if(codes.has('s'+j)&&e&&e.id&&charReady(VAULT.chars[e.id])) it.push({t:'s',j}); });
-  const seen=new Set(); idxs.forEach(i=>cutCodes(cs[i]).forEach(code=>{ const n=effOutfit(cs[i],code), key=code+'|'+n; if(n&&!seen.has(key)&&outfitImage(code,n)){ seen.add(key); it.push({t:'o',code,name:n}); } }));
+  const seen=new Set(); idxs.forEach(i=>codesOf(cs[i]).forEach(code=>{ const n=effOutfit(cs[i],code), key=code+'|'+n; if(n&&!seen.has(key)&&outfitImage(code,n)){ seen.add(key); it.push({t:'o',code,name:n}); } }));
   const ps=[]; idxs.forEach(i=>{ const n=cutPlace(i); if(n&&placeHasImage(n)&&!ps.includes(n)) ps.push(n); }); ps.forEach(n=>it.push({t:'l',n}));
   return it; }
 /* 배분표: 1명 3장(기준+턴어라운드+표정) · 2명 2~3장 · 3~4명 2장(기준+턴어라운드) · 5명 이상 1~2장(컷 나누기 추천) · 장소 1장 추가.
@@ -4169,8 +4170,29 @@ const GS_CARD=[['face','얼굴형'],['eyes','눈'],['hair','헤어'],['body','�
 function gsCardText(code){ const c=cardOfSlot(slotRefOf(code))||{}; return GS_CARD.filter(([k])=>String(c[k]||'').trim()).map(([k,n])=>`${n} ${String(c[k]).trim()}`).join(' / '); }
 const gsKeep=code=>String((cardOfSlot(slotRefOf(code))||{}).keep||'').trim();
 function gsBundles(){ const n=cuts().length, out=[]; for(let i=0;i<n;i+=GS_PER) out.push(Array.from({length:Math.min(GS_PER,n-i)},(_,j)=>i+j)); return out; }
-function gsCodesFor(idxs){ const cs=cuts(), set=new Set(); idxs.forEach(i=>cutCodes(cs[i]).forEach(c=>set.add(c))); return ['p0','p1','p2','s0','s1','s2'].filter(c=>set.has(c)&&(c[0]==='p'?peopleIdx().includes(+c.slice(1)):!!subEntry(+c.slice(1)))); }
-function gsAttNums(P,label){ return P.files.concat(P.extras).filter(f=>f.label===label).map(f=>f.n?`${f.n}번 ${f.missing?'(이미지 없음 · 직접 첨부)':f.kind}`:f.kind); }
+const GS_ALL_CODES=()=>['p0','p1','p2','s0','s1','s2'].filter(code=>code[0]==='p'?peopleIdx().includes(+code.slice(1)):!!subEntry(+code.slice(1)));
+/* 장면 글에서 인물을 짐작할 때 쓰는 말: 역할(사장님), 보관함 ID(사장님_A)와 그 앞부분(사장님) */
+function gsHints(code){ const o=new Set(), add=t=>{ t=String(t||'').trim(); if(t.length>=2) o.add(t); };
+  const e=codeEntry(code); if(code[0]==='p'){ add(person(+code.slice(1)).role); } else { const se=subEntry(+code.slice(1)); if(se&&se.local) add(se.local.role); }
+  if(e&&e.id){ add(e.id); add(e.id.split(/[_-]/)[0]); const ch=VAULT.chars[e.id]; if(ch) add(ch.role); const r=resolveEntry(e); if(r) add(r.role); }
+  return [...o]; }
+/* 이 컷에 실제로 나오는 인물: 컷의 "등장인물" 칸에 고른 인물만. 칸이 비어 있으면 장면 글과 말하는 사람 이름에서 짐작하고, 짐작이 안 되면 비운다 */
+function gsCutCodes(c){ const all=GS_ALL_CODES();
+  if((c.chars||[]).length) return all.filter(x=>c.chars.includes(x));
+  const txt=[c.direction,...talk(c).map(t=>t.who)].join(' ');
+  return all.filter(code=>gsHints(code).some(h=>txt.includes(h))); }
+function gsCodesFor(idxs){ const cs=cuts(), set=new Set(); idxs.forEach(i=>gsCutCodes(cs[i]).forEach(c=>set.add(c)));
+  const u=GS_ALL_CODES().filter(c=>set.has(c)); return u.length?u:GS_ALL_CODES().filter(c=>c[0]==='p'); }
+function gsBundleItems(idxs){ const cs=cuts(), fb=gsCodesFor(idxs); const none=!idxs.some(i=>gsCutCodes(cs[i]).length);
+  return bundleItemsBy(idxs,(c)=>{ const g=gsCutCodes(c); return g.length?g:(none?fb:[]); }); }
+/* 첨부 번호는 인물별로 묶는다: [인물1] 기준 → 턴어라운드 → 표정 → 의상 / [인물2] … / 장소. 기준 이미지가 각 인물의 첫 번째 */
+function gsPlan(idxs){ const codes=gsCodesFor(idxs), P=planFor(gsBundleItems(idxs)), order=codes.map(gsBare), places=[];
+  const all=P.files.concat(P.extras);
+  const rank=f=>f.kind==='턴어라운드'?1:f.kind==='표정 시트'?2:/^의상 시트/.test(f.kind)?3:0;
+  const grp=f=>{ if(String(f.label).startsWith('장소_')){ if(!places.includes(f.label)) places.push(f.label); return order.length+places.indexOf(f.label); } const g=order.indexOf(f.label); return g<0?order.length+99:g; };
+  const list=all.map((f,i)=>({f,g:grp(f),r:rank(f),i})).sort((a,b)=>a.g-b.g||a.r-b.r||a.i-b.i).map((x,j)=>({...x.f,n:j+1}));
+  return {list,P}; }
+function gsAttNums(list,label){ return list.filter(f=>f.label===label).map(f=>`${f.n}번 ${f.missing?'(이미지 없음 · 직접 첨부)':f.kind}`); }
 const gsSide=(i,n)=>n<2?[]:n===2?['화면 왼쪽','화면 오른쪽']:n===3?['화면 왼쪽','화면 가운데','화면 오른쪽']:n===4?['화면 왼쪽','화면 중간 왼쪽','화면 중간 오른쪽','화면 오른쪽']:[];
 function gsLetterSummary(m){ const L=letterSpec();
   return [`글자: 아래 [장별 내용]의 "글자" 줄에 적은 문구만, 한 글자도 바꾸지 말고 한글 그대로 정확히 넣어 주세요. 그 밖의 글자·영어·이름표는 넣지 마세요.`,
@@ -4179,8 +4201,8 @@ function gsLetterSummary(m){ const L=letterSpec();
     `  · 효과음: ${L.sfx}. 소리 나는 곳 옆에 그림의 일부로.`,
     `  · 자막: 흰 네모 칸에 검은 테두리, 검은 고딕체, 컷 왼쪽 모서리.`,
     `  · 글씨체·글자 크기·말풍선 모양은 ${m}장 모두 똑같이.`].join('\n'); }
-function gsCutBlock(c,i,P,codes){
-  const here=cutCodes(c).filter(x=>x!=='cast'&&codes.includes(x)), L=[`${i+1}장 · ${c.role||'컷'}`];
+function gsCutBlock(c,i,plan){
+  const here=gsCutCodes(c), L=[`${i+1}장 · ${c.role||'컷'}`];
   const names=here.map(code=>{ const o=effOutfit(c,code); return gsName(code)+(o?`(${outfitText(o)})`:''); });
   const cast=(c.chars||[]).includes('cast')&&castPromptCast()?[castPromptCast()]:[];
   if(names.length||cast.length) L.push(`- 등장: ${names.concat(cast).join(', ')}`);
@@ -4188,7 +4210,7 @@ function gsCutBlock(c,i,P,codes){
   L.push(`- 구도: ${c.shot||'미디엄샷'}`, `- 장면: ${c.direction||'(장면 설명을 적어 주세요)'}`);
   if(CUT_EXTRA_PROMPT){
     if(String(c.emotion||'').trim()) L.push(`- 표정·감정: ${c.emotion.trim()}`);
-    const pn=cutPlace(i), pf=pn&&P.files.find(f=>f.label==='장소_'+pn);
+    const pn=cutPlace(i), pf=pn&&plan.list.find(f=>f.label==='장소_'+pn);
     const bg=[String(c.place||'').trim(), c.sameBg&&i>0?'앞 장과 같은 장소·조명·소품 배치 유지':'', pf?`${pf.n}번 장소_${pn} 이미지와 같은 공간`:''].filter(Boolean).join(' · '); if(bg) L.push(`- 배경·시간대: ${bg}`);
     if(i>0&&String(c.diff||'').trim()) L.push(`- 앞 장과 달라진 점: ${c.diff.trim()}`);
     if(String(c.avoid||'').trim()) L.push(`- 그리지 말 것: ${c.avoid.trim()}`); }
@@ -4210,10 +4232,10 @@ function gsCutBlock(c,i,P,codes){
     L.push('- 글자(정확히 이대로):', ...t.map(x=>'    '+x)); }
   return L.join('\n'); }
 function gsPrompt(idxs){ const cs=cuts(), n=cs.length, m=idxs.length, a=idxs[0], z=idxs[m-1];
-  const items=bundleItems(idxs), P=planFor(items), codes=gsCodesFor(idxs), only=gsText()==='only';
-  const ppl=codes.map(code=>{ const nm=gsName(code), bare=gsBare(code), card=gsCardText(code), keep=gsKeep(code), at=gsAttNums(P,bare);
+  const plan=gsPlan(idxs), codes=gsCodesFor(idxs), only=gsText()==='only';
+  const ppl=codes.map(code=>{ const nm=gsName(code), bare=gsBare(code), card=gsCardText(code), keep=gsKeep(code), at=gsAttNums(plan.list,bare);
     return [`  ${nm} ${gsDesc(code)}`, card?`    카드: ${card}`:'', at.length?`    첨부: ${at.join(', ')}`:'', keep?`    절대 유지: ${keep}`:''].filter(Boolean).join('\n'); }).join('\n');
-  const places=P.files.filter(f=>f.label&&f.label.startsWith('장소_')).map(f=>`  ${f.n}번 ${f.label}(배경 기준 이미지${VAULT.places[f.label.slice(3)]&&VAULT.places[f.label.slice(3)].desc?`: ${VAULT.places[f.label.slice(3)].desc}`:''})`).join('\n');
+  const places=plan.list.filter(f=>f.label&&String(f.label).startsWith('장소_')).map(f=>`  ${f.n}번 ${f.label}(배경 기준 이미지${VAULT.places[f.label.slice(3)]&&VAULT.places[f.label.slice(3)].desc?`: ${VAULT.places[f.label.slice(3)].desc}`:''})`).join('\n');
   const castTx=cs.some(c=>(c.chars||[]).includes('cast'))&&castPromptCast()?`\n- 조연: ${castPromptCast()}. 처음부터 끝까지 옷·머리·모자를 똑같이 유지해 주세요.`:'';
   const lock=lockTail().trim();
   const det=DETAILS.filter(([k])=>detailOn(k)).map(([,nm,h])=>`${nm}(${h})`).join(', ');
@@ -4230,7 +4252,7 @@ ${ppl||'  (등장인물 없음)'}${places?`\n- 장소:\n${places}`:''}${castTx}$
 - ${only?'글자: 그림 안에 글자, 숫자, 말풍선, 간판 글씨, 이름표는 넣지 마세요. 대사는 제가 따로 얹어요.':gsLetterSummary(m)}
 
 [장별 내용]
-${idxs.map(i=>gsCutBlock(cs[i],i,P,codes)).join('\n\n')}
+${idxs.map(i=>gsCutBlock(cs[i],i,plan)).join('\n\n')}
 
 [마무리]
 - 모든 장에서 인물의 얼굴·머리 모양·옷·체형을 첨부 이미지와 똑같이 유지하고, 인물끼리 섞지 마세요.
@@ -4252,13 +4274,13 @@ function gsCopyText(k){
   if(k.startsWith('gsprep-')){ const m=k.match(/^gsprep-([ps]\d)-(ref|turn|expr)$/); return m?gsPrep(m[1],m[2]):''; }
   return ''; }
 /* ---------- 젠스파크 탭 화면 ---------- */
-function gsAttachHTML(idxs){ const P=planFor(bundleItems(idxs)), all=P.files.concat(P.extras), real=all.filter(f=>!f.missing); if(!all.length&&!P.miss.length) return '';
+function gsAttachHTML(idxs){ const {list:all,P}=gsPlan(idxs), real=all.filter(f=>!f.missing); if(!all.length&&!P.miss.length) return '';
   const notes=[]; if(P.dropped.length) notes.push(`참조 이미지가 ${ATT_MAX}장을 넘지 않게 ${P.dropped.map(d=>d.kind).filter((v,i,a)=>a.indexOf(v)===i).join('·')} ${P.dropped.length}장을 뺐어요.`);
   if(P.need) notes.push(`기준·의상·장소 이미지만으로도 ${P.total}장이라 한 번에 첨부하기 어려워요. 장수를 나눠 따로 만들어 주세요.`);
   if(P.people>=5) notes.push(`인물이 ${P.people}명이에요. 장을 나누는 걸 추천해요.`);
   if(P.miss.length) notes.push(`기준 이미지가 없는 인물이 있어요: ${P.miss.join(', ')}`);
-  return `<div class="attbox"><div class="lab-row"><b>이 묶음에 첨부할 이미지 ${real.length}장 <small>(최대 ${ATT_MAX}장)</small></b>${real.length?`<button type="button" class="btn sm" data-gs="dl" data-b="${esc(idxs.join(','))}">한 번에 내려받기</button>`:''}</div>
-    <ol class="attl">${all.map(f=>`<li><span class="ref">${vThumb(f.im,f.label)}</span><span class="vrow-m"><b>${f.n?`${f.n}번 · `:''}${esc(f.file||f.label)}</b><small>${f.missing?'':`${esc(f.label)} · `}${esc(f.kind)}</small></span></li>`).join('')}</ol>
+  return `<div class="attbox"><div class="lab-row"><b>이 묶음에 첨부할 이미지 ${real.length}장 <small>(최대 ${ATT_MAX}장 · 인물별로 묶은 순서)</small></b>${real.length?`<button type="button" class="btn sm" data-gs="dl" data-b="${esc(idxs.join(','))}">한 번에 내려받기</button>`:''}</div>
+    <ol class="attl">${all.map(f=>`<li><span class="ref">${vThumb(f.im,f.label)}</span><span class="vrow-m"><b>${f.n}번 · ${esc(f.file||f.label)}</b><small>${f.missing?'':`${esc(f.label)} · `}${esc(f.kind)}</small></span></li>`).join('')}</ol>
     ${notes.map(t=>`<p class="cwarn" role="status">${esc(t)}</p>`).join('')}</div>`; }
 function gsPrepHTML(){ const codes=gsCodesFor(cuts().map((_,i)=>i)); if(!codes.length) return '';
   const rows=codes.map(code=>{ const r=gsReady(code), need=gsNeed(code), nm=gsBare(code);
@@ -4308,7 +4330,7 @@ document.addEventListener('click',e=>{ const b=e.target.closest('[data-gs],[data
   const a=b.dataset.gs;
   if(a==='mode'){ e.preventDefault(); S.info.gsMode=b.dataset.v==='gs'?'gs':'std'; save(); if(S.step==='post') vPost(); return; }
   if(a==='text'){ S.info.gsText=b.value==='only'?'only':'with'; save(); const gb=document.getElementById('guideBox'); if(gb){ gb.innerHTML=gsHTML(); applyCopied(); } return; }
-  if(a==='dl'){ e.preventDefault(); const idxs=String(b.dataset.b||'').split(',').map(Number).filter(x=>x>=0), P=planFor(bundleItems(idxs)); downloadFiles(P.files.concat(P.extras).filter(f=>!f.missing)); } });
+  if(a==='dl'){ e.preventDefault(); const idxs=String(b.dataset.b||'').split(',').map(Number).filter(x=>x>=0), L=gsPlan(idxs).list; downloadFiles(L.filter(f=>!f.missing)); } });
 
 /* ================= 시작 ================= */
 const BOOT_HASH=location.hash;
