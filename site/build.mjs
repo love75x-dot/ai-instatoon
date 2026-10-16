@@ -38,7 +38,8 @@ const js = [...src.matchAll(/<script(?: type="text\/plain" id="appjs")?>([\s\S]*
 new vm.Script(js); // 문법 오류면 여기서 예외
 console.log('JS 문법 OK');
 
-fs.writeFileSync(path.join(here, 'instatoon.html'), out);
+// 파일 버전(site/instatoon.html)은 디스크에서 열어도 그림·글꼴이 보이게 /assets/ 주소를 상대 주소(assets/…)로 바꾼다. site/assets/ 폴더와 같은 곳에 두면 된다.
+fs.writeFileSync(path.join(here, 'instatoon.html'), out.replace(/(["'(])\/assets\//g, '$1assets/'));
 const dep = path.join(here, '..', 'deploy');
 fs.mkdirSync(dep, { recursive: true });
 fs.writeFileSync(path.join(dep, 'index.html'), out);

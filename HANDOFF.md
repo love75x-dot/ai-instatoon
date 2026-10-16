@@ -62,6 +62,12 @@
 
 ---
 
+## 0-3. 파일 버전(site/instatoon.html)을 디스크에서 열 때 (2026-10-16)
+
+`npm run build`가 만드는 `site/instatoon.html`은 그림·글꼴 주소를 상대 주소(`assets/…`)로 바꿔 둔다. **`site/assets/` 폴더와 같은 곳에 둔 채** 더블클릭으로 열면(file://) 웹툰 테마 샘플 그림과 예시 갤러리 그림이 보인다. 한계: 브라우저가 file://에서 글꼴 파일(woff2)을 막아 글꼴은 기본 글꼴로 보이고, 무료 맛보기·노트 링크(/api, /guide)는 동작하지 않는다(Gemini API 키 방식은 그대로 동작). 배포 버전(`deploy/index.html`)은 `/assets/…` 절대 주소 그대로. 검사: `dev/design/filever.mjs`.
+
+---
+
 ## 1. 프로젝트 개요
 
 ### 목적
