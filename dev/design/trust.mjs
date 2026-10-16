@@ -43,14 +43,15 @@ const bad = probe({ contactUrl: 'javascript:alert(1)' });
 C.ok(bad.status !== 0 && /contactUrl/.test(bad.stderr), '문의 링크가 https:// 가 아니면 빌드가 막음');
 
 // ─── 공유 이미지 · og · 트위터 · theme-color · manifest ───
-const png = fs.readFileSync(path.join(root, 'deploy', 'assets', 'og', 'og-default.png'));
+const png = fs.readFileSync(path.join(root, 'deploy', 'assets', 'og', 'og-v2.png'));
 const w = png.readUInt32BE(16), h = png.readUInt32BE(20);
-C.ok(png.subarray(1, 4).toString() === 'PNG' && w === 1200 && h === 630 && png.length < 300 * 1024, `공유 이미지: PNG ${w}×${h}, ${(png.length / 1024).toFixed(0)}KB(300KB 이하)`);
+C.ok(png.subarray(1, 4).toString() === 'PNG' && w === 1200 && h === 630 && png.length < 600 * 1024, `공유 이미지: PNG ${w}×${h}, ${(png.length / 1024).toFixed(0)}KB(600KB 이하)`);
 for (const [name, html] of [['앱 홈', home], ['노트 목록', guide], ['노트 글', trouble]]) {
   const og = (html.match(/property="og:image" content="([^"]+)"/) || [])[1];
-  C.ok(og === 'https://www.ai-instatoon.com/assets/og/og-default.png' && /og:image:width" content="1200"/.test(html) && /og:image:height" content="630"/.test(html) && /twitter:card" content="summary_large_image"/.test(html) && /twitter:image" content="https:\/\/www\.ai-instatoon\.com\/assets\/og\/og-default\.png"/.test(html), `${name}: og:image(절대 주소)·크기·트위터 큰 카드·트위터 이미지`);
+  C.ok(og === 'https://www.ai-instatoon.com/assets/og/og-v2.png' && /og:image:width" content="1200"/.test(html) && /og:image:height" content="630"/.test(html) && /twitter:card" content="summary_large_image"/.test(html) && /twitter:image" content="https:\/\/www\.ai-instatoon\.com\/assets\/og\/og-v2\.png"/.test(html), `${name}: og:image(절대 주소)·크기·트위터 큰 카드·트위터 이미지`);
   C.ok(/name="theme-color" content="#ffffff"/.test(html) && /rel="manifest" href="\/manifest\.webmanifest"/.test(html), `${name}: theme-color·manifest 링크`);
 }
+C.ok(fs.existsSync(path.join(root, 'deploy', 'assets', 'og', 'og-default.png')) && !/og-default/.test(home + guide + trouble), '이전 공유 이미지(og-default.png)는 파일로 남아 있고, 페이지는 모두 새 이미지(og-v2.png)를 가리킴');
 C.ok(/og:title/.test(home) && /og:description/.test(home) && /og:url" content="https:\/\/www\.ai-instatoon\.com\/"/.test(home), '카카오톡·인스타 DM 미리보기에 쓰는 og:title·description·url');
 const man = JSON.parse(dep('manifest.webmanifest'));
 C.ok(man.name && man.short_name && man.start_url === '/' && man.display === 'standalone' && man.icons.length >= 2 && man.icons.every((i) => fs.existsSync(path.join(root, 'deploy', i.src))), 'manifest: 이름·시작 주소·standalone·아이콘 파일 있음');

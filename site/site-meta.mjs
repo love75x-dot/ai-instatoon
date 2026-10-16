@@ -20,8 +20,8 @@ if (siteInfo.adsensePublisherId && !/^pub-\d{10,20}$/.test(siteInfo.adsensePubli
 export const ORIGIN = 'https://www.ai-instatoon.com';
 export const SITE_NAME = '인스타툰 연재실';
 export const THEME_COLOR = '#ffffff';
-/* 공유 이미지(og:image·트위터 카드): 1200×630. 예시 그림 6장을 받으면 마지막 그림으로 바꾼다(site/assets/examples/) */
-export const OG_IMAGE = { path: '/assets/og/og-default.png', width: 1200, height: 630, alt: `${SITE_NAME} — 분야와 이야기만 적으면 인스타툰 대본이 나와요` };
+/* 공유 이미지(og:image·트위터 카드): 1200×630. v2(캐릭터 2명 네 칸). 이전 흑백 심플 이미지(og-default.png)는 파일만 남겨 둠. 예시 그림 6장을 받으면 마지막 그림으로 바꾼다(site/assets/examples/) */
+export const OG_IMAGE = { path: '/assets/og/og-v2.png', width: 1200, height: 630, alt: `${SITE_NAME} — 팔로워 터지는 인스타툰, 복잡한 툴 없이 웹에서 바로 제작하세요` };
 export const ogImageUrl = ORIGIN + OG_IMAGE.path;
 
 /* 마지막 업데이트 날짜: 빌드한 날(한국 시간). 시험·재현용으로 BUILD_DATE=YYYY-MM-DD 로 고정할 수 있다 */
