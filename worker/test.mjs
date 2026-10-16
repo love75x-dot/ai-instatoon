@@ -58,6 +58,12 @@ r = await run(good, {}, { turnstile: false }); ok(r.res.status === 403 && r.w.ca
 // ── 정상 + 비밀값 노출 없음
 r = await run(good);
 ok(r.res.status === 200 && r.j.ok && r.j.provider === 'gemini' && r.j.text === GOOD_MAKE, '정상: Gemini 결과를 그대로 돌려줌');
+{ // 로그에는 응답한 서비스 이름과 작업 이름만 남는다(입력·결과·키·IP 없음)
+  const logs = []; const orig = console.log; console.log = (...x) => logs.push(x.join(' ')); let q; try { q = await run(good); } finally { console.log = orig; }
+  const mine = logs.filter((l) => l.includes('"ai"'));
+  ok(q.res.status === 200 && mine.length === 1 && mine[0] === JSON.stringify({ ai: { provider: 'gemini', task: good.task } }), '로그에 응답한 서비스 이름(gemini)과 작업 이름만 남음');
+  ok(!logs.join('|').includes(good.prompt.slice(10, 40)) && !logs.join('|').includes('1.2.3.4'), '로그에 입력 내용이 없음');
+}
 const gcall = r.w.calls.find((c) => c.url.includes('generativelanguage'));
 ok(gcall.init.headers['x-goog-api-key'] === SECRETS.GEMINI_KEY && !gcall.url.includes('SECRET'), '키는 서버에서 헤더로만 보냄(주소에 안 들어감)');
 const gb = JSON.parse(gcall.init.body);

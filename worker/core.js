@@ -155,6 +155,7 @@ export async function handle(request, env, deps = {}) {
     const parsed = extractJson(r.text);
     if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed[T.need])) continue; // 형식이 어긋난 답은 다음 공급자로
     await quota.used(day, name);
+    console.log(JSON.stringify({ ai: { provider: name, task } })); // 어느 서비스가 답했는지만 남긴다(입력·결과·키·IP는 남기지 않음)
     return json(200, { ok: true, provider: name, text: r.text });
   }
   await quota.refund(day, uh, task);
