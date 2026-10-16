@@ -523,6 +523,6 @@
   - **나중 과제로 기록:** 글꼴 직접 호스팅(LCP 개선) 등은 위 "남은 과제" 목록.
 - 2026-10-16 (푸터 반영 · 카카오 공유 카드 · 공유 이미지 v2):
   - **푸터:** 운영 "인스타툰 연재실장", 문의 `insta.toon13@gmail.com`(mailto 링크)을 `site/site-info.json`에 넣고 빌드·배포. 앱 홈·노트 목록·노트 글 푸터와 소개·개인정보처리방침·이용안내에 보임.
-  - **카카오 공유 카드 이미지 안 나오던 문제 해결됨 (원인: head/body 태그 누락).** 앱 홈 HTML에 `</head>`와 `<body>`가 없어서 브라우저는 알아서 처리했지만 카카오톡 미리보기 프로그램이 머리 부분을 제대로 못 읽었던 것으로 정리됨. 빌드(`site/build.mjs`)가 `</head>`와 `<body>`를 명시하도록 고치고, `og:image:secure_url`과 `<link rel="image_src">`도 추가(노트 페이지 포함). Cloudflare(Bot Fight Mode 등)는 원인이 아니었음(카카오 UA 요청이 홈·그림 모두 200).
+  - **카카오 공유 카드 이미지 안 나오던 문제 해결됨 (원인: head/body 태그 누락).** 앱 홈 HTML에 `</head>`와 `<body>`가 없어서 브라우저는 알아서 처리했지만 카카오톡 미리보기 프로그램이 머리 부분을 제대로 못 읽었던 것이 원인 — **확인됨**(2026-10-16 사장님이 카카오톡에서 v2 카드 이미지가 정상으로 나오는 것을 확인). 빌드(`site/build.mjs`)가 `</head>`와 `<body>`를 명시하도록 고치고, `og:image:secure_url`과 `<link rel="image_src">`도 추가(노트 페이지 포함). Cloudflare(Bot Fight Mode 등)는 원인이 아니었음(카카오 UA 요청이 홈·그림 모두 200).
   - **공유 이미지 v2 적용 (캐릭터 2명 네 칸 + 검은고딕/주아 글꼴):** 사장님이 만든 `site/assets/og/og-v2.png`(1200×630 PNG, 약 362KB)로 `site/site-meta.mjs`의 `OG_IMAGE`를 교체. og:image·og:image:secure_url·image_src·twitter:image가 모두 새 파일을 가리키고 크기 1200×630·type image/png도 확인(앱 홈·노트 목록·노트 글). 이전 흑백 심플 이미지 `og-default.png`는 지우지 않고 파일로 남김. 대체 텍스트도 새 문구로 바꿈. 이미지 크기 검사 한도는 300KB → 600KB로 조정(`dev/design/trust.mjs`).
   - **카카오 쪽:** 이미지 주소가 `og-default.png` → `og-v2.png`로 바뀌었으므로 카카오 공유 디버거에서 홈 주소 캐시를 한 번 더 초기화하면 새 그림이 보임.
