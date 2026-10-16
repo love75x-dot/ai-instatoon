@@ -5,7 +5,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const info = (() => { try { return JSON.parse(fs.readFileSync(path.join(here, 'site-info.json'), 'utf8')); } catch { return {}; } })();
+// 시험용: SITE_INFO_FILE 로 다른 파일을 가리킬 수 있다(빌드·배포에서는 쓰지 않음)
+const info = (() => { try { return JSON.parse(fs.readFileSync(process.env.SITE_INFO_FILE || path.join(here, 'site-info.json'), 'utf8')); } catch { return {}; } })();
 export const siteInfo = {
   operatorName: String(info.operatorName || '').trim(),
   contactEmail: String(info.contactEmail || '').trim(),
