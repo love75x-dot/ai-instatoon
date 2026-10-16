@@ -7,12 +7,14 @@ import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 import { gaId, gaSnippet } from './analytics.mjs';
 import { appFontHead, FONT_CSS_LINK } from './fonts.mjs';
+import { exampleGalleryLine } from './examples.mjs';
 import { OG_IMAGE, ogImageUrl, THEME_COLOR, ORIGIN, SITE_NAME, footerMetaHtml, appSiteInfoLine } from './site-meta.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 // 운영자·문의·마지막 업데이트(푸터)와 앱 안(사용 방법)의 SITE_INFO를 site-info.json 값으로 채운다. 값이 비면 그 항목은 보이지 않는다.
 const src = fs.readFileSync(path.join(here, 'index.html'), 'utf8')
   .replace(/const SITE_INFO=\{[^\n]*\};/, () => appSiteInfoLine())
+  .replace(/const EXAMPLES=\{[^\n]*\};/, () => exampleGalleryLine()) // 예시 갤러리 그림·글(site/assets/examples/examples.json)
   .replace(FONT_CSS_LINK, () => appFontHead()) // 글꼴: 첫 화면 글자 조각 미리 불러오기 + CSS를 페이지 안에(직접 호스팅)
   .replace('<p class="fmeta" id="fmeta"></p>', () => `<p class="fmeta" id="fmeta">${footerMetaHtml()}</p>`);
 const NL = '\n';
@@ -42,7 +44,7 @@ fs.mkdirSync(dep, { recursive: true });
 fs.writeFileSync(path.join(dep, 'index.html'), out);
 for (const f of ['favicon.svg', 'favicon.ico', 'favicon-32x32.png', 'apple-touch-icon.png']) fs.copyFileSync(path.join(here, f), path.join(dep, f));
 // 이미지(샘플 그림·공유 이미지·아이콘)와 홈 화면 추가용 manifest
-fs.cpSync(path.join(here, 'assets'), path.join(dep, 'assets'), { recursive: true }); // 샘플 그림·공유 이미지·아이콘·글꼴(assets/fonts)
+fs.cpSync(path.join(here, 'assets'), path.join(dep, 'assets'), { recursive: true, filter: (p) => !p.split(path.sep).join("/").includes("/examples/src") }); // 예시 그림 원본(examples/src)은 배포에 넣지 않는다. 샘플 그림·공유 이미지·아이콘·글꼴(assets/fonts)
 fs.copyFileSync(path.join(here, 'manifest.webmanifest'), path.join(dep, 'manifest.webmanifest'));
 // 보안 헤더(Cloudflare 에셋 헤더 파일): 손으로 관리하는 원본은 site/_headers, 배포 폴더로는 여기서 복사한다(deploy/는 git에 두지 않는다)
 fs.copyFileSync(path.join(here, '_headers'), path.join(dep, '_headers'));

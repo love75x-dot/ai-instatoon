@@ -29,3 +29,6 @@ deploy/
 
 # 시안(초안) 이미지는 저장소에 올리지 않는다
 docs/drafts/*.png
+
+# 예시 그림 원본(용량이 큼). 웹용 WebP는 node dev/tools/make-examples.mjs 로 만든다
+site/assets/examples/src/

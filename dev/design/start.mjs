@@ -202,8 +202,8 @@ for (const [vk, vp] of [['휴대폰 390', MOB], ['PC 1300', PC]]) {
   C.ok(f.one === 1 && f.inner === 4 && !f.opened && f.sum === '자주 묻는 질문' && f.gal === 0 && f.exHome === 0 && f.ov <= 1, `${vk} 첫 화면 아래: FAQ는 접힌 한 줄("${f.sum}")이고 안에 질문 ${f.inner}개, "이렇게 나와요" 칸은 홈에 없음, 넘침 없음`);
   await page.click('.faqall > summary'); C.ok(await page.evaluate(() => document.querySelector('.faqall').open && getComputedStyle(document.querySelector('.faqall > details')).display !== 'none'), `${vk} FAQ를 누르면 열림`);
   await page.evaluate(() => toggleHelp(true)); await page.waitForTimeout(150);
-  const ex = await page.evaluate(() => ({ items: document.querySelectorAll('#help .hex .exl li').length, head: /이렇게 나와요/.test(document.querySelector('#help .hex .hn').textContent) }));
-  C.ok(ex.items === 6 && ex.head, `${vk} "이렇게 나와요" 예시(${ex.items}컷)는 사용 방법 안에 있음`);
+  const ex = await page.evaluate(() => ({ items: document.querySelectorAll('#help .hex .exg-f').length, head: /이렇게 나와요/.test(document.querySelector('#help .hex .hn').textContent) }));
+  C.ok(ex.items === 6 && ex.head, `${vk} "이렇게 나와요" 예시 그림 갤러리(${ex.items}컷)는 사용 방법 안에 있음`);
   await page.close();
 }
 
