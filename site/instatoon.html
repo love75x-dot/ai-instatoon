@@ -84,6 +84,7 @@ body{margin:0}
 body.menu-open{overflow:hidden}
 @media (prefers-reduced-motion:reduce){.mbg,.mpanel{transition:none}}
 /* HEADER:END */
+#adSlot[hidden]{display:none}
 /* 젠스파크 · 다음 항목 복사 · 폭별 배치 (4e) */
 .gtabs{display:flex;gap:6px;margin:0 0 12px;border-bottom:1px solid var(--line)}
 .gtab{min-height:44px;padding:0 14px;border:0;border-bottom:2px solid transparent;background:none;color:var(--muted);font:700 15px/1 var(--sans);cursor:pointer}
@@ -1146,9 +1147,7 @@ const KINDS={
       cols:['페이지수','소제목','핵심 내용','대사·나레이션'],expert:'정보 콘텐츠 기획자이자 스토리보드 작가',flow:['1P ~ 2P (궁금증): 독자가 겪는 흔한 실수나 질문으로 시선을 붙잡습니다.','3P ~ 8P (핵심 정보): 팁을 한 컷에 하나씩, 쉬운 예시와 함께 순서대로 풀어냅니다.','9P (정리): 핵심을 한 줄로 요약합니다.','10P (마무리): 저장·공유·댓글처럼 가벼운 행동을 유도합니다. 판매·혜택 문구는 쓰지 않습니다.']}},
   daily:{name:'공감·일상형',desc:'겪은 일의 에피소드와 감정 중심이에요. 마지막은 공감 한마디로 끝나고 광고 요소는 넣지 않아요.',cta:false,target:false,offer:null,
     rule:'공감·일상형. 겪은 일의 에피소드와 감정 중심. 마지막 컷은 공감 한마디나 가벼운 질문으로 끝낸다. 광고·홍보·혜택·예약·구매 유도 요소를 넣지 않는다. 마지막 안내 카드 문구(endHead·endBtn)도 광고 문구 대신 다음 편 예고나 가벼운 인사로 쓴다.',
-    table:{name:'에피소드 흐름',btn:'에피소드 흐름 10p 표 만들기',sum:'소재와 감정 포인트만 적으면 10페이지 흐름 표가 나와요 (선택)',desc:'있었던 일을 컷 순서로 정리해 보세요. 나온 표는 복사하거나 이야기 칸에 넣어 대본의 바탕으로 쓸 수 있어요.',
-      f:[['소재·사건','예: 마감 하루 전 갑자기 수정 요청이 왔다'],['감정 포인트','예: 당황 → 오기 → 안도'],['공감할 사람','예: 프리랜서, 야근 많은 직장인'],['공감 한마디','예: 다들 이런 날 있죠?']],
-      cols:['페이지수','상황','감정','대사'],expert:'공감 에피소드 웹툰 작가이자 스토리보드 작가',flow:['1P ~ 2P (상황): 겪은 일의 시간·장소·인물을 한 장면으로 보여줍니다.','3P ~ 6P (전개): 상황이 꼬이고 감정이 커지는 과정을 구체적인 디테일로 쌓습니다.','7P ~ 8P (전환): 해결되거나 마음이 바뀌는 순간을 보여줍니다.','9P ~ 10P (공감): 공감 한마디나 가벼운 질문으로 끝냅니다. 광고·구매 유도는 쓰지 않습니다.']}},
+  },
   brand:{name:'브랜드 스토리형',desc:'시작 계기와 가치관을 들려줘요. 계기 → 어려움 → 전환점 → 지금의 가치 흐름이에요. 할인·혜택 문구는 넣지 않아요.',cta:false,target:false,
     offer:{l:'전하고 싶은 가치',s:'선택 · 마지막에 한 줄로 남겨요',p:'예: 오래 쓰는 물건을 만든다'},
     rule:'브랜드 스토리형. 시작 계기 → 어려움 → 전환점 → 지금의 가치 순서. 마지막 컷은 전하고 싶은 가치를 한 줄로 남긴다. 할인·혜택 같은 판매 문구 없이 진정성 있게, 과장 표현은 쓰지 않는다.',
@@ -1675,7 +1674,7 @@ function vInput(){
     <div class="h"><details class="more artsbox" id="artsBox"><summary>${sampleOf(i.art)?`<img class="art-thumb" src="${safeUrl(sampleOf(i.art))}" alt="">`:''}<span class="art-sumt"><b>웹툰 테마</b> <small>${esc(artOf().name)} · 모든 컷과 캐릭터에 똑같이 적용돼요 · 눌러서 바꾸기</small></span></summary><div class="inner"><div class="arts">${(()=>{ const vis=artVisible(); if(!vis.some(([k])=>k===i.art)){ i.art=vis[0][0]; save(); }
       return vis.map(([k,v])=>{ const sm=sampleOf(k), sw=v.c1||v.c2?` style="background:linear-gradient(135deg,${v.c1||'#FFE9A8'},${v.c2||v.c1||'#FFB27A'})"`:''; return `<button class="pick art-${esc(k)}" data-art="${esc(k)}" aria-pressed="${i.art===k}">${sm?`<img class="smp-img" src="${safeUrl(sm)}" alt="${esc(v.name)} 샘플">`:`<span class="sw" aria-hidden="true"${sw}></span>`}<span class="ttl" style="font-size:15px">${esc(v.name)}</span><span class="dsc">${esc(v.desc)}</span></button>`; }).join(''); })()}</div></div></details></div>
 
-    <div class="h">${adBoxHTML()}</div>
+    <div class="h" id="adSlot"${adBoxHTML()?'':' hidden'}>${adBoxHTML()}</div>
     <div class="h"><details class="more">
       <summary>더 자세히 설정하기</summary>
       <div class="inner">
@@ -3150,7 +3149,7 @@ function applyKind(rebuildAd=true){ const K=KINDS[kindOf()];
   document.querySelectorAll('[data-kfield]').forEach(e=>{ e.hidden=e.dataset.kfield==='offer'?!K.offer:!K.target; });
   if(K.offer){ const lb=document.getElementById('offerLb'); if(lb) lb.innerHTML=esc(K.offer.l)+' <small>'+esc(K.offer.s)+'</small>'; const o=document.getElementById('i-offer'); if(o) o.placeholder=K.offer.p; }
   const d=document.getElementById('kindDesc'); if(d) d.textContent=K.desc;
-  const ab=document.getElementById('adBox'); if(ab&&rebuildAd){ const was=ab.open; ab.outerHTML=adBoxHTML(); const nb=document.getElementById('adBox'); if(nb&&was) nb.open=true; } }
+  const sl=document.getElementById('adSlot'); if(sl&&rebuildAd){ const ab=document.getElementById('adBox'), was=!!(ab&&ab.open), h=adBoxHTML(); sl.innerHTML=h; sl.hidden=!h; const nb=document.getElementById('adBox'); if(nb&&was) nb.open=true; } }
 document.addEventListener('toggle',e=>{ if(e.target&&e.target.id==='moreHero') heroOpen=e.target.open; },true);
 document.addEventListener('input',e=>{ const el=e.target; if(!el.dataset||el.dataset.kindin===undefined) return;
   S.info.kindCustom=el.value; S.info.kind=el.value.trim()?'custom':'daily'; save();
@@ -3358,7 +3357,7 @@ function adSystem(){ const k=kindOf(), K=KINDS[k], T=K.table; if(k==='ad') retur
 ${T.flow.map(x=>'- '+x).join('\n')}`; }
 function adTableHTML(md){ const rows=String(md||'').split('\n').map(l=>l.trim()).filter(l=>l.startsWith('|')&&!/^\|[\s:|-]+\|?$/.test(l)).map(l=>l.replace(/^\||\|$/g,'').split('|').map(c=>c.trim()));
   if(rows.length<2) return ''; return `<div style="overflow-x:auto"><table class="adtbl"><thead><tr>${rows[0].map(c=>`<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>${rows.slice(1).map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`; }
-function adBoxHTML(){ const a=adS(), K=KINDS[kindOf()], T=K.table, f=T.f, id=['product','point','target','benefit'];
+function adBoxHTML(){ const a=adS(), K=KINDS[kindOf()]; if(!K||!K.table) return ''; /* adS()는 예전처럼 항상 불러 데이터 모양을 유지 */ const T=K.table, f=T.f, id=['product','point','target','benefit'];
   const fld=(n,mt)=>`<div><label class="f" for="ad-${id[n]}" style="margin-top:${mt||0}px">${esc(f[n][0])}${n===0?' <span class="req">*</span>':''}</label><input class="in" id="ad-${id[n]}" data-ad="${id[n]}" value="${esc(a[id[n]])}" placeholder="${esc(f[n][1])}"></div>`;
   return `<details class="more" id="adBox" ${a.table?'open':''}><summary>${esc(T.btn)} <small>${esc(T.sum)}</small></summary><div class="inner">
     <p class="sub" style="margin-top:0">${esc(T.desc)}</p>
