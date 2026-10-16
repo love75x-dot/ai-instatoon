@@ -5,7 +5,7 @@ export const cfg = { ga: '' }; // build-guide.mjs가 설정 (GA4 측정 ID, 없�
 export const DATE = '2026-10-01'; // 글에 published/modified가 없을 때의 기본값 (글별로 articles-*.mjs에서 지정)
 
 import { gaSnippet } from '../analytics.mjs';
-import { OG_IMAGE, ogImageUrl, THEME_COLOR, footerMetaHtml } from '../site-meta.mjs';
+import { OG_IMAGE, ogImageUrl, THEME_COLOR, NAVER_VERIFY, footerMetaHtml } from '../site-meta.mjs';
 import { guideFontHead } from '../fonts.mjs';
 import { exampleData } from '../examples.mjs';
 
@@ -265,6 +265,7 @@ export function head({ title, desc, canonical, type, extra = '', body = '', ga =
 <meta name="twitter:image" content="${ogImageUrl}">
 <meta name="twitter:image:alt" content="${esc(OG_IMAGE.alt)}">
 <meta name="theme-color" content="${THEME_COLOR}">
+${NAVER_VERIFY}
 <link rel="manifest" href="/manifest.webmanifest">
 ${FONTS}
 <style>${CSS}</style>

@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { gaId, gaSnippet } from './analytics.mjs';
 import { appFontHead, FONT_CSS_LINK } from './fonts.mjs';
 import { exampleGalleryLine } from './examples.mjs';
-import { OG_IMAGE, ogImageUrl, THEME_COLOR, ORIGIN, SITE_NAME, footerMetaHtml, appSiteInfoLine } from './site-meta.mjs';
+import { OG_IMAGE, ogImageUrl, THEME_COLOR, NAVER_VERIFY, ORIGIN, SITE_NAME, footerMetaHtml, appSiteInfoLine } from './site-meta.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 // 운영자·문의·마지막 업데이트(푸터)와 앱 안(사용 방법)의 SITE_INFO를 site-info.json 값으로 채운다. 값이 비면 그 항목은 보이지 않는다.
@@ -23,7 +23,7 @@ const head = [
   '<meta name="viewport" content="width=device-width,initial-scale=1">',
   '<meta name="description" content="분야와 내 이야기만 입력하면 인스타툰 기획·대본·컷 구성까지 정리해 주는 도구. 인스타툰 제작 가이드도 함께 제공합니다.">',
   '<meta name="robots" content="index,follow">',
-  `<meta name="theme-color" content="${THEME_COLOR}"><link rel="manifest" href="/manifest.webmanifest">`,
+  `<meta name="theme-color" content="${THEME_COLOR}">${NAVER_VERIFY}<link rel="manifest" href="/manifest.webmanifest">`,
   '<link rel="canonical" href="https://www.ai-instatoon.com/">',
   '<meta property="og:type" content="website"><meta property="og:site_name" content="인스타툰 연재실"><meta property="og:locale" content="ko_KR">',
   '<meta property="og:title" content="인스타툰 연재실"><meta property="og:description" content="분야와 내 이야기만 입력하면 인스타툰 기획·대본·컷 구성까지 정리해 주는 도구."><meta property="og:url" content="https://www.ai-instatoon.com/">',

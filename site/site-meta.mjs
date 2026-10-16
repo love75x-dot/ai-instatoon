@@ -20,6 +20,8 @@ if (siteInfo.adsensePublisherId && !/^pub-\d{10,20}$/.test(siteInfo.adsensePubli
 export const ORIGIN = 'https://www.ai-instatoon.com';
 export const SITE_NAME = '인스타툰 연재실';
 export const THEME_COLOR = '#ffffff';
+// 네이버 서치어드바이저 사이트 소유 확인 태그(비밀 값이 아님, 모든 페이지 <head>에 들어감)
+export const NAVER_VERIFY = '<meta name="naver-site-verification" content="7dc9647f6cf9532cdd20244898cc8b60bdd7f13b" />';
 /* 공유 이미지(og:image·트위터 카드): 1200×630. v2(캐릭터 2명 네 칸). 이전 흑백 심플 이미지(og-default.png)는 파일만 남겨 둠. 예시 그림 6장을 받으면 마지막 그림으로 바꾼다(site/assets/examples/) */
 export const OG_IMAGE = { path: '/assets/og/og-v2.png', width: 1200, height: 630, alt: `${SITE_NAME} — 팔로워 터지는 인스타툰, 복잡한 툴 없이 웹에서 바로 제작하세요` };
 export const ogImageUrl = ORIGIN + OG_IMAGE.path;
