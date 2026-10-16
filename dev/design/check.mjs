@@ -109,13 +109,13 @@ for (const [vk, w] of [['PC 1300', 1300], ['PC 1024', 1024], ['태블릿 768', 7
   // 열기
   await page.click('#menuBtn'); await page.waitForTimeout(350);
   const m = await page.evaluate(() => {
-    const p = document.querySelector('#menuPanel'), rc = p.getBoundingClientRect(), items = [...p.querySelectorAll('.mi')], cur = p.querySelector('[aria-current="page"]'), ss = document.querySelector('#shopSlot');
+    const p = document.querySelector('#menuPanel'), rc = p.getBoundingClientRect(), items = [...p.querySelectorAll('ul .mi')], cur = p.querySelector('[aria-current="page"]'), ss = document.querySelector('#shopSlot');
     const cs = cur && getComputedStyle(cur);
     return { open: document.querySelector('#menuWrap').classList.contains('on'), expanded: document.querySelector('#menuBtn').getAttribute('aria-expanded'), items: items.map((e) => e.textContent.trim()).join(','), inView: rc.left >= -1 && rc.right <= window.innerWidth + 1 && rc.top >= 0 && rc.bottom <= window.innerHeight + 1,
-      slotFirst: p.firstElementChild === ss, slotHidden: ss.hidden && ss.children.length === 0 && ss.textContent.trim() === '', cur: cur && cur.textContent.trim(), curColor: cs && cs.color, curLine: cs && cs.borderLeftWidth + ' ' + cs.borderLeftStyle, others: items.filter((e) => e !== cur).every((e) => getComputedStyle(e).color !== getComputedStyle(cur).color), focus: document.activeElement && document.activeElement.className, bodyLock: document.body.classList.contains('menu-open'), panelW: Math.round(rc.width), sheetOpen: document.body.classList.contains('sheet-open') };
+      slotFirst: p.firstElementChild === ss, slotHidden: !ss.hidden && /^내 가게s*▾$/.test(ss.textContent.trim()), cur: cur && cur.textContent.trim(), curColor: cs && cs.color, curLine: cs && cs.borderLeftWidth + ' ' + cs.borderLeftStyle, others: items.filter((e) => e !== cur).every((e) => getComputedStyle(e).color !== getComputedStyle(cur).color), focus: document.activeElement && document.activeElement.className, bodyLock: document.body.classList.contains('menu-open'), panelW: Math.round(rc.width), sheetOpen: document.body.classList.contains('sheet-open') };
   });
   C.ok(m.open && m.expanded === 'true' && m.items === MENU_ITEMS && m.inView, `${vk} 홈: ☰를 누르면 왼쪽에서 메뉴가 열리고 항목 7개가 순서대로 (${m.items})`);
-  C.ok(m.slotFirst && m.slotHidden, `${vk} 홈: 메뉴 맨 위에 #shopSlot 빈 자리가 있고 지금은 아무것도 그리지 않음`);
+  C.ok(m.slotFirst && m.slotHidden, `${vk} 홈: 메뉴 맨 위 #shopSlot에 가게 줄("내 가게 ▾")이 있음(4d)`);
   C.ok(m.cur === '인스타툰 만들기' && m.curColor === 'rgb(17, 17, 17)' && m.curLine === '2px solid' && m.others, `${vk} 홈: 지금 보는 항목은 검정 글씨 + 왼쪽 얇은 선, 나머지는 회색 (${m.cur})`);
   C.ok(m.panelW <= 300 && m.bodyLock, `${vk} 홈: 메뉴 폭 ${m.panelW}px, 열려 있는 동안 뒤 화면 스크롤 잠김`);
   // 닫기: Esc · 바깥 · 항목

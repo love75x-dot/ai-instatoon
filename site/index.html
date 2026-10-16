@@ -74,6 +74,15 @@ body{margin:0}
 body.menu-open{overflow:hidden}
 @media (prefers-reduced-motion:reduce){.mbg,.mpanel{transition:none}}
 /* HEADER:END */
+/* 가게(4d) */
+.shopbtn{min-height:40px;margin-bottom:6px;border-bottom:1px solid var(--line);font-size:13px;font-weight:600;justify-content:space-between;gap:8px}
+.shwrap{margin-bottom:8px}.shrow{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:12px;padding:2px 6px 2px 2px;background:var(--surface)}
+.shsw{flex:1;min-width:0;display:flex;align-items:center;text-align:left;background:none;border:0;border-radius:10px;padding:10px;font:inherit;color:inherit;cursor:pointer}
+.shsw[aria-current]{background:var(--sunken)}.shrow .vrow-m{flex:1;min-width:0}.shrow-b{display:flex;gap:6px;padding:6px 0}
+.shmenu{display:flex;gap:6px;flex-wrap:wrap;padding:8px 4px 2px}
+.shdot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#d97706;margin-left:6px;vertical-align:middle}
+.linkbtn{background:none;border:0;padding:0;color:var(--ink-2);text-decoration:underline;font:inherit;cursor:pointer}
+.bkscope{border:0;padding:0;margin:0 0 12px}.bkscope label{display:block;padding:6px 0;font-size:14px}
 .btn.save{background:var(--save);border-color:var(--save);color:var(--save-ink)} .btn.save:hover{border-color:var(--save);opacity:.88}
 .btn.load{background:var(--load-bg);border-color:var(--load-line);color:var(--load-ink)} .btn.load:hover{border-color:var(--load-ink)}
 .hero-lb{align-self:center;font-weight:800;font-size:13px;color:var(--ink-2);margin-right:2px}
@@ -1040,6 +1049,26 @@ window.kv=kv;
 })();
 </script>
 <script type="text/plain" id="appjs">
+/* ================= 가게(작업 공간) · 4d =================
+   가게마다 작업·사진·기준 이미지·복사 표시·백업 시각·체험 백업이 따로 저장된다. 기본 가게 s1("내 가게")은 기존 키 이름 그대로라 옛 작업·옛 백업 이전이 필요 없고,
+   다른 가게는 키 뒤에 @<id>가 붙는다. 앱 코드는 kv.getItem/setItem/removeItem만 쓰므로 여기서 "지금 가게" 키로 바꿔 주면 나머지는 그대로 동작한다.
+   가게를 바꾸면 새로고침한다(메모리의 임시 상태가 섞이지 않게). 탭마다 지금 가게는 sessionStorage, 마지막 가게는 kv에 둔다.
+   API 키·모델·AI 종류·사용액·테마 샘플·글꼴·도움말 확인 여부는 모든 가게가 같이 쓴다. */
+const SHOP_BASE_RE=/^(instatoonRoom\.v4|instatoon\.(photo\.\d|charRef\d?|copied|lastBackup|backupBase|backupSnooze|vaultBackup|vaultChanged|demoBackup|shopSaved))$/;
+const SHOP_LIST_KEY='instatoon.shops', SHOP_LAST_KEY='instatoon.lastShop', SHOP_TAB_KEY='instatoon.curShop', SHOP_DEFAULT='내 가게';
+const kvRaw={get:kv.getItem.bind(kv),set:kv.setItem.bind(kv),del:kv.removeItem.bind(kv)};
+function readShops(){ try{ const a=JSON.parse(kvRaw.get(SHOP_LIST_KEY)||'null'); if(Array.isArray(a)){ const l=a.filter(x=>x&&/^s[0-9a-z]{1,14}$/.test(String(x.id))&&String(x.name||'').trim()).map(x=>({id:String(x.id),name:String(x.name).trim().slice(0,20),at:x.at||0})); if(l.length) return l; } }catch(_){} return [{id:'s1',name:SHOP_DEFAULT}]; }
+let SHOPS=readShops();
+const CUR=(()=>{ let t=''; try{ t=sessionStorage.getItem(SHOP_TAB_KEY)||''; }catch(_){} const l=(kvRaw.get(SHOP_LAST_KEY)||''); const ok=id=>id&&SHOPS.some(x=>x.id===id); const id=ok(t)?t:ok(l)?l:SHOPS[0].id;
+  try{ sessionStorage.setItem(SHOP_TAB_KEY,id); }catch(_){} if(id!==l&&!(l===''&&id==='s1')){ try{ kvRaw.set(SHOP_LAST_KEY,id); }catch(_){} } return id; })();
+const shopKey=(k,id)=>{ id=id||CUR; return (id!=='s1'&&SHOP_BASE_RE.test(k))?k+'@'+id:k; };
+kv.getItem=k=>kvRaw.get(shopKey(k)); kv.setItem=(k,v)=>kvRaw.set(shopKey(k),v); kv.removeItem=k=>kvRaw.del(shopKey(k));
+const rawGet=(k,id)=>{ try{ return kvRaw.get(shopKey(k,id)); }catch(_){ return null; } };
+const rawSet=(k,id,v)=>{ try{ kvRaw.set(shopKey(k,id),String(v)); }catch(_){} };
+const rawDel=(k,id)=>{ try{ kvRaw.del(shopKey(k,id)); }catch(_){} };
+const shopName=id=>{ const s=SHOPS.find(x=>x.id===id); return s?s.name:''; };
+const MANY_SHOPS=()=>SHOPS.length>1;
+function saveShops(){ try{ kvRaw.set(SHOP_LIST_KEY,JSON.stringify(SHOPS)); }catch(_){} }
 /* ================= 데이터 ================= */
 const STEPS=[
   {id:'input', t:'내 이야기 적기', s:'이야기', d:'분야만 골라도 돼요'},
@@ -1174,14 +1203,15 @@ const fixMode=o=>{ if(o&&(o.mode==='reels'||o.mode==='stats')) o.mode='one'; ret
 let S=load()||blank(), downloads=null, sample=null, busy=null, pv=0, openCut=0;
 let saveWarned=false;
 kv.onError=e=>{ saveFailed=true; try{ updateSaved(); }catch(_){} if(!saveWarned){ saveWarned=true; try{ toast('브라우저 저장 공간에 저장하지 못했어요. ☰ 메뉴의 "백업 저장"으로 파일을 받아 두세요'); }catch(__){} } };
-function save(){ try{ syncLinked(); }catch(_){} try{ kv.setItem(KEY,JSON.stringify(S)); lastSavedAt=Date.now(); saveFailed=false; markSaving(); updateSaved(); }catch(_){ saveFailed=true; updateSaved(); if(!saveWarned){ saveWarned=true; try{ toast('브라우저 저장 공간이 가득 차서 이 작업이 새로고침하면 사라질 수 있어요. ☰ 메뉴의 "백업 저장"으로 파일을 받아 두세요'); }catch(__){} } } }
+function save(){ try{ syncLinked(); }catch(_){} try{ kv.setItem(KEY,JSON.stringify(S)); lastSavedAt=Date.now(); if(SHOPS.length>1){ try{ kv.setItem('instatoon.shopSaved',String(lastSavedAt)); }catch(_){} } saveFailed=false; markSaving(); updateSaved(); }catch(_){ saveFailed=true; updateSaved(); if(!saveWarned){ saveWarned=true; try{ toast('브라우저 저장 공간이 가득 차서 이 작업이 새로고침하면 사라질 수 있어요. ☰ 메뉴의 "백업 저장"으로 파일을 받아 두세요'); }catch(__){} } } }
 /* ---------- 저장 표시 · 7일 백업 알림 ---------- */
 let lastSavedAt=0, saveFailed=false;
 const BK_LAST='instatoon.lastBackup', BK_BASE='instatoon.backupBase', BK_SNOOZE='instatoon.backupSnooze', DAY=86400000;
 const lsNum=k=>{ try{ return +kv.getItem(k)||0; }catch(_){ return 0; } };
 const lsSet=(k,v)=>{ try{ kv.setItem(k,String(v)); }catch(_){} };
 const hasWork=()=>cuts().length>0||(S.history||[]).length>0||pics().length>0;
-function savedText(){ if(saveFailed) return '저장하지 못했어요 · ☰ 메뉴의 "백업 저장"으로 파일을 받아 두세요'; if(!lastSavedAt) return hasWork()?'저장돼 있어요':''; const s=Math.floor((Date.now()-lastSavedAt)/1000);
+function savedText(){ const t=savedText0(); return MANY_SHOPS()&&t?shopName(CUR)+' · '+t:t; }
+function savedText0(){ if(saveFailed) return '저장하지 못했어요 · ☰ 메뉴의 "백업 저장"으로 파일을 받아 두세요'; if(!lastSavedAt) return hasWork()?'저장돼 있어요':''; const s=Math.floor((Date.now()-lastSavedAt)/1000);
   return s<15?'방금 저장됨':s<60?`${s}초 전 저장됨`:s<3600?`${Math.floor(s/60)}분 전 저장됨`:`${Math.floor(s/3600)}시간 전 저장됨`; }
 function backupDue(){ if(S.demo) return null; const now=Date.now(), snz=lsNum(BK_SNOOZE)>now, vd=!snz&&vaultCount()>0&&lsNum(VAULT_CH)>lsNum(VAULT_BK);
   if(!hasWork()) return vd?{days:0,never:!lsNum(BK_LAST),vault:true}:null;
@@ -2550,33 +2580,78 @@ JSON 하나로만 답해: {"hooks":["","","","",""]}`;
 }
 
 
-async function makeBackup(opt){ opt=opt||{img:true};
-  const ls=k=>{ try{ return kv.getItem(k); }catch(_){ return null; } };
-  const data={app:'instatoon',v:1,savedAt:new Date().toISOString(),state:S,photos:{},refs:{},samples:{},fonts:[]};
-  [0,1,2].forEach(k=>{ const p=ls('instatoon.photo.'+k); if(p) data.photos[k]=p; const r=ls(refKey(k)); if(r) data.refs[k]=r; });
-  Object.keys(ARTS).forEach(k=>{ const v=ls('instatoon.sample.'+k); if(v) data.samples[k]=v; });
-  for(const f of await idbAll()){ try{ const u=new Uint8Array(f.buf); let bin=''; for(let j=0;j<u.length;j+=32768) bin+=String.fromCharCode.apply(null,u.subarray(j,j+32768)); data.fonts.push({f:f.f,b64:btoa(bin)}); }catch(_){} }
-  if(vaultCount()) data.vault=await vaultExport(opt.img!==false);
-  const d=new Date(), name=`인스타툰_백업_${S.info.name||'내작업'}_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.json`;
+/* 백업 파일 모양
+   - 가게가 1개일 때: 지금까지와 같은 v1 {app,v:1,state,photos,refs,samples,fonts[,vault]} (옛 앱·옛 백업과 서로 읽힘)
+   - 가게가 2개 이상일 때 "이 가게만": v2 {app,v:2,kind:'shop',shop:{id,name},state,photos,refs,samples,fonts[,vault]} — 옛 앱도 state만 읽으면 열림
+   - "전체 가게": v2 {app,v:2,kind:'all',cur,shops:[{id,name,state,photos,refs[,vault]}],samples,fonts}
+   API 키는 어느 백업에도 들어가지 않는다. */
+async function fontsOut(){ const out=[]; for(const f of await idbAll()){ try{ const u=new Uint8Array(f.buf); let bin=''; for(let j=0;j<u.length;j+=32768) bin+=String.fromCharCode.apply(null,u.subarray(j,j+32768)); out.push({f:f.f,b64:btoa(bin)}); }catch(_){} } return out; }
+function samplesOut(){ const o={}; Object.keys(ARTS).forEach(k=>{ try{ const v=kvRaw.get('instatoon.sample.'+k); if(v) o[k]=v; }catch(_){} }); return o; }
+async function shopPack(id,img){ if(id===CUR){ try{ syncLinked(); }catch(_){} }
+  const photos={}, refs={}; [0,1,2].forEach(k=>{ const p=rawGet('instatoon.photo.'+k,id); if(p) photos[k]=p; const r=rawGet(refKey(k),id); if(r) refs[k]=r; });
+  const o={id,name:shopName(id),state:shopState(id),photos,refs}, src=id===CUR?VAULT:shopVaultSrc(id);
+  if(Object.keys(src.chars).length+Object.keys(src.places).length) o.vault=await vaultExport(img!==false,src);
+  return o; }
+async function makeBackup(opt){ opt=opt||{img:true}; const scope=opt.scope||'shop', sid=opt.shop||CUR, many=MANY_SHOPS();
+  const fonts=await fontsOut(), d=new Date(), ymd=`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+  let data, name;
+  if(scope==='all'){ const shops=[]; for(const s of SHOPS) shops.push(await shopPack(s.id,opt.img));
+    data={app:'instatoon',v:2,kind:'all',savedAt:d.toISOString(),cur:CUR,shops,samples:samplesOut(),fonts}; name=`인스타툰_전체백업_${ymd}.json`; }
+  else { const p=await shopPack(sid,opt.img);
+    data={app:'instatoon',v:many?2:1,savedAt:d.toISOString(),...(many?{kind:'shop',shop:{id:sid,name:shopName(sid)}}:{}),state:p.state,photos:p.photos,refs:p.refs,samples:samplesOut(),fonts};
+    if(p.vault) data.vault=p.vault;
+    name=`인스타툰_백업_${(sid===CUR?S.info.name:'')||(many?shopName(sid):'')||'내작업'}_${ymd}.json`; }
   await saveFile(name,new Blob([JSON.stringify(data)],{type:'application/json'}));
-  lsSet(BK_LAST,Date.now()); if(opt.img!==false) lsSet(VAULT_BK,Date.now()); renderSaved();
+  (scope==='all'?SHOPS.map(s=>s.id):[sid]).forEach(id=>{ rawSet('instatoon.lastBackup',id,Date.now()); if(opt.img!==false) rawSet('instatoon.vaultBackup',id,Date.now()); });
+  renderSaved();
 }
+/* 두세 가지 중 하나를 고르는 작은 창(확인 창 대신) */
+function askChoice(title,text,opts){ return new Promise(res=>{ let w=document.getElementById('askSheet'); if(!w){ w=document.createElement('div'); w.id='askSheet'; w.className='sheet'; w.setAttribute('role','dialog'); w.setAttribute('aria-modal','true'); w.setAttribute('aria-labelledby','ask-t'); document.body.appendChild(w); }
+  w.innerHTML=`<div class="sheet-bg" data-ask=""></div><div class="sheet-in" role="document"><div class="sheet-h"><h2 id="ask-t">${esc(title)}</h2></div><p class="sub" style="margin:0 0 12px">${esc(text)}</p><div class="row">${opts.map(([v,l],i)=>`<button type="button" class="btn${i===0?' pri':''}" data-ask="${esc(v)}">${esc(l)}</button>`).join('')}</div></div>`;
+  w.hidden=false; document.body.classList.add('sheet-open');
+  const done=v=>{ w.hidden=true; document.removeEventListener('click',onc,true); document.removeEventListener('keydown',onk,true); const k=document.getElementById('keySheet'), vs=document.getElementById('vaultSheet'); if((!k||k.hidden)&&(!vs||vs.hidden)) document.body.classList.remove('sheet-open'); res(v); };
+  const onc=e=>{ const b=e.target.closest('[data-ask]'); if(!b||!w.contains(b)) return; e.preventDefault(); e.stopPropagation(); done(b.dataset.ask||'cancel'); };
+  const onk=e=>{ if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); done('cancel'); } };
+  document.addEventListener('click',onc,true); document.addEventListener('keydown',onk,true); const f=w.querySelector('.btn.pri'); if(f) f.focus(); }); }
+async function registerBackupFonts(data){ for(const f of data.fonts||[]){ try{ const bin=atob(f.b64), u=new Uint8Array(bin.length); for(let j=0;j<bin.length;j++) u[j]=bin.charCodeAt(j); await registerFont(f.f,u.buffer.slice(0)); await idbPut({f:f.f,buf:u.buffer}); }catch(_){} } }
+/* 한 가게의 백업 내용을 그 가게 자리에 넣는다. 지금 가게면 화면 상태(S)도 바꾼다. */
+async function applyShopData(id,p){ const b=blank(), st=fixMode({...b,...p.state,info:{...b.info,...(p.state.info||{})}});
+  const set=(k,v)=>{ v?rawSet(k,id,v):rawDel(k,id); };
+  if(id===CUR){ S=st; [0,1,2].forEach(k=>{ set('instatoon.photo.'+k,p.photos?.[k]||''); setRef(k,p.refs?.[k]||null); }); }
+  else { rawSet(KEY,id,JSON.stringify(st)); [0,1,2].forEach(k=>{ set('instatoon.photo.'+k,p.photos?.[k]||''); set(refKey(k),p.refs?.[k]||''); }); rawSet('instatoon.shopSaved',id,Date.now()); }
+  if(p.vault){ if(id===CUR) vaultImportFlow(p.vault); else await vaultImportInto(id,p.vault); } }
+function stampCur(){ if(SHOPS.length===1&&lastSavedAt) rawSet('instatoon.shopSaved',CUR,lastSavedAt); }
+function addShop(name){ stampCur(); const s={id:newShopId(),name:uniqueShopName(name||'불러온 가게'),at:Date.now()}; SHOPS.push(s); saveShops(); shopSlotRender(); return s.id; }
 async function restoreBackup(file){
-  try{ const data=JSON.parse(await file.text()); if(data.app!=='instatoon'||!data.state) throw 0;
-    const b=blank(); S=fixMode({...b,...data.state,info:{...b.info,...data.state.info}});
-    const set=(k,v)=>{ try{ v?kv.setItem(k,v):kv.removeItem(k); }catch(_){} };
-    [0,1,2].forEach(k=>{ set('instatoon.photo.'+k,data.photos?.[k]||''); setRef(k,data.refs?.[k]||null); });
-    Object.entries(data.samples||{}).forEach(([k,v])=>set('instatoon.sample.'+k,v));
-    for(const f of data.fonts||[]){ try{ const bin=atob(f.b64), u=new Uint8Array(bin.length); for(let j=0;j<bin.length;j++) u[j]=bin.charCodeAt(j); await registerFont(f.f,u.buffer.slice(0)); await idbPut({f:f.f,buf:u.buffer}); }catch(_){} }
-    save(); applyFontVars(); applyRatio(); pv=0; render(); toast('백업을 불러왔어요'); if(data.vault) vaultImportFlow(data.vault);
+  try{ const data=JSON.parse(await file.text()); if(data.app!=='instatoon') throw 0;
+    if(data.kind==='all'&&Array.isArray(data.shops)&&data.shops.length) return restoreAll(data);
+    if(!data.state) throw 0;
+    let target=CUR;
+    if(MANY_SHOPS()){ const ch=await askChoice('백업 불러오기',`가게가 여러 개예요. 이 백업을 어디에 넣을까요?`,[['new','새 가게로 추가'],['over',`지금 가게(${shopName(CUR)})에 덮어쓰기`],['cancel','취소']]); if(ch==='cancel') return; if(ch==='new') target=addShop(data.shop&&data.shop.name); }
+    await applyShopData(target,data);
+    Object.entries(data.samples||{}).forEach(([k,v])=>{ try{ kvRaw.set('instatoon.sample.'+k,v); }catch(_){} });
+    await registerBackupFonts(data);
+    if(target===CUR){ save(); applyFontVars(); applyRatio(); pv=0; render(); toast('백업을 불러왔어요'); }
+    else { applyFontVars(); toast(`새 가게 "${shopName(target)}"에 넣었어요. ☰ 메뉴의 가게에서 바꿔 보세요`); }
   }catch(_){ toast('인스타툰 연재실 백업 파일이 아니에요. 백업 저장으로 받은 .json 파일을 골라 주세요'); }
 }
+/* 전체 가게 백업 불러오기: 이 브라우저가 비어 있으면 첫 가게를 지금 가게 자리에, 나머지는 새 가게로 추가. 비어 있지 않으면 전부 새 가게로 추가(지금 가게는 건드리지 않음) */
+async function restoreAll(data){
+  const blankBrowser=!MANY_SHOPS()&&!S.demo&&!hasWork()&&!String(S.info.type||'').trim()&&!String(S.info.name||'').trim()&&!String(S.info.story||'').trim()&&vaultCount()===0;
+  const ch=await askChoice('전체 가게 백업',`가게 ${data.shops.length}개가 들어 있는 백업이에요. ${blankBrowser?'이 브라우저는 비어 있어서 그대로 옮겨 올게요.':'지금 가게는 그대로 두고 새 가게로 추가할게요.'}`,[['go','불러오기'],['cancel','취소']]); if(ch!=='go') return;
+  let first=true, n=0;
+  for(const sh of data.shops){ if(!sh||!sh.state) continue; let id;
+    if(first&&blankBrowser){ id=CUR; const me=SHOPS.find(x=>x.id===CUR); if(me&&sh.name) me.name=uniqueShopName(sh.name,CUR); saveShops(); shopSlotRender(); } else id=addShop(sh.name);
+    first=false; await applyShopData(id,sh); n++; }
+  Object.entries(data.samples||{}).forEach(([k,v])=>{ try{ kvRaw.set('instatoon.sample.'+k,v); }catch(_){} });
+  await registerBackupFonts(data); save(); applyFontVars(); applyRatio(); pv=0; render(); toast(`가게 ${n}개를 불러왔어요`); }
 
 /* ================= 캐릭터 보관함 (별도 IndexedDB: instatoonVault) =================
    인물(characters)과 장소(places)를 저장해 두고 편마다 불러 쓴다. 이미지는 올린 파일 그대로(Blob) 저장해 화질을 줄이지 않는다.
    작업(S.info)에는 ID와 "이번 편만 수정"만 둔다: info.link{0,1,2}(주연 슬롯), info.subs[](조연 최대 3). 둘 다 없어도 되는 추가 필드. */
 let VAULT_PROMPT=true; /* 보관함 인물·카드·장소 이미지를 그림 프롬프트에 넣을지. 문장은 사장님 승인(2026-10-14) 완료. 보관함 인물이 없고 카드가 비어 있으면 어느 쪽이든 프롬프트는 한 글자도 바뀌지 않는다 */
-const VAULT={chars:{},places:{},ok:false};
+const VAULT={chars:{},places:{},ok:false}; /* 지금 가게의 것만 */
+const ALLV={chars:{},places:{}}; /* 모든 가게(레코드의 shop 필드, 없으면 s1) */
 const CARD_FIELDS=[['face','얼굴형','예: 동글동글한 달걀형'],['eyes','눈','예: 처진 큰 눈, 갈색'],['hair','헤어','예: 어깨 길이 단발, 짙은 갈색'],['body','체형(키·등신)','예: 작은 키, 2.5등신'],['feature','고유 특징','예: 동그란 안경, 왼쪽 볼 점'],['outfit','의상','예: 베이지 앞치마, 흰 셔츠'],['hex','대표 색','예: 머스타드 옐로(#D4A017), 애쉬그레이(#A9B0B8)'],['keep','절대 유지','예: 안경은 항상 동그란 테']];
 const CARD_LABEL={face:'얼굴형',eyes:'눈',hair:'헤어',body:'체형',feature:'고유 특징',outfit:'의상',hex:'대표 색',keep:'절대 유지'};
 const SUB_MAX=3;
@@ -2587,18 +2662,25 @@ function vaultOpen(){ return new Promise(res=>{ try{ if(!window.indexedDB) retur
 async function vaultInit(){ vdb=await vaultOpen(); if(!vdb){ VAULT.ok=false; return; } VAULT.ok=true;
   for(const [st,m,key] of [['characters','chars','id'],['places','places','name']]){
     const all=await new Promise(res=>{ try{ const q=vdb.transaction(st).objectStore(st).getAll(); q.onsuccess=()=>res(q.result||[]); q.onerror=()=>res([]); }catch(_){ res([]); } });
-    VAULT[m]={}; all.forEach(x=>{ VAULT[m][x[key]]=x; }); } }
-function vaultPut(st,rec){ return new Promise(res=>{ const m=st==='characters'?'chars':'places', key=st==='characters'?rec.id:rec.name;
-  if(!vdb){ VAULT[m][key]=rec; return res(false); }
-  try{ const tx=vdb.transaction(st,'readwrite'); tx.objectStore(st).put(rec); tx.oncomplete=()=>{ VAULT[m][key]=rec; vaultMarkChanged(); res(true); }; tx.onerror=tx.onabort=()=>res(false); }catch(_){ res(false); } }); }
+    VAULT[m]={}; ALLV[m]={}; all.forEach(x=>{ ALLV[m][x[key]]=x; if(((x&&x.shop)||'s1')===CUR) VAULT[m][x[key]]=x; }); } }
+function vaultPut(st,rec,sid){ sid=sid||CUR; return new Promise(res=>{ const m=st==='characters'?'chars':'places', key=st==='characters'?rec.id:rec.name;
+  const ex=ALLV[m][key]; if(ex&&((ex.shop)||'s1')!==sid){ try{ toast(st==='characters'?'"'+key+'" ID는 다른 가게에서 쓰고 있어요. 다른 ID를 써 주세요.':'"'+key+'" 장소는 다른 가게에 있어요. 다른 이름을 써 주세요.'); }catch(_){} return res(false); }
+  rec.shop=sid; const put=()=>{ ALLV[m][key]=rec; if(sid===CUR) VAULT[m][key]=rec; };
+  if(!vdb){ put(); return res(false); }
+  try{ const tx=vdb.transaction(st,'readwrite'); tx.objectStore(st).put(rec); tx.oncomplete=()=>{ put(); if(sid===CUR) vaultMarkChanged(); else rawSet('instatoon.vaultChanged',sid,Date.now()); res(true); }; tx.onerror=tx.onabort=()=>res(false); }catch(_){ res(false); } }); }
 function vaultDel(st,key){ return new Promise(res=>{ const m=st==='characters'?'chars':'places';
-  if(!vdb){ delete VAULT[m][key]; return res(false); }
-  try{ const tx=vdb.transaction(st,'readwrite'); tx.objectStore(st).delete(key); tx.oncomplete=()=>{ delete VAULT[m][key]; vaultMarkChanged(); res(true); }; tx.onerror=tx.onabort=()=>res(false); }catch(_){ res(false); } }); }
+  const gone=()=>{ delete VAULT[m][key]; delete ALLV[m][key]; };
+  if(!vdb){ gone(); return res(false); }
+  try{ const tx=vdb.transaction(st,'readwrite'); tx.objectStore(st).delete(key); tx.oncomplete=()=>{ gone(); vaultMarkChanged(); res(true); }; tx.onerror=tx.onabort=()=>res(false); }catch(_){ res(false); } }); }
+/* 가게를 지울 때: 다른 가게 화면에서도 쓰는 삭제(변경 표시는 남기지 않음) */
+function vaultDelRaw(st,key){ return new Promise(res=>{ const m=st==='characters'?'chars':'places'; const gone=()=>{ delete VAULT[m][key]; delete ALLV[m][key]; };
+  if(!vdb){ gone(); return res(false); }
+  try{ const tx=vdb.transaction(st,'readwrite'); tx.objectStore(st).delete(key); tx.oncomplete=()=>{ gone(); res(true); }; tx.onerror=tx.onabort=()=>res(false); }catch(_){ res(false); } }); }
 const fmtSize=n=>n>=1048576?(n/1048576).toFixed(1)+'MB':Math.max(1,Math.round(n/1024))+'KB';
 const BLOBURL=new WeakMap();
 function blobUrl(im){ if(!im||!im.blob) return ''; let u=BLOBURL.get(im.blob); if(!u){ try{ u=URL.createObjectURL(im.blob); BLOBURL.set(im.blob,u); }catch(_){ u=''; } } return u; }
-function vaultBytes(){ let n=0; const add=im=>{ if(im&&im.size) n+=im.size; };
-  Object.values(VAULT.chars).forEach(c=>{ const m=c.images||{}; add(m.ref); add(m.turn); add(m.expr); (m.outfits||[]).forEach(add); }); Object.values(VAULT.places).forEach(p=>add(p.image)); return n; }
+function vaultBytes(src){ let n=0; const V=src||VAULT; const add=im=>{ if(im&&im.size) n+=im.size; };
+  Object.values(V.chars).forEach(c=>{ const m=c.images||{}; add(m.ref); add(m.turn); add(m.expr); (m.outfits||[]).forEach(add); }); Object.values(V.places).forEach(p=>add(p.image)); return n; }
 const charReady=c=>!!(c&&c.images&&c.images.ref);
 const VID_RE=/^[0-9A-Za-z가-힣_-]{1,30}$/;
 const imgExt=im=>{ const m=String(im&&(im.file||im.name)||'').match(/\.([0-9A-Za-z]{1,5})$/); if(m) return m[1].toLowerCase(); const t=String(im&&im.type||'').split('/')[1]||'png'; return t.replace('jpeg','jpg'); };
@@ -2691,11 +2773,12 @@ const VS={tab:'chars',view:'list',draft:null,isNew:false,pick:null,after:null,sl
 const OVOPEN={};
 const KIND_KO={main:'주연',sub:'조연'};
 function vThumb(im,alt){ const u=blobUrl(im); return u?`<img src="${safeUrl(u)}" alt="${esc(alt||'')}">`:'<span>이미지<br>없음</span>'; }
-const vTitle=()=>VS.view==='export'?'캐릭터만 내보내기':VS.view==='import'?'같은 ID가 있어요':VS.view==='list'?(VS.pick?'보관함에서 고르기':'캐릭터 보관함'):VS.tab==='chars'?(VS.isNew?'새 인물':'인물 수정'):(VS.isNew?'새 장소':'장소 수정');
+const vTitle=()=>VS.view==='copy'?'다른 가게에서 가져오기':VS.view==='export'?'캐릭터만 내보내기':VS.view==='import'?'같은 ID가 있어요':VS.view==='list'?(VS.pick?'보관함에서 고르기':'캐릭터 보관함'):VS.tab==='chars'?(VS.isNew?'새 인물':'인물 수정'):(VS.isNew?'새 장소':'장소 수정');
 function vaultHTML(){
   const nC=Object.keys(VAULT.chars).length, nP=Object.keys(VAULT.places).length, b=vaultBytes();
   const head=`<div class="sheet-h"><h2 id="vs-t">${vTitle()}</h2><button type="button" class="btn sm ghost" data-v="close">닫기</button></div>`;
   if(!VAULT.ok) return head+`<p class="sub">이 브라우저에서는 보관함을 쓸 수 없어요(저장소를 열지 못했어요). 시크릿 창이거나 저장소가 막혀 있을 수 있어요.</p>`;
+  if(VS.view==='copy') return head+copyViewHTML()+(VS.msg?`<div class="status" role="status">${esc(VS.msg)}</div>`:'');
   if(VS.view==='export') return head+exportViewHTML();
   if(VS.view==='import'&&VS.imp) return head+importViewHTML();
   if(VS.view==='edit') return head+(VS.tab==='chars'?vCharEditHTML():vPlaceEditHTML());
@@ -2708,7 +2791,7 @@ function vaultHTML(){
     const items=Object.values(VAULT.places).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
     list=items.length?items.map(p=>`<button type="button" class="vrow" data-v="edit" data-id="${esc(p.name)}"><span class="ref">${vThumb(p.image,p.name)}</span><span class="vrow-m"><b>${esc(p.name)}</b><small>${esc(p.desc||'설명 없음')}${p.image?'':' · 이미지 필요'}</small></span></button>`).join(''):`<p class="sub">저장한 장소가 없어요. 같은 장소가 자주 나오면 기준 이미지를 한 장 올려 두세요.</p>`;
   }
-  return head+`${VS.pick?'':`<p class="sub" style="margin:0 0 10px">인물 ${nC}명 · 장소 ${nP}개 · 이미지 ${fmtSize(b)}</p>${tabs}`}<div class="vlist">${list}</div>${VS.pick?'':`<div class="row" style="margin-top:12px"><button type="button" class="btn pri" data-v="new">${VS.tab==='chars'?'새 인물':'새 장소'}</button><button type="button" class="btn" data-v="exp">캐릭터만 내보내기</button><button type="button" class="btn" data-v="imp">캐릭터 불러오기</button></div>`}${VS.msg?`<div class="status err" role="status">${esc(VS.msg)}</div>`:''}`;
+  return head+`${VS.pick?'':`<p class="sub" style="margin:0 0 10px">인물 ${nC}명 · 장소 ${nP}개 · 이미지 ${fmtSize(b)}${MANY_SHOPS()?' · <button type="button" class="linkbtn" data-v="cp">다른 가게에서 가져오기</button>':''}</p>${tabs}`}<div class="vlist">${list}</div>${VS.pick?'':`<div class="row" style="margin-top:12px"><button type="button" class="btn pri" data-v="new">${VS.tab==='chars'?'새 인물':'새 장소'}</button><button type="button" class="btn" data-v="exp">캐릭터만 내보내기</button><button type="button" class="btn" data-v="imp">캐릭터 불러오기</button></div>`}${VS.msg?`<div class="status err" role="status">${esc(VS.msg)}</div>`:''}`;
 }
 function vImgSlot(label,slot,im,fname){ return `<div class="vimg"><div class="ref">${vThumb(im,label)}</div><div class="vimg-m"><b>${label}</b>${im?`<small>${esc(fname||im.name||'')} · ${fmtSize(im.size||0)}</small>`:'<small>선택</small>'}<div class="row"><button type="button" class="btn sm" data-v="pickimg" data-slot="${slot}">${im?'바꾸기':'올리기'}</button>${im?`<button type="button" class="btn sm ghost" data-v="delimg" data-slot="${slot}">지우기</button>`:''}</div></div></div>`; }
 function cardGridHTML(card,attr){ return `<div class="cardgrid">${CARD_FIELDS.map(([k,n,ph])=>`<div><label class="f" for="${attr}-${k}">${n}</label><input class="in" id="${attr}-${k}" ${attr==='v'?`data-vc="${k}"`:`data-${attr}="${k}"`} value="${esc((card||{})[k]||'')}" placeholder="${esc(ph)}"></div>`).join('')}</div>`; }
@@ -2762,7 +2845,7 @@ function vOpenEdit(id){ if(VS.tab==='chars'){ const c=VAULT.chars[id]; if(!c) re
 async function vSave(){ const d=VS.draft; VS.msg='';
   if(VS.tab==='chars'){
     d.id=String(d.id||'').trim(); if(!VID_RE.test(d.id)){ VS.msg='ID는 글자·숫자·_ - 만 쓸 수 있어요(30자 이내, 한글 가능).'; return vRender(); }
-    if(VS.isNew&&VAULT.chars[d.id]){ VS.msg=`"${d.id}" ID가 이미 있어요. 다른 ID를 쓰거나 목록에서 그 인물을 열어 고쳐 주세요.`; return vRender(); }
+    if(VS.isNew&&ALLV.chars[d.id]){ VS.msg=`"${d.id}" ID가 이미 있어요${VAULT.chars[d.id]?'':'(다른 가게에서 쓰는 ID예요)'}. 다른 ID를 쓰거나 목록에서 그 인물을 열어 고쳐 주세요.`; return vRender(); }
     const now=Date.now(), rec={id:d.id,kind:d.kind==='sub'?'sub':'main',role:d.role||'',gender:d.gender||'',age:d.age||'',looks:d.looks||'',card:{},images:{ref:d.images.ref||null,turn:d.images.turn||null,expr:d.images.expr||null,outfits:d.images.outfits||[]},savedAt:VS.isNew?now:(d.savedAt||now),updatedAt:now};
     CARD_FIELDS.forEach(([k])=>{ if(String((d.card||{})[k]||'').trim()) rec.card[k]=d.card[k]; });
     rec.ready=charReady(rec);
@@ -2774,6 +2857,7 @@ async function vSave(){ const d=VS.draft; VS.msg='';
     VS.view='list'; VS.draft=null; vRender();
   } else {
     d.name=String(d.name||'').trim(); if(!VID_RE.test(d.name)){ VS.msg='장소 이름은 글자·숫자·_ - 만 쓸 수 있어요(30자 이내, 한글 가능).'; return vRender(); }
+    if(VS.isNew&&ALLV.places[d.name]&&!VAULT.places[d.name]){ const tag=shopName(CUR).replace(/[^0-9A-Za-z가-힣_-]/g,''); d.name=(d.name+'_'+(tag||CUR)).slice(0,30); if(ALLV.places[d.name]) d.name=uniqueName(d.name,new Set(Object.keys(ALLV.places))); }
     if(VS.isNew&&VAULT.places[d.name]){ VS.msg=`"${d.name}" 장소가 이미 있어요. 다른 이름을 쓰거나 목록에서 열어 고쳐 주세요.`; return vRender(); }
     const now=Date.now(), rec={name:d.name,desc:d.desc||'',image:d.image||null,savedAt:VS.isNew?now:(d.savedAt||now),updatedAt:now};
     const ok=await vaultPut('places',rec); if(!ok){ VS.msg='저장하지 못했어요. 이미지가 너무 크거나 저장 공간이 부족할 수 있어요.'; return vRender(); }
@@ -2903,9 +2987,9 @@ function vaultMarkChanged(){ lsSet(VAULT_CH,Date.now()); try{ renderSaved(); }ca
 const vaultCount=()=>Object.keys(VAULT.chars).length+Object.keys(VAULT.places).length;
 const blobToData=b=>new Promise(res=>{ const fr=new FileReader(); fr.onload=()=>res(String(fr.result)); fr.onerror=()=>res(''); fr.readAsDataURL(b); });
 async function imgOut(im,withImg){ if(!im) return null; const o={name:im.name||'',file:im.file||'',type:im.type||(im.blob&&im.blob.type)||'',size:im.size||0}; if(withImg&&im.blob) o.data=await blobToData(im.blob); else if(!withImg) o.noImage=true; return o; }
-async function vaultExport(withImg){ const chars=[], places=[];
-  for(const c of Object.values(VAULT.chars)){ const m=c.images||{}; chars.push({id:c.id,kind:c.kind,role:c.role||'',gender:c.gender||'',age:c.age||'',looks:c.looks||'',card:c.card||{},savedAt:c.savedAt,updatedAt:c.updatedAt,images:{ref:await imgOut(m.ref,withImg),turn:await imgOut(m.turn,withImg),expr:await imgOut(m.expr,withImg),outfits:await Promise.all((m.outfits||[]).map(o=>imgOut(o,withImg)))}}); }
-  for(const p of Object.values(VAULT.places)) places.push({name:p.name,desc:p.desc||'',savedAt:p.savedAt,updatedAt:p.updatedAt,image:await imgOut(p.image,withImg)});
+async function vaultExport(withImg,src){ const V=src||VAULT, chars=[], places=[];
+  for(const c of Object.values(V.chars)){ const m=c.images||{}; chars.push({id:c.id,kind:c.kind,role:c.role||'',gender:c.gender||'',age:c.age||'',looks:c.looks||'',card:c.card||{},savedAt:c.savedAt,updatedAt:c.updatedAt,images:{ref:await imgOut(m.ref,withImg),turn:await imgOut(m.turn,withImg),expr:await imgOut(m.expr,withImg),outfits:await Promise.all((m.outfits||[]).map(o=>imgOut(o,withImg)))}}); }
+  for(const p of Object.values(V.places)) places.push({name:p.name,desc:p.desc||'',savedAt:p.savedAt,updatedAt:p.updatedAt,image:await imgOut(p.image,withImg)});
   return {v:1,withImages:!!withImg,chars,places}; }
 function dataToImg(o){ if(!o||!o.data) return null; try{ const b=dataUrlToBlob(o.data); return {blob:b,name:o.name||'',file:o.file||'',type:o.type||b.type||'',size:b.size}; }catch(_){ return null; } }
 function normIncoming(v){ const chars=[], places=[]; let bad=0;
@@ -2926,19 +3010,22 @@ function vaultImportFlow(raw){ const inc=normIncoming(raw); if(!VAULT.ok){ toast
   if(!conf.length) return vaultImportApply(inc,conf);
   VS.imp={inc,conf}; VS.view='import'; VS.msg=''; let w=document.getElementById('vaultSheet'); if(!w||w.hidden){ openVault({}); } VS.view='import'; vRender(); }
 async function vaultImportApply(inc,conf){ let nc=0, np=0, sk=0; const choice=new Map(conf.map(x=>[x.t+':'+x.key,x.choice]));
-  const takenC=new Set(Object.keys(VAULT.chars)), takenP=new Set(Object.keys(VAULT.places)), now=Date.now();
-  for(const c of inc.chars){ const ch=choice.get('c:'+c.id)||(VAULT.chars[c.id]?'skip':'new'); let rec=c;
+  const takenC=new Set(Object.keys(ALLV.chars)), takenP=new Set(Object.keys(ALLV.places)), now=Date.now();
+  for(const c of inc.chars){ const ch=choice.get('c:'+c.id)||(VAULT.chars[c.id]?'skip':ALLV.chars[c.id]?'add':'new'); let rec=c;
     if(ch==='skip'){ sk++; continue; }
     if(ch==='add'){ rec={...c,id:uniqueName(c.id,takenC),savedAt:now,updatedAt:now}; }
     else if(ch==='overwrite'){ const ex=VAULT.chars[c.id], a=c.images, b=ex.images||{}; rec={...c,images:{ref:a.ref||b.ref||null,turn:a.turn||b.turn||null,expr:a.expr||b.expr||null,outfits:a.outfits.length?a.outfits:(b.outfits||[])},savedAt:ex.savedAt||c.savedAt,updatedAt:now}; }
     rec.ready=charReady(rec); if(await vaultPut('characters',rec)){ takenC.add(rec.id); nc++; } }
-  for(const p of inc.places){ const ch=choice.get('p:'+p.name)||(VAULT.places[p.name]?'skip':'new'); let rec=p;
+  for(const p of inc.places){ const ch=choice.get('p:'+p.name)||(VAULT.places[p.name]?'skip':ALLV.places[p.name]?'add':'new'); let rec=p;
     if(ch==='skip'){ sk++; continue; }
     if(ch==='add') rec={...p,name:uniqueName(p.name,takenP),savedAt:now,updatedAt:now};
     else if(ch==='overwrite'){ const ex=VAULT.places[p.name]; rec={...p,image:p.image||ex.image||null,savedAt:ex.savedAt||p.savedAt,updatedAt:now}; }
     if(await vaultPut('places',rec)){ takenP.add(rec.name); np++; } }
   syncLinked(); save(); VS.imp=null; VS.view='list'; VS.tab='chars'; VS.msg='';
   toast(`인물 ${nc}명 · 장소 ${np}개를 보관함에 넣었어요${sk?` (건너뜀 ${sk})`:''}`); vRender(); }
+async function vaultImportInto(id,raw){ const inc=normIncoming(raw); if(!VAULT.ok) return; const takenC=new Set(Object.keys(ALLV.chars)), takenP=new Set(Object.keys(ALLV.places));
+  for(const c of inc.chars){ const rec=takenC.has(c.id)?{...c,id:uniqueName(c.id,takenC)}:c; rec.ready=charReady(rec); if(await vaultPut('characters',rec,id)) takenC.add(rec.id); }
+  for(const p of inc.places){ const rec=takenP.has(p.name)?{...p,name:uniqueName(p.name,takenP)}:p; if(await vaultPut('places',rec,id)) takenP.add(rec.name); } }
 function importViewHTML(){ const {conf}=VS.imp;
   return `<p class="sub" style="margin:0 0 10px">보관함에 이미 있는 ID(이름)예요. 하나씩 정해 주세요. 똑같은 것은 자동으로 건너뛰었어요.</p>
   <div class="vlist">${conf.map((x,j)=>`<div class="vrow imp"><span class="ref">${vThumb(x.t==='c'?(x.inc.images||{}).ref:x.inc.image,x.key)}</span><span class="vrow-m"><b>${esc(x.key)}</b><small>보관함: ${dateKo(x.ex.updatedAt)}${x.t==='c'?` · 이미지 ${imgCount(x.ex)}장`:''} / 가져오는 것: ${dateKo(x.inc.updatedAt)}${x.t==='c'?` · 이미지 ${imgCount(x.inc)}장`:''}</small>
@@ -2965,18 +3052,23 @@ document.addEventListener('click',async e=>{ const b=e.target.closest('[data-v]'
     try{ const d=JSON.parse(await file.text()); const v=d&&d.app==='instatoon-characters'?d:(d&&d.app==='instatoon'&&d.vault?d.vault:null); if(!v) throw 0; vaultImportFlow(v); }
     catch(_){ toast('캐릭터 파일이 아니에요. "캐릭터만 내보내기"로 받은 .json이나 보관함이 들어 있는 백업 파일을 골라 주세요'); } }); })();
 /* 백업 저장: 보관함 이미지가 있으면 저장 전에 용량을 보여 주고 "이미지 빼고 저장" 선택지를 준다 */
-function backupSizeInfo(){ let base=JSON.stringify(S).length; try{ [0,1,2].forEach(k=>{ base+=(kv.getItem('instatoon.photo.'+k)||'').length+(kv.getItem(refKey(k))||'').length; }); Object.keys(ARTS).forEach(k=>{ base+=(kv.getItem('instatoon.sample.'+k)||'').length; }); }catch(_){}
-  return {work:base,img:Math.round(vaultBytes()*4/3)}; }
-function backupStart(){ if(!vaultCount()||!vaultBytes()) return makeBackup({img:true});
-  const z=backupSizeInfo(); let w=document.getElementById('bkSheet'); if(!w){ w=document.createElement('div'); w.id='bkSheet'; w.className='sheet'; w.setAttribute('role','dialog'); w.setAttribute('aria-modal','true'); w.setAttribute('aria-labelledby','bk-t'); document.body.appendChild(w); }
+function backupSizeInfo(ids,vb){ let base=0; try{ ids.forEach(id=>{ base+=JSON.stringify(shopState(id)).length; [0,1,2].forEach(k=>{ base+=(rawGet('instatoon.photo.'+k,id)||'').length+(rawGet(refKey(k),id)||'').length; }); }); Object.keys(ARTS).forEach(k=>{ base+=(kvRaw.get('instatoon.sample.'+k)||'').length; }); }catch(_){}
+  return {work:base,img:Math.round(vb*4/3)}; }
+let BKO={scope:'shop',shop:''};
+function backupStart(opt){ opt=opt||{}; const scope=opt.scope||'shop', sid=opt.shop||CUR; BKO={scope,shop:sid};
+  const ids=scope==='all'?SHOPS.map(x=>x.id):[sid], srcs=ids.map(id=>id===CUR?VAULT:shopVaultSrc(id));
+  const vb=srcs.reduce((n,v)=>n+vaultBytes(v),0), nC=srcs.reduce((n,v)=>n+Object.keys(v.chars).length,0), nP=srcs.reduce((n,v)=>n+Object.keys(v.places).length,0);
+  if(!(nC+nP)||!vb) return makeBackup({img:true,scope,shop:sid});
+  const z=backupSizeInfo(ids,vb); let w=document.getElementById('bkSheet'); if(!w){ w=document.createElement('div'); w.id='bkSheet'; w.className='sheet'; w.setAttribute('role','dialog'); w.setAttribute('aria-modal','true'); w.setAttribute('aria-labelledby','bk-t'); document.body.appendChild(w); }
   w.innerHTML=`<div class="sheet-bg" data-bk="close"></div><div class="sheet-in" role="document"><div class="sheet-h"><h2 id="bk-t">백업 저장</h2><button type="button" class="btn sm ghost" data-bk="close">닫기</button></div>
+    ${scope==='all'?`<p class="sub" style="margin:0 0 6px">전체 가게 ${ids.length}개를 파일 하나로 저장해요.</p>`:MANY_SHOPS()?`<p class="sub" style="margin:0 0 6px">가게: <b>${esc(shopName(sid))}</b></p>`:''}
     <p class="sub" style="margin:0 0 6px">작업 약 ${fmtSize(z.work)} + 보관함 이미지 약 ${fmtSize(z.img)} = <b>약 ${fmtSize(z.work+z.img)}</b></p>
-    <p class="sub" style="margin:0 0 12px">보관함: 인물 ${Object.keys(VAULT.chars).length}명 · 장소 ${Object.keys(VAULT.places).length}개. 이미지를 빼면 파일은 작아지지만 기준 이미지 등은 다시 올려야 해요(인물 정보와 카드는 그대로 들어가요).</p>
+    <p class="sub" style="margin:0 0 12px">보관함: 인물 ${nC}명 · 장소 ${nP}개. 이미지를 빼면 파일은 작아지지만 기준 이미지 등은 다시 올려야 해요(인물 정보와 카드는 그대로 들어가요).</p>
     <div class="row"><button type="button" class="btn pri" data-bk="full">보관함 이미지 포함해 저장</button><button type="button" class="btn" data-bk="light">이미지 빼고 저장</button></div></div>`;
   w.hidden=false; document.body.classList.add('sheet-open'); }
 document.addEventListener('click',async e=>{ const b=e.target.closest('[data-bk]'); if(!b) return; e.preventDefault(); const a=b.dataset.bk, w=document.getElementById('bkSheet'); if(w) w.hidden=true;
   const k=document.getElementById('keySheet'), v=document.getElementById('vaultSheet'); if((!k||k.hidden)&&(!v||v.hidden)) document.body.classList.remove('sheet-open');
-  if(a==='full') await makeBackup({img:true}); else if(a==='light') await makeBackup({img:false}); });
+  if(a==='full') await makeBackup({img:true,...BKO}); else if(a==='light') await makeBackup({img:false,...BKO}); });
 
 /* ================= 이벤트 ================= */
 /* ---------- 드롭다운 동작 ---------- */
@@ -3325,7 +3417,7 @@ const CL={ get key(){ try{ return kv.getItem('instatoon.claudeKey')||''; }catch(
   get plan(){ try{ return kv.getItem('instatoon.claudePlan')||CL_PLAN; }catch(_){ return CL_PLAN; } },
   get fast(){ try{ return kv.getItem('instatoon.claudeFast')||CL_FAST; }catch(_){ return CL_FAST; } } };
 const monthKey=()=>{ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); };
-const SHOP_ID='s1'; /* 4d에서 가게별로 나뉜다 */
+const SHOP_ID=CUR; /* 사용액은 가게별로 쌓는다(저장 키 하나를 모든 가게가 같이 쓰고, 안에서 가게 id로 나눔) */
 function usageAll(){ try{ return JSON.parse(kv.getItem('instatoon.usage')||'{}')||{}; }catch(_){ return {}; } }
 function recordUsage(kind,u){
   if(!u) return; const all=usageAll(), ym=monthKey(), m=(all[ym]=all[ym]||{}), s=(m[SHOP_ID]=m[SHOP_ID]||{}), k=(s[kind]=s[kind]||{i:0,o:0,n:0});
@@ -3851,7 +3943,7 @@ window.addEventListener('hashchange',admHash); admHash();
 
 /* ================= ☰ 메뉴 · 저장 상태 · 백업 창 (4b) =================
    머리말은 [☰] 로고 …… [저장 상태] [인스타툰 노트]. 메뉴는 왼쪽에서 열리고, 바깥을 누르거나 Esc를 누르면 닫힌다.
-   메뉴 맨 위 #shopSlot은 4d(가게 전환)가 채울 빈 자리이며 지금은 아무것도 그리지 않는다. */
+   메뉴 맨 위 #shopSlot은 4d(가게 전환)가 채운다(아래 "가게 전환"). */
 let menuTimer=null;
 const menuIsOpen=()=>{ const w=$('#menuWrap'); return !!w&&!w.hidden&&w.classList.contains('on'); };
 function menuMark(){ const cur=(S.mode||'one')==='month'?'month':'home'; document.querySelectorAll('#menuPanel [data-cur]').forEach(b=>{ if(b.dataset.cur===cur) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current'); }); }
@@ -3909,14 +4001,113 @@ function openBackupWin(){
   let w=document.getElementById('bkWin'); if(!w){ w=document.createElement('div'); w.id='bkWin'; w.className='sheet'; w.setAttribute('role','dialog'); w.setAttribute('aria-modal','true'); w.setAttribute('aria-labelledby','bkw-t'); document.body.appendChild(w); }
   w.innerHTML=`<div class="sheet-bg" data-bkw="close"></div><div class="sheet-in" role="document"><div class="sheet-h"><h2 id="bkw-t">백업</h2><button type="button" class="btn sm ghost" data-bkw="close" aria-label="닫기">닫기</button></div>
     <p class="sub" style="margin:0 0 12px">작업은 이 브라우저에만 저장돼요. 다른 기기로 옮기거나 브라우저 기록을 지우기 전에 백업 파일을 받아 두세요.</p>
+    ${MANY_SHOPS()?`<fieldset class="bkscope"><legend class="sub">저장 범위</legend><label><input type="radio" name="bkScope" value="shop" checked> 이 가게만 (${esc(shopName(CUR))})</label><label><input type="radio" name="bkScope" value="all"> 전체 가게 (${SHOPS.length}개)</label></fieldset>`:''}
     <div class="row"><button type="button" class="btn pri" data-bkw="save">백업 저장</button><button type="button" class="btn" data-bkw="load">불러오기</button></div>
     <p class="sub" style="margin:12px 0 0">다른 기기에서는 백업 불러오기로 그대로 이어서 할 수 있어요.</p>
     <p class="sub" id="bkw-last" style="margin:6px 0 0">${esc(bkAgo())}</p></div>`;
   w.hidden=false; document.body.classList.add('sheet-open'); setTimeout(()=>{ const f=w.querySelector('[data-bkw="save"]'); if(f) f.focus({preventScroll:true}); },30); }
 function closeBackupWin(){ const w=document.getElementById('bkWin'); if(w) w.hidden=true; const k=document.getElementById('keySheet'), v=document.getElementById('vaultSheet'); if((!k||k.hidden)&&(!v||v.hidden)) document.body.classList.remove('sheet-open'); }
-document.addEventListener('click',e=>{ const b=e.target.closest('[data-bkw]'); if(!b) return; e.preventDefault(); const a=b.dataset.bkw; closeBackupWin();
-  if(a==='save') backupStart(); else if(a==='load') $('#backupIn').click(); });
+document.addEventListener('click',e=>{ const b=e.target.closest('[data-bkw]'); if(!b) return; e.preventDefault(); const a=b.dataset.bkw, sc=((document.querySelector('input[name="bkScope"]:checked')||{}).value)||'shop'; closeBackupWin();
+  if(a==='save') backupStart({scope:sc}); else if(a==='load') $('#backupIn').click(); });
 document.addEventListener('keydown',e=>{ const w=document.getElementById('bkWin'); if(e.key==='Escape'&&w&&!w.hidden) closeBackupWin(); });
+
+
+/* ================= 가게 전환 · 추가 · 이름 바꾸기 · 지우기 (4d) =================
+   ☰ 메뉴 맨 위 #shopSlot에 "내 가게 ▾"(1개) / "지금 가게: 이름 ▾"(2개 이상). 누르면 바닥 시트. 새 버튼은 "+ 가게 추가" 하나뿐. */
+const SH={view:'list',menu:'',editing:'',delId:'',delStep:0,adding:false,msg:'',est:null};
+const SHOP_PHOTO_KEYS=()=>{ const o=[]; [0,1,2].forEach(k=>{ o.push('instatoon.photo.'+k); o.push(refKey(k)); }); return o; };
+const SHOP_ALL_KEYS=['instatoonRoom.v4','instatoon.copied','instatoon.lastBackup','instatoon.backupBase','instatoon.backupSnooze','instatoon.vaultBackup','instatoon.vaultChanged','instatoon.demoBackup','instatoon.shopSaved'];
+function shopState(id){ if(id===CUR) return S; try{ const d=JSON.parse(rawGet(KEY,id)||'null'); if(d&&d.info){ const b=blank(); return fixMode({...b,...d,info:{...b.info,...d.info}}); } }catch(_){} return blank(); }
+function shopEpisodes(id){ const st=shopState(id), h=(st.history||[]).length; const open=st.toon&&(st.toon.cuts||[]).length&&!(st.history||[]).some(x=>x&&x.hid&&x.hid===st.toon.hid); return h+(open?1:0); }
+function shopSavedAt(id){ if(id===CUR&&lastSavedAt) return lastSavedAt; return +rawGet('instatoon.shopSaved',id)||0; }
+function shopBackupOld(id){ if(shopEpisodes(id)===0) return false; const ref=+rawGet('instatoon.lastBackup',id)||+rawGet('instatoon.backupBase',id)||0; return !ref||Date.now()-ref>=7*DAY; }
+function shopVaultSrc(id){ const o={chars:{},places:{}}; ['chars','places'].forEach(m=>Object.entries(ALLV[m]).forEach(([k,x])=>{ if(((x&&x.shop)||'s1')===id) o[m][k]=x; })); return o; }
+function shopVaultCount(id){ const v=shopVaultSrc(id); return Object.keys(v.chars).length+Object.keys(v.places).length; }
+function newShopId(){ let id; do{ id='s'+Date.now().toString(36).slice(-6)+Math.floor(Math.random()*36).toString(36); }while(SHOPS.some(x=>x.id===id)); return id; }
+function uniqueShopName(n,skipId){ n=String(n||'').trim().slice(0,20)||'새 가게'; let m=n, i=2; while(SHOPS.some(x=>x.id!==skipId&&x.name===m)) m=n.slice(0,16)+' ('+(i++)+')'; return m; }
+function shopSlotRender(){ const el=$('#shopSlot'); if(!el) return; const nm=shopName(CUR)||SHOP_DEFAULT;
+  el.hidden=false; el.innerHTML=`<button type="button" class="mi shopbtn" data-shop="open" aria-haspopup="dialog"><span>${MANY_SHOPS()?'지금 가게: '+esc(nm):esc(nm)}</span><span aria-hidden="true">▾</span></button>`; }
+const shopBusy=()=>!!(busy||(typeof autoCtl!=='undefined'&&autoCtl));
+function switchShop(id){ if(id===CUR) return closeShopSheet();
+  if(!SHOPS.some(x=>x.id===id)) return;
+  if(shopBusy()){ SH.msg='지금 AI나 그림 작업이 진행 중이에요. 끝난 뒤에 바꿔 주세요.'; return shopRender(); }
+  try{ save(); }catch(_){} try{ kv.flush&&kv.flush(); }catch(_){}
+  try{ sessionStorage.setItem(SHOP_TAB_KEY,id); }catch(_){} try{ kvRaw.set(SHOP_LAST_KEY,id); }catch(_){}
+  try{ history.replaceState(null,'',location.pathname+location.search); }catch(_){}
+  setTimeout(()=>location.reload(),60); }
+async function shopEstimate(){ try{ if(navigator.storage&&navigator.storage.estimate) SH.est=await navigator.storage.estimate(); }catch(_){} }
+function shopListHTML(){
+  const rows=SHOPS.map(s=>{ const n=shopEpisodes(s.id), t=shopSavedAt(s.id), old=shopBackupOld(s.id), cur=s.id===CUR;
+    const uc=usageCost(null,s.id), usage=uc.n?` · Claude 이번 달 약 ${Math.round(uc.usd*KRW_PER_USD).toLocaleString()}원`:'';
+    const meta=`편 ${n}${t?' · '+dateKo(t)+' 저장':''}${usage}`;
+    if(SH.editing===s.id) return `<div class="shrow"><span class="vrow-m"><input class="in" id="shopRenIn" value="${esc(s.name)}" maxlength="20" aria-label="가게 이름"></span><span class="shrow-b"><button type="button" class="btn sm pri" data-shop="renok" data-id="${esc(s.id)}">저장</button><button type="button" class="btn sm ghost" data-shop="rencancel">취소</button></span></div>`;
+    const menu=SH.menu===s.id?`<div class="shmenu" role="group" aria-label="${esc(s.name)} 관리"><button type="button" class="btn sm" data-shop="ren" data-id="${esc(s.id)}">이름 바꾸기</button><button type="button" class="btn sm" data-shop="bk" data-id="${esc(s.id)}">이 가게 백업</button>${SHOPS.length>1?`<button type="button" class="btn sm" data-shop="del" data-id="${esc(s.id)}">지우기</button>`:''}</div>`:'';
+    return `<div class="shwrap"><div class="shrow"><button type="button" class="shsw" data-shop="sw" data-id="${esc(s.id)}" ${cur?'aria-current="true"':''}><span class="vrow-m"><b>${esc(s.name)}${cur?' <small>· 지금 가게</small>':''}</b><small>${esc(meta)}${old?' <i class="shdot" title="백업한 지 오래됐어요" aria-label="백업한 지 오래됐어요"></i>':''}</small></span></button><button type="button" class="btn sm ghost shmore" data-shop="menu" data-id="${esc(s.id)}" aria-label="${esc(s.name)} 관리 메뉴" aria-expanded="${SH.menu===s.id}">⋯</button></div>${menu}</div>`; }).join('');
+  const add=SH.adding?`<div class="shrow"><span class="vrow-m"><input class="in" id="shopAddIn" placeholder="가게 이름" maxlength="20" aria-label="새 가게 이름"></span><span class="shrow-b"><button type="button" class="btn sm pri" data-shop="addok">추가</button><button type="button" class="btn sm ghost" data-shop="addcancel">취소</button></span></div>`:`<button type="button" class="btn" data-shop="add" style="margin-top:10px">+ 가게 추가</button>`;
+  const e=SH.est, space=(e&&e.quota)?`<p class="sub" style="margin:12px 0 0">저장 공간: ${fmtSize(e.usage||0)} 사용 중 (이 브라우저가 허용하는 약 ${fmtSize(e.quota)} 중)</p>`:'';
+  return `<p class="sub" style="margin:0 0 10px">가게마다 작업·사진·캐릭터 보관함이 따로 저장돼요. 가게를 바꾸면 화면이 새로고침돼요.</p><div class="vlist">${rows}</div>${add}${SH.msg?`<p class="cwarn" role="status">${esc(SH.msg)}</p>`:''}${space}`; }
+function shopDelHTML(){ const s=SHOPS.find(x=>x.id===SH.delId); if(!s) return ''; const n=shopEpisodes(s.id), v=shopVaultCount(s.id);
+  if(SH.delStep===1) return `<p style="margin:0 0 6px"><b>"${esc(s.name)}"</b>을(를) 지우기 전에 백업 파일을 받아 둘까요?</p><p class="sub" style="margin:0 0 12px">지우면 이 가게의 작업(편 ${n}), 사진, 캐릭터 보관함(${v}개)이 이 브라우저에서 사라져요.</p><div class="row"><button type="button" class="btn pri" data-shop="delbk">백업 받고 계속</button><button type="button" class="btn" data-shop="delnext">백업 없이 계속</button><button type="button" class="btn ghost" data-shop="delcancel">취소</button></div>`;
+  return `<p style="margin:0 0 6px"><b>"${esc(s.name)}"</b>을(를) 정말 지울까요?</p><p class="sub" style="margin:0 0 12px">되돌릴 수 없어요.</p><div class="row"><button type="button" class="btn pri" data-shop="delgo">정말 지우기</button><button type="button" class="btn ghost" data-shop="delcancel">취소</button></div>`; }
+function shopRender(){ const w=document.getElementById('shopSheet'); if(!w||w.hidden) return; const sc=w.querySelector('.sheet-in'), top=sc?sc.scrollTop:0;
+  w.innerHTML=`<div class="sheet-bg" data-shop="close"></div><div class="sheet-in" role="document"><div class="sheet-h"><h2 id="shop-t">${SH.view==='del'?'가게 지우기':'가게'}</h2><button type="button" class="btn sm ghost" data-shop="close">닫기</button></div>${SH.view==='del'?shopDelHTML():shopListHTML()}</div>`;
+  const n=w.querySelector('.sheet-in'); if(n) n.scrollTop=top; const f=w.querySelector('#shopRenIn,#shopAddIn'); if(f){ f.focus(); try{ f.select(); }catch(_){} } }
+function openShopSheet(){ SHOPS=readShops(); SH.view='list'; SH.menu=''; SH.editing=''; SH.adding=false; SH.msg=''; closeMenu(false);
+  let w=document.getElementById('shopSheet'); if(!w){ w=document.createElement('div'); w.id='shopSheet'; w.className='sheet'; w.setAttribute('role','dialog'); w.setAttribute('aria-modal','true'); w.setAttribute('aria-labelledby','shop-t'); document.body.appendChild(w); }
+  w.hidden=false; document.body.classList.add('sheet-open'); shopRender(); shopEstimate().then(()=>shopRender()); }
+function closeShopSheet(){ const w=document.getElementById('shopSheet'); if(w) w.hidden=true; const k=document.getElementById('keySheet'), v=document.getElementById('vaultSheet'), b=document.getElementById('bkWin'); if((!k||k.hidden)&&(!v||v.hidden)&&(!b||b.hidden)) document.body.classList.remove('sheet-open'); }
+function shopAfterChange(){ saveShops(); shopSlotRender(); renderSaved(); shopRender(); }
+async function shopDelete(id){
+  [...SHOP_ALL_KEYS,...SHOP_PHOTO_KEYS()].forEach(k=>rawDel(k,id));
+  const v=shopVaultSrc(id); for(const [st,m] of [['characters','chars'],['places','places']]) for(const key of Object.keys(v[m])) await vaultDelRaw(st,key);
+  SHOPS=SHOPS.filter(x=>x.id!==id); saveShops();
+  if(id===CUR){ const nx=SHOPS[0].id; try{ sessionStorage.setItem(SHOP_TAB_KEY,nx); }catch(_){} try{ kvRaw.set(SHOP_LAST_KEY,nx); }catch(_){} try{ kv.flush&&kv.flush(); }catch(_){} location.reload(); return; }
+  SH.view='list'; SH.delId=''; SH.delStep=0; SH.menu=''; toast('가게를 지웠어요'); shopRender(); }
+document.addEventListener('click',async e=>{ const b=e.target.closest('[data-shop]'); if(!b) return; const a=b.dataset.shop, id=b.dataset.id||'';
+  if(a==='open'){ e.preventDefault(); return openShopSheet(); }
+  const w=document.getElementById('shopSheet'); if(!(w&&w.contains(b))) return;
+  if(a==='close') return closeShopSheet();
+  if(a==='sw') return switchShop(id);
+  if(a==='menu'){ SH.menu=SH.menu===id?'':id; SH.msg=''; return shopRender(); }
+  if(a==='ren'){ SH.editing=id; SH.menu=''; return shopRender(); }
+  if(a==='rencancel'){ SH.editing=''; return shopRender(); }
+  if(a==='renok'){ const v=($('#shopRenIn')||{}).value||''; if(!v.trim()){ SH.msg='이름을 적어 주세요.'; return shopRender(); } const s=SHOPS.find(x=>x.id===id); if(s) s.name=uniqueShopName(v,id); SH.editing=''; SH.msg=''; return shopAfterChange(); }
+  if(a==='add'){ SH.adding=true; SH.msg=''; return shopRender(); }
+  if(a==='addcancel'){ SH.adding=false; return shopRender(); }
+  if(a==='addok'){ const v=($('#shopAddIn')||{}).value||''; if(!v.trim()){ SH.msg='가게 이름을 적어 주세요.'; return shopRender(); } stampCur(); SHOPS.push({id:newShopId(),name:uniqueShopName(v),at:Date.now()}); SH.adding=false; SH.msg='가게를 추가했어요. 눌러서 바꿔 보세요.'; return shopAfterChange(); }
+  if(a==='bk'){ SH.menu=''; closeShopSheet(); return backupStart({scope:'shop',shop:id}); }
+  if(a==='del'){ if(SHOPS.length<2) return; SH.view='del'; SH.delId=id; SH.delStep=1; return shopRender(); }
+  if(a==='delcancel'){ SH.view='list'; SH.delId=''; SH.delStep=0; return shopRender(); }
+  if(a==='delbk'){ SH.delStep=2; shopRender(); return backupStart({scope:'shop',shop:SH.delId}); }
+  if(a==='delnext'){ SH.delStep=2; return shopRender(); }
+  if(a==='delgo'){ if(SH.delStep===2&&SH.delId) return shopDelete(SH.delId); } });
+document.addEventListener('keydown',e=>{ const w=document.getElementById('shopSheet'); if(!w||w.hidden) return;
+  if(e.key==='Escape'){ e.preventDefault(); return closeShopSheet(); }
+  if(e.key==='Enter'){ const t=e.target; if(t&&t.id==='shopRenIn'){ e.preventDefault(); const bt=w.querySelector('[data-shop="renok"]'); if(bt) bt.click(); } else if(t&&t.id==='shopAddIn'){ e.preventDefault(); const bt=w.querySelector('[data-shop="addok"]'); if(bt) bt.click(); } } });
+
+/* ---------- 다른 가게에서 가져오기(보관함 · 복사, 이동 아님) ---------- */
+function otherShopsWithVault(){ return SHOPS.filter(s=>s.id!==CUR&&shopVaultCount(s.id)>0); }
+function copyViewHTML(){ const list=otherShopsWithVault();
+  if(!list.length) return `<p class="sub">다른 가게에 가져올 캐릭터나 장소가 없어요.</p><div class="row" style="margin-top:12px"><button type="button" class="btn" data-v="back">돌아가기</button></div>`;
+  const sel=VS.copyShop&&list.some(s=>s.id===VS.copyShop)?VS.copyShop:list[0].id; VS.copyShop=sel; const src=shopVaultSrc(sel);
+  const rows=[...Object.values(src.chars).map(c=>`<label class="chk"><input type="checkbox" data-vcp="c:${esc(c.id)}" ${VS.copySel&&VS.copySel.has('c:'+c.id)?'checked':''}> 인물 · ${esc(c.id)}</label>`),...Object.values(src.places).map(p=>`<label class="chk"><input type="checkbox" data-vcp="p:${esc(p.name)}" ${VS.copySel&&VS.copySel.has('p:'+p.name)?'checked':''}> 장소 · ${esc(p.name)}</label>`)].join('');
+  return `<p class="sub" style="margin:0 0 10px">다른 가게의 캐릭터·장소를 이 가게(${esc(shopName(CUR))})로 <b>복사</b>해요. 원래 가게에는 그대로 남아요.</p>
+  <label class="f" for="vcpShop">가져올 가게</label><select class="in" id="vcpShop" data-vcpshop>${list.map(s=>`<option value="${esc(s.id)}" ${s.id===sel?'selected':''}>${esc(s.name)}</option>`).join('')}</select>
+  <div class="vlist" style="margin-top:10px">${rows}</div>
+  <div class="row" style="margin-top:12px"><button type="button" class="btn pri" data-v="cpgo">복사하기</button><button type="button" class="btn" data-v="back">취소</button></div>`; }
+document.addEventListener('change',e=>{ const el=e.target; if(!el.dataset) return;
+  if(el.dataset.vcpshop!==undefined){ VS.copyShop=el.value; VS.copySel=new Set(); return vRender(); }
+  if(el.dataset.vcp){ VS.copySel=VS.copySel||new Set(); el.checked?VS.copySel.add(el.dataset.vcp):VS.copySel.delete(el.dataset.vcp); } });
+async function vaultCopyFromShop(){ const src=shopVaultSrc(VS.copyShop), sel=VS.copySel||new Set(); if(!sel.size){ VS.msg='가져올 항목을 골라 주세요.'; return vRender(); }
+  const takenC=new Set(Object.keys(ALLV.chars)), takenP=new Set(Object.keys(ALLV.places)), now=Date.now(); let nc=0, np=0;
+  for(const key of sel){ const t=key[0], k=key.slice(2);
+    if(t==='c'&&src.chars[k]){ const c=src.chars[k], id=takenC.has(c.id)?uniqueName(c.id,takenC):c.id; const rec={...c,id,images:{...(c.images||{})},card:{...(c.card||{})},savedAt:now,updatedAt:now}; rec.ready=charReady(rec); if(await vaultPut('characters',rec)){ takenC.add(id); nc++; } }
+    if(t==='p'&&src.places[k]){ const p=src.places[k], name=takenP.has(p.name)?uniqueName(p.name,takenP):p.name; if(await vaultPut('places',{...p,name,savedAt:now,updatedAt:now})){ takenP.add(name); np++; } } }
+  VS.copySel=new Set(); VS.view='list'; VS.msg=`인물 ${nc}명 · 장소 ${np}개를 복사했어요`; toast(VS.msg); vRender(); }
+document.addEventListener('click',e=>{ const b=e.target.closest('[data-v]'); if(!b) return; const w=document.getElementById('vaultSheet'); if(!(w&&w.contains(b))) return;
+  if(b.dataset.v==='cp'){ VS.view='copy'; VS.msg=''; VS.copySel=new Set(); return vRender(); }
+  if(b.dataset.v==='cpgo') return vaultCopyFromShop(); });
+shopSlotRender();
 
 /* ================= 시작 ================= */
 const BOOT_HASH=location.hash;
