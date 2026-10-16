@@ -246,6 +246,8 @@ export function head({ title, desc, canonical, type, extra = '', body = '', ga =
 <meta property="og:image:width" content="${OG_IMAGE.width}">
 <meta property="og:image:height" content="${OG_IMAGE.height}">
 <meta property="og:image:alt" content="${esc(OG_IMAGE.alt)}">
+<meta property="og:image:secure_url" content="${ogImageUrl}">
+<link rel="image_src" href="${ogImageUrl}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${esc(title)}">
 <meta name="twitter:description" content="${esc(desc)}">
