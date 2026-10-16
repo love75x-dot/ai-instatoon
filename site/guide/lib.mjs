@@ -6,6 +6,7 @@ export const DATE = '2026-10-01'; // 글에 published/modified가 없을 때의 
 
 import { gaSnippet } from '../analytics.mjs';
 import { OG_IMAGE, ogImageUrl, THEME_COLOR, footerMetaHtml } from '../site-meta.mjs';
+import { guideFontHead } from '../fonts.mjs';
 
 export const CATS = {
   toon: { name: '인스타툰 가이드', desc: '인스타툰의 개념, 구성, 스토리 만드는 법' },
@@ -193,8 +194,8 @@ footer p{margin:10px 0 0;font-size:13px}
 footer .fmeta a{color:var(--ink-2)}
 `;
 
-/* 글꼴 CSS는 화면 그리기를 막지 않게 불러온다(다 받으면 적용, 받는 동안은 기본 글꼴) */
-const FONTS = '<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" media="print" onload="this.media=\'all\'"><noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"></noscript>';
+/* 글꼴은 이 사이트에서 직접 제공한다(site/assets/fonts). 자주 쓰는 글자 조각은 미리 불러온다 */
+const FONTS = guideFontHead();
 
 const MENU_JS = `(function(){var b=document.getElementById('menuBtn'),w=document.getElementById('menuWrap');if(!b||!w)return;var t,on=function(){return !w.hidden&&w.classList.contains('on')};
 function op(){clearTimeout(t);w.hidden=false;document.body.classList.add('menu-open');b.setAttribute('aria-expanded','true');requestAnimationFrame(function(){requestAnimationFrame(function(){w.classList.add('on')})});setTimeout(function(){var f=w.querySelector('.mi');if(f&&on())f.focus({preventScroll:true})},40)}
