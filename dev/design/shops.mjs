@@ -37,7 +37,7 @@ C.ok(promptA0.includes('아침단골') && promptA0.includes('빵순이'), 'A 가
 
 // ─── 2. 가게 추가 · 이름 바꾸기 ───
 await menuShop(pg);
-C.ok(await pg.locator('#shopSheet').innerText().then((t) => /가게마다 작업·사진·캐릭터 보관함이 따로/.test(t) && /\+ 가게 추가/.test(t) && /저장 공간|편 /.test(t)), '가게 시트: 목록·"+ 가게 추가"');
+C.ok(await pg.locator('#shopSheet').innerText().then((t) => /가게마다 작업·사진·내 캐릭터가 따로/.test(t) && /\+ 가게 추가/.test(t) && /저장 공간|편 /.test(t)), '가게 시트: 목록·"+ 가게 추가"');
 C.ok(await pg.locator('#shopSheet [data-shop="add"]').count() === 1, '새 버튼은 "+ 가게 추가" 하나뿐');
 await pg.locator('#shopSheet [data-shop="add"]').click(); await pg.waitForTimeout(120);
 await pg.locator('#shopAddIn').fill('저녁식당'); await pg.locator('#shopSheet [data-shop="addok"]').click(); await pg.waitForTimeout(200);

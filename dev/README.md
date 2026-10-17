@@ -10,6 +10,7 @@
 | 컷 편집 | `node dev/design/edit.mjs` | 앱 2단계(컷 편집) 기능·"새 칸은 프롬프트를 바꾸지 않는다" |
 | 저장소 이전 | `node dev/compat/storage.mjs` | localStorage → IndexedDB 자동 이전 안전성(원본 보존, 실패·중단·동시 탭·IndexedDB 없음 등) |
 | 주소·SEO | `node dev/snapshots/seo.mjs` | /guide/ 주소, sitemap, canonical, robots 불변 |
+| UI 정리 | `node dev/design/ui.mjs` | 1단계 순서·이름·"고급"·내 가게 설정·옛 작업 호환·도움말 |
 
 화면 캡처: `npm run snapshot [폴더]` → `dev/snapshots/<폴더>/` (기준은 `before/`).
 `npm run check:app`은 먼저 빌드한 뒤 위 3가지를 돌린다(빌드 결과 `deploy/`를 검사하므로 `site/index.html`을 고친 뒤엔 반드시 빌드).

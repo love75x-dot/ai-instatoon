@@ -199,7 +199,7 @@ for (const [vk, vp, want] of [['휴대폰 390', MOB, '툰 만들기'], ['PC 1300
 for (const [vk, vp] of [['휴대폰 390', MOB], ['PC 1300', PC]]) {
   const { page } = await open(vp, withKey);
   const f = await page.evaluate(() => ({ one: document.querySelectorAll('.faq > details.faqall').length, inner: document.querySelectorAll('.faq details.faqall > details').length, opened: document.querySelector('.faqall').open, sum: document.querySelector('.faqall > summary').textContent.trim(), gal: document.querySelectorAll('.galslot, #exSec').length, exHome: document.querySelectorAll('#main .exl, .faq .exl').length, ov: document.documentElement.scrollWidth - innerWidth }));
-  C.ok(f.one === 1 && f.inner === 4 && !f.opened && f.sum === '자주 묻는 질문' && f.gal === 0 && f.exHome === 0 && f.ov <= 1, `${vk} 첫 화면 아래: FAQ는 접힌 한 줄("${f.sum}")이고 안에 질문 ${f.inner}개, "이렇게 나와요" 칸은 홈에 없음, 넘침 없음`);
+  C.ok(f.one === 1 && f.inner === 3 && !f.opened && f.sum === '자주 묻는 질문' && f.gal === 0 && f.exHome === 0 && f.ov <= 1, `${vk} 첫 화면 아래: FAQ는 접힌 한 줄("${f.sum}")이고 안에 질문 ${f.inner}개, "이렇게 나와요" 칸은 홈에 없음, 넘침 없음`);
   await page.click('.faqall > summary'); C.ok(await page.evaluate(() => document.querySelector('.faqall').open && getComputedStyle(document.querySelector('.faqall > details')).display !== 'none'), `${vk} FAQ를 누르면 열림`);
   await page.evaluate(() => toggleHelp(true)); await page.waitForTimeout(150);
   const ex = await page.evaluate(() => ({ items: document.querySelectorAll('#help .hex .exg-f').length, head: /이렇게 나와요/.test(document.querySelector('#help .hex .hn').textContent) }));
@@ -225,19 +225,19 @@ for (const [vk, vp] of [['휴대폰 390', MOB], ['PC 1300', PC]]) {
       oldHeader: document.querySelectorAll('.htools, #hmoreBtn, #hpop, #modes, .mode').length,
     };
   });
-  C.ok(e.tourBtn === 0 && e.tourText === 0, `${vk} 첫 화면: "30초 둘러보기" 버튼이 없음(둘러보기 입구는 ☰ 메뉴의 "사용 방법" 하나)`);
-  C.ok(e.help === 0 && e.oldHeader === 0, `${vk} 첫 화면: 메뉴를 닫아 두면 "사용 방법" 입구가 안 보이고, 옛 머리말 도구 버튼·⋯ 메뉴·모드 탭이 없음 (옛 요소 ${e.oldHeader}개)`);
+  C.ok(e.tourBtn === 0 && e.tourText === 0, `${vk} 첫 화면: "30초 둘러보기" 버튼이 없음(둘러보기 입구는 ☰ 메뉴의 "도움말" 하나)`);
+  C.ok(e.help === 0 && e.oldHeader === 0, `${vk} 첫 화면: 메뉴를 닫아 두면 "도움말" 입구가 안 보이고, 옛 머리말 도구 버튼·⋯ 메뉴·모드 탭이 없음 (옛 요소 ${e.oldHeader}개)`);
   C.ok(e.demoLinks === 1 && e.demoOpen === 1, `${vk} 첫 화면: "예시로 먼저 체험해 보기" 입구는 입력칸 근처 글자 링크 한 곳 (${e.demoLinks}개)`);
   C.ok(e.exSections === 0 && e.ex === 0 && e.prep === 0 && e.galDemos === 0, `${vk} 첫 화면: "이렇게 나와요"·갤러리 자리·"준비 중"·체험 버튼이 없음`);
   C.ok(e.model === 0, `${vk} 첫 화면: 모델 이름(대본·기획 모델 / gemini-…)이 보이지 않음`);
   C.ok(e.keyRows === 1 && e.keyInputs === 0, `${vk} 첫 화면: API 키 입구는 "API 키 설정" 줄 하나(입력칸은 시트 안에만)`);
   C.ok(e.saveNote <= 1, `${vk} 첫 화면: "이 브라우저에만 저장" 안내가 한 번만 보임 (${e.saveNote}번)`);
   await page.click('#menuBtn'); await page.waitForTimeout(350);
-  C.ok(await page.evaluate(() => document.querySelectorAll('#menuPanel [data-act="help"]').length === 1), `${vk}: ☰ 메뉴 안에 "사용 방법" 하나`);
+  C.ok(await page.evaluate(() => document.querySelectorAll('#menuPanel [data-act="help"]').length === 1), `${vk}: ☰ 메뉴 안에 "도움말" 하나`);
   // 사용 방법 = 둘러보기 시작 → 마지막에서 전체 안내(패널) 열기. 패널엔 겹치는 입구가 없음
   await page.click('#menuPanel [data-act="help"]');
   await page.waitForTimeout(350);
-  C.ok(await page.evaluate(() => !!document.querySelector('#tour') && document.querySelector('#help').hidden), `${vk}: "사용 방법"을 누르면 둘러보기가 시작되고 안내 패널은 열리지 않음`);
+  C.ok(await page.evaluate(() => !!document.querySelector('#tour') && document.querySelector('#help').hidden), `${vk}: "도움말"을 누르면 둘러보기가 시작되고 안내 패널은 열리지 않음`);
   await page.evaluate(() => { while (document.querySelector('#tour') && !document.querySelector('[data-tour="guide"]')) document.querySelector('[data-tour="next"]').click(); });
   await page.waitForTimeout(200);
   C.ok(await page.evaluate(() => !!document.querySelector('[data-tour="guide"]')), `${vk}: 둘러보기 마지막에 "전체 사용 안내" 버튼`);
@@ -265,13 +265,11 @@ for (const [vk, vp] of [['휴대폰 390', MOB], ['PC 1300', PC]]) {
   C.ok(await d.page.evaluate(() => API.text === 'gemini-3.1-flash-lite'), '모델을 정한 적이 없으면 기본 모델(gemini-3.1-flash-lite, 4c에서 무료 한도가 넉넉한 Flash-Lite로 변경)이 쓰임');
   await d.page.close();
 }
-// 9) FAQ 맨 아래 "전체 사용 안내 보기" 글자 링크 → 상세 안내 패널
+// 9) FAQ 3개만, 맨 아래 "전체 사용 안내 보기" 줄과 노트 글 링크 묶음은 없고 노트로 가는 링크 하나는 남음
 for (const [vk, vp] of [['휴대폰 390', MOB], ['PC 1300', PC]]) {
   const { page } = await open(vp, withKey);
-  const l = await page.evaluate(() => { document.querySelector('.faqall').open = true; const b = document.querySelector('.faq .faq-more .linkbtn'), last = document.querySelector('.faq .faqall').lastElementChild; return { n: document.querySelectorAll('.faq .linkbtn').length, text: b && b.textContent.trim(), last: last === b.parentElement, bg: b && getComputedStyle(b).backgroundColor, border: b && getComputedStyle(b).borderTopWidth, deco: b && getComputedStyle(b).textDecorationLine }; });
-  C.ok(l.n === 1 && l.text === '전체 사용 안내 보기' && l.last && l.border === '0px' && /underline/.test(l.deco), `${vk} FAQ 맨 아래에 글자 링크 "전체 사용 안내 보기" 하나(버튼 모양 아님)`);
-  await page.click('.faq .linkbtn'); await page.waitForTimeout(250);
-  C.ok(await page.evaluate(() => !document.querySelector('#help').hidden && !document.querySelector('#tour') && /1단계|내 이야기 적기/.test(document.querySelector('#help').textContent)), `${vk} 누르면 상세 안내 패널이 열림(둘러보기는 시작되지 않음)`);
+  const l = await page.evaluate(() => ({ q: [...document.querySelectorAll('.faqall > details > summary')].map((s) => s.textContent.trim()), more: document.querySelectorAll('.faq .faq-more, .faq .linkbtn').length, gcards: document.querySelectorAll('.gcards').length, note: !!document.querySelector('.gfoot .gnav a[href="/guide/"]'), legal: ['/about/', '/privacy/', '/terms/', '/sitemap.xml'].every((h) => !!document.querySelector('.gfoot .gnav a[href="' + h + '"]')) }));
+  C.ok(l.q.join('|') === '이용료가 있나요?|그림은 어디서 그리나요?|작업이 사라지면 어떻게 하나요?' && l.more === 0 && l.gcards === 0 && l.note && l.legal, `${vk} 홈 아래: FAQ 3개(${l.q.length}), 노트 글 링크 묶음·"전체 사용 안내" 줄 없음, 노트·소개·개인정보·이용안내·사이트맵 링크는 그대로`);
   await page.close();
 }
 await browser.close(); srv.close();

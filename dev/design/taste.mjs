@@ -32,7 +32,7 @@ const shown = (page, id) => page.evaluate((i) => { const e = document.getElement
 {
   const txt = (page) => page.evaluate(() => document.querySelector('#keyTxt').textContent.trim());
   const on = await open({ cfg: ON, reply: okMake });
-  C.ok(await txt(on.page) === '무료 맛보기로 바로 만들 수 있어요 · 내 키 넣기(선택)', '키 없음 + 맛보기 켜짐: "무료 맛보기로 바로 만들 수 있어요 · 내 키 넣기(선택)"');
+  C.ok(await txt(on.page) === '오늘 무료 1회 · 내 키 설정', '키 없음 + 맛보기 켜짐: "오늘 무료 1회 · 내 키 설정"');
   C.ok(!/필요해요/.test(await on.page.locator('#keyBox').innerText()), '키 없음 + 맛보기 켜짐: 키 줄에 "필요해요"가 없음');
   await on.page.evaluate(() => { S.demo = true; refreshKeyLine(); }); C.ok(/둘러보기만/.test(await txt(on.page)), '체험 모드: "둘러보기만 하면 필요 없어요"');
   await on.ctx.close();

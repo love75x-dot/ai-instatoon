@@ -16,8 +16,8 @@ for (const [vk, vp] of [['PC 1300', PC], ['휴대폰 390', MOB]]) {
   await page.evaluate(() => { S = demoState('bakery'); S.demo = false; S.step = 'input'; S.mode = 'one'; save(); render(); });
 
   // 1) 열기: ☰ 메뉴(휴대폰) 또는 1단계의 "캐릭터 보관함 열기"
-  if (vp.width <= 720) { await page.locator('#menuBtn').click(); await page.waitForTimeout(300); await page.locator('#menuPanel [data-v="open"]').click(); }
-  else await page.getByText('캐릭터 보관함 열기').first().click({ force: true });
+  { await page.locator('#menuBtn').click(); await page.waitForTimeout(300); await page.locator('#menuPanel [data-v="open"]').click(); }
+
   await page.waitForTimeout(250);
   C.ok(await page.locator('#vaultSheet:not([hidden]) .sheet-in').count() === 1, `${vk}: 보관함 창이 열림`);
   C.ok(await page.locator('#vaultSheet').innerText().then((t) => /인물 0명 · 장소 0개/.test(t)), `${vk}: 비어 있을 때 개수와 용량이 보임`);
@@ -59,7 +59,7 @@ for (const [vk, vp] of [['PC 1300', PC], ['휴대폰 390', MOB]]) {
   await page.evaluate(() => closeVault());
 
   // 5) 1단계에서 보관함 인물 불러오기
-  await page.evaluate(() => { S.info.looks = '손으로 쓴 외모'; S.info.role = '직접입력'; save(); vInput(); document.querySelector('#moreHero').open = true; });
+  await page.evaluate(() => { S.info.looks = '손으로 쓴 외모'; S.info.role = '직접입력'; save(); vInput(); });
   await page.locator('[data-v="pick"][data-ref="m0"]').click(); await page.waitForTimeout(150);
   await page.locator('#vaultSheet [data-v="choose"][data-id="사장님_A"]').click(); await page.waitForTimeout(250);
   const lk = await page.evaluate(() => ({ id: linkId(0), role: S.info.role, looks: S.info.looks, card: document.querySelector('.lk') && document.querySelector('.lk').innerText, hasLooksInput: !!document.querySelector('#i-looks') }));
@@ -112,7 +112,7 @@ for (const [vk, vp] of [['PC 1300', PC], ['휴대폰 390', MOB]]) {
   const r = await page.evaluate(() => {
     S = demoState('bakery'); S.demo = false; S.step = 'input'; S.mode = 'one'; S.info.p2 = { role: '알바생', gender: '남성', age: '20대', looks: '까치머리', on: true }; S.info.p3 = { role: '손님', gender: '여성', age: '70대', looks: '보라색 카디건', on: true };
     S.info.cast = '단골 할머니(흰 파마머리)'; delete S.info.link; delete S.info.subs; S.toon.cast = ''; save(); render();
-    const before = JSON.stringify(S); render(); vInput(); document.querySelector('#moreHero').open = true; render();
+    const before = JSON.stringify(S); render(); vInput(); render();
     const after = JSON.stringify(S); const sheets = peopleIdx().map((k) => sheetPrompt(k)).join('|'); const setup = setupPrompt();
     return { same: before === after, n: peopleIdx().length, noLink: !('link' in S.info) && !('subs' in S.info), noVaultTxt: !/캐릭터 카드|\[[^\]]+_[A-Z]\]/.test(sheets + setup), attach: setup.split('\n')[1], rule7: setup.includes('7. 조연: 단골 할머니(흰 파마머리).') };
   });

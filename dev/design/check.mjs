@@ -83,7 +83,7 @@ for (const [vk, vp] of [['모바일 390', { width: 390, height: 844 }], ['태블
   for (const n of ['노트 글', '소개', '개인정보', '이용안내', '404']) C.ok(res[n].btns.map((b) => b.kind).join() === '보조,주', `${vk} ${n} 머리말: 보조 "인스타툰 노트" → 주 "인스타툰 만들기"`);
 }
 // ---- 4b: 머리말 [☰] 로고 …… [저장 상태] [인스타툰 노트], ☰ 메뉴, 모드 탭 없음 ----
-const MENU_ITEMS = '인스타툰 만들기,한 달 기획,캐릭터 보관함,인스타툰 노트,백업 저장 · 불러오기,사용 방법,문제 해결';
+const MENU_ITEMS = '웹툰 만들기,한 달 기획,내 캐릭터,인스타툰 노트,내 작업 저장 · 불러오기,도움말';
 const homeProbe = () => {
   const vis = (el) => !!el && getComputedStyle(el).display !== 'none' && el.getBoundingClientRect().width > 0;
   const tb = document.querySelector('.topbar'), h = (el) => Math.round(el.getBoundingClientRect().height * 10) / 10;
@@ -114,9 +114,9 @@ for (const [vk, w] of [['PC 1300', 1300], ['PC 1024', 1024], ['태블릿 768', 7
     return { open: document.querySelector('#menuWrap').classList.contains('on'), expanded: document.querySelector('#menuBtn').getAttribute('aria-expanded'), items: items.map((e) => e.textContent.trim()).join(','), inView: rc.left >= -1 && rc.right <= window.innerWidth + 1 && rc.top >= 0 && rc.bottom <= window.innerHeight + 1,
       slotFirst: p.firstElementChild === ss, slotHidden: !ss.hidden && /^내 가게s*▾$/.test(ss.textContent.trim()), cur: cur && cur.textContent.trim(), curColor: cs && cs.color, curLine: cs && cs.borderLeftWidth + ' ' + cs.borderLeftStyle, others: items.filter((e) => e !== cur).every((e) => getComputedStyle(e).color !== getComputedStyle(cur).color), focus: document.activeElement && document.activeElement.className, bodyLock: document.body.classList.contains('menu-open'), panelW: Math.round(rc.width), sheetOpen: document.body.classList.contains('sheet-open') };
   });
-  C.ok(m.open && m.expanded === 'true' && m.items === MENU_ITEMS && m.inView, `${vk} 홈: ☰를 누르면 왼쪽에서 메뉴가 열리고 항목 7개가 순서대로 (${m.items})`);
+  C.ok(m.open && m.expanded === 'true' && m.items === MENU_ITEMS && m.inView, `${vk} 홈: ☰를 누르면 왼쪽에서 메뉴가 열리고 항목 6개가 순서대로 (${m.items})`);
   C.ok(m.slotFirst && m.slotHidden, `${vk} 홈: 메뉴 맨 위 #shopSlot에 가게 줄("내 가게 ▾")이 있음(4d)`);
-  C.ok(m.cur === '인스타툰 만들기' && m.curColor === 'rgb(17, 17, 17)' && m.curLine === '2px solid' && m.others, `${vk} 홈: 지금 보는 항목은 검정 글씨 + 왼쪽 얇은 선, 나머지는 회색 (${m.cur})`);
+  C.ok(m.cur === '웹툰 만들기' && m.curColor === 'rgb(17, 17, 17)' && m.curLine === '2px solid' && m.others, `${vk} 홈: 지금 보는 항목은 검정 글씨 + 왼쪽 얇은 선, 나머지는 회색 (${m.cur})`);
   C.ok(m.panelW <= 300 && m.bodyLock, `${vk} 홈: 메뉴 폭 ${m.panelW}px, 열려 있는 동안 뒤 화면 스크롤 잠김`);
   // 닫기: Esc · 바깥 · 항목
   await page.keyboard.press('Escape'); await page.waitForTimeout(300);
@@ -129,11 +129,11 @@ for (const [vk, w] of [['PC 1300', 1300], ['PC 1024', 1024], ['태블릿 768', 7
   await page.click('#menuBtn'); await page.waitForTimeout(300);
   C.ok(await page.evaluate(() => document.querySelector('#menuPanel [aria-current="page"]').textContent.trim() === '한 달 기획'), `${vk} 한 달 기획: 메뉴의 현재 표시가 "한 달 기획"으로 바뀜`);
   await page.click('#menuPanel [data-menu="home"]'); await page.waitForTimeout(400);
-  C.ok(await page.evaluate(() => S.mode === 'one' && S.step === 'input' && !!document.querySelector('#makeBtn')), `${vk} 한 달 기획: 메뉴의 "인스타툰 만들기"로 홈에 돌아옴`);
+  C.ok(await page.evaluate(() => S.mode === 'one' && S.step === 'input' && !!document.querySelector('#makeBtn')), `${vk} 한 달 기획: 메뉴의 "웹툰 만들기"로 홈에 돌아옴`);
   // 백업 · 사용 방법 · 문제 해결
   await page.click('#menuBtn'); await page.waitForTimeout(300); await page.click('#menuPanel [data-act="backupWin"]'); await page.waitForTimeout(300);
   const bk = await page.evaluate(() => { const w = document.querySelector('#bkWin'); return { open: !!w && !w.hidden, text: w && w.innerText.replace(/\s+/g, ' '), menuClosed: document.querySelector('#menuWrap').hidden, btns: w && [...w.querySelectorAll('.row .btn')].map((b) => b.textContent.trim()).join(',') }; });
-  C.ok(bk.open && bk.menuClosed && bk.btns === '백업 저장,불러오기' && /작업은 이 브라우저에만 저장돼요\. 다른 기기로 옮기거나 브라우저 기록을 지우기 전에 백업 파일을 받아 두세요\./.test(bk.text) && /다른 기기에서는 백업 불러오기로 그대로 이어서 할 수 있어요\./.test(bk.text), `${vk} 홈: 메뉴의 "백업 저장 · 불러오기"가 백업 창을 열고 안내 문구 두 개가 그대로 들어 있음`);
+  C.ok(bk.open && bk.menuClosed && bk.btns === '백업 저장,불러오기' && /작업은 이 브라우저에만 저장돼요\. 다른 기기로 옮기거나 브라우저 기록을 지우기 전에 백업 파일을 받아 두세요\./.test(bk.text) && /다른 기기에서는 불러오기로 그대로 이어서 할 수 있어요\./.test(bk.text), `${vk} 홈: 메뉴의 "내 작업 저장 · 불러오기"가 백업 창을 열고 안내 문구 두 개가 그대로 들어 있음`);
   const [dl] = await Promise.all([page.waitForEvent('download', { timeout: 4000 }).catch(() => null), page.click('#bkWin [data-bkw="save"]')]);
   C.ok(!!dl, `${vk} 홈: 백업 창의 "백업 저장"이 실제로 백업 파일을 내려받음`);
   await page.evaluate(() => openBackupWin());
@@ -142,8 +142,8 @@ for (const [vk, w] of [['PC 1300', 1300], ['PC 1024', 1024], ['태블릿 768', 7
   await page.evaluate(() => openBackupWin()); await page.keyboard.press('Escape');
   C.ok(await page.evaluate(() => document.querySelector('#bkWin').hidden), `${vk} 홈: Esc로 백업 창이 닫힘`);
   await page.click('#menuBtn'); await page.waitForTimeout(300); await page.click('#menuPanel [data-act="help"]'); await page.waitForTimeout(300);
-  C.ok(await page.evaluate(() => !!document.querySelector('#tour')), `${vk} 홈: 메뉴의 "사용 방법"을 누르면 둘러보기가 시작됨`);
-  C.ok(await page.evaluate(() => { const a = document.querySelector('#menuPanel a[href="/guide/instatoon-troubleshooting/"]'); const n = document.querySelector('#menuPanel a[href="/guide/"]'); return !!a && !!n && a.textContent.trim() === '문제 해결'; }), `${vk} 홈: "문제 해결"과 "인스타툰 노트"는 글 주소로 연결`);
+  C.ok(await page.evaluate(() => !!document.querySelector('#tour')), `${vk} 홈: 메뉴의 "도움말"을 누르면 둘러보기가 시작됨`);
+  C.ok(await page.evaluate(() => { const a = document.querySelector('#menuPanel a[href="/guide/instatoon-troubleshooting/"]'); const n = document.querySelector('#menuPanel a[href="/guide/"]'); return !a && !!n && n.textContent.trim() === '인스타툰 노트'; }), `${vk} 홈: "인스타툰 노트"는 글 주소로 연결, "문제 해결"은 도움말로 합쳐짐`);
   C.ok(!errors.length, `${vk} 홈 머리말·메뉴: 페이지 오류 없음${errors[0] ? ' ← ' + errors[0] : ''}`);
   await page.close();
 }
@@ -167,21 +167,14 @@ for (const [vk, w] of [['PC 1300', 1300], ['PC 1024', 1024], ['태블릿 768', 7
   C.ok(t.vt === '✓' && t.ov <= 1, `휴대폰 홈: 저장 상태는 ✓만 보임 (${t.vt}), 넘침 없음`);
   await m.page.close();
 }
-{ // 새 기기: 저장된 작업이 없을 때만 "백업 불러오기" 한 줄, 작업을 시작하면 사라짐
+{ // 새 기기 줄 삭제: 홈에는 "백업 불러오기" 줄이 없고, 불러오기는 ☰ "내 작업 저장 · 불러오기"에만 남음. "어떤 가게예요?" 안내 한 줄은 그대로.
   const { page } = await newPage(browser, srv.base, { viewport: { width: 390, height: 800 }, ls: { 'instatoon.helpSeen': '1' } });
   await page.goto(srv.base + '/'); await page.waitForTimeout(500);
-  const a = await page.evaluate(() => { const n = document.querySelector('#newDev'); return { shown: !n.hidden && n.getClientRects().length > 0, text: n.textContent.replace(/\s+/g, ' ').trim() }; });
-  C.ok(a.shown && /다른 기기에서 쓰던 작업이 있나요\? 백업 불러오기/.test(a.text), `새 기기: 입력칸 아래에 "${a.text}" 한 줄이 보임`);
-  const [fc] = await Promise.all([page.waitForEvent('filechooser', { timeout: 4000 }).catch(() => null), page.click('#newDev [data-act="restore"]')]);
-  C.ok(!!fc, '새 기기: 그 줄의 "백업 불러오기"가 파일 선택 창을 엶');
-  C.ok(await page.evaluate(() => !document.querySelector('#makeHint').hidden && /업종을 먼저 골라 주세요/.test(document.querySelector('#makeHint').textContent)), '업종이 비었을 때: 폼 안에 "업종을 먼저 골라 주세요" 한 줄 안내');
+  C.ok(await page.evaluate(() => !document.querySelector('#newDev') && !/백업 불러오기/.test(document.querySelector('#main').textContent)), '새 기기: 홈에 "백업 불러오기" 줄이 없음');
+  C.ok(await page.evaluate(() => !document.querySelector('#makeHint').hidden && /"어떤 가게예요\?"를 먼저 골라 주세요/.test(document.querySelector('#makeHint').textContent)), '가게(업종)가 비었을 때: 폼 안에 "어떤 가게예요?를 먼저 골라 주세요" 한 줄 안내');
   await page.evaluate(() => { S.info.type = '카페'; save(); }); await page.waitForTimeout(150);
-  C.ok(await page.evaluate(() => document.querySelector('#newDev').hidden && document.querySelector('#makeHint').hidden), '작업을 시작하면(업종 입력) 두 줄 모두 사라짐');
+  C.ok(await page.evaluate(() => document.querySelector('#makeHint').hidden), '작업을 시작하면(업종 입력) 안내가 사라짐');
   await page.close();
-  const old = await newPage(browser, srv.base, { viewport: { width: 390, height: 800 }, ls: { 'instatoon.helpSeen': '1', 'instatoonRoom.v4': JSON.stringify({ step: 'input', info: { type: '빵집', name: '옛 작업', story: '있었던 일' }, toon: null }) } });
-  await old.page.goto(srv.base + '/'); await old.page.waitForTimeout(500);
-  C.ok(await old.page.evaluate(() => document.querySelector('#newDev').hidden), '저장된 작업이 있는 브라우저: "다른 기기에서 쓰던 작업" 줄이 안 보임');
-  await old.page.close();
 }
 { // 인스타툰 노트 페이지의 ☰ 메뉴 + 주소로 들어오기(#month #vault #backup #help)
   for (const [vk, vp] of [['휴대폰 390', { width: 390, height: 800 }], ['PC 1300', { width: 1300, height: 800 }]]) {
@@ -191,7 +184,7 @@ for (const [vk, w] of [['PC 1300', 1300], ['PC 1024', 1024], ['태블릿 768', 7
       const closed = await page.evaluate(() => ({ w: document.querySelector('#menuWrap').hidden, mb: document.querySelector('#menuBtn').getBoundingClientRect().height }));
       await page.click('#menuBtn'); await page.waitForTimeout(350);
       const o = await page.evaluate(() => { const p = document.querySelector('#menuPanel'), items = [...p.querySelectorAll('.mi')], cur = p.querySelector('[aria-current="page"]'); return { items: items.map((e) => e.textContent.trim()).join(','), hrefs: items.map((e) => e.getAttribute('href')).join(','), cur: cur && cur.textContent.trim(), slot: p.firstElementChild.id === 'shopSlot' && p.firstElementChild.hidden, on: document.querySelector('#menuWrap').classList.contains('on') }; });
-      C.ok(closed.w && closed.mb === 40 && o.on && o.items === MENU_ITEMS && o.hrefs === '/,/#month,/#vault,/guide/,/#backup,/#help,/guide/instatoon-troubleshooting/' && o.slot && (o.cur || null) === curText, `${vk} ${name}: ☰ 메뉴가 홈과 같은 항목·순서로 열리고 링크가 맞음 (현재 표시: ${o.cur || '없음'})`);
+      C.ok(closed.w && closed.mb === 40 && o.on && o.items === MENU_ITEMS && o.hrefs === '/,/#month,/#vault,/guide/,/#backup,/#help' && o.slot && (o.cur || null) === curText, `${vk} ${name}: ☰ 메뉴가 홈과 같은 항목·순서로 열리고 링크가 맞음 (현재 표시: ${o.cur || '없음'})`);
       await page.keyboard.press('Escape'); await page.waitForTimeout(300);
       C.ok(await page.evaluate(() => document.querySelector('#menuWrap').hidden), `${vk} ${name}: Esc로 메뉴가 닫힘`);
       await page.click('#menuBtn'); await page.waitForTimeout(300); await page.mouse.click(vp.width - 6, 500); await page.waitForTimeout(300);
@@ -316,23 +309,23 @@ for (const [vk, w] of [['PC 1300', 1300], ['PC 1024', 1024], ['태블릿 768', 7
     const g = await page.evaluate(() => {
       const box = (sel) => { const e = document.querySelector(sel); if (!e) return null; const b = e.getBoundingClientRect(); return { l: Math.round(b.left), r: Math.round(b.right), t: Math.round(b.top), w: Math.round(b.width) }; };
       const dd = (id) => { const e = document.querySelector(id); return e && e.closest('.dd') ? e.closest('.dd').getBoundingClientRect() : null; };
-      const type = document.querySelector('#ind-lb').parentElement.querySelector('.dd'), tb = type.getBoundingClientRect(), nm = box('#i-name'), who = [...document.querySelector('.fform .who').children].map((d) => Math.round(d.getBoundingClientRect().top)),
-        hero = box('#moreHero'), prof = box('.fform .prof'), kind = document.querySelector('.kindrow .dd').getBoundingClientRect(), story = box('#i-story'), panel = box('#main .panel');
+      const type = document.querySelector('#ind-lb').parentElement.querySelector('.dd'), tb = type.getBoundingClientRect(), nm = box('#i-name'), who = (document.querySelector('#moreAll').open = true, [...document.querySelector('#moreAll .who').children].map((d) => Math.round(d.getBoundingClientRect().top))),
+        hero = box('#moreAll'), kind = document.querySelector('.kindrow .dd').getBoundingClientRect(), story = box('#i-story'), panel = box('#main .panel');
       const longInputs = [...document.querySelectorAll('.fform input.in')].filter((e) => e.getBoundingClientRect().width > 640 && e.getClientRects().length).length;
       const lefts = [...document.querySelectorAll('.fform > .h, .fform > .g2, .fform > .story, .fform > .kindrow')].filter((e) => e.getClientRects().length).map((e) => Math.round(e.getBoundingClientRect().left));
-      return { typeT: Math.round(tb.top), nameT: nm.t, whoSame: new Set(who).size === 1, hero, prof, kindW: Math.round(kind.width), panelW: panel.w, story, longInputs, lefts, ov: document.documentElement.scrollWidth - innerWidth };
+      return { typeT: Math.round(tb.top), nameT: nm.t, whoSame: new Set(who).size === 1, hero, kindW: Math.round(kind.width), panelW: panel.w, story, longInputs, lefts, ov: document.documentElement.scrollWidth - innerWidth };
     });
     if (vp.width >= 721) {
-      C.ok(Math.abs(g.typeT - g.nameT) <= 2, `${vk} 1단계: 업종 | 브랜드 이름이 한 줄에 나란히`);
-      C.ok(g.whoSame, `${vk} 1단계: 역할·성별·나이가 한 줄`);
-      C.ok(g.hero && g.prof && Math.abs(g.hero.t - g.prof.t) <= 2 && g.prof.l > g.hero.r - 2, `${vk} 1단계: "주인공 모습·컷 수·비율 더 설정하기"와 "브랜드 프로필"이 나란히`);
+      C.ok(Math.abs(g.typeT - g.nameT) <= 2, `${vk} 1단계: 어떤 가게예요? | 가게 이름이 한 줄에 나란히`);
+      C.ok(g.whoSame, `${vk} 1단계: 분위기·이야기 방식·한 장 구성이 한 줄`);
+      C.ok(g.hero && g.hero.w >= (g.panelW - 56) * 0.9, `${vk} 1단계: "더 자세히 설정하기"는 가로 전체(${g.hero && g.hero.w}px)`);
       C.ok(g.kindW <= (g.panelW - 56) / 2 + 2, `${vk} 1단계: 대본 유형 선택칸은 절반 폭까지만(${g.kindW}px) — 한 칸이 길게 늘어지지 않음`);
       C.ok(g.story.w >= (g.panelW - 56) * 0.9, `${vk} 1단계: 있었던 일은 가로 전체(${g.story.w}px)`);
       C.ok(g.longInputs === 0, `${vk} 1단계: 한 줄 입력칸이 640px보다 길게 늘어지지 않음 (${g.longInputs}개)`);
       // 열린 칸은 가로 전체로
-      await page.evaluate(() => { document.querySelector('#moreHero').open = true; }); await page.waitForTimeout(150);
-      C.ok(await page.evaluate(() => { const h = document.querySelector('#moreHero').getBoundingClientRect(), p = document.querySelector('#main .panel').getBoundingClientRect(); return h.width > (p.width - 56) * 0.9; }), `${vk} 1단계: 칸을 펼치면 가로 전체로 넓어짐`);
-      await page.evaluate(() => { document.querySelector('#moreHero').open = false; });
+      await page.evaluate(() => { document.querySelector('#moreAll').open = true; }); await page.waitForTimeout(150);
+      C.ok(await page.evaluate(() => { const h = document.querySelector('#moreAll').getBoundingClientRect(), p = document.querySelector('#main .panel').getBoundingClientRect(); return h.width > (p.width - 56) * 0.9; }), `${vk} 1단계: 칸을 펼치면 가로 전체로 넓어짐`);
+      await page.evaluate(() => { document.querySelector('#moreAll').open = false; });
     } else {
       C.ok(g.typeT < g.nameT && new Set(g.lefts).size === 1 && g.ov <= 1, `${vk} 1단계: 휴대폰은 1열(업종 → 이름 위아래, 칸들의 왼쪽 끝이 모두 같음)`);
     }

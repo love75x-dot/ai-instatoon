@@ -139,14 +139,13 @@ C.ok(cut14.total <= 14 && cut14.dropped === 1 && cut14.xLine === cut14.extras &&
 // 1단계 맨 위 글자 링크: 보관함이 비어 있으면 숨김
 const F = await open(); await F.page.evaluate(helpers);
 await F.page.evaluate(() => { S = demoState('bakery'); S.demo = false; S.step = 'input'; S.mode = 'one'; save(); render(); });
-C.ok(await F.page.locator('.vlink').count() === 0, '보관함이 비어 있으면 1단계 맨 위 "불러오기" 링크가 안 보임');
+C.ok(await F.page.locator('.vlink').count() === 0 && await F.page.locator('.cast [data-v="pick"][data-ref="m0"]').count() === 1 && await F.page.locator('.cast [data-v="newslot"][data-ref="m0"]').count() === 1, '1단계 캐릭터 칸: 따로 "불러오기" 링크 없이 "보관함에서 고르기"·"새로 만들기" 두 버튼만');
 await F.page.evaluate(async () => { await seedVault(); vInput(); }); await F.page.waitForTimeout(150);
-C.ok(await F.page.locator('.vlink .linkbtn').innerText() === '보관함에 인물 2명 · 불러오기', '보관함에 인물이 있으면 1단계 맨 위에 "보관함에 인물 N명 · 불러오기" 글자 링크가 보임');
-C.ok(await F.page.evaluate(() => { const r = document.querySelector('.vlink').getBoundingClientRect(), a = document.querySelector('#artsBox').getBoundingClientRect(); return r.top < a.top; }), '링크가 웹툰 테마 등 입력 칸보다 위(1단계 맨 위)에 있음');
-await F.page.locator('.vlink .linkbtn').click(); await F.page.waitForTimeout(150);
-C.ok(await F.page.locator('#vaultSheet:not([hidden]) [data-v="choose"]').count() === 2, '링크를 누르면 바로 인물 고르기 창이 열림');
+C.ok(await F.page.locator('.cast [data-v="pick"]').count() >= 2 && await F.page.locator('.cast [data-v="newslot"]').count() >= 2, '캐릭터 칸은 주인공·조연 두 줄(각각 고르기·새로 만들기)');
+await F.page.locator('.cast [data-v="pick"][data-ref="m0"]').click(); await F.page.waitForTimeout(150);
+C.ok(await F.page.locator('#vaultSheet:not([hidden]) [data-v="choose"]').count() >= 1, '"보관함에서 고르기"를 누르면 인물 고르기 창이 열림');
 await F.page.locator('#vaultSheet [data-v="choose"][data-id="알바생_B"]').click(); await F.page.waitForTimeout(200);
-C.ok(await F.page.evaluate(() => linkId(0) === '알바생_B'), '고른 인물은 첫 번째로 비어 있는 인물 자리(주인공)에 들어감');
+C.ok(await F.page.evaluate(() => linkId(0) === '알바생_B'), '고른 인물은 주인공 자리에 들어감');
 // 컷별 의상 선택 · 4명 초과 경고
 await E.page.evaluate(() => { S = demoState('bakery'); S.demo = false; S.step = 'edit'; S.mode = 'one'; S.info.link = {}; S.info.subs = []; linkSlot('m0', '사장님_A'); linkSlot('m1', '알바생_B'); linkSlot('m2', 'P2'); linkSlot('s0', 'P3'); linkSlot('s1', 'P4'); linkSlot('s2', 'P5'); S.toon.cuts[0].chars = ['p0']; VAULT_PROMPT2 = false; openCut = 0; save(); render(); });
 await E.page.waitForTimeout(250);

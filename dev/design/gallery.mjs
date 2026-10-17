@@ -25,29 +25,23 @@ for (const [name, vp] of [['PC', { width: 1300, height: 900 }], ['휴대폰', { 
   const { page, errors } = await newPage(browser, srv.base, { viewport: vp, ls: { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST' }, freeze: false });
   const reqs = []; page.on('request', (r) => { if (/\/assets\/examples\/.+\.webp/.test(r.url())) reqs.push(r.url()); });
   await page.goto(srv.base + '/'); await page.waitForTimeout(1500);
-  C.ok(reqs.length === 0 && await page.locator('#exGalIn .exg-f').count() === 0 && await page.locator('#exGal').evaluate((e) => !e.open), `${name}: 홈에서 접혀 있는 동안 예시 그림 요청 0, 그림 칸도 아직 없음`);
-  if (name === 'PC') {
-    C.ok(await page.locator('#exGal summary').innerText() === '이런 인스타툰이 나와요' && await page.locator('#exGal > summary').evaluate((e) => e.tagName === 'SUMMARY'), '홈 맨 아래에 접힌 글자 한 줄 "이런 인스타툰이 나와요"(버튼이 아님)');
-    const before = await page.locator('button').count();
-    await page.locator('#exGal summary').click(); await page.waitForTimeout(500);
-    const after = await page.locator('button').count();
-    C.ok(after - before === 1, `펼치면 늘어나는 버튼은 글자 링크 1개뿐 (${before} → ${after})`);
-  } else { await page.locator('#exGal summary').click(); await page.waitForTimeout(500); }
-  const g = await page.evaluate(() => { const gr = document.querySelector('#exGalIn .exg-g'); const imgs = [...document.querySelectorAll('#exGalIn img')]; const cs = getComputedStyle(gr); return { n: imgs.length, attrs: imgs.every((i) => i.width && i.height && i.loading === 'lazy' && i.decoding === 'async' && i.alt.length > 20 && /360w.*720w/.test(i.getAttribute('srcset'))), disp: cs.display, cols: cs.gridTemplateColumns.split(' ').length, scroll: gr.scrollWidth > gr.clientWidth + 2, page: document.documentElement.scrollWidth <= innerWidth + 1, fw: Math.round(imgs[0].getBoundingClientRect().width), left: Math.round(imgs[0].getBoundingClientRect().left) }; });
+  C.ok(reqs.length === 0 && await page.locator('.exg-f').count() === 0 && await page.locator('#exGal').count() === 0, `${name}: 홈에는 예시 그림 요청 0, "이런 인스타툰이 나와요" 미리보기 접힘·그림 칸도 없음`);
+  await page.evaluate(() => toggleHelp(true)); await page.waitForTimeout(800); // 갤러리는 ☰ 도움말 안에만 있음
+  const g = await page.evaluate(() => { const gr = document.querySelector('#help .hex .exg-g'); const imgs = [...document.querySelectorAll('#help .hex img')]; const cs = getComputedStyle(gr); return { n: imgs.length, attrs: imgs.every((i) => i.width && i.height && i.loading === 'lazy' && i.decoding === 'async' && i.alt.length > 20 && /360w.*720w/.test(i.getAttribute('srcset'))), disp: cs.display, cols: cs.gridTemplateColumns.split(' ').length, scroll: gr.scrollWidth > gr.clientWidth + 2, page: document.documentElement.scrollWidth <= innerWidth + 1, fw: Math.round(imgs[0].getBoundingClientRect().width), left: Math.round(imgs[0].getBoundingClientRect().left) }; });
   C.ok(g.n === 6 && g.attrs, `${name}: 펼치면 그림 6장 — 크기(width·height)·지연 로딩·async 디코딩·대체 텍스트·srcset(360w·720w)`);
   if (name === 'PC') C.ok(g.disp === 'grid' && g.cols === 3 && g.page, `PC: 3열 격자, 가로 넘침 없음 (그림 폭 ${g.fw}px)`);
-  else C.ok(g.disp === 'flex' && g.scroll && g.page && g.fw > 150 && g.fw < 200 && g.left === 16, `휴대폰: 옆으로 넘기는 띠(화면 폭 안에서만 스크롤), 페이지 가로 넘침 없음 (그림 폭 ${g.fw}px, 첫 그림 왼쪽 ${g.left}px)`);
-  await page.locator('#exGalIn img').nth(0).scrollIntoViewIfNeeded(); await page.waitForTimeout(800);
-  const dec = await page.evaluate(() => { const i = document.querySelector('#exGalIn img'); return i.naturalWidth; });
+  else C.ok(g.disp === 'flex' && g.scroll && g.page && g.fw > 150 && g.fw < 200 && g.left >= 16 && g.left <= 60, `휴대폰: 옆으로 넘기는 띠(화면 폭 안에서만 스크롤), 페이지 가로 넘침 없음 (그림 폭 ${g.fw}px, 첫 그림 왼쪽 ${g.left}px)`);
+  await page.locator('#help .hex img').nth(0).scrollIntoViewIfNeeded(); await page.waitForTimeout(800);
+  const dec = await page.evaluate(() => { const i = document.querySelector('#help .hex img'); return i.naturalWidth; });
   C.ok(dec > 0 && reqs.length >= 1, `${name}: 화면에 보이는 그림만 받아 오고(${reqs.length}개 요청) 실제로 그려짐`);
-  const dpr = await page.evaluate(() => document.querySelector('#exGalIn img').currentSrc.replace(location.origin, ''));
+  const dpr = await page.evaluate(() => document.querySelector('#help .hex img').currentSrc.replace(location.origin, ''));
   C.ok(/-360\.webp$/.test(dpr) || /-720\.webp$/.test(dpr), `${name}: 화면에 맞는 크기를 골라 받음 (${dpr})`);
   if (name === 'PC') {
     // 체험 링크 → 기존 체험 기능으로 열림, 갤러리와 같은 이야기
     const picks = await page.evaluate(() => demoPicks());
     C.ok((picks.match(/<button/g) || []).length === 3 && !/반찬/.test(picks), '1단계 "체험해 보기" 고르기는 그대로 3개(반찬가게 체험은 숨김)');
     await page.evaluate(() => { S.info.name = '내작업이름'; S.info.type = '카페'; save(); });
-    await page.locator('#exGalIn [data-act="exDemo"]').click(); await page.waitForTimeout(700);
+    await page.locator('#help .hex [data-act="exDemo"]').click(); await page.waitForTimeout(700);
     const d = await page.evaluate(() => ({ demo: S.demo, key: S.demoKey, roles: S.toon.cuts.map((c) => c.role), title: S.toon.title, last: S.toon.cuts[5].title.replace(/\n/g, ' '), panels: S.toon.cuts[1].panels }));
     C.ok(d.demo && d.key === 'banchan' && d.roles.length === 6 && d.roles.every((r, i) => r === E.cuts[i].role) && /고객님 덕분에 오늘도 완판 성공!/.test(d.title) && /고객님 덕분에 오늘도 완판 성공!/.test(d.last), `"이 예시로 체험해 보기": 갤러리와 같은 6컷·같은 역할·마지막 컷 "고객님 덕분에 오늘도 완판 성공!" (${d.roles.join('/')})`);
     // 체험 화면이 3단계까지 정상: 프롬프트 만들기
