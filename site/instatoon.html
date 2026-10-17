@@ -3566,8 +3566,9 @@ function autoSection(){
 /* ---------- API 키: 바닥 시트(만들기를 누를 때) · 키 테스트 ---------- */
 let keyAfter=null;
 /* 키가 있으면 "연결됨 ✓", 없으면 무료 맛보기로 만들 수 있다고 알리고, 맛보기가 꺼져 있을 때만 "API 키가 필요해요"(서버 설정을 아직 모르는 동안은 중립 문구) */
-const keySummary=()=>API.ready?`API 키 설정 ${AIP()==='claude'?'· Claude 연결됨 ✓':'· 연결됨 ✓'}`:S.demo?'API 키 설정 · 둘러보기만 하면 필요 없어요':TASTE.cfg?(TASTE.spent?'오늘 무료 사용함 · 내 키 설정':'오늘 무료 1회 · 내 키 설정'):TASTE.tried?'API 키가 필요해요':'API 키 설정';
-function refreshKeyLine(){ const s=document.querySelector('#keyTxt'); if(s) s.textContent=keySummary(); const c=document.querySelector('#keyBox .keychg'); if(c) c.textContent=API.ready?'변경':'설정'; }
+const keySummary=()=>API.ready?`API 키 설정 ${AIP()==='claude'?'· Claude 연결됨 ✓':'· 연결됨 ✓'}`:S.demo?'API 키 설정 · 둘러보기만 하면 필요 없어요':TASTE.cfg?(TASTE.spent?'오늘 무료 사용함':'오늘 무료 1회'):TASTE.tried?'API 키가 필요해요':'API 키 설정';
+const keyBtnText=()=>API.ready?'변경':(!S.demo&&TASTE.cfg?'내 키 설정':'설정'); /* 안내 글에 "설정"이 들어 있으면 버튼은 "내 키 설정"으로 겹쳐 읽히지 않게 */
+function refreshKeyLine(){ const s=document.querySelector('#keyTxt'); if(s) s.textContent=keySummary(); const c=document.querySelector('#keyBox .keychg'); if(c) c.textContent=keyBtnText(); }
 async function testKey(key){
   try{ const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=1',{headers:{'x-goog-api-key':key}}); const j=await r.json().catch(()=>({}));
     if(r.ok) return {ok:true,msg:'연결됐어요 ✓ 이 키로 AI를 쓸 수 있어요'};
@@ -3613,7 +3614,7 @@ async function keySheetAct(a){
 document.addEventListener('change',e=>{ if(e.target.id!=='ks-ai') return; const c=$('#ks-claude'); if(c) c.hidden=e.target.value!=='claude'; });
 document.addEventListener('click',e=>{ const b=e.target.closest('[data-sheet]'); if(!b) return; e.preventDefault(); keySheetAct(b.dataset.sheet); });
 document.addEventListener('keydown',e=>{ const w=$('#keySheet'); if(!w||w.hidden) return; if(e.key==='Escape') closeKeySheet(); else if(e.key==='Enter'&&e.target.id==='ks-key') keySheetAct('save'); });
-function keyBoxHTML(){ return `<div class="more keybox" id="keyBox"><button type="button" class="keyrow" data-sheet="open" aria-haspopup="dialog"><span id="keyTxt">${keySummary()}</span><span class="keychg" aria-hidden="true">${API.ready?'변경':'설정'}</span></button></div>`; }
+function keyBoxHTML(){ return `<div class="more keybox" id="keyBox"><button type="button" class="keyrow" data-sheet="open" aria-haspopup="dialog"><span id="keyTxt">${keySummary()}</span><span class="keychg" aria-hidden="true">${keyBtnText()}</span></button></div>`; }
 
 function refreshAi(){ /* 연결 상태 표시는 첫 화면의 "API 키 설정" 줄(keyBoxHTML)에만 있다. 머리말에는 두지 않는다. */ }
 /* ================= 관리자: 프롬프트 편집실 ================= */

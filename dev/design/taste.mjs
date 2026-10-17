@@ -32,7 +32,9 @@ const shown = (page, id) => page.evaluate((i) => { const e = document.getElement
 {
   const txt = (page) => page.evaluate(() => document.querySelector('#keyTxt').textContent.trim());
   const on = await open({ cfg: ON, reply: okMake });
-  C.ok(await txt(on.page) === '오늘 무료 1회 · 내 키 설정', '키 없음 + 맛보기 켜짐: "오늘 무료 1회 · 내 키 설정"');
+  C.ok(await txt(on.page) === '오늘 무료 1회', '키 없음 + 맛보기 켜짐: "오늘 무료 1회"(버튼은 "내 키 설정")');
+  C.ok(await on.page.evaluate(() => document.querySelector('#keyBox .keychg').textContent.trim()) === '내 키 설정' && await on.page.evaluate(() => (document.querySelector('#keyBox').innerText.match(/설정/g) || []).length) === 1, '키 줄: "설정"이 한 번만 읽힘(안내 "오늘 무료 1회" + 버튼 "내 키 설정")');
+  C.ok(await on.page.evaluate(() => { TASTE.spent = true; refreshKeyLine(); const t = document.querySelector('#keyTxt').textContent; TASTE.spent = false; refreshKeyLine(); return t; }) === '오늘 무료 사용함', '맛보기를 쓴 뒤: "오늘 무료 사용함" + 같은 버튼');
   C.ok(!/필요해요/.test(await on.page.locator('#keyBox').innerText()), '키 없음 + 맛보기 켜짐: 키 줄에 "필요해요"가 없음');
   await on.page.evaluate(() => { S.demo = true; refreshKeyLine(); }); C.ok(/둘러보기만/.test(await txt(on.page)), '체험 모드: "둘러보기만 하면 필요 없어요"');
   await on.ctx.close();
