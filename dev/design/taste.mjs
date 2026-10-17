@@ -50,7 +50,7 @@ const shown = (page, id) => page.evaluate((i) => { const e = document.getElement
 {
   const t = await open({ cfg: ON, reply: okMake });
   await t.page.click('#makeBtn'); await t.page.waitForTimeout(250);
-  C.ok(await shown(t.page, 'tasteSheet') && !(await shown(t.page, 'keySheet')), '키가 없으면 "툰 만들기"에서 키 시트 대신 무료 맛보기 시트가 열림');
+  C.ok(await shown(t.page, 'tasteSheet') && !(await shown(t.page, 'keySheet')), '키가 없으면 "대본 만들기"에서 키 시트 대신 무료 맛보기 시트가 열림');
   const txt = await t.page.locator('#tasteSheet').innerText();
   C.ok(/Google Gemini · Groq · OpenRouter/.test(txt) && /서비스 개선·학습/.test(txt) && /개인정보와 비밀 내용은 넣지 마세요/.test(txt) && /저장하지 않아요/.test(txt), '시트에 무료 AI 서비스 안내(학습에 쓰일 수 있음·개인정보 금지·서버 비저장)');
   C.ok(await t.page.evaluate(() => window.__ts && window.__ts.sitekey === 'SITE-KEY'), 'Turnstile 위젯을 사이트 키로 그림');

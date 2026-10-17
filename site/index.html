@@ -1488,7 +1488,7 @@ function renderDock(){
   document.body.classList.remove('has-dock');
   if(!one){ d.hidden=true; return; }
   const input=S.step==='input';
-  b.textContent=input?'툰 만들기':'그림 그리러 가기 →'; b.dataset.dock=input?'make':'post';
+  b.textContent=input?'대본 만들기':'그림 그리러 가기 →'; b.dataset.dock=input?'make':'post';
   const target=input?$('#makeBtn'):document.querySelector('.actions [data-step="post"]');
   if(!target){ d.hidden=true; return; }
   d.hidden=false;

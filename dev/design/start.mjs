@@ -57,7 +57,7 @@ const vis = (page, sel) => page.evaluate((s) => { const e = document.querySelect
   await setState(page, () => { S = demoState('bakery'); S.mode = 'one'; S.step = 'input'; });
   await page.evaluate(() => window.scrollTo(0, 0)); await page.waitForTimeout(250);
   let d = await page.evaluate(() => ({ on: document.querySelector('#dock').classList.contains('on'), shown: getComputedStyle(document.querySelector('#dock')).display, text: document.querySelector('#dockBtn').textContent, pos: getComputedStyle(document.querySelector('#dock')).position }));
-  C.ok(d.on && d.shown === 'block' && d.pos === 'fixed' && d.text === '툰 만들기', `휴대폰 앱 1단계: 아래에 고정된 검정 "툰 만들기" 버튼 (${d.text})`);
+  C.ok(d.on && d.shown === 'block' && d.pos === 'fixed' && d.text === '대본 만들기', `휴대폰 앱 1단계: 아래에 고정된 검정 "대본 만들기" 버튼 (${d.text})`);
   await page.evaluate(() => document.querySelector('#makeBtn').scrollIntoView({ block: 'center' })); await page.waitForTimeout(350);
   C.ok(await page.evaluate(() => getComputedStyle(document.querySelector('#dock')).display === 'none'), '휴대폰 앱 1단계: 본문의 만들기 버튼이 보이면 고정 버튼은 숨김');
   await page.evaluate(() => window.scrollTo(0, 0)); await page.waitForTimeout(250);
@@ -114,7 +114,7 @@ for (const [vk, vp, want] of [['휴대폰 390', MOB, '툰 만들기'], ['PC 1300
   C.ok(/둘러보기만/.test(line) && !/필요해요$/.test(line), `체험 모드: "API 키 필요" 대신 "${line}"`);
   await page.click('#makeBtn'); await page.waitForTimeout(250);
   let sh = await page.evaluate(() => { const w = document.querySelector('#keySheet'); return { shown: !!w && !w.hidden, text: w ? w.textContent : '', terms: !!(w && w.querySelector('a[href="https://ai.google.dev/gemini-api/terms"]')), role: w && w.getAttribute('role'), pos: w && getComputedStyle(w.querySelector('.sheet-in')).borderRadius }; });
-  C.ok(sh.shown && sh.role === 'dialog' && /Gemini API 키가 필요해요/.test(sh.text), '키 없이 "툰 만들기"를 누르면 키 입력 시트가 열림');
+  C.ok(sh.shown && sh.role === 'dialog' && /Gemini API 키가 필요해요/.test(sh.text), '키 없이 "대본 만들기"를 누르면 키 입력 시트가 열림');
   C.ok(/이 브라우저에만/.test(sh.text) && /내 Google 키/.test(sh.text), '시트에 "저장은 이 브라우저에만, AI 호출은 내 Google 키로" 안내');
   C.ok(/무료 키/.test(sh.text) && /서비스 개선/.test(sh.text) && sh.terms, '시트에 무료 키 데이터 사용 안내와 Google 약관 출처 링크');
   await page.click('[data-sheet="save"]'); await page.waitForTimeout(100);
@@ -132,7 +132,7 @@ for (const [vk, vp, want] of [['휴대폰 390', MOB, '툰 만들기'], ['PC 1300
   await page.click('[data-sheet="save"]'); await page.waitForTimeout(600);
   const after = await page.evaluate(() => ({ closed: document.querySelector('#keySheet').hidden, key: kv.getItem('instatoon.key'), line: document.querySelector('#keyTxt').textContent.trim() }));
   C.ok(after.closed && after.key === 'AIza-good-key' && /연결됨 ✓/.test(after.line), `키를 저장하면 시트가 닫히고 줄이 "${after.line}"로 바뀜`);
-  C.ok(reqs.some((r) => r.startsWith('POST') && /generateContent/.test(r)), '키를 저장하면 누르려던 "툰 만들기"가 이어서 실행됨(AI 호출 발생)');
+  C.ok(reqs.some((r) => r.startsWith('POST') && /generateContent/.test(r)), '키를 저장하면 누르려던 "대본 만들기"가 이어서 실행됨(AI 호출 발생)');
   C.ok(!errors.length, '키 시트: 페이지 오류 없음' + (errors[0] ? ' ← ' + errors[0] : ''));
   await page.close();
   const mob = await open(MOB, SEEN); await setState(mob.page, () => { S = demoState('bakery'); S.mode = 'one'; S.step = 'input'; });
