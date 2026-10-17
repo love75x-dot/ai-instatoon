@@ -1201,6 +1201,11 @@ function applyArts(cfg){ const c=cfg&&typeof cfg==='object'?cfg:{};
 const artVisible=()=>{ const v=Object.entries(ARTS).filter(([k])=>!ART_CFG.hidden.includes(k)); return v.length?v:Object.entries(ARTS); };
 try{ applyArts(JSON.parse(kv.getItem(ART_LS)||'null')); }catch(_){}
 const BUILTIN_SAMPLES={"chibi":"/assets/samples/chibi.jpg","mono":"/assets/samples/mono.jpg","deadpan":"/assets/samples/deadpan.jpg","doodle":"/assets/samples/doodle.jpg","pastel":"/assets/samples/pastel.jpg","sketch":"/assets/samples/sketch.jpg","shonen":"/assets/samples/shonen.jpg","dark":"/assets/samples/dark.jpg","family":"/assets/samples/family.jpg","shoujo":"/assets/samples/shoujo.jpg","retro":"/assets/samples/retro.jpg","cg3d":"/assets/samples/cg3d.jpg","mascot":"/assets/samples/mascot.jpg"};
+function refreshArtSummary(){ const sm=document.querySelector('#artsBox summary'); if(!sm) return; const n=sm.querySelector('.art-sumt small'); if(n) n.textContent=artOf().name;
+  const src=sampleOf(S.info.art); let im=sm.querySelector('.art-thumb');
+  if(!src){ if(im) im.remove(); return; }
+  if(!im){ im=document.createElement('img'); im.className='art-thumb'; im.width=44; im.height=44; im.alt=''; im.decoding='async'; sm.insertBefore(im,sm.firstChild); }
+  im.src=safeUrl(src); }
 function sampleOf(k){ try{ return kv.getItem('instatoon.sample.'+k)||BUILTIN_SAMPLES[k]||''; }catch(_){ return BUILTIN_SAMPLES[k]||''; } }
 const castText=()=>[S.info.cast,S.toon?.cast].filter(Boolean).join(' / ');
 const detailOn=k=>(S.info.details||DEF_DETAILS).includes(k);
@@ -3147,7 +3152,7 @@ document.addEventListener('click',async e=>{
   if(b.dataset.q){ const ta=$('#i-story'); const q=QUESTIONS[+b.dataset.q].q; ta.value=(ta.value.trim()?ta.value.trimEnd()+'\n\n':'')+`Q. ${q}\nA. `; S.info.story=ta.value; save(); ta.focus(); ta.setSelectionRange(ta.value.length,ta.value.length); return; }
   if(b.dataset.kind){ S.info.kind=b.dataset.kind; S.info.kindCustom=''; const ci=document.getElementById('i-kind'); if(ci) ci.value=''; save(); document.querySelectorAll('[data-kind]').forEach(c=>c.setAttribute('aria-pressed',c.dataset.kind===S.info.kind)); applyKind(true); return; }
   if(b.dataset.tone){ S.info.tone=b.dataset.tone; save(); document.querySelectorAll('[data-tone]').forEach(c=>c.setAttribute('aria-pressed',c.dataset.tone===S.info.tone)); return; }
-  if(b.dataset.art){ S.info.art=b.dataset.art; save(); document.querySelectorAll('[data-art]').forEach(c=>c.setAttribute('aria-pressed',c.dataset.art===S.info.art)); return; }
+  if(b.dataset.art){ S.info.art=b.dataset.art; save(); document.querySelectorAll('[data-art]').forEach(c=>c.setAttribute('aria-pressed',c.dataset.art===S.info.art)); refreshArtSummary(); return renderPhone(); }
   if(b.dataset.mode){ S.info.mode=b.dataset.mode; save(); document.querySelectorAll('[data-mode]').forEach(c=>c.setAttribute('aria-pressed',c.dataset.mode===S.info.mode)); return; }
   if(b.dataset.layout){ S.info.layout=b.dataset.layout; save(); document.querySelectorAll('[data-layout]').forEach(c=>c.setAttribute('aria-pressed',c.dataset.layout===S.info.layout)); return; }
   if(b.dataset.detail){ const d=new Set(S.info.details||DEF_DETAILS); d.has(b.dataset.detail)?d.delete(b.dataset.detail):d.add(b.dataset.detail); S.info.details=[...d]; save(); b.setAttribute('aria-pressed',d.has(b.dataset.detail)); return; }
