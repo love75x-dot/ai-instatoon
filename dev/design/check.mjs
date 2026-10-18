@@ -82,14 +82,14 @@ for (const [vk, vp] of [['모바일 390', { width: 390, height: 844 }], ['태블
   C.ok(lst === '주', `${vk} 노트 목록 머리말: 주 "인스타툰 만들기"만`);
   for (const n of ['노트 글', '소개', '개인정보', '이용안내', '404']) C.ok(res[n].btns.map((b) => b.kind).join() === '보조,주', `${vk} ${n} 머리말: 보조 "인스타툰 노트" → 주 "인스타툰 만들기"`);
 }
-// ---- 4b: 머리말 [☰] 로고 …… [저장 상태] [인스타툰 노트], ☰ 메뉴, 모드 탭 없음 ----
+// ---- 4b: 머리말 로고 …… [저장 상태] [인스타툰 노트] [☰], ☰ 메뉴(오른쪽에서 열림), 모드 탭 없음. 로고 위치·높이는 dev/design/logo.mjs 가 소개 화면과 맞는지 잰다 ----
 const MENU_ITEMS = '웹툰 만들기,한 달 기획,내 캐릭터,인스타툰 노트,소개,내 작업 저장 · 불러오기,도움말';
 const homeProbe = () => {
   const vis = (el) => !!el && getComputedStyle(el).display !== 'none' && el.getBoundingClientRect().width > 0;
   const tb = document.querySelector('.topbar'), h = (el) => Math.round(el.getBoundingClientRect().height * 10) / 10;
   const mb = document.querySelector('#menuBtn'), br = tb.querySelector('.brand'), note = tb.querySelector('.hnav > a.hb');
   return {
-    menuBtn: vis(mb) && h(mb) === 40 && Math.round(mb.getBoundingClientRect().width) === 40, menuLeftOfLogo: mb.getBoundingClientRect().right <= br.getBoundingClientRect().left + 8,
+    menuBtn: vis(mb) && h(mb) === 40 && Math.round(mb.getBoundingClientRect().width) === 40, menuRightOfNote: mb.getBoundingClientRect().left >= note.getBoundingClientRect().right && mb.getBoundingClientRect().left > br.getBoundingClientRect().right,
     sameRow: Math.abs(mb.getBoundingClientRect().top - note.getBoundingClientRect().top) < 1,
     oldHeader: document.querySelectorAll('.htools, #hmoreBtn, #hpop, .apptools').length, modes: document.querySelectorAll('#modes, .modes, [data-mode2]').length,
     noStatus: !tb.querySelector('.hai,#aiDot,#aiText,#aiDotM,#aiTextM,.hpai,.dot') && !/연결됨|키 필요|연결 없음|연결 확인/.test(tb.textContent), keyRow: (document.querySelector('#keyTxt') || {}).textContent || '',
@@ -100,9 +100,9 @@ for (const [vk, w] of [['PC 1300', 1300], ['PC 1024', 1024], ['태블릿 768', 7
   const { page, errors } = await newPage(browser, srv.base, { viewport: { width: w, height: 800 }, ls: { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST' } });
   await page.goto(srv.base + '/'); await page.waitForTimeout(300);
   const r = await page.evaluate(homeProbe);
-  C.ok(r.menuBtn && r.menuLeftOfLogo && r.sameRow, `${vk} 홈: ☰ 버튼이 로고 왼쪽에 높이 40px로 있고 "인스타툰 노트"와 같은 줄`);
+  C.ok(r.menuBtn && r.menuRightOfNote && r.sameRow, `${vk} 홈: ☰ 버튼이 "인스타툰 노트" 오른쪽 끝에 높이 40px로 있고 같은 줄`);
   C.ok(r.oldHeader === 0 && r.modes === 0, `${vk} 홈: 옛 도구 버튼·⋯ 메뉴·모드 탭이 없음 (옛 요소 ${r.oldHeader}개, 모드 탭 ${r.modes}개)`);
-  C.ok(r.overflow <= 1 && r.tbH === 72, `${vk} 홈: 가로 넘침 없음, 머리말 높이 72px`);
+  C.ok(r.overflow <= 1 && r.tbH === (w >= 720 ? 64 : 56), `${vk} 홈: 가로 넘침 없음, 머리말 높이 ${w >= 720 ? 64 : 56}px(소개 화면과 같음, 실제 ${r.tbH})`);
   C.ok(r.noStatus, `${vk} 홈: 머리말에 AI 연결 상태 표시(● 연결됨 / ● 키 필요) 없음`);
   C.ok(/API 키 설정/.test(r.keyRow) && /연결됨/.test(r.keyRow), `${vk} 홈: 연결 상태는 첫 화면 "API 키 설정" 줄에서만 보임(${r.keyRow.trim()})`);
   C.ok(r.wrapHidden && r.expanded === 'false', `${vk} 홈: 메뉴는 닫혀 있음`);
@@ -114,14 +114,14 @@ for (const [vk, w] of [['PC 1300', 1300], ['PC 1024', 1024], ['태블릿 768', 7
     return { open: document.querySelector('#menuWrap').classList.contains('on'), expanded: document.querySelector('#menuBtn').getAttribute('aria-expanded'), items: items.map((e) => e.textContent.trim()).join(','), inView: rc.left >= -1 && rc.right <= window.innerWidth + 1 && rc.top >= 0 && rc.bottom <= window.innerHeight + 1,
       slotFirst: p.firstElementChild === ss, slotHidden: !ss.hidden && /^내 가게s*▾$/.test(ss.textContent.trim()), cur: cur && cur.textContent.trim(), curColor: cs && cs.color, curLine: cs && cs.borderLeftWidth + ' ' + cs.borderLeftStyle, others: items.filter((e) => e !== cur).every((e) => getComputedStyle(e).color !== getComputedStyle(cur).color), focus: document.activeElement && document.activeElement.className, bodyLock: document.body.classList.contains('menu-open'), panelW: Math.round(rc.width), sheetOpen: document.body.classList.contains('sheet-open') };
   });
-  C.ok(m.open && m.expanded === 'true' && m.items === MENU_ITEMS && m.inView, `${vk} 홈: ☰를 누르면 왼쪽에서 메뉴가 열리고 항목 7개가 순서대로 (${m.items})`);
+  C.ok(m.open && m.expanded === 'true' && m.items === MENU_ITEMS && m.inView, `${vk} 홈: ☰를 누르면 오른쪽에서 메뉴가 열리고 항목 7개가 순서대로 (${m.items})`);
   C.ok(m.slotFirst && m.slotHidden, `${vk} 홈: 메뉴 맨 위 #shopSlot에 가게 줄("내 가게 ▾")이 있음(4d)`);
   C.ok(m.cur === '웹툰 만들기' && m.curColor === 'rgb(17, 17, 17)' && m.curLine === '2px solid' && m.others, `${vk} 홈: 지금 보는 항목은 검정 글씨 + 왼쪽 얇은 선, 나머지는 회색 (${m.cur})`);
   C.ok(m.panelW <= 300 && m.bodyLock, `${vk} 홈: 메뉴 폭 ${m.panelW}px, 열려 있는 동안 뒤 화면 스크롤 잠김`);
   // 닫기: Esc · 바깥 · 항목
   await page.keyboard.press('Escape'); await page.waitForTimeout(300);
   C.ok(await page.evaluate(() => document.querySelector('#menuWrap').hidden && document.querySelector('#menuBtn').getAttribute('aria-expanded') === 'false' && document.activeElement.id === 'menuBtn'), `${vk} 홈: Esc로 메뉴가 닫히고 ☰로 초점이 돌아옴`);
-  await page.click('#menuBtn'); await page.waitForTimeout(300); await page.mouse.click(Math.round(w - 6), 500); await page.waitForTimeout(300);
+  await page.click('#menuBtn'); await page.waitForTimeout(300); await page.mouse.click(6, 500); await page.waitForTimeout(300);
   C.ok(await page.evaluate(() => document.querySelector('#menuWrap').hidden), `${vk} 홈: 바깥(어두운 곳)을 누르면 메뉴가 닫힘`);
   // 한 달 기획 → 현재 표시가 옮겨감 → 인스타툰 만들기로 돌아오기
   await page.click('#menuBtn'); await page.waitForTimeout(300); await page.click('#menuPanel [data-menu="month"]'); await page.waitForTimeout(400);
@@ -187,7 +187,7 @@ for (const [vk, w] of [['PC 1300', 1300], ['PC 1024', 1024], ['태블릿 768', 7
       C.ok(closed.w && closed.mb === 40 && o.on && o.items === MENU_ITEMS && o.hrefs === '/,/#month,/#vault,/guide/,/#intro,/#backup,/#help' && o.slot && (o.cur || null) === curText, `${vk} ${name}: ☰ 메뉴가 홈과 같은 항목·순서로 열리고 링크가 맞음 (현재 표시: ${o.cur || '없음'})`);
       await page.keyboard.press('Escape'); await page.waitForTimeout(300);
       C.ok(await page.evaluate(() => document.querySelector('#menuWrap').hidden), `${vk} ${name}: Esc로 메뉴가 닫힘`);
-      await page.click('#menuBtn'); await page.waitForTimeout(300); await page.mouse.click(vp.width - 6, 500); await page.waitForTimeout(300);
+      await page.click('#menuBtn'); await page.waitForTimeout(300); await page.mouse.click(6, 500); await page.waitForTimeout(300);
       C.ok(await page.evaluate(() => document.querySelector('#menuWrap').hidden), `${vk} ${name}: 바깥을 누르면 메뉴가 닫힘`);
       C.ok(!errors.length, `${vk} ${name}: 페이지 오류 없음`);
       await page.close();

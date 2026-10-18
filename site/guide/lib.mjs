@@ -71,17 +71,21 @@ a{color:inherit}
 /* HEADER:BEGIN 홈·인스타툰 노트 공통 머리말. 앱(site/index.html)과 노트(site/guide/lib.mjs)의 이 블록은 글자까지 같아야 해요. dev/design/check.mjs가 비교해요. */
 body{margin:0}
 .hwrap{max-width:1200px;margin:0 auto;padding-inline:16px}
-.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;height:72px;padding:0}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;height:56px;padding:0 4px}
+@media (min-width:720px){.topbar{height:64px;padding:0 16px}}
 .brand{display:flex;align-items:center;gap:10px;height:40px;padding:0 8px;margin:0 -8px;border:0;border-radius:10px;background:none;color:var(--ink);font:inherit;text-align:left;text-decoration:none;cursor:pointer}
 .brand:hover b{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px}
 .brand .mark{width:28px;height:28px;border-radius:7px;background:#FFD60A;color:#111;display:grid;place-items:center;flex:none;font-weight:800;font-size:15px;line-height:1;letter-spacing:0}
-.brand b{font-weight:900;font-size:19px;line-height:1;letter-spacing:-.02em;white-space:nowrap}
+.brand b{font-weight:800;font-size:17px;line-height:1;letter-spacing:-.035em;white-space:nowrap}
+@media (min-width:720px){.brand b{font-size:19px}}
 .hnav{display:flex;align-items:center;gap:8px;flex:none}
 .hb{display:inline-flex;align-items:center;justify-content:center;height:40px;padding:0 16px;border:1px solid var(--line-2);border-radius:999px;background:var(--surface);color:var(--ink);font:700 15px/1 var(--sans);text-decoration:none;white-space:nowrap;cursor:pointer}
 .hb:hover{border-color:var(--ink)}
 .hb.pri{background:var(--ink);border-color:var(--ink);color:var(--surface)}
 .hb.pri:hover{opacity:.86}
 @media (max-width:480px){.hp{display:none}.hb{padding:0 14px}.topbar{gap:8px}}
+@media (max-width:480px){.hnav .hb-note{display:none}}
+@media (max-width:340px){.hnav .hb{display:none}}
 .hleft{display:flex;align-items:center;gap:10px;min-width:0}
 .menubtn{width:40px;height:40px;flex:none;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line-2);border-radius:12px;background:var(--surface);color:var(--ink);font:400 20px/1 var(--sans);cursor:pointer}
 .menubtn:hover{border-color:var(--ink)}
@@ -90,7 +94,7 @@ body{margin:0}
 .mwrap[hidden]{display:none}
 .mbg{position:absolute;inset:0;background:rgba(0,0,0,.4);opacity:0;transition:opacity .18s}
 .mwrap.on .mbg{opacity:1}
-.mpanel{position:absolute;left:0;top:0;bottom:0;width:min(300px,86vw);display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top,0px) + 12px) 12px 24px;overflow:auto;background:var(--surface);border-right:1px solid var(--ink);transform:translateX(-100%);transition:transform .18s}
+.mpanel{position:absolute;right:0;top:0;bottom:0;width:min(300px,86vw);display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top,0px) + 12px) 12px 24px;overflow:auto;background:var(--surface);border-left:1px solid var(--ink);transform:translateX(100%);transition:transform .18s}
 .mwrap.on .mpanel{transform:none}
 .mpanel ul{list-style:none;margin:0;padding:0}
 .mpanel hr{border:0;border-top:1px solid var(--line);margin:10px 0}
@@ -221,9 +225,8 @@ const menuHtml = (cur) => `<div class="mwrap" id="menuWrap" hidden><div class="m
 
 export const header = (cur) => `<a class="skip" href="#main">본문 바로가기</a>
 <div class="hwrap"><header class="topbar">
-<div class="hleft"><button type="button" class="menubtn" id="menuBtn" aria-label="메뉴 열기" aria-haspopup="dialog" aria-expanded="false" aria-controls="menuPanel"><span aria-hidden="true">☰</span></button>
-<a class="brand" href="/" aria-label="${SITE} 첫 화면으로"><span class="mark" aria-hidden="true">툰</span><b>${SITE}</b></a></div>
-<nav class="hnav" aria-label="주요 메뉴">${cur === 'hub' ? '' : '<a class="hb" href="/guide/" aria-label="인스타툰 노트"><span class="hp">인스타툰&nbsp;</span>노트</a>'}<a class="hb pri" href="/" data-track="cta" data-loc="header" aria-label="인스타툰 만들기"><span class="hp">인스타</span>툰 만들기</a></nav>
+<div class="hleft"><a class="brand" href="/" aria-label="${SITE} 첫 화면으로"><span class="mark" aria-hidden="true">툰</span><b>${SITE}</b></a></div>
+<nav class="hnav" aria-label="주요 메뉴">${cur === 'hub' ? '' : '<a class="hb hb-note" href="/guide/" aria-label="인스타툰 노트"><span class="hp">인스타툰&nbsp;</span>노트</a>'}<a class="hb pri" href="/" data-track="cta" data-loc="header" aria-label="인스타툰 만들기"><span class="hp">인스타</span>툰 만들기</a><button type="button" class="menubtn" id="menuBtn" aria-label="메뉴 열기" aria-haspopup="dialog" aria-expanded="false" aria-controls="menuPanel"><span aria-hidden="true">☰</span></button></nav>
 </header></div>${menuHtml(cur)}<script>${MENU_JS}</script>`;
 
 export const footer = `<footer><div class="wrap"><nav class="nav" aria-label="푸터 메뉴"><a href="/guide/">인스타툰 노트</a><a href="/" data-track="cta" data-loc="footer">인스타툰 만들기</a><a href="/about/">소개</a><a href="/privacy/">개인정보처리방침</a><a href="/terms/">이용안내</a><a href="/sitemap.xml">사이트맵</a></nav>
