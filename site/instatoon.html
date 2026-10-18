@@ -976,6 +976,7 @@ body.sheet-open{overflow:hidden}
 .vrow{display:flex;align-items:center;gap:12px;width:100%;padding:12px 0;border:0;border-bottom:1px solid var(--line);background:none;font:inherit;color:var(--ink);cursor:pointer;text-align:left}
 .vrow:hover{background:var(--sunken)}
 .vimg{display:flex;gap:12px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.store{margin:18px 0 4px}.st-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0 16px}.st-note{margin:8px 0 0}.st-auto{margin:6px 0 0}
 .vimg-m{display:flex;flex-direction:column;gap:4px;min-width:0}
 .vimg-m small{font-size:15px;color:var(--muted);overflow-wrap:anywhere}
 .vout{padding:8px 0}
@@ -1190,7 +1191,7 @@ label.f{font-size:16px}
 
   <section class="in-band"><div class="in-wrapw"><h2>오늘 있었던 일, 인스타툰으로 남겨 볼까요?</h2><a class="in-btn k" href="#start" data-intro="start">내 이야기로 시작하기 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div></section>
   <footer class="in-foot"><div class="in-wrapw">
-    <div><b class="in-disp">인스타툰 연재실</b><p class="fmeta" id="fmetaIntro">운영: 인스타툰 연재실장 · 문의: <a href="mailto:insta.toon13@gmail.com">insta.toon13@gmail.com</a> · 마지막 업데이트 2026-10-18</p><p style="margin:6px 0 0">작업은 이 브라우저에만 저장돼요.</p></div>
+    <div><b class="in-disp">인스타툰 연재실</b><p class="fmeta" id="fmetaIntro">운영: 인스타툰 연재실장 · 문의: <a href="mailto:insta.toon13@gmail.com">insta.toon13@gmail.com</a> · 마지막 업데이트 2026-10-19</p><p style="margin:6px 0 0">작업은 이 브라우저에만 저장돼요.</p></div>
     <nav aria-label="사이트 링크"><a href="/guide/">인스타툰 노트</a><a href="/about/">소개</a><a href="/privacy/">개인정보처리방침</a><a href="/terms/">이용안내</a><a href="/sitemap.xml">사이트맵</a><button type="button" data-intro="backup">백업 파일 불러오기</button></nav>
   </div></footer>
 </div>
@@ -1275,7 +1276,7 @@ if('IntersectionObserver' in window){ var links={}; [].forEach.call(I.querySelec
   </section>
   <footer class="gfoot">
     <nav class="gnav" aria-label="노트 링크"><a href="/guide/">인스타툰 노트 전체 보기</a><a href="/about/">소개</a><a href="/privacy/">개인정보처리방침</a><a href="/terms/">이용안내</a><a href="/sitemap.xml">사이트맵</a></nav>
-    <p class="fmeta" id="fmeta">운영: 인스타툰 연재실장 · 문의: <a href="mailto:insta.toon13@gmail.com">insta.toon13@gmail.com</a> · 마지막 업데이트 2026-10-18</p>
+    <p class="fmeta" id="fmeta">운영: 인스타툰 연재실장 · 문의: <a href="mailto:insta.toon13@gmail.com">insta.toon13@gmail.com</a> · 마지막 업데이트 2026-10-19</p>
   </footer>
 </div>
 <div class="dock" id="dock" hidden><button type="button" class="btn pri big" id="dockBtn"></button></div>
@@ -1957,6 +1958,7 @@ function vInput(){
       <div><label class="f" id="ind-lb">어떤 가게예요?<span class="req">*</span></label>${ddHTML('',INDUSTRIES.map(k=>`<button class="chip" data-ind="${k}" aria-pressed="${i.type===k}">${k}</button>`).join(''),{search:true,label:'어떤 가게예요?',custom:`<label class="dd-cl" for="i-type">목록에 없으면 직접 입력</label><input class="in" id="i-type" data-info="type" value="${esc(i.type)}" placeholder="예: 수제 베이글 판매, 웹소설 작가">`})}</div>
       <div><label class="f" for="i-name">가게 이름</label><input class="in" id="i-name" data-info="name" value="${esc(i.name)}" placeholder="예: 담 사진관, 하늘 디자인, OO컴퍼니"></div>
     </div>
+    ${storeHTML()}
     ${S.demo?'':`<details class="demo-more demo-link"><summary>처음이라면 예시 가게로 먼저 체험해 보기</summary><div class="row">${demoPicks()}</div></details>`}
 
     <div class="story">
@@ -2069,7 +2071,7 @@ function optFieldHTML(c,i,k){
   if(k==='extras') return `<div class="cf" data-k="extras">${head()}<div class="chips det-chips">${DETAIL_CHIPS.map(w=>`<button type="button" class="chip" data-cdet="${i}|${esc(w)}" aria-pressed="${detList(c).includes(w)}">${w}</button>`).join('')}</div><input class="in" id="${id}" data-f="extras" value="${esc(c.extras||'')}" placeholder="직접 입력 예: 손글씨 '두근'"></div>`;
   if(k==='same') return `<div class="cf" data-k="same"><label class="chk"><input type="checkbox" data-csame="${i}" ${c.sameBg?'checked':''}> 앞 컷과 같은 배경 유지</label></div>`;
   if(k==='avoid') return `<div class="cf" data-k="avoid">${head()}<div class="chips det-chips">${AVOID_CHIPS.map(w=>`<button type="button" class="chip" data-cavoid="${i}|${esc(w)}" aria-pressed="${String(c.avoid||'').split(/[,，]/).map(x=>x.trim()).includes(w)}">${w}</button>`).join('')}</div><input class="in" id="${id}" data-f="avoid" value="${esc(c.avoid||'')}"></div>`;
-  if(k==='place'){ const pl=Object.keys(VAULT.places); return `<div class="cf" data-k="place">${head()}${pl.length?`<div class="chips det-chips" aria-label="보관함 장소">${pl.map(w=>`<button type="button" class="chip" data-cplace="${i}|${esc(w)}" aria-pressed="${c.placeId===w}">${esc(w)}${VAULT.places[w].image?'':' (이미지 없음)'}</button>`).join('')}</div>`:''}<input class="in" id="${id}" data-f="place" value="${esc(c.place||'')}" placeholder="${esc(OPT_PH.place)}"></div>`; }
+  if(k==='place'){ const pl=Object.keys(VAULT.places); return `<div class="cf" data-k="place">${head()}${pl.length?`<div class="chips det-chips" aria-label="보관함 장소">${(storeKey('out')||storeKey('in'))?`<button type="button" class="chip" data-cplace="${i}|-" aria-pressed="${c.placeId==='-'}">사진 안 씀</button>`:''}${pl.map(w=>`<button type="button" class="chip" data-cplace="${i}|${esc(w)}" aria-pressed="${c.placeId===w}">${esc(w)}${VAULT.places[w].image?'':' (이미지 없음)'}</button>`).join('')}</div>${!c.placeId&&cutPlace(i)?`<p class="sub st-auto">자동으로 ${esc(cutPlace(i))} 사진을 써요</p>`:''}`:''}<input class="in" id="${id}" data-f="place" value="${esc(c.place||'')}" placeholder="${esc(OPT_PH.place)}"></div>`; }
   return `<div class="cf" data-k="${k}">${head()}<input class="in" id="${id}" data-f="${k}" value="${esc(c[k]||'')}" placeholder="${esc(OPT_PH[k]||'')}"></div>`;
 }
 function hlHTML(c,i){ const w=titleWords(c); if(!w.length) return `<div class="hl-box" id="hl-${i}"></div>`;
@@ -3115,7 +3117,33 @@ function keepLines(){ if(!VAULT_PROMPT) return ''; const o=[];
   return o.length?'\n'+o.join('\n'):''; }
 
 /* ---------- 장소 ---------- */
-function cutPlace(i){ const cs=cuts(); let n=i; while(n>=0){ const c=cs[n]; if(!c) return ''; if(c.placeId) return c.placeId; if(c.sameBg&&n>0) n--; else break; } return ''; }
+function cutPlace(i){ const cs=cuts(); let n=i; while(n>=0){ const c=cs[n]; if(!c) return ''; if(c.placeId) return c.placeId==='-'?'':c.placeId; if(c.sameBg&&n>0) n--; else break; } return autoPlace(n); }
+/* 우리 가게 사진(1단계): 보관함 장소에 '우리가게_외관'·'우리가게_내부'로 저장하고, 컷에 장소를 고르지 않았으면 자동으로 연결한다.
+   사진이 없으면 autoPlace는 ''라서 프롬프트는 한 글자도 바뀌지 않는다. 컷에서 '사진 안 씀'을 고르면 placeId '-'. */
+const STORE_BASE={out:'우리가게_외관',in:'우리가게_내부'}, STORE_KINDS=[['out','간판·외관'],['in','내부']];
+const STORE_DESC='실제 매장 사진이에요. 구조·간판·색감은 살리되 사진처럼 그리지 말고 지정한 그림체로 그려 주세요. 사진 속 사람은 그리지 마세요.';
+const STORE_OUT_RE=/(가게|매장|건물|문)\s?(앞|밖)|입구|간판|바깥|외관|거리|길가|테라스|골목/;
+function storeKey(k){ const b=STORE_BASE[k]; return Object.keys(VAULT.places).find(n=>n===b||n.startsWith(b+'_'))||''; }
+function storeNewName(k){ const b=STORE_BASE[k]; return ALLV.places[b]?uniqueName((b+'_'+CUR).slice(0,30),new Set(Object.keys(ALLV.places))):b; }
+const storeOn=k=>{ const n=storeKey(k); return n&&placeHasImage(n)?n:''; };
+function autoPlace(i){ if(!VAULT_PROMPT) return ''; const o=storeOn('out'), inn=storeOn('in'); if(!o&&!inn) return ''; const c=cuts()[i]||{};
+  return STORE_OUT_RE.test(`${c.place||''} ${c.direction||''}`)?o:inn; }
+function storeHTML(){ if(typeof indexedDB==='undefined') return '';
+  const sl=STORE_KINDS.map(([k,lb])=>{ const n=storeKey(k), im=n&&VAULT.places[n]&&VAULT.places[n].image;
+    return `<div class="vimg st-slot"><div class="ref">${vThumb(im,lb+' 사진')}</div><div class="vimg-m"><b>${lb}</b><div class="row"><label class="btn sm">${im?'바꾸기':'올리기'}<input type="file" accept="image/*" data-store="${k}" hidden></label>${im?`<button type="button" class="btn sm ghost" data-storedel="${k}">지우기</button>`:''}</div></div></div>`; }).join('');
+  return `<div class="store"><label class="f">우리 가게 사진 (선택)</label><div class="st-grid">${sl}</div><p class="sub st-note">올리면 웹툰 배경을 우리 가게처럼 그려요. 손님 얼굴이나 차 번호판이 나오지 않게 찍어 주세요.</p></div>`; }
+async function shrinkPhoto(f){ const url=URL.createObjectURL(f); try{ const im=await new Promise((res,rej)=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=url; });
+  const s=Math.min(1,1600/Math.max(im.width,im.height)), cv=document.createElement('canvas'); cv.width=Math.round(im.width*s); cv.height=Math.round(im.height*s); cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);
+  return await new Promise((res,rej)=>cv.toBlob(b=>b?res(b):rej(new Error('blob')),'image/jpeg',0.88)); } finally{ URL.revokeObjectURL(url); } }
+document.addEventListener('change',async e=>{ const k=e.target&&e.target.dataset&&e.target.dataset.store; if(!k) return; const f=e.target.files&&e.target.files[0]; if(!f) return;
+  if(!VAULT.ok){ toast('저장 공간을 준비하는 중이에요. 잠시 후 다시 올려 주세요'); return; }
+  let blob; try{ blob=await shrinkPhoto(f); }catch(_){ toast('사진을 읽지 못했어요. 다른 사진으로 해 주세요'); return; }
+  const name=storeKey(k)||storeNewName(k), old=VAULT.places[name], now=Date.now();
+  const ok=await vaultPut('places',{name,desc:(old&&old.desc)||STORE_DESC,image:{blob,name:(k==='out'?'외관':'내부')+'.jpg',type:'image/jpeg',size:blob.size},savedAt:(old&&old.savedAt)||now,updatedAt:now});
+  if(!ok){ toast('저장하지 못했어요. 저장 공간이 부족할 수 있어요'); return; }
+  toast('가게 사진을 저장했어요'); if(S.step==='input') vInput(); });
+document.addEventListener('click',async e=>{ const b=e.target.closest&&e.target.closest('[data-storedel]'); if(!b) return; const n=storeKey(b.dataset.storedel); if(!n) return;
+  await vaultDel('places',n); toast('가게 사진을 지웠어요'); if(S.step==='input') vInput(); });
 const placeHasImage=n=>!!(VAULT.places[n]&&VAULT.places[n].image);
 function placesAttached(){ const o=[]; cuts().forEach((_,i)=>{ const n=cutPlace(i); if(n&&placeHasImage(n)&&!o.includes(n)) o.push(n); }); return o; }
 const placeAttachText=i=>{ if(!VAULT_PROMPT) return ''; const n=cutPlace(i); return n&&placesAttached().includes(n)?`첨부한 장소_${n} 이미지와 같은 공간`:''; };
