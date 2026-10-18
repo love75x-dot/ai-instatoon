@@ -33,7 +33,9 @@ C.ok(/<link rel="stylesheet" href="\/assets\/fonts\/toon\.css" media="print" onl
 // ─── preload ───
 const pre = JSON.parse(fs.readFileSync(path.join(root, 'site', 'font-preload.json'), 'utf8'));
 const tags = (h) => [...h.matchAll(/<link rel="preload" href="(\/assets\/fonts\/pretendard\/[^"]+)" as="font" type="font\/woff2" crossorigin>/g)].map((m) => path.basename(m[1]));
-C.ok(JSON.stringify(tags(pages['앱홈'])) === JSON.stringify(pre.app) && pre.app.length > 0 && pre.app.length <= 14, `앱 홈 preload ${pre.app.length}개(14개 이하)가 font-preload.json과 같음`);
+// 앱 홈의 글자 조각 preload는 소개 화면 방문자에게 필요 없어서 소개 판단 스크립트 뒤의 작은 스크립트가 html.intro 가 아닐 때만 넣는다(site/build.mjs appPreload)
+const scriptPre = (h) => { const m = h.match(/classList\.contains\('intro'\)\)return;(\[[^\]]*\])\.forEach/); return m ? JSON.parse(m[1]).map((u) => path.basename(u)) : []; };
+C.ok(tags(pages['앱홈']).length === 0 && JSON.stringify(scriptPre(pages['앱홈'])) === JSON.stringify(pre.app) && pre.app.length > 0 && pre.app.length <= 14, `앱 홈 preload ${pre.app.length}개(14개 이하, 소개 화면이 아닐 때만 스크립트로)가 font-preload.json과 같음`);
 C.ok(JSON.stringify(tags(pages['노트목록'])) === JSON.stringify(pre.guide) && JSON.stringify(tags(pages['노트글'])) === JSON.stringify(pre.guide) && pre.guide.length <= 14, `노트 페이지 preload ${pre.guide.length}개가 font-preload.json과 같음`);
 C.ok(!/rel="preload"[^>]*toon\//.test(pages['앱홈']), '그림 글자용 글꼴은 preload하지 않음(첫 화면에 안 씀)');
 C.ok(/\.subset\.\d+\.woff2/.test(pre.app[0]) && pre.app.every((n) => fs.existsSync(path.join(fontDir, 'pretendard', n))), 'preload 파일이 모두 있음');

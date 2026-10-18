@@ -7,6 +7,7 @@ const ok = (c, m) => { try { assert.ok(c, m); console.log('✓', m); } catch { f
 const introOn = (p) => p.evaluate(() => document.documentElement.classList.contains('intro'));
 const vis = (p, sel) => p.evaluate((s) => { const e = document.querySelector(s); return !!e && e.getClientRects().length > 0; }, sel);
 const M = { width: 390, height: 844 };
+const preN = (p) => p.evaluate(() => document.querySelectorAll('link[rel=preload][href*="/pretendard/"]').length);
 
 // 1) 처음 온 사람: 소개가 보이고 앱은 숨겨짐, 가로 스크롤 없음
 {
@@ -14,6 +15,7 @@ const M = { width: 390, height: 844 };
   await page.goto(srv.base + '/'); await page.waitForTimeout(600);
   ok(await introOn(page) && await vis(page, '#intro h1') && !await vis(page, '#main'), '처음 온 사람: 소개 화면이 보이고 만들기 화면은 숨겨져요');
   ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), '390px: 가로 스크롤 없음');
+  ok(await preN(page) === 0, '처음 온 사람: 앱용 Pretendard 글꼴은 미리 불러오지 않아요(성능)');
   ok(await page.title() === '인스타툰 연재실', 'title 유지');
   // 시작 → 만들기 화면, 새로고침해도 소개로 안 돌아감
   await page.click('#intro .in-hero [data-intro="start"]'); await page.waitForTimeout(400);
@@ -39,23 +41,24 @@ const M = { width: 390, height: 844 };
   const { page } = await newPage(browser, srv.base, { intro: true, viewport: M, ls: { 'instatoonRoom.v4': JSON.stringify(st) } });
   await page.goto(srv.base + '/'); await page.waitForTimeout(800);
   ok(!await introOn(page) && await vis(page, '#main'), '재방문자: 소개 없이 작업 화면');
+  ok(await preN(page) === 12, '재방문자: 앱용 Pretendard 글꼴 12개를 그대로 미리 불러와요');
   await page.click('#menuBtn'); await page.waitForTimeout(300);
   await page.click('#menuPanel a[href="#intro"]'); await page.waitForTimeout(500);
   ok(await introOn(page), '☰ 메뉴 "소개"로 소개 화면을 다시 봐요');
   await page.click('#intro .in-top [data-intro="start"]'); await page.waitForTimeout(400);
   ok(!await introOn(page) && await page.evaluate(() => document.querySelector('#i-name')?.value === '보리당'), '다시 시작하기 → 내 작업 그대로');
 }
-// 4) 예시 넘기기: 탭 2개(편의점은 꺼짐), 처음엔 반찬가게, 6컷, 편의점 흔적 없음
+// 4) 예시 넘기기: 탭 3개(편의점·반찬가게·수제버거, 편의점은 site/intro.config.json 로 켜고 끔), 처음엔 반찬가게, 6컷
 {
   const { page } = await newPage(browser, srv.base, { intro: true, viewport: M });
-  const reqs = []; page.on('request', (r) => reqs.push(r.url()));
+  const cfg = JSON.parse((await import('node:fs')).readFileSync(new URL('../../site/intro.config.json', import.meta.url), 'utf8')), on = cfg.convenienceStore === true;
   await page.goto(srv.base + '/'); await page.waitForTimeout(500);
-  ok(await page.evaluate(() => [...document.querySelectorAll('#intro .in-tab')].map((t) => t.dataset.story + ':' + t.getAttribute('aria-selected')).join()) === 'banchan:true,burger:false', '예시 탭 2개(반찬가게 사장·수제버거집 사장), 처음엔 반찬가게');
-  ok(await page.evaluate(() => document.querySelectorAll('#intro .in-card').length === 2), '첫 화면 피드 카드 2장');
+  ok(await page.evaluate(() => [...document.querySelectorAll('#intro .in-tab')].map((t) => t.dataset.story + ':' + t.getAttribute('aria-selected')).join()) === (on ? 'cvs:false,banchan:true,burger:false' : 'banchan:true,burger:false'), '예시 탭 구성과 처음 선택(반찬가게)이 설정(편의점 ' + (on ? '켜짐' : '꺼짐') + ')과 맞아요');
+  ok(await page.evaluate(() => document.querySelectorAll('#intro .in-card').length) === (on ? 3 : 2), '첫 화면 피드 카드 수가 설정과 맞아요');
   await page.click('#intro .in-tab[data-story="burger"]'); await page.click('#in-next');
   ok(await page.evaluate(() => document.querySelector('#intro .in-no').textContent.startsWith('02') && /burger2/.test(document.querySelector('#intro .in-stage img').src)), '수제버거 탭/넘기기 동작');
-  await page.evaluate(async () => { for (let y = 0; y < document.body.scrollHeight; y += 700) { scrollTo(0, y); await new Promise((r) => setTimeout(r, 80)); } });
-  ok(!reqs.some((u) => /ex-cvs/.test(u)) && !await page.evaluate(() => /편의점/.test(document.getElementById('intro').innerHTML)), '편의점 그림·글이 소개 화면에 없어요(끄기 상태)');
+  if (on) { await page.click('#intro .in-tab[data-story="cvs"]'); await page.waitForTimeout(200); ok(await page.evaluate(() => /ex-cvs1/.test(document.querySelector('#intro .in-stage img').src) && document.querySelector('#intro .in-no').textContent.startsWith('01')), '편의점 탭: 1컷부터 보임'); }
+  else ok(!await page.evaluate(() => /편의점/.test(document.getElementById('intro').innerHTML)), '끄기 상태: 편의점 글이 소개 화면에 없어요');
 }
 await browser.close(); srv.close();
 if (fails) { console.log(`\n실패 ${fails}개`); process.exit(1); } console.log('\n소개 화면 검사 통과');

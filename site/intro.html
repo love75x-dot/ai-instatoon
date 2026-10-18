@@ -2,8 +2,11 @@
 <!--@HEAD-->
 <script>
 /* 처음 온 사람에게만 소개 화면을 보인다(깜빡임 없이 먼저 정함). 최종 판단은 앱 코드(introState)가 저장된 작업을 보고 다시 한다. */
-(function(){var d=document.documentElement;try{var h=location.hash,ret=localStorage.getItem('instatoon.storage.returning')==='1',ent=sessionStorage.getItem('instatoon.storage.entered')==='1';
-if(h==='#intro'||(!ret&&!ent&&h!=='#start'&&!/^#(edit|post|month|vault|backup|help|room-)/.test(h))){d.className+=' intro';var l=document.createElement('link');l.rel='preload';l.as='font';l.type='font/woff2';l.crossOrigin='anonymous';l.href='/assets/fonts/introsquare/IntroSquare-800.woff2';document.head.appendChild(l);
+(function(){var d=document.documentElement;
+/* 이 배포 전부터 쓰던 사람(아직 returning 표시가 없음): 저장된 작업 내용이나 가게 목록이 있으면 다시 온 사람 */
+function hasSaved(){try{if(localStorage.getItem('instatoon.shops'))return true;var s=JSON.parse(localStorage.getItem('instatoonRoom.v4')||'null'),i=s&&s.info;return !!(s&&(s.toon||s.check||(i&&(i.type||i.name||i.story||i.offer))));}catch(e){return false;}}
+try{var h=location.hash,ret=localStorage.getItem('instatoon.storage.returning')==='1'||hasSaved(),ent=sessionStorage.getItem('instatoon.storage.entered')==='1';
+if(h==='#intro'||(!ret&&!ent&&h!=='#start'&&!/^#(edit|post|month|vault|backup|help|room-)/.test(h))){d.className+=' intro';var l=document.createElement('link');l.rel='preload';l.as='font';l.type='font/woff2';l.crossOrigin='anonymous';l.href='/assets/fonts/introsquare/IntroSquare-800.woff2';document.head.appendChild(l);var f=document.createElement('link');f.rel='preload';f.as='font';f.type='font/woff2';f.crossOrigin='anonymous';f.href='/assets/fonts/introsquare/IntroSquare-400.woff2';document.head.appendChild(f);var m=document.createElement('link');m.rel='preload';m.as='image';m.href='/assets/intro/ex-banchan1-400.webp';m.setAttribute('fetchpriority','high');document.head.appendChild(m);
 }}catch(e){d.className+=' intro';}})();
 </script>
 <style>
@@ -11,7 +14,7 @@ if(h==='#intro'||(!ret&&!ent&&h!=='#start'&&!/^#(edit|post|month|vault|backup|he
 @font-face{font-family:"IntroSquare";font-weight:800;font-display:swap;src:url("/assets/fonts/introsquare/IntroSquare-800.woff2") format("woff2")}
 html:not(.intro) #intro{display:none}
 html.intro .wrap,html.intro .dock{display:none}
-#intro{--in-yellow:#FFD60A;--in-ink:#111;--in-sub:#5b5b5b;--in-gray:#f4f4f2;--in-line:#e2e2e2;color-scheme:light;background:#fff;color:var(--in-ink);font:400 16px/1.7 "IntroSquare",var(--sans);word-break:keep-all;overflow-wrap:break-word;-webkit-text-size-adjust:100%}
+#intro{--in-yellow:#FFD60A;--in-ink:#111;--in-sub:#5b5b5b;--in-gray:#f4f4f2;--in-line:#e2e2e2;color-scheme:light;background:#fff;color:var(--in-ink);font:400 16px/1.7 "IntroSquare","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;word-break:keep-all;overflow-wrap:break-word;-webkit-text-size-adjust:100%}
 :where(#intro) *{box-sizing:border-box}
 :where(#intro) a{color:inherit}
 :where(#intro) img{display:block;max-width:100%;height:auto}
@@ -197,7 +200,7 @@ html.intro .wrap,html.intro .dock{display:none}
       <div class="in-fan__FAN__">
         <!--cvs--><article class="in-card l s" aria-label="편의점 알바생의 하루 예시 게시물">
           <div class="in-card-h"><span class="in-ava" aria-hidden="true">편</span><div class="in-card-n"><b>편의점 알바생</b><small>인스타툰 · 예시</small></div><span class="in-ex">예시</span></div>
-          <div class="in-card-img"><img src="/assets/intro/ex-cvs1-400.webp" width="400" height="600" alt="편의점 알바생의 하루 1컷 표지 예시" loading="lazy" decoding="async"><span class="in-badge">1/6</span></div>
+          <div class="in-card-img" style="--ar:896/1200"><img src="/assets/intro/ex-cvs1-400.webp" width="400" height="536" alt="편의점 알바생의 하루 1컷 표지 예시" loading="lazy" decoding="async"><span class="in-badge">1/6</span></div>
           <div class="in-card-f"><b>편의점 알바생</b> 손님은 안 오는데 왜 나만 바쁠까</div>
         </article><!--/cvs-->
         <article class="in-card r s" aria-label="수제버거집 사장님의 절규 예시 게시물">
@@ -231,7 +234,7 @@ html.intro .wrap,html.intro .dock{display:none}
         <h3>1컷 · 표지</h3>
         <p>오후 8시 반, 마감 직전. 분명 아침엔 의욕이 넘쳤는데…</p>
         <div class="in-arrows"><button type="button" class="in-arrow" id="in-prev" aria-label="이전 컷"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button><button type="button" class="in-arrow" id="in-next" aria-label="다음 컷"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></div>
-        <div class="in-thumbs"><button type="button" class="in-thumb" data-i="0" aria-label="1컷 · 표지 보기" aria-current="true"><img src="/assets/intro/ex-banchan1-400.webp" srcset="/assets/intro/ex-banchan1-400.webp 400w, /assets/intro/ex-banchan1-800.webp 800w" sizes="64px" width="400" height="600" alt="" loading="lazy" decoding="async"></button><button type="button" class="in-thumb" data-i="1" aria-label="2컷 · 아침 준비 보기" aria-current="false"><img src="/assets/intro/ex-banchan2-400.webp" srcset="/assets/intro/ex-banchan2-400.webp 400w, /assets/intro/ex-banchan2-800.webp 800w" sizes="64px" width="400" height="600" alt="" loading="lazy" decoding="async"></button><button type="button" class="in-thumb" data-i="2" aria-label="3컷 · 신메뉴 보기" aria-current="false"><img src="/assets/intro/ex-banchan3-400.webp" srcset="/assets/intro/ex-banchan3-400.webp 400w, /assets/intro/ex-banchan3-800.webp 800w" sizes="64px" width="400" height="600" alt="" loading="lazy" decoding="async"></button><button type="button" class="in-thumb" data-i="3" aria-label="4컷 · 걱정 보기" aria-current="false"><img src="/assets/intro/ex-banchan4-400.webp" srcset="/assets/intro/ex-banchan4-400.webp 400w, /assets/intro/ex-banchan4-800.webp 800w" sizes="64px" width="400" height="600" alt="" loading="lazy" decoding="async"></button><button type="button" class="in-thumb" data-i="4" aria-label="5컷 · 단골 등장 보기" aria-current="false"><img src="/assets/intro/ex-banchan5-400.webp" srcset="/assets/intro/ex-banchan5-400.webp 400w, /assets/intro/ex-banchan5-800.webp 800w" sizes="64px" width="400" height="600" alt="" loading="lazy" decoding="async"></button><button type="button" class="in-thumb" data-i="5" aria-label="6컷 · 마무리 보기" aria-current="false"><img src="/assets/intro/ex-banchan6-400.webp" srcset="/assets/intro/ex-banchan6-400.webp 400w, /assets/intro/ex-banchan6-800.webp 800w" sizes="64px" width="400" height="600" alt="" loading="lazy" decoding="async"></button></div>
+        <div class="in-thumbs"><button type="button" class="in-thumb" data-i="0" aria-label="1컷 · 표지 보기" aria-current="true"><img data-src="/assets/intro/ex-banchan1-400.webp" data-srcset="/assets/intro/ex-banchan1-400.webp 400w, /assets/intro/ex-banchan1-800.webp 800w" sizes="64px" width="400" height="600" alt="" decoding="async"></button><button type="button" class="in-thumb" data-i="1" aria-label="2컷 · 아침 준비 보기" aria-current="false"><img data-src="/assets/intro/ex-banchan2-400.webp" data-srcset="/assets/intro/ex-banchan2-400.webp 400w, /assets/intro/ex-banchan2-800.webp 800w" sizes="64px" width="400" height="600" alt="" decoding="async"></button><button type="button" class="in-thumb" data-i="2" aria-label="3컷 · 신메뉴 보기" aria-current="false"><img data-src="/assets/intro/ex-banchan3-400.webp" data-srcset="/assets/intro/ex-banchan3-400.webp 400w, /assets/intro/ex-banchan3-800.webp 800w" sizes="64px" width="400" height="600" alt="" decoding="async"></button><button type="button" class="in-thumb" data-i="3" aria-label="4컷 · 걱정 보기" aria-current="false"><img data-src="/assets/intro/ex-banchan4-400.webp" data-srcset="/assets/intro/ex-banchan4-400.webp 400w, /assets/intro/ex-banchan4-800.webp 800w" sizes="64px" width="400" height="600" alt="" decoding="async"></button><button type="button" class="in-thumb" data-i="4" aria-label="5컷 · 단골 등장 보기" aria-current="false"><img data-src="/assets/intro/ex-banchan5-400.webp" data-srcset="/assets/intro/ex-banchan5-400.webp 400w, /assets/intro/ex-banchan5-800.webp 800w" sizes="64px" width="400" height="600" alt="" decoding="async"></button><button type="button" class="in-thumb" data-i="5" aria-label="6컷 · 마무리 보기" aria-current="false"><img data-src="/assets/intro/ex-banchan6-400.webp" data-srcset="/assets/intro/ex-banchan6-400.webp 400w, /assets/intro/ex-banchan6-800.webp 800w" sizes="64px" width="400" height="600" alt="" decoding="async"></button></div>
       </div>
     </div>
   </div></section>
@@ -279,12 +282,14 @@ html.intro .wrap,html.intro .dock{display:none}
 var I=document.getElementById('intro'); if(!I) return;
 var rm=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
 I.addEventListener('click',function(e){ var a=e.target.closest('[data-go]'); if(!a) return; e.preventDefault(); var t=document.getElementById(a.getAttribute('data-go')); if(t) t.scrollIntoView({behavior:rm?'auto':'smooth',block:'start'}); });
-var AR={cvs:'2/3',banchan:'1/1',burger:'800/1062'};
+var AR={cvs:'896/1200',banchan:'1/1',burger:'800/1062'};
 var ALL=[{"who":"편의점 알바생의 하루","key":"cvs","cuts":[["1컷 · 표지","오전 10시, 알바 시작. 한산한데 몸이 열 개라도 모자라요."],["2컷 · 바쁜 업무","오후 2시, 컵라면 정리하고 폐기 찍고 담배 재고까지."],["3컷 · 휴식","오후 5시, 드디어 휴식! 신상 간식을 먹어 보려는데…"],["4컷 · 손님 등장","오후 5시 10분, 손님 다섯 분이 한꺼번에 들어와요."],["5컷 · 눈물","내 신상 간식… 저 멀리 도망가네…"],["6컷 · 마무리","여러분도 이런 적 있으신가요? 공감 댓글을 부탁해요."]]},{"who":"반찬가게 사장님의 하루","key":"banchan","cuts":[["1컷 · 표지","오후 8시 반, 마감 직전. 분명 아침엔 의욕이 넘쳤는데…"],["2컷 · 아침 준비","오전 9시, 조리 시작. 진미채만 볶아도 반나절이에요."],["3컷 · 신메뉴","오후 2시, 새로 개발한 제육볶음 완성! 대박 나겠지?"],["4컷 · 걱정","오후 6시, 아직 손님 세 분 몫이 남았네…"],["5컷 · 단골 등장","오후 7시, 단골손님이 \"제육 두 팩 주세요!\""],["6컷 · 마무리","오후 8시, 고객님 덕분에 오늘도 완판 성공!"]]},{"who":"수제버거집 사장님의 절규","key":"burger","cuts":[["1컷 · 표지","오후 3시 30분, 브레이크타임. 딱 1시간 반만 쉬고 싶어요."],["2컷 · 쾅쾅","오후 3시 45분, 닫힌 문을 쾅쾅! \"장사 안 해?\""],["3컷 · 전화","오후 4시 10분, 전화로 \"지금 브레이크타임이라…\""],["4컷 · 부탁","오후 4시 40분, 3시 반부터 5시까지는 쉬게 해 주세요… 흑흑"],["5컷 · 간절","다음엔 꼭 확인하고 와 주실 거죠…?"],["6컷 · 영업 재개","오후 5시, 영업 재개! 이제 웃으며 만나요."]]}];
 var sec=document.getElementById('example'), stage=sec.querySelector('.in-stage img'), info=sec.querySelector('.in-info');
 var tabs=[].slice.call(sec.querySelectorAll('.in-tab')), ST=ALL.filter(function(x){ return tabs.some(function(t){ return t.dataset.story===x.key; }); }), s=0, i=0;
 ST.forEach(function(x,j){ if(x.key==='banchan') s=j; });
 var thumbs=[].slice.call(sec.querySelectorAll('.in-thumb'));
+function loadThumbs(){ thumbs.forEach(function(b){ var im=b.querySelector('img'); if(im.dataset.src){ im.src=im.dataset.src; im.srcset=im.dataset.srcset; im.removeAttribute('data-src'); im.removeAttribute('data-srcset'); } }); }
+if('IntersectionObserver' in window){ var tio=new IntersectionObserver(function(es){ if(es[0].isIntersecting){ loadThumbs(); tio.disconnect(); } },{rootMargin:'300px'}); tio.observe(sec.querySelector('.in-ex-body')); } else loadThumbs();
 function u(k,n,w){ return '/assets/intro/ex-'+k+n+'-'+w+'.webp'; }
 function show(n){ i=(n+6)%6; var S=ST[s], c=S.cuts[i], k=S.key; sec.style.setProperty('--ar',AR[k]);
   stage.src=u(k,i+1,400); stage.srcset=u(k,i+1,400)+' 400w, '+u(k,i+1,800)+' 800w'; stage.alt=tabs[s].textContent+' '+c[0];
