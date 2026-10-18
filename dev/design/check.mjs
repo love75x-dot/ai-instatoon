@@ -51,7 +51,7 @@ const HPAGES = [['홈', '/'], ['노트 목록', '/guide/'], ['노트 글', '/gui
 const headProbe = () => {
   const box = (el) => { const r = el.getBoundingClientRect(); return { x: Math.round(r.left * 10) / 10, y: Math.round(r.top * 10) / 10, w: Math.round(r.width * 10) / 10, h: Math.round(r.height * 10) / 10, r: Math.round((window.innerWidth - r.right) * 10) / 10 }; };
   const tb = document.querySelector('.topbar'), brand = tb.querySelector('.brand'), mark = brand.querySelector('.mark'), name = brand.querySelector('b'), menu = tb.querySelector('#menuBtn');
-  const btns = [...tb.querySelectorAll('.hnav .hb:not(.hmore)')].map((b) => { const cs = getComputedStyle(b); return { kind: b.classList.contains('pri') ? '주' : '보조', text: b.textContent.trim(), box: box(b), css: [cs.fontSize, cs.fontWeight, cs.paddingLeft, cs.borderRadius, cs.borderTopWidth, cs.backgroundColor, cs.color, cs.borderTopColor].join('|') }; });
+  const btns = [...tb.querySelectorAll('.hnav .hb:not(.hmore)')].filter((b) => b.getClientRects().length).map((b) => { const cs = getComputedStyle(b); return { kind: b.classList.contains('pri') ? '주' : '보조', text: b.textContent.trim(), box: box(b), css: [cs.fontSize, cs.fontWeight, cs.paddingLeft, cs.borderRadius, cs.borderTopWidth, cs.backgroundColor, cs.color, cs.borderTopColor].join('|') }; });
   const ncs = getComputedStyle(name);
   return { tb: box(tb), menu: box(menu), mark: box(mark), name: { ...box(name), font: [ncs.fontSize, ncs.fontWeight, ncs.fontFamily].join('|') }, btns, overflow: document.documentElement.scrollWidth - window.innerWidth, logoHref: brand.tagName === 'A' ? brand.getAttribute('href') : '(앱: 첫 화면 이동 버튼)' };
 };
@@ -80,7 +80,7 @@ for (const [vk, vp] of [['모바일 390', { width: 390, height: 844 }], ['태블
   const lst = res['노트 목록'].btns.map((b) => b.kind).join(), art = res['노트 글'].btns.map((b) => b.kind).join();
   C.ok(base.btns.map((b) => b.kind).join() === '보조', `${vk} 홈 머리말: 보조 "인스타툰 노트"만`);
   C.ok(lst === '주', `${vk} 노트 목록 머리말: 주 "인스타툰 만들기"만`);
-  for (const n of ['노트 글', '소개', '개인정보', '이용안내', '404']) C.ok(res[n].btns.map((b) => b.kind).join() === '보조,주', `${vk} ${n} 머리말: 보조 "인스타툰 노트" → 주 "인스타툰 만들기"`);
+  for (const n of ['노트 글', '소개', '개인정보', '이용안내', '404']) C.ok(res[n].btns.map((b) => b.kind).join() === (vp.width <= 480 ? '주' : '보조,주'), `${vk} ${n} 머리말: ${vp.width <= 480 ? '주 "인스타툰 만들기"만(좁은 화면에서는 "인스타툰 노트" 버튼을 ☰ 메뉴로 넘김)' : '보조 "인스타툰 노트" → 주 "인스타툰 만들기"'}`);
 }
 // ---- 4b: 머리말 로고 …… [저장 상태] [인스타툰 노트] [☰], ☰ 메뉴(오른쪽에서 열림), 모드 탭 없음. 로고 위치·높이는 dev/design/logo.mjs 가 소개 화면과 맞는지 잰다 ----
 const MENU_ITEMS = '웹툰 만들기,한 달 기획,내 캐릭터,인스타툰 노트,소개,내 작업 저장 · 불러오기,도움말';
@@ -89,8 +89,8 @@ const homeProbe = () => {
   const tb = document.querySelector('.topbar'), h = (el) => Math.round(el.getBoundingClientRect().height * 10) / 10;
   const mb = document.querySelector('#menuBtn'), br = tb.querySelector('.brand'), note = tb.querySelector('.hnav > a.hb');
   return {
-    menuBtn: vis(mb) && h(mb) === 40 && Math.round(mb.getBoundingClientRect().width) === 40, menuRightOfNote: mb.getBoundingClientRect().left >= note.getBoundingClientRect().right && mb.getBoundingClientRect().left > br.getBoundingClientRect().right,
-    sameRow: Math.abs(mb.getBoundingClientRect().top - note.getBoundingClientRect().top) < 1,
+    menuBtn: vis(mb) && h(mb) === 40 && Math.round(mb.getBoundingClientRect().width) === 40, menuRightOfNote: (!vis(note) || mb.getBoundingClientRect().left >= note.getBoundingClientRect().right) && mb.getBoundingClientRect().left > br.getBoundingClientRect().right,
+    sameRow: Math.abs(mb.getBoundingClientRect().top - (vis(note) ? note : br).getBoundingClientRect().top) < 1,
     oldHeader: document.querySelectorAll('.htools, #hmoreBtn, #hpop, .apptools').length, modes: document.querySelectorAll('#modes, .modes, [data-mode2]').length,
     noStatus: !tb.querySelector('.hai,#aiDot,#aiText,#aiDotM,#aiTextM,.hpai,.dot') && !/연결됨|키 필요|연결 없음|연결 확인/.test(tb.textContent), keyRow: (document.querySelector('#keyTxt') || {}).textContent || '',
     overflow: document.documentElement.scrollWidth - window.innerWidth, tbH: h(tb), expanded: mb.getAttribute('aria-expanded'), wrapHidden: document.querySelector('#menuWrap').hidden,
