@@ -7,7 +7,7 @@ const ok = (c, m) => { try { assert.ok(c, m); console.log('✓', m); } catch { f
 const introOn = (p) => p.evaluate(() => document.documentElement.classList.contains('intro'));
 const vis = (p, sel) => p.evaluate((s) => { const e = document.querySelector(s); return !!e && e.getClientRects().length > 0; }, sel);
 const M = { width: 390, height: 844 };
-const preN = (p) => p.evaluate(() => document.querySelectorAll('link[rel=preload][href*="/pretendard/"]').length);
+const preN = (p, k = "introsquare") => p.evaluate((d) => document.querySelectorAll(`link[rel=preload][href*="/${d}/"]`).length, k);
 
 // 1) 처음 온 사람: 소개가 보이고 앱은 숨겨짐, 가로 스크롤 없음
 {
@@ -15,7 +15,7 @@ const preN = (p) => p.evaluate(() => document.querySelectorAll('link[rel=preload
   await page.goto(srv.base + '/'); await page.waitForTimeout(600);
   ok(await introOn(page) && await vis(page, '#intro h1') && !await vis(page, '#main'), '처음 온 사람: 소개 화면이 보이고 만들기 화면은 숨겨져요');
   ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), '390px: 가로 스크롤 없음');
-  ok(await preN(page) === 0, '처음 온 사람: 앱용 Pretendard 글꼴은 미리 불러오지 않아요(성능)');
+  ok(await preN(page, 'pretendard') === 0 && await preN(page) === 2, '처음 온 사람: 소개 글꼴 2개(400·800)만 미리 불러오고 Pretendard는 안 불러와요(성능)');
   ok(await page.title() === '인스타툰 연재실', 'title 유지');
   // 시작 → 만들기 화면, 새로고침해도 소개로 안 돌아감
   await page.click('#intro .in-hero [data-intro="start"]'); await page.waitForTimeout(400);
@@ -41,7 +41,7 @@ const preN = (p) => p.evaluate(() => document.querySelectorAll('link[rel=preload
   const { page } = await newPage(browser, srv.base, { intro: true, viewport: M, ls: { 'instatoonRoom.v4': JSON.stringify(st) } });
   await page.goto(srv.base + '/'); await page.waitForTimeout(800);
   ok(!await introOn(page) && await vis(page, '#main'), '재방문자: 소개 없이 작업 화면');
-  ok(await preN(page) === 12, '재방문자: 앱용 Pretendard 글꼴 12개를 그대로 미리 불러와요');
+  ok(await preN(page) === 3 && await preN(page, 'pretendard') === 0, '재방문자: 앱 글꼴 IntroSquare 3개(400·700·800)를 미리 불러와요');
   await page.click('#menuBtn'); await page.waitForTimeout(300);
   await page.click('#menuPanel a[href="#intro"]'); await page.waitForTimeout(500);
   ok(await introOn(page), '☰ 메뉴 "소개"로 소개 화면을 다시 봐요');
