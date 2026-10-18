@@ -74,7 +74,7 @@ ok(!/<img /.test((await get('/guide/how-to-make-instatoon/')).text), '글 페이
 for (const u of ['/', ...pages]) { const t = (await get(u)).text.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g, ''); ok(!t.includes('콘텐츠 가이드'), `${u} 화면에 옛 이름(콘텐츠 가이드) 남음`); }
 // 공통 머리말: "메인으로" 버튼 없음, 로고는 첫 화면(/)으로, 검정 "인스타툰 만들기" 버튼 하나
 // 공통 머리말: "메인으로" 버튼 없음, 로고는 첫 화면(/)으로, 노트 목록은 검정 "인스타툰 만들기"만, 나머지는 보조 "인스타툰 노트" + 검정 "인스타툰 만들기"
-const MAKE = '<a class="hb pri" href="/" data-track="cta" data-loc="header" aria-label="인스타툰 만들기"><span class="hp">인스타</span>툰 만들기</a>', NOTE = '<a class="hb" href="/guide/" aria-label="인스타툰 노트"><span class="hp">인스타툰&nbsp;</span>노트</a>';
+const MAKE = '<a class="hb pri" href="/" data-track="cta" data-loc="header" aria-label="인스타툰 만들기"><span class="hp">인스타</span>툰 만들기</a>', NOTE = '<a class="hb hb-note" href="/guide/" aria-label="인스타툰 노트"><span class="hp">인스타툰&nbsp;</span>노트</a>';
 for (const u of ['/guide/', `/guide/${articles[0].slug}/`, '/about/', '/privacy/', '/terms/']) { const t = (await get(u)).text; ok(!/>메인으로</.test(t), `${u} 머리말에 메인으로 버튼 남음`); ok(t.includes('<a class="brand" href="/"'), `${u} 로고가 첫 화면(/)으로 연결`); ok(t.includes(MAKE), `${u} 검정 인스타툰 만들기 버튼`); ok(u === '/guide/' ? !t.includes(NOTE) : t.includes(NOTE + MAKE), `${u} 머리말 버튼 구성(${u === '/guide/' ? '만들기만' : '노트 → 만들기'})`); }
 const nf = fs.readFileSync(path.join(dep, '404.html'), 'utf8'); ok(!/>메인으로</.test(nf) && nf.includes('<a class="brand" href="/"') && nf.includes(NOTE + MAKE), '404 머리말');
 // 메인 → /guide/
