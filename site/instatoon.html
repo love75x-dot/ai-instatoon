@@ -3122,12 +3122,18 @@ function cutPlace(i){ const cs=cuts(); let n=i; while(n>=0){ const c=cs[n]; if(!
    사진이 없으면 autoPlace는 ''라서 프롬프트는 한 글자도 바뀌지 않는다. 컷에서 '사진 안 씀'을 고르면 placeId '-'. */
 const STORE_BASE={out:'우리가게_외관',in:'우리가게_내부'}, STORE_KINDS=[['out','간판·외관'],['in','내부']];
 const STORE_DESC='실제 매장 사진이에요. 구조·간판·색감은 살리되 사진처럼 그리지 말고 지정한 그림체로 그려 주세요. 사진 속 사람은 그리지 마세요.';
-const STORE_OUT_RE=/(가게|매장|건물|문)\s?(앞|밖)|입구|간판|바깥|외관|거리|길가|테라스|골목/;
+const STORE_OUT_RE=/(가게|매장|건물|문)\s?(앞|밖)|입구|간판|바깥|외관|테라스/;
+const STORE_ELSE_RE=/집|자택|거실|안방|침대|시장|마트|공원|지하철|버스|택시|차 안|운전|출근|퇴근|병원|학교|사무실|은행|여행|바닷가|해변|거리|길가|골목|회식/;
+const STORE_IN_RE=/가게|매장|진열|계산대|카운터|주방|홀|테이블|작업실|샵|점포|가게 안|실내|창가|오븐|선반/;
 function storeKey(k){ const b=STORE_BASE[k]; return Object.keys(VAULT.places).find(n=>n===b||n.startsWith(b+'_'))||''; }
 function storeNewName(k){ const b=STORE_BASE[k]; return ALLV.places[b]?uniqueName((b+'_'+CUR).slice(0,30),new Set(Object.keys(ALLV.places))):b; }
 const storeOn=k=>{ const n=storeKey(k); return n&&placeHasImage(n)?n:''; };
 function autoPlace(i){ if(!VAULT_PROMPT) return ''; const o=storeOn('out'), inn=storeOn('in'); if(!o&&!inn) return ''; const c=cuts()[i]||{};
-  return STORE_OUT_RE.test(`${c.place||''} ${c.direction||''}`)?o:inn; }
+  const pl=String(c.place||'').trim(), t=`${pl} ${c.direction||''}`;
+  if(STORE_OUT_RE.test(t)) return o; /* 가게 앞·입구·간판 장면 → 외관 */
+  if(STORE_ELSE_RE.test(t)) return ''; /* 집·시장·길거리처럼 가게가 아닌 곳 → 사진 없이 */
+  if(pl&&!STORE_IN_RE.test(pl)) return ''; /* 배경 칸에 다른 장소를 적었으면 사진 없이 */
+  return inn; }
 function storeHTML(){ if(typeof indexedDB==='undefined') return '';
   const sl=STORE_KINDS.map(([k,lb])=>{ const n=storeKey(k), im=n&&VAULT.places[n]&&VAULT.places[n].image;
     return `<div class="vimg st-slot"><div class="ref">${vThumb(im,lb+' 사진')}</div><div class="vimg-m"><b>${lb}</b><div class="row"><label class="btn sm">${im?'바꾸기':'올리기'}<input type="file" accept="image/*" data-store="${k}" hidden></label>${im?`<button type="button" class="btn sm ghost" data-storedel="${k}">지우기</button>`:''}</div></div></div>`; }).join('');

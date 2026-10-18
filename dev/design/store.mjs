@@ -40,6 +40,12 @@ const putStore = (page, kinds) => page.evaluate((kinds) => {
   C.ok(p.text.includes('첨부한 장소_우리가게_내부 이미지와 같은 공간') && p.text.includes('첨부한 장소_우리가게_외관 이미지와 같은 공간'), 'ChatGPT 컷 프롬프트: "첨부한 장소_… 이미지와 같은 공간" 문장');
   C.ok(p.text.includes(DESC), 'ChatGPT 첨부 목록에 매장 사진 설명(사진처럼 그리지 말고 그림체로, 사람은 그리지 않기)');
   C.ok(/장소_우리가게_내부/.test(p.gs) && p.gs.includes(DESC), '젠스파크 프롬프트에도 장소와 매장 사진 설명');
+  // 가게가 아닌 장면은 사진 없이(다른 배경으로 그림)
+  await page.evaluate(() => { const cs = cuts(); cs[1].place = '집 거실, 밤'; cs[2].place = ''; cs[2].direction = '시장에서 장을 본다'; cs[3].place = '진열대 앞, 오후'; save(); });
+  const e = await all(page);
+  C.ok(e.places[1] === '' && e.places[2] === '', `집·시장 같은 가게가 아닌 장면엔 가게 사진을 붙이지 않음 (${e.places[1] || '없음'}, ${e.places[2] || '없음'})`);
+  C.ok(e.places[3] === '우리가게_내부', '배경에 진열대·계산대 같은 가게 안 장소를 적으면 내부 사진');
+  await page.evaluate(() => { const cs = cuts(); cs.forEach(c => { c.place = ''; c.direction = '진열대 앞에서 빵을 정리한다'; }); cs[0].place = '가게 앞 입구, 아침'; save(); });
   // 컷에서 '사진 안 씀'
   await page.evaluate(() => { cuts()[1].placeId = '-'; save(); });
   const q = await all(page);
