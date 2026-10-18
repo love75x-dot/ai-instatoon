@@ -83,7 +83,7 @@ for (const [vk, vp] of [['모바일 390', { width: 390, height: 844 }], ['태블
   for (const n of ['노트 글', '소개', '개인정보', '이용안내', '404']) C.ok(res[n].btns.map((b) => b.kind).join() === '보조,주', `${vk} ${n} 머리말: 보조 "인스타툰 노트" → 주 "인스타툰 만들기"`);
 }
 // ---- 4b: 머리말 [☰] 로고 …… [저장 상태] [인스타툰 노트], ☰ 메뉴, 모드 탭 없음 ----
-const MENU_ITEMS = '웹툰 만들기,한 달 기획,내 캐릭터,인스타툰 노트,내 작업 저장 · 불러오기,도움말';
+const MENU_ITEMS = '웹툰 만들기,한 달 기획,내 캐릭터,인스타툰 노트,소개,내 작업 저장 · 불러오기,도움말';
 const homeProbe = () => {
   const vis = (el) => !!el && getComputedStyle(el).display !== 'none' && el.getBoundingClientRect().width > 0;
   const tb = document.querySelector('.topbar'), h = (el) => Math.round(el.getBoundingClientRect().height * 10) / 10;
@@ -114,7 +114,7 @@ for (const [vk, w] of [['PC 1300', 1300], ['PC 1024', 1024], ['태블릿 768', 7
     return { open: document.querySelector('#menuWrap').classList.contains('on'), expanded: document.querySelector('#menuBtn').getAttribute('aria-expanded'), items: items.map((e) => e.textContent.trim()).join(','), inView: rc.left >= -1 && rc.right <= window.innerWidth + 1 && rc.top >= 0 && rc.bottom <= window.innerHeight + 1,
       slotFirst: p.firstElementChild === ss, slotHidden: !ss.hidden && /^내 가게s*▾$/.test(ss.textContent.trim()), cur: cur && cur.textContent.trim(), curColor: cs && cs.color, curLine: cs && cs.borderLeftWidth + ' ' + cs.borderLeftStyle, others: items.filter((e) => e !== cur).every((e) => getComputedStyle(e).color !== getComputedStyle(cur).color), focus: document.activeElement && document.activeElement.className, bodyLock: document.body.classList.contains('menu-open'), panelW: Math.round(rc.width), sheetOpen: document.body.classList.contains('sheet-open') };
   });
-  C.ok(m.open && m.expanded === 'true' && m.items === MENU_ITEMS && m.inView, `${vk} 홈: ☰를 누르면 왼쪽에서 메뉴가 열리고 항목 6개가 순서대로 (${m.items})`);
+  C.ok(m.open && m.expanded === 'true' && m.items === MENU_ITEMS && m.inView, `${vk} 홈: ☰를 누르면 왼쪽에서 메뉴가 열리고 항목 7개가 순서대로 (${m.items})`);
   C.ok(m.slotFirst && m.slotHidden, `${vk} 홈: 메뉴 맨 위 #shopSlot에 가게 줄("내 가게 ▾")이 있음(4d)`);
   C.ok(m.cur === '웹툰 만들기' && m.curColor === 'rgb(17, 17, 17)' && m.curLine === '2px solid' && m.others, `${vk} 홈: 지금 보는 항목은 검정 글씨 + 왼쪽 얇은 선, 나머지는 회색 (${m.cur})`);
   C.ok(m.panelW <= 300 && m.bodyLock, `${vk} 홈: 메뉴 폭 ${m.panelW}px, 열려 있는 동안 뒤 화면 스크롤 잠김`);
@@ -184,7 +184,7 @@ for (const [vk, w] of [['PC 1300', 1300], ['PC 1024', 1024], ['태블릿 768', 7
       const closed = await page.evaluate(() => ({ w: document.querySelector('#menuWrap').hidden, mb: document.querySelector('#menuBtn').getBoundingClientRect().height }));
       await page.click('#menuBtn'); await page.waitForTimeout(350);
       const o = await page.evaluate(() => { const p = document.querySelector('#menuPanel'), items = [...p.querySelectorAll('.mi')], cur = p.querySelector('[aria-current="page"]'); return { items: items.map((e) => e.textContent.trim()).join(','), hrefs: items.map((e) => e.getAttribute('href')).join(','), cur: cur && cur.textContent.trim(), slot: p.firstElementChild.id === 'shopSlot' && p.firstElementChild.hidden, on: document.querySelector('#menuWrap').classList.contains('on') }; });
-      C.ok(closed.w && closed.mb === 40 && o.on && o.items === MENU_ITEMS && o.hrefs === '/,/#month,/#vault,/guide/,/#backup,/#help' && o.slot && (o.cur || null) === curText, `${vk} ${name}: ☰ 메뉴가 홈과 같은 항목·순서로 열리고 링크가 맞음 (현재 표시: ${o.cur || '없음'})`);
+      C.ok(closed.w && closed.mb === 40 && o.on && o.items === MENU_ITEMS && o.hrefs === '/,/#month,/#vault,/guide/,/#intro,/#backup,/#help' && o.slot && (o.cur || null) === curText, `${vk} ${name}: ☰ 메뉴가 홈과 같은 항목·순서로 열리고 링크가 맞음 (현재 표시: ${o.cur || '없음'})`);
       await page.keyboard.press('Escape'); await page.waitForTimeout(300);
       C.ok(await page.evaluate(() => document.querySelector('#menuWrap').hidden), `${vk} ${name}: Esc로 메뉴가 닫힘`);
       await page.click('#menuBtn'); await page.waitForTimeout(300); await page.mouse.click(vp.width - 6, 500); await page.waitForTimeout(300);

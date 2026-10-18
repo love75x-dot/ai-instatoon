@@ -1,0 +1,4 @@
+{
+  "_설명": "소개 화면 켜고 끄기. 편의점 예시 그림(ex-cvs1~6-400·800.webp)에 실제 편의점 로고·상품명이 보여서 지금은 끄고, 그림 파일도 git에 올리지 않아요. 로고 없는 그림으로 site/assets/intro/ex-cvs1-400.webp … ex-cvs6-800.webp 12개를 만들어 넣고(node dev/tools/make-intro-images.mjs) convenienceStore 를 true 로 바꾼 뒤 npm run build 하면 편의점 탭·피드 카드가 다시 켜져요. 켰는데 그림이 없으면 빌드가 멈춰요.",
+  "convenienceStore": false
+}
