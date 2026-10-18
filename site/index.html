@@ -6,6 +6,7 @@
 <link rel="stylesheet" href="/assets/fonts/pretendard.css">
 <link rel="stylesheet" href="/assets/fonts/toon.css" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="/assets/fonts/toon.css"></noscript>
+<!--INTRO_HEAD-->
 <style>
 :root{
   --bg:#FFFFFF; --surface:#FFFFFF; --sunken:#F5F5F5; --ink:#111111; --ink-2:#3A3A3A; --muted:#6B6B6B; --line:#E6E6E6; --line-2:#CFCFCF;
@@ -889,6 +890,7 @@ details.artsbox{margin-top:0}
 </style>
 
 <a class="skip" href="#main">본문 바로가기</a>
+<!--INTRO_BODY-->
 <div class="wrap">
   <header class="topbar">
     <div class="hleft">
@@ -909,6 +911,7 @@ details.artsbox{margin-top:0}
         <li><button type="button" class="mi" data-menu="month" data-cur="month">한 달 기획</button></li>
         <li><button type="button" class="mi" data-v="open">내 캐릭터</button></li>
         <li><a class="mi" href="/guide/">인스타툰 노트</a></li>
+        <li><a class="mi" href="#intro">소개</a></li>
       </ul>
       <hr>
       <ul>
@@ -1479,6 +1482,7 @@ let lastSynced=null;
 const hashOfStep=s=>s==='edit'?'#edit':s==='post'?'#post':'';
 function stepFromHash(){ const h=location.hash; const s=h==='#edit'?'edit':h==='#post'?'post':'input'; return s!=='input'&&!cuts().length?'input':s; }
 function syncHash(){
+  if(document.documentElement.classList.contains('intro')) return; /* 소개 화면이 보이는 동안은 주소를 건드리지 않는다 */
   if((S.mode||'one')!=='one'||location.hash===ADM_HASH) return;
   const want=hashOfStep(S.step); if(lastSynced===S.step&&location.hash===want) return;
   if(location.hash!==want){ try{ (lastSynced===null?history.replaceState:history.pushState).call(history,null,'',location.pathname+location.search+want); }catch(_){} }
@@ -1593,14 +1597,14 @@ const whoDD=(name,list,cur,chipAttr,inAttr,ph)=>ddHTML(name,list.map(k=>`<button
 
 
 /* ---------- 1. 이야기 (웹툰 만들기) ---------- */
-/* 캐릭터 칸: 주인공·조연 모두 "보관함에서 고르기 / 새로 만들기" 두 버튼만. 옛 작업의 직접 입력값(외모·카드·사진·고정 이미지)은 지우지 않고 한 줄로 보여 주며, 눌러서 고치면 보관함 편집 화면(고급)이 열린다. */
+/* 캐릭터 칸: 주인공·조연 모두 "새로 만들기 / 보관함에서 고르기" 두 버튼만(보관함 고르기는 뒤쪽·보조 버튼). 옛 작업의 직접 입력값(외모·카드·사진·고정 이미지)은 지우지 않고 한 줄로 보여 주며, 눌러서 고치면 보관함 편집 화면(고급)이 열린다. */
 function localDesc(ref){ const x=slotLocal(ref), k=ref[0]==='m'?+ref.slice(1):-1;
   const d=[x.age,x.gender,x.role].filter(Boolean).join(' ')||String(x.looks||'').trim(); if(d) return d;
   if(cardLines(x.card).length) return '캐릭터 카드';
   if(k>=0&&(getPhoto(k)||refOf(k))) return '사진·이미지';
   if(k>=0&&String((S.info.locks||{})[k]||'').trim()) return '고정 문구';
   return ''; }
-function slotPickBar(ref){ return `<div class="slotbar"><button type="button" class="btn sm" data-v="pick" data-ref="${ref}">보관함에서 고르기</button><button type="button" class="btn sm" data-v="newslot" data-ref="${ref}">새로 만들기</button></div>`; }
+function slotPickBar(ref){ return `<div class="slotbar"><button type="button" class="btn sm" data-v="newslot" data-ref="${ref}">새로 만들기</button><button type="button" class="btn sm ghost" data-v="pick" data-ref="${ref}">보관함에서 고르기</button></div>`; }
 function castSlotHTML(ref,label,rm){ const e=slotEntry(ref), linked=!!(e&&e.id), ld=linked?'':localDesc(ref);
   return `<div class="cslot"><div class="cslot-h"><b>${label}</b>${rm||''}</div>${linked?linkedCardHTML(ref):`${ld?`<p class="lk-legacy"><span>이 작업의 캐릭터 · ${esc(ld)}</span><button type="button" class="linkbtn" data-v="saveslot" data-ref="${ref}">수정</button></p>`:''}${slotPickBar(ref)}`}</div>`; }
 function subFreeIdx(){ const s=S.info.subs||[]; const j=s.findIndex((e,n)=>!(e&&e.id)&&!subActive(n)); return j>=0?j:s.length; }
@@ -2299,7 +2303,7 @@ function applySpell(k){ const T=S.toon, f=T.spell?.[k]; if(!f) return; const tgt
 /* ================= 둘러보기 ================= */
 const TOUR=()=>[
   ['#steps','한 편은 딱 3단계 (① → ② → ③)','이야기 → 대본 → 그림. 끝난 단계엔 ✓가 붙어요.'],
-  ['.cast','캐릭터','"보관함에서 고르기"나 "새로 만들기"로 주인공과 조연을 정해요. 안 정해도 돼요.'],
+  ['.cast','캐릭터','"새로 만들기"나 "보관함에서 고르기"로 주인공과 조연을 정해요. 안 정해도 돼요.'],
   ['#ind-lb','어떤 가게인지만 고르면 시작할 수 있어요','꼭 필요한 건 이것 하나예요. 있었던 일은 적을수록 재밌어져요.'],
   ['#artsBox','웹툰 테마','눌러서 웹툰 테마 중 하나를 고르면 모든 컷과 캐릭터가 같은 그림체로 나와요.'],
   ['#makeBtn','이 버튼 하나면 대본 완성','30초~1분이면 컷별 대본, 첫 장 제목 후보, 캡션, 해시태그가 나와요.'],
@@ -4253,8 +4257,40 @@ document.addEventListener('click',e=>{ const b=e.target.closest('[data-gs],[data
   if(a==='text'){ S.info.gsText=b.value==='only'?'only':'with'; save(); const gb=document.getElementById('guideBox'); if(gb){ gb.innerHTML=gsHTML(); applyCopied(); } return; }
   if(a==='dl'){ e.preventDefault(); const idxs=String(b.dataset.b||'').split(',').map(Number).filter(x=>x>=0), L=gsPlan(idxs).list; downloadFiles(L.filter(f=>!f.missing)); } });
 
+/* ================= 소개 화면 (처음 온 사람) ================= */
+/* 소개 화면(#intro)은 저장된 작업이 없는 처음 온 사람에게만 보인다. 화면 상태만 다루고 저장 데이터 모양은 바꾸지 않는다.
+   - 저장된 작업이 있으면(hasWork) 바로 작업 화면. 주소 끝 #intro 는 누구나 소개를 다시 볼 수 있는 링크.
+   - [시작하기]를 누르면 이 탭 동안은 소개로 돌아가지 않는다(새로고침해도): sessionStorage 표시 + 주소 #start 는 잠깐 쓰고 지운다.
+   - localStorage 의 instatoon.storage.returning 은 "다시 온 사람" 표시(저장소가 늦게 열려도 소개가 깜빡 보이지 않게). instatoon.storage. 접두사라 백업·이전 대상이 아니다. */
+const INTRO_RET='instatoon.storage.returning', INTRO_ENT='instatoon.storage.entered', HTML_EL=document.documentElement;
+/* 저장된 작업이 있나: 앱이 이미 쓰는 isBlankBrowser()(대본·그림·기록·입력·보관함·백업 기록이 모두 없음)에 가게 여러 개까지 더해서 본다 */
+function introHasWork(){ try{ if(SHOPS.length>1||kvRaw.get(SHOP_LIST_KEY)) return true; }catch(_){} return !isBlankBrowser(); }
+function markReturning(){ try{ if(introHasWork()) localStorage.setItem(INTRO_RET,'1'); }catch(_){} }
+function introState(){
+  const h=location.hash;
+  if(h==='#intro') return true;
+  if(h==='#start'){ try{ sessionStorage.setItem(INTRO_ENT,'1'); }catch(_){} try{ history.replaceState(null,'',location.pathname+location.search); }catch(_){} return false; }
+  if(/^#(edit|post|month|vault|backup|help)/.test(h)||h===ADM_HASH) return false;
+  if(introHasWork()){ markReturning(); return false; }
+  try{ if(sessionStorage.getItem(INTRO_ENT)==='1') return false; }catch(_){}
+  return true;
+}
+function applyIntro(){ const on=introState(); HTML_EL.classList.toggle('intro',on); return on; }
+function enterApp(ind){
+  try{ sessionStorage.setItem(INTRO_ENT,'1'); }catch(_){}
+  if(location.hash==='#intro'||location.hash==='#start'){ try{ history.replaceState(null,'',location.pathname+location.search); }catch(_){} }
+  if(ind&&INDUSTRIES.includes(ind)&&!String(S.info.type||'').trim()&&(S.mode||'one')==='one'&&S.step==='input'&&!S.demo){ S.info.type=ind; save(); }
+  HTML_EL.classList.remove('intro'); render(); window.scrollTo(0,0); }
+document.addEventListener('click',e=>{ const b=e.target.closest('[data-intro]'); if(!b) return; e.preventDefault();
+  if(b.dataset.intro==='backup'){ enterApp(); return openBackupWin(); }
+  enterApp(b.dataset.ind||''); });
+window.addEventListener('hashchange',()=>{ if(location.hash===ADM_HASH) return; const was=HTML_EL.classList.contains('intro'), on=applyIntro(); if(on&&!was) window.scrollTo(0,0); else if(!on&&was) render(); });
+window.addEventListener('pagehide',markReturning);
+{ const fm=document.getElementById('fmeta'), fi=document.getElementById('fmetaIntro'); if(fm&&fi&&!fi.innerHTML) fi.innerHTML=fm.innerHTML; }
+
 /* ================= 시작 ================= */
 const BOOT_HASH=location.hash;
+applyIntro();
 applyFontVars();
 applyRatio();
 render();

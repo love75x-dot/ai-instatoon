@@ -23,7 +23,7 @@ for (const [vk, vp] of [['PC 1300', { width: 1300, height: 900 }], ['휴대폰 3
   await page.evaluate(() => { document.querySelector('#moreAll').open = true; });
   C.ok(await page.evaluate(() => ['#kind-lb', '[data-cuts]', '[data-ratio]', '[data-tone]', '[data-mode]', '[data-layout]', '[data-detail]'].every((s) => !!document.querySelector('#moreAll ' + s))), `${vk} "더 자세히 설정하기" 안에 대본 유형·컷 수·비율·분위기·이야기 방식·한 장 구성·디테일`);
   // 4) 캐릭터 칸: 주인공·조연 각각 두 버튼
-  C.ok(await page.evaluate(() => document.querySelectorAll('.cast [data-v="pick"]').length === 2 && document.querySelectorAll('.cast [data-v="newslot"]').length === 2 && [...document.querySelectorAll('.cast .slotbar .btn')].map((b) => b.textContent.trim()).join('|') === '보관함에서 고르기|새로 만들기|보관함에서 고르기|새로 만들기'), `${vk} 캐릭터 칸: 주인공·조연 각각 "보관함에서 고르기 / 새로 만들기"`);
+  C.ok(await page.evaluate(() => document.querySelectorAll('.cast [data-v="pick"]').length === 2 && document.querySelectorAll('.cast [data-v="newslot"]').length === 2 && [...document.querySelectorAll('.cast .slotbar .btn')].map((b) => b.textContent.trim()).join('|') === '새로 만들기|보관함에서 고르기|새로 만들기|보관함에서 고르기'), `${vk} 캐릭터 칸: 주인공·조연 각각 "새로 만들기 / 보관함에서 고르기"(보관함은 뒤쪽)`);
   // 5) 알리고 싶은 것: 평소 숨김, 광고형에서만 ③ 아래에 보임
   const off = async () => page.evaluate(() => { const e = document.querySelector('[data-kfield="offer"]'); return !e.hidden && e.getClientRects().length > 0; });
   const offerBefore = await off();

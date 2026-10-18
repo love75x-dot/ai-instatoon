@@ -218,7 +218,7 @@ if(e.key==='Tab'){var a=[].slice.call(w.querySelectorAll('.mi'));if(!a.length)re
 
 /* ☰ 메뉴: 홈(site/index.html)과 항목·순서가 같다. #shopSlot은 4d(가게 전환)가 채울 빈 자리. */
 const menuHtml = (cur) => `<div class="mwrap" id="menuWrap" hidden><div class="mbg"></div><nav class="mpanel" id="menuPanel" role="dialog" aria-modal="true" aria-label="메뉴"><div id="shopSlot" hidden></div>
-<ul><li><a class="mi" href="/">웹툰 만들기</a></li><li><a class="mi" href="/#month">한 달 기획</a></li><li><a class="mi" href="/#vault">내 캐릭터</a></li><li><a class="mi" href="/guide/"${cur === 'hub' || cur === 'guide' ? ' aria-current="page"' : ''}>인스타툰 노트</a></li></ul><hr>
+<ul><li><a class="mi" href="/">웹툰 만들기</a></li><li><a class="mi" href="/#month">한 달 기획</a></li><li><a class="mi" href="/#vault">내 캐릭터</a></li><li><a class="mi" href="/guide/"${cur === 'hub' || cur === 'guide' ? ' aria-current="page"' : ''}>인스타툰 노트</a></li><li><a class="mi" href="/#intro">소개</a></li></ul><hr>
 <ul><li><a class="mi" href="/#backup">내 작업 저장 · 불러오기</a></li><li><a class="mi" href="/#help">도움말</a></li></ul></nav></div>`;
 
 export const header = (cur) => `<a class="skip" href="#main">본문 바로가기</a>

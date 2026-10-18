@@ -53,7 +53,7 @@ const FREEZE = `(() => {
   let s = 12345; Math.random = () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
 })();`;
 
-/** opts: { viewport, freeze=true, noIDB=false, ls: {key:value} (처음 한 번만 채움), keepLs } */
+/** opts: { intro=false(소개 화면 검사용), viewport, freeze=true, noIDB=false, ls: {key:value} (처음 한 번만 채움), keepLs } */
 export async function newPage(browser, base, opts = {}) {
   const ctx = await browser.newContext({ viewport: opts.viewport || { width: 1300, height: 1000 }, acceptDownloads: true });
   const page = await ctx.newPage();
@@ -69,6 +69,8 @@ export async function newPage(browser, base, opts = {}) {
     return r.fulfill({ status: 200, contentType: ct, body: '' });
   });
   if (opts.freeze !== false) await page.addInitScript(FREEZE);
+  // 소개 화면(처음 온 사람용)을 건너뛰고 만들기 화면에서 시작한다. 소개를 검사할 때만 opts.intro=true
+  if (!opts.intro) await page.addInitScript(() => { try { sessionStorage.setItem('instatoon.storage.entered', '1'); } catch (_) {} });
   if (opts.noIDB) await page.addInitScript(() => { try { Object.defineProperty(window, 'indexedDB', { value: undefined, configurable: true }); } catch (_) {} });
   if (opts.ls) {
     await page.addInitScript(({ ls }) => {

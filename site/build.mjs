@@ -6,17 +6,30 @@ import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 import { gaId, gaSnippet } from './analytics.mjs';
-import { appFontHead, FONT_CSS_LINK } from './fonts.mjs';
+import { appFontHead, preloadTags, FONT_CSS_LINK } from './fonts.mjs';
 import { exampleGalleryLine } from './examples.mjs';
 import { OG_IMAGE, ogImageUrl, THEME_COLOR, NAVER_VERIFY, ORIGIN, SITE_NAME, footerMetaHtml, appSiteInfoLine } from './site-meta.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
+// 처음 온 사람용 소개 화면 조각(site/intro.html): <!--@HEAD--> 아래는 머리(글꼴·CSS·판단 스크립트), <!--@BODY--> 아래는 본문
+const [, introHead, introBody] = fs.readFileSync(path.join(here, 'intro.html'), 'utf8').replace(/\r\n/g, '\n').split(/<!--@HEAD-->\n|<!--@BODY-->\n/);
+if (!introHead || !introBody) throw new Error('site/intro.html 에 <!--@HEAD-->, <!--@BODY--> 표시가 있어야 해요');
+// 소개 화면 켜고 끄기: site/intro.config.json 의 convenienceStore (편의점 예시 그림에 실제 로고·상품명이 있어 지금은 false). 꺼지면 <!--cvs-->…<!--/cvs--> 구간(탭·피드 카드)이 빠진다.
+const introCfg = JSON.parse(fs.readFileSync(path.join(here, 'intro.config.json'), 'utf8'));
+const cvsOn = introCfg.convenienceStore === true;
+if (cvsOn) for (let n = 1; n <= 6; n++) for (const w of [400, 800]) if (!fs.existsSync(path.join(here, 'assets', 'intro', `ex-cvs${n}-${w}.webp`))) throw new Error(`편의점 예시 그림이 없어요: ex-cvs${n}-${w}.webp (intro.config.json 의 convenienceStore 를 켜려면 12개가 모두 필요해요)`);
+// 앱 첫 화면용 글꼴 조각(Pretendard 12개, 약 300KB)은 소개 화면을 보는 처음 온 사람에게는 필요 없어서, html.intro 가 아닐 때만 미리 불러온다(소개 판단 스크립트 바로 뒤에 실행).
+const appPreHrefs = [...preloadTags('app').matchAll(/href="([^"]+)"/g)].map((m) => m[1]);
+const appPreload = `<script>(function(){if(document.documentElement.classList.contains('intro'))return;${JSON.stringify(appPreHrefs)}.forEach(function(h){var l=document.createElement('link');l.rel='preload';l.as='font';l.type='font/woff2';l.crossOrigin='anonymous';l.href=h;document.head.appendChild(l);});})();</script>\n`;
+const introPick = (h) => h.replace(/<!--cvs-->([\s\S]*?)<!--\/cvs-->/g, (m, inner) => cvsOn ? inner : '').replace('__FAN__', cvsOn ? '' : ' two');
 // 운영자·문의·마지막 업데이트(푸터)와 앱 안(사용 방법)의 SITE_INFO를 site-info.json 값으로 채운다. 값이 비면 그 항목은 보이지 않는다.
 const src = fs.readFileSync(path.join(here, 'index.html'), 'utf8')
   .replace(/const SITE_INFO=\{[^\n]*\};/, () => appSiteInfoLine())
   .replace(/const EXAMPLES=\{[^\n]*\};/, () => exampleGalleryLine()) // 예시 갤러리 그림·글(site/assets/examples/examples.json)
-  .replace(FONT_CSS_LINK, () => appFontHead()) // 글꼴: 첫 화면 글자 조각 미리 불러오기 + CSS를 페이지 안에(직접 호스팅)
-  .replace('<p class="fmeta" id="fmeta"></p>', () => `<p class="fmeta" id="fmeta">${footerMetaHtml()}</p>`);
+  .replace(FONT_CSS_LINK, () => appFontHead().replace(preloadTags('app'), '')) // 글꼴 CSS를 페이지 안에(직접 호스팅). 앱 글자 조각 미리 불러오기는 아래 appPreload 가 소개 화면이 아닐 때만 한다
+  .replace('<p class="fmeta" id="fmeta"></p>', () => `<p class="fmeta" id="fmeta">${footerMetaHtml()}</p>`)
+  .replace('<!--INTRO_HEAD-->', () => introPick(introHead) + appPreload) // 처음 온 사람용 소개 화면(site/intro.html): 머리에 들어갈 글꼴·CSS·판단 스크립트
+  .replace('<!--INTRO_BODY-->', () => introPick(introBody).replace('id="fmetaIntro"></p>', () => `id="fmetaIntro">${footerMetaHtml()}</p>`)); // 본문(소개 화면 마크업)
 const NL = '\n';
 const head = [
   '<!doctype html>', '<html lang="ko">', '<head>', '<meta charset="utf-8">',
@@ -45,7 +58,7 @@ fs.mkdirSync(dep, { recursive: true });
 fs.writeFileSync(path.join(dep, 'index.html'), out);
 for (const f of ['favicon.svg', 'favicon.ico', 'favicon-32x32.png', 'apple-touch-icon.png']) fs.copyFileSync(path.join(here, f), path.join(dep, f));
 // 이미지(샘플 그림·공유 이미지·아이콘)와 홈 화면 추가용 manifest
-fs.cpSync(path.join(here, 'assets'), path.join(dep, 'assets'), { recursive: true, filter: (p) => !p.split(path.sep).join("/").includes("/examples/src") }); // 예시 그림 원본(examples/src)은 배포에 넣지 않는다. 샘플 그림·공유 이미지·아이콘·글꼴(assets/fonts)
+fs.cpSync(path.join(here, 'assets'), path.join(dep, 'assets'), { recursive: true, filter: (p) => { const q = p.split(path.sep).join('/'); return !q.includes('/examples/src') && (cvsOn || !/\/intro\/ex-cvs/.test(q)); } }); // 예시 그림 원본(examples/src)은 배포에 넣지 않는다. 샘플 그림·공유 이미지·아이콘·글꼴(assets/fonts)
 fs.copyFileSync(path.join(here, 'manifest.webmanifest'), path.join(dep, 'manifest.webmanifest'));
 // 보안 헤더(Cloudflare 에셋 헤더 파일): 손으로 관리하는 원본은 site/_headers, 배포 폴더로는 여기서 복사한다(deploy/는 git에 두지 않는다)
 fs.copyFileSync(path.join(here, '_headers'), path.join(dep, '_headers'));

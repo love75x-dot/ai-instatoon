@@ -1,0 +1,307 @@
+<!-- 소개 화면(처음 온 사람용). site/build.mjs 가 index.html 의 <!--INTRO_HEAD-->, <!--INTRO_BODY--> 자리에 넣는다. -->
+<!--@HEAD-->
+<script>
+/* 처음 온 사람에게만 소개 화면을 보인다(깜빡임 없이 먼저 정함). 최종 판단은 앱 코드(introState)가 저장된 작업을 보고 다시 한다. */
+(function(){var d=document.documentElement;
+/* 이 배포 전부터 쓰던 사람(아직 returning 표시가 없음): 저장된 작업 내용이나 가게 목록이 있으면 다시 온 사람 */
+function hasSaved(){try{if(localStorage.getItem('instatoon.shops'))return true;var s=JSON.parse(localStorage.getItem('instatoonRoom.v4')||'null'),i=s&&s.info;return !!(s&&(s.toon||s.check||(i&&(i.type||i.name||i.story||i.offer))));}catch(e){return false;}}
+try{var h=location.hash,ret=localStorage.getItem('instatoon.storage.returning')==='1'||hasSaved(),ent=sessionStorage.getItem('instatoon.storage.entered')==='1';
+if(h==='#intro'||(!ret&&!ent&&h!=='#start'&&!/^#(edit|post|month|vault|backup|help|room-)/.test(h))){d.className+=' intro';var l=document.createElement('link');l.rel='preload';l.as='font';l.type='font/woff2';l.crossOrigin='anonymous';l.href='/assets/fonts/introsquare/IntroSquare-800.woff2';document.head.appendChild(l);var f=document.createElement('link');f.rel='preload';f.as='font';f.type='font/woff2';f.crossOrigin='anonymous';f.href='/assets/fonts/introsquare/IntroSquare-400.woff2';document.head.appendChild(f);var m=document.createElement('link');m.rel='preload';m.as='image';m.href='/assets/intro/ex-banchan1-400.webp';m.setAttribute('fetchpriority','high');document.head.appendChild(m);
+}}catch(e){d.className+=' intro';}})();
+</script>
+<style>
+@font-face{font-family:"IntroSquare";font-weight:400;font-display:swap;src:url("/assets/fonts/introsquare/IntroSquare-400.woff2") format("woff2")}
+@font-face{font-family:"IntroSquare";font-weight:800;font-display:swap;src:url("/assets/fonts/introsquare/IntroSquare-800.woff2") format("woff2")}
+html:not(.intro) #intro{display:none}
+html.intro .wrap,html.intro .dock{display:none}
+#intro{--in-yellow:#FFD60A;--in-ink:#111;--in-sub:#5b5b5b;--in-gray:#f4f4f2;--in-line:#e2e2e2;color-scheme:light;background:#fff;color:var(--in-ink);font:400 16px/1.7 "IntroSquare","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;word-break:keep-all;overflow-wrap:break-word;-webkit-text-size-adjust:100%}
+:where(#intro) *{box-sizing:border-box}
+:where(#intro) a{color:inherit}
+:where(#intro) img{display:block;max-width:100%;height:auto}
+#intro :focus-visible{outline:3px solid #2563eb;outline-offset:2px}
+#intro .in-disp{font-weight:800;letter-spacing:-.035em}
+:where(#intro) section{scroll-margin-top:104px}
+.in-wrapw{max-width:1200px;margin:0 auto;padding-inline:20px}
+.in-head{position:sticky;top:0;z-index:30}
+.in-top{background:#0b0b0b}
+.in-top .in-wrapw{display:flex;align-items:center;justify-content:space-between;gap:12px;height:56px}
+.in-logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff!important;font-size:17px}
+.in-mark{width:28px;height:28px;border-radius:7px;background:var(--in-yellow);display:grid;place-items:center;color:#111;font-weight:800;font-size:14px;letter-spacing:0}
+.in-topr{display:flex;align-items:center;gap:16px}
+.in-topr .in-note{color:#cfcfcf;text-decoration:none;font-size:14px;font-weight:700;display:none}
+.in-btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:0 24px;border-radius:6px;border:1.5px solid transparent;font:inherit;font-weight:800;font-size:16px;text-decoration:none;cursor:pointer;line-height:1.2}
+.in-btn.w{background:#fff;color:#111!important}
+.in-btn.k{background:#111;color:#fff!important}
+.in-btn.o{border-color:#fff;color:#fff!important;font-weight:700}
+.in-btn.sm{min-height:40px;padding:0 16px;font-size:14px;border-radius:999px}
+.in-tabs{background:rgba(255,255,255,.97);border-bottom:1px solid #e6e6e6}
+.in-tabs .in-wrapw{display:flex;gap:22px;overflow-x:auto;scrollbar-width:none}
+.in-tabs .in-wrapw::-webkit-scrollbar{display:none}
+.in-tabs a{color:var(--in-sub);text-decoration:none;font-weight:700;font-size:14px;padding:11px 0;border-bottom:2px solid transparent;white-space:nowrap}
+.in-tabs a:hover,.in-tabs a.on{color:#111;border-bottom-color:#111}
+.in-hero{background:#0b0b0b;color:#fff;overflow:hidden}
+.in-hero .in-wrapw{padding-block:40px 36px;display:flex;flex-direction:column;gap:36px}
+.in-kick{font-size:13px;font-weight:800;letter-spacing:.14em;color:#8a6d00}
+.in-hero .in-kick{color:#bdbdbd}
+.in-hero h1{font-size:clamp(34px,9.5vw,64px);line-height:1.16;margin:14px 0 18px;font-weight:800;letter-spacing:-.035em}
+.in-hero h1 em{font-style:normal;color:var(--in-yellow)}
+.in-hero p.lead{color:#bdbdbd;font-size:16px;line-height:1.75;margin:0 0 28px;max-width:520px}
+.in-cta{display:flex;flex-direction:column;gap:10px}
+.in-fan{position:relative;display:flex;justify-content:center}
+.in-card{background:#fff;color:#111;border-radius:16px;overflow:hidden;width:min(300px,100%)}
+.in-card.s{display:none}
+.in-card-h{display:flex;align-items:center;gap:10px;padding:11px 14px}
+.in-ava{width:32px;height:32px;border-radius:50%;background:var(--in-gray);border:1.5px solid #111;display:grid;place-items:center;font-weight:800;font-size:13px;flex:none}
+.in-card-n{flex:1;min-width:0;line-height:1.3}.in-card-n b{display:block;font-size:13px}.in-card-n small{font-size:11px;color:#6b6b6b}
+.in-ex{font-size:11px;font-weight:800;border:1.5px solid #111;border-radius:999px;padding:1px 8px;flex:none}
+.in-card-img{position:relative;aspect-ratio:var(--ar,1/1);background:var(--in-gray);overflow:hidden}
+.in-card-img img{width:100%;height:100%;object-fit:cover}
+.in-badge{position:absolute;top:10px;right:10px;background:rgba(17,17,17,.78);color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px}
+.in-card-f{padding:10px 14px 14px;font-size:13px;line-height:1.5}
+.in-spec{border-top:1px solid #262626}
+.in-spec ul{list-style:none;margin:0;padding:24px 20px;display:grid;grid-template-columns:1fr 1fr;gap:22px 16px;max-width:1200px;margin-inline:auto;color:#fff}
+.in-spec li{display:flex;gap:12px;align-items:center}
+.in-spec svg{flex:none;opacity:.9}
+.in-spec b{display:block;font-size:20px;font-weight:800;letter-spacing:-.03em;line-height:1.2}
+.in-spec span{display:block;color:#9a9a9a;font-size:12.5px;line-height:1.4;margin-top:2px}
+.in-sec{padding-block:64px}
+.in-sec.g{background:var(--in-gray)}
+.in-sec.k{background:#0b0b0b;color:#fff}
+.in-sech{text-align:center;margin-bottom:36px}
+.in-sech h2{font-size:clamp(26px,6.6vw,52px);line-height:1.25;margin:10px 0 12px;font-weight:800;letter-spacing:-.035em}
+.in-sech p{margin:0;color:var(--in-sub);font-size:16px;line-height:1.7}
+.in-ex-tabs{display:flex;gap:8px;overflow-x:auto;justify-content:flex-start;margin-bottom:28px;padding-bottom:4px;scrollbar-width:none}
+.in-ex-tabs::-webkit-scrollbar{display:none}
+@media (min-width:600px){.in-ex-tabs{justify-content:center}}
+.in-tab{font:inherit;font-weight:800;font-size:15px;padding:10px 18px;border-radius:999px;cursor:pointer;background:#fff;color:#111;border:1.5px solid #cfcfcf;white-space:nowrap;min-height:44px}
+.in-tab[aria-selected="true"]{background:#111;color:#fff;border-color:#111}
+.in-ex-body{display:flex;flex-direction:column;gap:28px;align-items:center}
+.in-stage{width:min(100%,380px);aspect-ratio:var(--ar,1/1);border-radius:8px;overflow:hidden;background:var(--in-gray)}
+.in-stage img{width:100%;height:100%;object-fit:cover}
+.in-info{width:100%;max-width:520px}
+.in-who{font-size:14px;font-weight:800;color:#8a6d00;margin-bottom:8px}
+.in-no{font-size:16px;font-weight:800;color:#8a8a8a}.in-no i{font-style:normal;color:#bdbdbd}
+.in-info h3{font-size:26px;margin:8px 0 8px;font-weight:800;letter-spacing:-.03em}
+.in-info p{margin:0 0 22px;font-size:16px;line-height:1.7;color:#444;min-height:3.4em}
+.in-arrows{display:flex;gap:10px;margin-bottom:22px}
+.in-arrow{width:48px;height:48px;border-radius:50%;border:1.5px solid #111;background:#fff;display:grid;place-items:center;cursor:pointer;color:#111}
+.in-arrow:hover{background:#111;color:#fff}
+.in-thumbs{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+.in-thumb{position:relative;aspect-ratio:var(--ar,1/1);overflow:hidden;border-radius:4px;cursor:pointer;padding:0;background:var(--in-gray);border:1.5px solid transparent;opacity:.55}
+.in-thumb[aria-current="true"]{border:2.5px solid #111;opacity:1}
+.in-thumb img{width:100%;height:100%;object-fit:cover}
+.in-step{display:flex;flex-direction:column;gap:24px;margin-bottom:56px}
+.in-step:last-child{margin-bottom:0}
+.in-step .no{font-size:14px;font-weight:800;color:#8a6d00;letter-spacing:.08em}
+.in-step h3{font-size:32px;margin:8px 0 10px;font-weight:800;letter-spacing:-.035em}
+.in-step p{margin:0;font-size:16px;line-height:1.8;color:#444}
+.in-mock{background:#fff;border-radius:8px;padding:20px;border:1px solid #e2e2e2}
+.in-mock .q{font-weight:800;font-size:14px;margin-bottom:10px}
+.in-pills{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.in-pills span{border:1.5px solid #d6d6d6;border-radius:999px;padding:7px 13px;font-weight:700;font-size:14px}
+.in-pills span.on{background:#111;border-color:#111;color:#fff;font-weight:800}
+.in-ta{border:1.5px solid #111;border-radius:6px;padding:12px 14px;font-size:15px;line-height:1.7;color:#333}
+.in-row{display:flex;gap:14px;align-items:flex-start;border-bottom:1px solid #ececec;padding:12px 4px}.in-row:last-child{border:0}
+.in-row b.n{font-size:20px;font-weight:800;color:#bdbdbd;min-width:28px}.in-row b.n.on{color:#111}
+.in-row div b{display:block;font-weight:800;font-size:15px}.in-row div span{display:block;color:#6b6b6b;font-size:13.5px;margin-top:3px}
+.in-pics{background:#0b0b0b;border-radius:8px;padding:18px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.in-pics .p{aspect-ratio:1;border-radius:4px;overflow:hidden;background:#222}.in-pics .p img{width:100%;height:100%;object-fit:cover}
+.in-pics .f{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding-top:6px;color:#bdbdbd;font-weight:700;font-size:14px}
+.in-pics .f span+span{background:#fff;color:#111;font-weight:800;padding:8px 14px;border-radius:4px}
+.in-chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;max-width:980px;margin:0 auto}
+.in-chip{font:inherit;border:1.5px solid #cfcfcf;border-radius:999px;padding:0 18px;min-height:46px;font-weight:700;font-size:16px;background:#fff;color:#111;cursor:pointer}
+.in-chip:hover{border-color:#111;background:#111;color:#fff}
+.in-chip.d{border-color:#111;background:#111;color:#fff}
+.in-themes{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 14px}
+.in-themes img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:6px;background:#e3e3df}
+.in-themes b{display:block;font-weight:800;font-size:15px;margin-top:10px;line-height:1.4}
+.in-series{display:flex;flex-direction:column;gap:36px}
+.in-series .in-kick{color:#bdbdbd}
+.in-series h2{font-size:clamp(28px,7vw,52px);line-height:1.25;margin:10px 0 22px;font-weight:800;letter-spacing:-.035em}
+.in-series ul{list-style:none;padding:0;margin:0 0 30px}
+.in-series li{display:flex;gap:12px;font-size:16px;line-height:1.6;padding:16px 0;border-top:1px solid #2a2a2a}.in-series li:last-child{border-bottom:1px solid #2a2a2a}
+.in-series li svg{flex:none;margin-top:3px;color:#fff}
+.in-char{position:relative;border-radius:8px;background:#1a1a1a;padding:24px 24px 0;display:flex;justify-content:center;overflow:hidden}
+.in-char img{width:min(100%,360px)}
+.in-notes{display:grid;gap:4px}
+.in-notes a{border-top:2px solid #111;padding:20px 0;text-decoration:none;display:block}
+.in-notes small{display:block;font-size:13px;color:#8a6d00;font-weight:800;margin-bottom:8px}
+.in-notes b{font-weight:800;font-size:18px;line-height:1.5}
+.in-nh{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:22px}
+.in-nh h2{margin:0;font-size:clamp(26px,6vw,40px);font-weight:800;letter-spacing:-.035em}
+.in-nh a{font-weight:800;font-size:15px}
+.in-band{background:var(--in-yellow);color:#111}
+.in-band .in-wrapw{padding-block:44px;display:flex;flex-direction:column;gap:20px}
+.in-band h2{margin:0;font-size:clamp(24px,6vw,36px);line-height:1.3;font-weight:800;letter-spacing:-.035em}
+.in-foot{background:#0b0b0b;color:#8a8a8a;font-size:14px}
+.in-foot .in-wrapw{padding-block:36px;display:flex;flex-direction:column;gap:18px}
+.in-foot .fmeta{margin:0}
+.in-foot b{display:block;color:#fff;font-size:17px;margin-bottom:8px}
+.in-foot nav{display:flex;gap:6px 18px;flex-wrap:wrap}
+.in-foot a,.in-foot button{color:#bdbdbd;font:inherit;background:none;border:0;padding:6px 0;cursor:pointer;text-decoration:underline}
+.in-foot .fmeta a{color:#bdbdbd}
+@media (min-width:720px){
+#intro section{scroll-margin-top:110px}
+.in-wrapw{padding-inline:32px}
+.in-top .in-wrapw{height:64px}
+.in-logo{font-size:19px}
+.in-topr .in-note{display:inline}
+.in-tabs .in-wrapw{gap:32px}.in-tabs a{font-size:15px;padding:14px 0}
+.in-hero .in-wrapw{flex-direction:row;align-items:center;padding-block:80px 64px;min-height:600px}
+.in-hero .in-txt{flex:1 1 50%}.in-fan{flex:1 1 50%;height:540px;align-items:center}
+.in-cta{flex-direction:row}
+.in-card{position:absolute;width:300px}
+.in-card.s{display:block}
+.in-card.l{transform:translateX(-150px) rotate(-7deg) scale(.84);z-index:1}
+.in-card.r{transform:translateX(150px) rotate(7deg) scale(.84);z-index:2}
+.in-card.c{position:relative;z-index:3}
+.in-fan.two .in-card.c{position:absolute;transform:translateX(-118px) rotate(-5deg);z-index:2}
+.in-fan.two .in-card.r{transform:translateX(118px) rotate(5deg);z-index:1}
+.in-spec ul{grid-template-columns:repeat(4,1fr);padding:32px;gap:24px}
+.in-spec li+li{border-left:1px solid #2c2c2c;padding-left:24px}
+.in-spec b{font-size:28px}.in-spec span{font-size:14px}
+.in-sec{padding-block:104px}
+.in-sech{margin-bottom:56px}
+.in-ex-body{flex-direction:row;justify-content:center;gap:56px;align-items:center}
+.in-stage{flex:none;width:380px}
+.in-info{flex:1;max-width:480px}
+.in-step{flex-direction:row;align-items:center;gap:64px;margin-bottom:88px}
+.in-step>div{flex:1 1 0;min-width:0}
+.in-step.rev{flex-direction:row-reverse}
+.in-step h3{font-size:40px}.in-step p{font-size:18px}
+.in-themes{grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:28px 20px}
+.in-series{flex-direction:row;align-items:center;gap:64px}.in-series>div{flex:1 1 0;min-width:0}
+.in-notes{grid-template-columns:repeat(3,1fr);gap:20px}
+.in-band .in-wrapw{flex-direction:row;justify-content:space-between;align-items:center;padding-block:56px}
+.in-foot .in-wrapw{flex-direction:row;justify-content:space-between}
+}
+@media (prefers-reduced-motion:reduce){#intro *{scroll-behavior:auto!important}}
+</style>
+<!--@BODY-->
+<div id="intro">
+  <div class="in-head">
+    <header class="in-top"><div class="in-wrapw">
+      <a class="in-logo" href="#top" data-go="top" aria-label="인스타툰 연재실 소개 맨 위로"><span class="in-mark" aria-hidden="true">툰</span><b class="in-disp">인스타툰 연재실</b></a>
+      <div class="in-topr"><a class="in-note" href="/guide/">인스타툰 노트</a><a class="in-btn w sm" href="#start" data-intro="start">시작하기</a></div>
+    </div></header>
+    <nav class="in-tabs" aria-label="섹션"><div class="in-wrapw">
+      <a href="#top" data-go="top">개요</a><a href="#example" data-go="example">예시</a><a href="#how" data-go="how">만드는 법</a><a href="#jobs" data-go="jobs">업종</a><a href="#themes" data-go="themes">그림체</a><a href="#series" data-go="series">연재</a><a href="#notes" data-go="notes">노트</a>
+    </div></nav>
+  </div>
+
+  <section id="top" class="in-hero" aria-labelledby="in-h1">
+    <div class="in-wrapw">
+      <div class="in-txt">
+        <div class="in-kick">INSTATOON STUDIO</div>
+        <h1 id="in-h1">내 가게 이야기가<br><em>인스타툰</em>이 되는 곳</h1>
+        <p class="lead">있었던 일 한 줄이면 충분해요. 대본, 컷 구성, 그림 프롬프트, 게시물 글까지 한 번에 정리해 드려요.</p>
+        <div class="in-cta"><a class="in-btn w" href="#start" data-intro="start">내 이야기로 시작하기 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a class="in-btn o" href="#example" data-go="example">예시 먼저 보기</a></div>
+      </div>
+      <div class="in-fan__FAN__">
+        <!--cvs--><article class="in-card l s" aria-label="편의점 알바생의 하루 예시 게시물">
+          <div class="in-card-h"><span class="in-ava" aria-hidden="true">편</span><div class="in-card-n"><b>편의점 알바생</b><small>인스타툰 · 예시</small></div><span class="in-ex">예시</span></div>
+          <div class="in-card-img" style="--ar:896/1200"><img src="/assets/intro/ex-cvs1-400.webp" width="400" height="536" alt="편의점 알바생의 하루 1컷 표지 예시" loading="lazy" decoding="async"><span class="in-badge">1/6</span></div>
+          <div class="in-card-f"><b>편의점 알바생</b> 손님은 안 오는데 왜 나만 바쁠까</div>
+        </article><!--/cvs-->
+        <article class="in-card r s" aria-label="수제버거집 사장님의 절규 예시 게시물">
+          <div class="in-card-h"><span class="in-ava" aria-hidden="true">버</span><div class="in-card-n"><b>수제버거집 사장</b><small>인스타툰 · 예시</small></div><span class="in-ex">예시</span></div>
+          <div class="in-card-img" style="--ar:800/1062"><img src="/assets/intro/ex-burger1-400.webp" width="400" height="600" alt="수제버거집 사장님의 절규 1컷 표지 예시" loading="lazy" decoding="async"><span class="in-badge">1/6</span></div>
+          <div class="in-card-f"><b>수제버거집 사장</b> 브레이크타임만은 지켜 주세요</div>
+        </article>
+        <article class="in-card c" aria-label="반찬가게 사장님의 하루 예시 게시물">
+          <div class="in-card-h"><span class="in-ava" aria-hidden="true">반</span><div class="in-card-n"><b>반찬가게 사장</b><small>인스타툰 · 예시</small></div><span class="in-ex">예시</span></div>
+          <div class="in-card-img"><img src="/assets/intro/ex-banchan1-400.webp" width="400" height="600" alt="반찬가게 사장님의 하루 1컷 표지 예시" decoding="async" fetchpriority="high"><span class="in-badge">1/6</span></div>
+          <div class="in-card-f"><b>반찬가게 사장</b> 제육볶음 두 팩의 기적</div>
+        </article>
+      </div>
+    </div>
+    <div class="in-spec"><ul>
+        <li><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12h8M12 8v8"/></svg><div><b>0원</b><span>가입·결제 없이 바로</span></div></li>
+        <li><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg><div><b>하루 1회</b><span>키 없이 무료로 대본 만들기</span></div></li>
+        <li><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1 0 1.5-.8 1.5-1.5 0-1.2-1-1.5-1-2.5S13.3 15 15 15h2a4 4 0 0 0 4-4c0-4.4-4-8-9-8z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7" r="1"/></svg><div><b>13가지</b><span>고르기만 하는 웹툰 그림체</span></div></li>
+        <li><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="4" width="8" height="7" rx="1"/><rect x="13" y="4" width="8" height="7" rx="1"/><rect x="3" y="13" width="8" height="7" rx="1"/><rect x="13" y="13" width="8" height="7" rx="1"/></svg><div><b>4~10컷</b><span>인스타 한 게시물 분량</span></div></li>
+    </ul></div>
+  </section>
+
+  <section id="example" class="in-sec" aria-labelledby="in-h-ex"><div class="in-wrapw">
+    <div class="in-sech"><div class="in-kick">EXAMPLE</div><h2 id="in-h-ex">이렇게 한 편이 나와요</h2><p>가게 종류와 있었던 일만 적었어요. 컷마다 제목, 말풍선, 장면이 정리돼서 나와요. AI로 만든 예시 그림이에요.</p></div>
+    <div class="in-ex-tabs" role="tablist" aria-label="예시 고르기"><!--cvs--><button type="button" class="in-tab" role="tab" data-story="cvs" aria-selected="false">편의점 알바생</button><!--/cvs--><button type="button" class="in-tab" role="tab" data-story="banchan" aria-selected="true">반찬가게 사장</button><button type="button" class="in-tab" role="tab" data-story="burger" aria-selected="false">수제버거집 사장</button></div>
+    <div class="in-ex-body">
+      <div class="in-stage"><img src="/assets/intro/ex-banchan1-400.webp" srcset="/assets/intro/ex-banchan1-400.webp 400w, /assets/intro/ex-banchan1-800.webp 800w" sizes="(max-width:720px) 90vw, 380px" width="400" height="600" alt="반찬가게 사장 1컷 · 표지" loading="lazy" decoding="async"></div>
+      <div class="in-info" aria-live="polite">
+        <div class="in-who">반찬가게 사장님의 하루</div>
+        <div class="in-no in-disp">01 <i>/ 06</i></div>
+        <h3>1컷 · 표지</h3>
+        <p>오후 8시 반, 마감 직전. 분명 아침엔 의욕이 넘쳤는데…</p>
+        <div class="in-arrows"><button type="button" class="in-arrow" id="in-prev" aria-label="이전 컷"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button><button type="button" class="in-arrow" id="in-next" aria-label="다음 컷"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></div>
+        <div class="in-thumbs"><button type="button" class="in-thumb" data-i="0" aria-label="1컷 · 표지 보기" aria-current="true"><img data-src="/assets/intro/ex-banchan1-400.webp" data-srcset="/assets/intro/ex-banchan1-400.webp 400w, /assets/intro/ex-banchan1-800.webp 800w" sizes="64px" width="400" height="600" alt="" decoding="async"></button><button type="button" class="in-thumb" data-i="1" aria-label="2컷 · 아침 준비 보기" aria-current="false"><img data-src="/assets/intro/ex-banchan2-400.webp" data-srcset="/assets/intro/ex-banchan2-400.webp 400w, /assets/intro/ex-banchan2-800.webp 800w" sizes="64px" width="400" height="600" alt="" decoding="async"></button><button type="button" class="in-thumb" data-i="2" aria-label="3컷 · 신메뉴 보기" aria-current="false"><img data-src="/assets/intro/ex-banchan3-400.webp" data-srcset="/assets/intro/ex-banchan3-400.webp 400w, /assets/intro/ex-banchan3-800.webp 800w" sizes="64px" width="400" height="600" alt="" decoding="async"></button><button type="button" class="in-thumb" data-i="3" aria-label="4컷 · 걱정 보기" aria-current="false"><img data-src="/assets/intro/ex-banchan4-400.webp" data-srcset="/assets/intro/ex-banchan4-400.webp 400w, /assets/intro/ex-banchan4-800.webp 800w" sizes="64px" width="400" height="600" alt="" decoding="async"></button><button type="button" class="in-thumb" data-i="4" aria-label="5컷 · 단골 등장 보기" aria-current="false"><img data-src="/assets/intro/ex-banchan5-400.webp" data-srcset="/assets/intro/ex-banchan5-400.webp 400w, /assets/intro/ex-banchan5-800.webp 800w" sizes="64px" width="400" height="600" alt="" decoding="async"></button><button type="button" class="in-thumb" data-i="5" aria-label="6컷 · 마무리 보기" aria-current="false"><img data-src="/assets/intro/ex-banchan6-400.webp" data-srcset="/assets/intro/ex-banchan6-400.webp 400w, /assets/intro/ex-banchan6-800.webp 800w" sizes="64px" width="400" height="600" alt="" decoding="async"></button></div>
+      </div>
+    </div>
+  </div></section>
+
+  <section id="how" class="in-sec g" aria-labelledby="in-h-how"><div class="in-wrapw">
+    <div class="in-sech"><div class="in-kick">HOW IT WORKS</div><h2 id="in-h-how">고르고, 적고, 누르면 한 편 완성</h2></div>
+    <div class="in-step"><div><div class="no">STEP 01</div><h3>이야기</h3><p>어떤 가게인지 고르고, 있었던 일을 한두 줄 적어요. 질문 버튼을 누르면 답만 채우면 돼요. 주인공과 그림체도 여기서 골라요.</p></div>
+      <div class="in-mock"><div class="q">어떤 가게예요?</div><div class="in-pills"><span class="on">식당</span><span>카페</span><span>미용실</span><span>꽃집</span><span>프리랜서</span></div><div class="q">있었던 일</div><div class="in-ta">신메뉴 제육볶음이 저녁까지 남아서 걱정했어요. 7시에 단골손님이 와서 두 팩을 사 가셨어요.</div></div></div>
+    <div class="in-step rev"><div><div class="no">STEP 02</div><h3>대본</h3><p>컷별 제목, 대사, 장면이 정리돼서 나와요. 마음에 안 드는 컷만 고치거나 다시 만들 수 있어요. 캡션과 해시태그도 같이 나와요.</p></div>
+      <div class="in-mock"><div class="in-row"><b class="n">01</b><div><b>분명 아침엔 의욕이 넘쳤는데…</b><span>마감 직전, 어깨가 처진 사장님</span></div></div><div class="in-row"><b class="n on">03</b><div><b>"새로 개발한 제육볶음! 대박 나겠지?"</b><span>오후 2시, 신메뉴 완성 · 미디엄샷</span></div></div><div class="in-row"><b class="n">06</b><div><b>고객님 덕분에 오늘도 완판 성공!</b><span>오후 8시, 마감 완료</span></div></div></div></div>
+    <div class="in-step"><div><div class="no">STEP 03</div><h3>그림</h3><p>정리된 문장을 ChatGPT·젠스파크 같은 이미지 AI에 붙여 넣으면 그림이 나와요. 다시 올리면 인스타 비율에 맞춰 한 번에 저장돼요.</p></div>
+      <div class="in-pics"><div class="p"><img src="/assets/intro/ex-banchan2-400.webp" srcset="/assets/intro/ex-banchan2-400.webp 400w, /assets/intro/ex-banchan2-800.webp 800w" sizes="(max-width:720px) 28vw, 160px" width="400" height="600" alt="반찬가게 2컷 예시" loading="lazy" decoding="async"></div><div class="p"><img src="/assets/intro/ex-banchan4-400.webp" srcset="/assets/intro/ex-banchan4-400.webp 400w, /assets/intro/ex-banchan4-800.webp 800w" sizes="(max-width:720px) 28vw, 160px" width="400" height="600" alt="반찬가게 4컷 예시" loading="lazy" decoding="async"></div><div class="p"><img src="/assets/intro/ex-banchan6-400.webp" srcset="/assets/intro/ex-banchan6-400.webp 400w, /assets/intro/ex-banchan6-800.webp 800w" sizes="(max-width:720px) 28vw, 160px" width="400" height="600" alt="반찬가게 6컷 예시" loading="lazy" decoding="async"></div><div class="f"><span>6장 · 4:5 · PNG 묶음</span><span>zip으로 저장</span></div></div></div>
+  </div></section>
+
+  <section id="jobs" class="in-sec" aria-labelledby="in-h-jobs"><div class="in-wrapw">
+    <div class="in-sech"><div class="in-kick">FOR EVERYONE</div><h2 id="in-h-jobs">어떤 일을 하든, 이야기는 있어요</h2><p>우리 가게, 내 직업, 오늘 하루. 고르면 거기서 시작해요.</p></div>
+    <div class="in-chips"><button type="button" class="in-chip" data-intro="start" data-ind="카페">카페</button><button type="button" class="in-chip" data-intro="start" data-ind="식당">식당</button><button type="button" class="in-chip" data-intro="start">반찬가게</button><button type="button" class="in-chip" data-intro="start" data-ind="미용실">미용실</button><button type="button" class="in-chip" data-intro="start" data-ind="네일·뷰티">네일·뷰티</button><button type="button" class="in-chip" data-intro="start" data-ind="사진관">사진관</button><button type="button" class="in-chip" data-intro="start" data-ind="꽃집">꽃집</button><button type="button" class="in-chip" data-intro="start" data-ind="학원">학원</button><button type="button" class="in-chip" data-intro="start" data-ind="운동·필라테스">필라테스</button><button type="button" class="in-chip" data-intro="start" data-ind="공방·클래스">공방</button><button type="button" class="in-chip" data-intro="start" data-ind="반려동물">반려동물</button><button type="button" class="in-chip" data-intro="start" data-ind="프리랜서">프리랜서</button><button type="button" class="in-chip" data-intro="start" data-ind="온라인 쇼핑몰">쇼핑몰</button><button type="button" class="in-chip d" data-intro="start">그냥 내 일상</button></div>
+  </div></section>
+
+  <section id="themes" class="in-sec g" aria-labelledby="in-h-th"><div class="in-wrapw">
+    <div class="in-sech"><div class="in-kick">13 THEMES</div><h2 id="in-h-th">그림체는 고르기만 하세요</h2><p>고른 테마가 모든 컷과 캐릭터에 똑같이 적용돼요.</p></div>
+    <ul class="in-themes"><li><img src="/assets/intro/th-00-320.webp" srcset="/assets/intro/th-00-320.webp 320w, /assets/intro/th-00-640.webp 640w" sizes="(max-width:720px) 45vw, 240px" width="320" height="320" loading="lazy" decoding="async" alt="귀여운 2~3등신 그림체 샘플"><b>귀여운 2~3등신</b></li><li><img src="/assets/intro/th-01-320.webp" srcset="/assets/intro/th-01-320.webp 320w, /assets/intro/th-01-640.webp 640w" sizes="(max-width:720px) 45vw, 240px" width="320" height="320" loading="lazy" decoding="async" alt="흑백 + 포인트 컬러 그림체 샘플"><b>흑백 + 포인트 컬러</b></li><li><img src="/assets/intro/th-02-320.webp" srcset="/assets/intro/th-02-320.webp 320w, /assets/intro/th-02-640.webp 640w" sizes="(max-width:720px) 45vw, 240px" width="320" height="320" loading="lazy" decoding="async" alt="시크한 무표정 치비 그림체 샘플"><b>시크한 무표정 치비</b></li><li><img src="/assets/intro/th-03-320.webp" srcset="/assets/intro/th-03-320.webp 320w, /assets/intro/th-03-640.webp 640w" sizes="(max-width:720px) 45vw, 240px" width="320" height="320" loading="lazy" decoding="async" alt="동글동글 손그림 일상툰 그림체 샘플"><b>동글동글 손그림 일상툰</b></li><li><img src="/assets/intro/th-04-320.webp" srcset="/assets/intro/th-04-320.webp 320w, /assets/intro/th-04-640.webp 640w" sizes="(max-width:720px) 45vw, 240px" width="320" height="320" loading="lazy" decoding="async" alt="풀컬러 파스텔 일러스트 그림체 샘플"><b>풀컬러 파스텔 일러스트</b></li><li><img src="/assets/intro/th-05-320.webp" srcset="/assets/intro/th-05-320.webp 320w, /assets/intro/th-05-640.webp 640w" sizes="(max-width:720px) 45vw, 240px" width="320" height="320" loading="lazy" decoding="async" alt="펜 크로키 + 포인트 색 그림체 샘플"><b>펜 크로키 + 포인트 색</b></li><li><img src="/assets/intro/th-06-320.webp" srcset="/assets/intro/th-06-320.webp 320w, /assets/intro/th-06-640.webp 640w" sizes="(max-width:720px) 45vw, 240px" width="320" height="320" loading="lazy" decoding="async" alt="열혈 소년 모험 만화 그림체 샘플"><b>열혈 소년 모험 만화</b></li><li><img src="/assets/intro/th-07-320.webp" srcset="/assets/intro/th-07-320.webp 320w, /assets/intro/th-07-640.webp 640w" sizes="(max-width:720px) 45vw, 240px" width="320" height="320" loading="lazy" decoding="async" alt="거칠고 어두운 액션 만화 그림체 샘플"><b>거칠고 어두운 액션 만화</b></li><li><img src="/assets/intro/th-08-320.webp" srcset="/assets/intro/th-08-320.webp 320w, /assets/intro/th-08-640.webp 640w" sizes="(max-width:720px) 45vw, 240px" width="320" height="320" loading="lazy" decoding="async" alt="가족 코믹 애니 그림체 샘플"><b>가족 코믹 애니</b></li><li><img src="/assets/intro/th-09-320.webp" srcset="/assets/intro/th-09-320.webp 320w, /assets/intro/th-09-640.webp 640w" sizes="(max-width:720px) 45vw, 240px" width="320" height="320" loading="lazy" decoding="async" alt="반짝이는 순정 만화 그림체 샘플"><b>반짝이는 순정 만화</b></li><li><img src="/assets/intro/th-10-320.webp" srcset="/assets/intro/th-10-320.webp 320w, /assets/intro/th-10-640.webp 640w" sizes="(max-width:720px) 45vw, 240px" width="320" height="320" loading="lazy" decoding="async" alt="레트로 90년대 애니 그림체 샘플"><b>레트로 90년대 애니</b></li><li><img src="/assets/intro/th-11-320.webp" srcset="/assets/intro/th-11-320.webp 320w, /assets/intro/th-11-640.webp 640w" sizes="(max-width:720px) 45vw, 240px" width="320" height="320" loading="lazy" decoding="async" alt="3D 애니메이션 영화 그림체 샘플"><b>3D 애니메이션 영화</b></li><li><img src="/assets/intro/th-12-320.webp" srcset="/assets/intro/th-12-320.webp 320w, /assets/intro/th-12-640.webp 640w" sizes="(max-width:720px) 45vw, 240px" width="320" height="320" loading="lazy" decoding="async" alt="2등신 동물 마스코트 그림체 샘플"><b>2등신 동물 마스코트</b></li></ul>
+  </div></section>
+
+  <section id="series" class="in-sec k" aria-labelledby="in-h-se"><div class="in-wrapw in-series">
+    <div><div class="in-kick">SERIES</div><h2 id="in-h-se">한 번 만든 캐릭터로<br>계속 연재하세요</h2>
+      <ul><li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>내 캐릭터에 저장해 두면 다음 편도 같은 얼굴로</li><li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>한 달 기획으로 올릴 주제를 미리 정리</li><li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>가게 말투·해시태그는 한 번만 적으면 매 편 자동으로</li></ul>
+      <a class="in-btn w" href="#start" data-intro="start">내 캐릭터 만들기</a></div>
+    <div class="in-char"><img src="/assets/intro/series-main.webp" width="600" height="674" loading="lazy" decoding="async" alt="나만의 캐릭터를 만들어요라고 말하며 손 흔드는 알바생 캐릭터"></div>
+  </div></section>
+
+  <section id="notes" class="in-sec" aria-labelledby="in-h-no"><div class="in-wrapw">
+    <div class="in-nh"><h2 id="in-h-no">인스타툰 노트</h2><a href="/guide/">전체 글 보기 →</a></div>
+    <div class="in-notes"><a href="/guide/how-to-use-instatoon-room/"><small>인스타툰 가이드</small><b>인스타툰 연재실 사용법: 업종 입력부터 게시용 글까지 한 편 만들기</b></a><a href="/guide/gemini-api-key-setup-guide/"><small>AI 콘텐츠 제작</small><b>Gemini API 키 넣는 방법과 오류가 날 때 해결하기</b></a><a href="/guide/instatoon-troubleshooting/"><small>인스타툰 가이드</small><b>인스타툰 만들다 막힐 때: 증상별 원인과 해결 방법</b></a></div>
+  </div></section>
+
+  <section class="in-band"><div class="in-wrapw"><h2>오늘 있었던 일, 인스타툰으로 남겨 볼까요?</h2><a class="in-btn k" href="#start" data-intro="start">내 이야기로 시작하기 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div></section>
+  <footer class="in-foot"><div class="in-wrapw">
+    <div><b class="in-disp">인스타툰 연재실</b><p class="fmeta" id="fmetaIntro"></p><p style="margin:6px 0 0">작업은 이 브라우저에만 저장돼요.</p></div>
+    <nav aria-label="사이트 링크"><a href="/guide/">인스타툰 노트</a><a href="/about/">소개</a><a href="/privacy/">개인정보처리방침</a><a href="/terms/">이용안내</a><a href="/sitemap.xml">사이트맵</a><button type="button" data-intro="backup">백업 파일 불러오기</button></nav>
+  </div></footer>
+</div>
+<script>
+(function(){
+var I=document.getElementById('intro'); if(!I) return;
+var rm=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+I.addEventListener('click',function(e){ var a=e.target.closest('[data-go]'); if(!a) return; e.preventDefault(); var t=document.getElementById(a.getAttribute('data-go')); if(t) t.scrollIntoView({behavior:rm?'auto':'smooth',block:'start'}); });
+var AR={cvs:'896/1200',banchan:'1/1',burger:'800/1062'};
+var ALL=[{"who":"편의점 알바생의 하루","key":"cvs","cuts":[["1컷 · 표지","오전 10시, 알바 시작. 한산한데 몸이 열 개라도 모자라요."],["2컷 · 바쁜 업무","오후 2시, 컵라면 정리하고 폐기 찍고 담배 재고까지."],["3컷 · 휴식","오후 5시, 드디어 휴식! 신상 간식을 먹어 보려는데…"],["4컷 · 손님 등장","오후 5시 10분, 손님 다섯 분이 한꺼번에 들어와요."],["5컷 · 눈물","내 신상 간식… 저 멀리 도망가네…"],["6컷 · 마무리","여러분도 이런 적 있으신가요? 공감 댓글을 부탁해요."]]},{"who":"반찬가게 사장님의 하루","key":"banchan","cuts":[["1컷 · 표지","오후 8시 반, 마감 직전. 분명 아침엔 의욕이 넘쳤는데…"],["2컷 · 아침 준비","오전 9시, 조리 시작. 진미채만 볶아도 반나절이에요."],["3컷 · 신메뉴","오후 2시, 새로 개발한 제육볶음 완성! 대박 나겠지?"],["4컷 · 걱정","오후 6시, 아직 손님 세 분 몫이 남았네…"],["5컷 · 단골 등장","오후 7시, 단골손님이 \"제육 두 팩 주세요!\""],["6컷 · 마무리","오후 8시, 고객님 덕분에 오늘도 완판 성공!"]]},{"who":"수제버거집 사장님의 절규","key":"burger","cuts":[["1컷 · 표지","오후 3시 30분, 브레이크타임. 딱 1시간 반만 쉬고 싶어요."],["2컷 · 쾅쾅","오후 3시 45분, 닫힌 문을 쾅쾅! \"장사 안 해?\""],["3컷 · 전화","오후 4시 10분, 전화로 \"지금 브레이크타임이라…\""],["4컷 · 부탁","오후 4시 40분, 3시 반부터 5시까지는 쉬게 해 주세요… 흑흑"],["5컷 · 간절","다음엔 꼭 확인하고 와 주실 거죠…?"],["6컷 · 영업 재개","오후 5시, 영업 재개! 이제 웃으며 만나요."]]}];
+var sec=document.getElementById('example'), stage=sec.querySelector('.in-stage img'), info=sec.querySelector('.in-info');
+var tabs=[].slice.call(sec.querySelectorAll('.in-tab')), ST=ALL.filter(function(x){ return tabs.some(function(t){ return t.dataset.story===x.key; }); }), s=0, i=0;
+ST.forEach(function(x,j){ if(x.key==='banchan') s=j; });
+var thumbs=[].slice.call(sec.querySelectorAll('.in-thumb'));
+function loadThumbs(){ thumbs.forEach(function(b){ var im=b.querySelector('img'); if(im.dataset.src){ im.src=im.dataset.src; im.srcset=im.dataset.srcset; im.removeAttribute('data-src'); im.removeAttribute('data-srcset'); } }); }
+if('IntersectionObserver' in window){ var tio=new IntersectionObserver(function(es){ if(es[0].isIntersecting){ loadThumbs(); tio.disconnect(); } },{rootMargin:'300px'}); tio.observe(sec.querySelector('.in-ex-body')); } else loadThumbs();
+function u(k,n,w){ return '/assets/intro/ex-'+k+n+'-'+w+'.webp'; }
+function show(n){ i=(n+6)%6; var S=ST[s], c=S.cuts[i], k=S.key; sec.style.setProperty('--ar',AR[k]);
+  stage.src=u(k,i+1,400); stage.srcset=u(k,i+1,400)+' 400w, '+u(k,i+1,800)+' 800w'; stage.alt=tabs[s].textContent+' '+c[0];
+  info.querySelector('.in-who').textContent=S.who; info.querySelector('.in-no').firstChild.textContent='0'+(i+1)+' ';
+  info.querySelector('h3').textContent=c[0]; info.querySelector('p').textContent=c[1];
+  thumbs.forEach(function(b,j){ var im=b.querySelector('img'); im.src=u(k,j+1,400); im.srcset=u(k,j+1,400)+' 400w, '+u(k,j+1,800)+' 800w'; b.setAttribute('aria-current',j===i); b.setAttribute('aria-label',S.cuts[j][0]+' 보기'); });
+  tabs.forEach(function(t,j){ t.setAttribute('aria-selected',j===s); }); }
+document.getElementById('in-prev').onclick=function(){ show(i-1); }; document.getElementById('in-next').onclick=function(){ show(i+1); };
+thumbs.forEach(function(b){ b.onclick=function(){ show(+b.dataset.i); }; });
+tabs.forEach(function(t){ t.onclick=function(){ s=tabs.indexOf(t); show(0); }; });
+if('IntersectionObserver' in window){ var links={}; [].forEach.call(I.querySelectorAll('.in-tabs a'),function(a){ links[a.getAttribute('data-go')]=a; });
+  var io=new IntersectionObserver(function(es){ es.forEach(function(en){ if(en.isIntersecting){ for(var k in links) links[k].classList.toggle('on',k===en.target.id); } }); },{rootMargin:'-40% 0px -55% 0px'});
+  Object.keys(links).forEach(function(k){ var t=document.getElementById(k); if(t) io.observe(t); }); }
+})();
+</script>

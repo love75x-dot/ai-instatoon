@@ -15,7 +15,7 @@ const browser = await launch(); const ctx = await browser.newContext({ viewport:
 const errs = [], failed = [];
 page.on('pageerror', (e) => errs.push(e.message)); page.on('requestfailed', (r) => { if (/\/assets\/(samples|examples)\//.test(r.url())) failed.push(r.url().split('/assets/')[1]); });
 await page.route(/^https?:/, (r) => r.fulfill({ status: 200, contentType: 'text/css', body: '' })); // 외부 주소(JSZip 등)는 막음
-await page.addInitScript(() => { try { localStorage.setItem('instatoon.helpSeen', '1'); localStorage.setItem('instatoon.key', 'TEST'); } catch (_) {} });
+await page.addInitScript(() => { try { sessionStorage.setItem('instatoon.storage.entered', '1'); localStorage.setItem('instatoon.helpSeen', '1'); localStorage.setItem('instatoon.key', 'TEST'); } catch (_) {} });
 await page.goto(pathToFileURL(path.join(root, 'site', 'instatoon.html')).href); await page.waitForTimeout(1800);
 const t = await page.evaluate(async () => { const i = document.querySelector('img.art-thumb'); if (i) await i.decode().catch(() => {}); return { thumb: i ? i.naturalWidth : -1, src: i && i.getAttribute('src') }; });
 C.ok(t.thumb > 0 && /^assets\/samples\//.test(t.src), `파일 버전: 웹툰 테마 샘플 그림이 디스크의 assets/에서 보임 (${t.src})`);
