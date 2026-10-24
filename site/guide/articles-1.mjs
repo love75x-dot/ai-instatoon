@@ -54,7 +54,7 @@ export default [
   desc: '소재 정하기, 주인공과 메시지 설정, 컷 나누기, 대사와 이미지 제작, 캡션 작성, 업로드 전 확인까지 인스타툰 제작 흐름을 순서대로 설명합니다.',
   card: '소재부터 업로드 전 확인까지 8단계 제작 흐름',
   lead: '인스타툰은 그림부터 그리면 막히기 쉽습니다. 아이디어 → 대본 → 장면 → 이미지 → 말풍선 → 캡션 → 게시 순서로 진행하면 각 단계에서 해야 할 일이 분명해져요.',
-  related: ['what-is-instatoon', '4-panel-instatoon', 'instatoon-storytelling', 'instagram-caption-writing'],
+  related: ['what-is-instatoon', '4-panel-instatoon', 'instatoon-storytelling', 'instatoon-art-style-guide'],
   summary: ['그림보다 소재·메시지·대본을 먼저 정한다.', '컷마다 "이 컷에서 독자가 알게 되는 것"을 한 줄로 적는다.', '대사는 소리 내어 읽었을 때 어색하지 않게 짧게 쓴다.', '업로드 전에 메뉴명·가격·오탈자를 사람이 직접 확인한다.'],
   sections: [
     sec('소재 정하기',

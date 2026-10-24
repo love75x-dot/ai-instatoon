@@ -25,6 +25,7 @@
     "https://www.ai-instatoon.com/guide/gemini-api-key-setup-guide/",
     "https://www.ai-instatoon.com/guide/how-to-use-instatoon-room/",
     "https://www.ai-instatoon.com/guide/instatoon-troubleshooting/",
+    "https://www.ai-instatoon.com/guide/instatoon-art-style-guide/",
     "https://www.ai-instatoon.com/about/",
     "https://www.ai-instatoon.com/privacy/",
     "https://www.ai-instatoon.com/terms/"
@@ -43,6 +44,7 @@
     "instagram-facebook-content",
     "instagram-post-structure",
     "instagram-reels-vs-feed",
+    "instatoon-art-style-guide",
     "instatoon-character-consistency",
     "instatoon-storytelling",
     "instatoon-troubleshooting",
@@ -68,7 +70,7 @@
       "canonical": "https://www.ai-instatoon.com/guide/",
       "ogUrl": "https://www.ai-instatoon.com/guide/",
       "robots": "index,follow",
-      "title": "인스타툰 · SNS 콘텐츠 가이드 | 인스타툰 연재실"
+      "title": "인스타툰 노트: 인스타툰·SNS 콘텐츠 만드는 법 | 인스타툰 연재실"
     },
     "/guide/what-is-instatoon/": {
       "status": 200,
@@ -230,6 +232,13 @@
       "ogUrl": "https://www.ai-instatoon.com/guide/instatoon-troubleshooting/",
       "robots": "index,follow",
       "title": "인스타툰 만들다 막힐 때: 증상별 원인과 해결 방법 | 인스타툰 연재실"
+    },
+    "/guide/instatoon-art-style-guide/": {
+      "status": 200,
+      "canonical": "https://www.ai-instatoon.com/guide/instatoon-art-style-guide/",
+      "ogUrl": "https://www.ai-instatoon.com/guide/instatoon-art-style-guide/",
+      "robots": "index,follow",
+      "title": "인스타툰 그림체 13가지 비교: 웹툰 테마 고르는 법 | 인스타툰 연재실"
     },
     "/about/": {
       "status": 200,
