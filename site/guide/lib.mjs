@@ -30,13 +30,16 @@ export const table = (head, ...rows) => ({ t: 'table', head, rows });
 export const sec = (h, ...blocks) => ({ h, blocks });
 /* 예시 갤러리(반찬가게 사장님의 하루): site/assets/examples/examples.json 한 곳의 그림·글을 그대로 쓴다 */
 export const gallery = () => ({ t: 'gallery' });
+// 웹툰 테마 샘플 그림 묶음(사이트의 /assets/samples/<key>.jpg). items: [[key, 이름, 한 줄 설명], ...]
+export const themes = (...items) => ({ t: 'themes', v: items });
 
 export const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 // 본문 인라인: **굵게**, [[slug|텍스트]] 내부 링크
 export const inline = (s) => esc(s)
   .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
   .replace(/\[\[(\/[a-z0-9/-]*)\|(.+?)\]\]/g, (_, href, t) => `<a href="${href}">${t}</a>`)
-  .replace(/\[\[([a-z0-9-]+)\|(.+?)\]\]/g, (_, slug, t) => `<a href="/guide/${slug}/">${t}</a>`);
+  .replace(/\[\[([a-z0-9-]+)\|(.+?)\]\]/g, (_, slug, t) => `<a href="/guide/${slug}/">${t}</a>`)
+  .replace(/\[([^\]\[]+)\]\((https:\/\/[^)\s"]+)\)/g, (_, t, href) => `<a href="${href}" rel="noopener noreferrer">${t}</a>`);
 
 export const url = (slug) => `${ORIGIN}/guide/${slug}/`;
 
@@ -55,6 +58,8 @@ function block(b) {
       const E = exampleData(); if (!E) return '';
       return `<figure class="gal"><div class="gal-g">${E.cuts.map((c) => `<figure class="gal-f"><img src="/assets/examples/${c.file}-360.webp" srcset="/assets/examples/${c.file}-360.webp 360w, /assets/examples/${c.file}-720.webp 720w" sizes="(min-width:721px) 220px, 46vw" width="${E.w}" height="${E.h}" loading="lazy" decoding="async" alt="${esc(c.alt)}"><figcaption><b>${c.n}컷 · ${esc(c.role)}</b>${esc(c.cap)}</figcaption></figure>`).join('')}</div><figcaption class="gal-n"><b>${esc(E.title)}</b> · ${esc(E.sub)}. ${esc(E.note)}</figcaption></figure>`;
     }
+    case 'themes':
+      return `<figure class="gal"><div class="gal-g">${b.v.map(([k, n, d]) => `<figure class="gal-f"><img src="/assets/samples/${esc(k)}.jpg" width="360" height="360" loading="lazy" decoding="async" alt="${esc(n)} 테마 샘플 그림"><figcaption><b>${esc(n)}</b>${esc(d)}</figcaption></figure>`).join('')}</div><figcaption class="gal-n">샘플은 모두 AI로 만든 그림이에요. 같은 테마라도 쓰는 그림 도구와 장면에 따라 결과가 달라져요.</figcaption></figure>`;
     default: throw new Error('unknown block ' + b.t);
   }
 }

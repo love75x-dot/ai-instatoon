@@ -5,17 +5,17 @@ import { p, ul, ol, check, tip, warn, ex, table, sec } from '../lib.mjs';
 // 해결하는 질문: "Gemini API 키는 어디서 받아 어디에 넣고, 오류 메시지가 뜨면 어떻게 하나? 키는 안전한가?"
 export default {
   slug: 'gemini-api-key-setup-guide', cat: 'ai',
-  published: '2026-10-01',
+  published: '2026-10-01', modified: '2026-10-24',
   title: 'Gemini API 키 넣는 방법과 오류가 날 때 해결하기',
   metaTitle: 'Gemini API 키 넣는 방법과 오류 해결 (인스타툰 연재실)',
   desc: '인스타툰 연재실에서 대본을 만들 때 필요한 Gemini API 키를 받아 입력하는 순서와 키 오류, 사용 한도 초과, 서버 혼잡 같은 메시지가 나올 때 확인할 점, 키를 안전하게 쓰는 방법을 정리했습니다.',
   card: '키 입력 순서, 오류 메시지별 해결, 키 보관 주의점',
-  lead: '인스타툰 연재실의 대본·캡션 만들기는 사용자가 직접 발급한 Google Gemini API 키로 동작합니다. 키를 넣는 위치, 자주 보이는 오류 메시지의 뜻과 해결 순서, 키를 안전하게 다루는 방법을 정리했습니다.',
+  lead: '인스타툰 연재실의 대본·캡션 만들기는 하루 1회까지는 키 없이 무료로 해 볼 수 있고, 그 뒤로는 사용자가 직접 발급한 Google Gemini API 키로 동작합니다(고급 설정에서 Anthropic Claude 키를 고를 수도 있어요). 키를 넣는 위치, 자주 보이는 오류 메시지의 뜻과 해결 순서, 키를 안전하게 다루는 방법을 정리했습니다.',
   related: ['how-to-use-instatoon-room', 'ai-instatoon-review-checklist', 'instagram-content-copyright', 'instatoon-character-consistency'],
-  summary: ['키는 Google AI Studio에서 직접 발급해 화면 위쪽 "API 키 설정"에 붙여 넣고 저장한다.', '"Gemini 연결됨"이 보이면 준비된 것이고, 오류는 메시지가 알려 주는 원인(키, 한도, 혼잡, 권한)을 순서대로 확인한다.', '키는 내 브라우저에만 저장되므로 공용 컴퓨터에서는 쓰지 않거나 사용 후 지운다.', '키와 한도·요금 조건은 Google이 정하며 바뀔 수 있어 AI Studio의 현재 안내를 확인한다.'],
+  summary: ['키는 Google AI Studio에서 직접 발급해 화면 위쪽 "내 키 설정"을 눌러 열리는 "API 키 설정" 창에 붙여 넣고 저장한다.', '"Gemini 연결됨"이 보이면 준비된 것이고, 오류는 메시지가 알려 주는 원인(키, 한도, 혼잡, 권한)을 순서대로 확인한다.', '키는 내 브라우저에만 저장되므로 공용 컴퓨터에서는 쓰지 않거나 사용 후 지운다.', '키와 한도·요금 조건은 Google이 정하며 바뀔 수 있어 AI Studio의 현재 안내를 확인한다.'],
   sections: [
     sec('키를 받아서 넣는 순서',
-      ol('Google AI Studio의 API 키 페이지(aistudio.google.com/apikey)에 접속해 Google 계정으로 로그인한다.', '"API 키 만들기(Create API key)"로 키를 만들고 복사한다.', '인스타툰 연재실 화면 위쪽의 "API 키 설정"을 열어 "Gemini API 키" 칸에 붙여 넣고 "저장"을 누른다.', '오른쪽 위에 초록 점과 "Gemini 연결됨"이 보이면 완료다.'),
+      ol('Google AI Studio의 API 키 페이지(aistudio.google.com/apikey)에 접속해 Google 계정으로 로그인한다.', '"API 키 만들기(Create API key)"로 키를 만들고 복사한다.', '인스타툰 연재실 화면 위쪽 "오늘 무료 1회" 줄의 "내 키 설정"을 눌러 "API 키 설정" 창을 열고 "Gemini API 키" 칸에 붙여 넣고 "저장"을 누른다.', '오른쪽 위에 초록 점과 "Gemini 연결됨"이 보이면 완료다.'),
       p('Gemini는 이 도구에서 대본, 기획, 캡션 같은 글을 만드는 데에만 쓰입니다. 그림은 사용자가 ChatGPT 같은 외부 이미지 도구에서 직접 만듭니다. 키 발급 화면과 무료 사용 범위는 Google이 바꿀 수 있으니 AI Studio의 현재 안내를 확인하세요.')),
     sec('모델 이름 칸은 어떻게 하나',
       p('"대본·기획 모델" 칸에는 기본값이 들어 있습니다. 보통은 그대로 쓰면 됩니다. 모델 이름 관련 오류가 나면 AI Studio에 표시되는 현재 사용 가능한 모델 이름으로 바꿔 저장해 보세요. 어떤 이름이 사용 가능한지는 시기와 계정에 따라 다를 수 있습니다.')),
