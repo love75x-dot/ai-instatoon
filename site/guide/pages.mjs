@@ -39,7 +39,7 @@ ${sections.join('\n')}
 }
 
 const gaParagraph = () => cfg.ga
-  ? S('analytics', '방문 통계(Google Analytics)', P('이 사이트는 방문 통계를 위해 Google Analytics 4를 사용합니다. 페이지 조회, 활성 사용자, 참여 시간, 가이드 글의 스크롤 깊이와 링크 클릭 같은 이용 정보를 쿠키 등을 통해 수집하며, 이 정보는 Google로 전송됩니다. 이 통계에는 사용자가 인스타툰 제작 화면에 입력한 내용, 사진, API 키가 포함되지 않습니다. 브라우저 설정에서 쿠키를 차단하거나 Google이 제공하는 차단 도구로 수집을 거부할 수 있습니다.'))
+  ? S('analytics', '방문 통계(Google Analytics)', P('이 사이트는 방문 통계를 위해 Google Analytics 4를 사용합니다. 페이지 조회, 활성 사용자, 참여 시간, 가이드 글의 스크롤 깊이와 링크 클릭 같은 이용 정보를 쿠키 등을 통해 수집하며, 이 정보는 Google로 전송됩니다. 이 통계에는 사용자가 인스타툰 제작 화면에 입력한 내용, 사진, API 키가 포함되지 않습니다. 브라우저 설정에서 쿠키를 차단하거나 Google이 제공하는 [Google 애널리틱스 차단 부가기능](https://tools.google.com/dlpage/gaoptout)으로 수집을 거부할 수 있습니다. Google이 이 정보를 처리하는 방식은 [Google 안내](https://policies.google.com/technologies/partner-sites)를 참고하세요.'))
   : S('analytics', '방문 통계', P(`현재(${UPDATED} 기준) 이 사이트에는 방문 통계 도구가 활성화되어 있지 않습니다. 도입하는 경우 이 방침에 사용 목적과 수집 항목을 먼저 반영합니다.`));
 
 export const pages = [
