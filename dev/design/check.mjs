@@ -228,7 +228,7 @@ for (const [vk, w] of [['PC 1300', 1300], ['PC 1024', 1024], ['태블릿 768', 7
   });
   for (const [vk, vp] of [['모바일 390', { width: 390, height: 844 }], ['PC 1300', { width: 1300, height: 900 }]]) {
     const mob = vp.width <= 480;
-    { // 실제 목록(23편)
+    { // 실제 목록(24편)
       const { page, errors } = await newPage(browser, srv.base, { viewport: vp });
       await page.goto(srv.base + '/guide/'); await page.waitForTimeout(300);
       let r = await info(page);
@@ -240,7 +240,7 @@ for (const [vk, w] of [['PC 1300', 1300], ['PC 1024', 1024], ['태블릿 768', 7
       r = await info(page);
       C.ok(r.visible === 10 && r.cur === '2' && r.url === '/guide/?page=2' && r.topY >= -2 && r.topY < 200, `${vk} 노트 목록: 2페이지로 이동, 주소에 ?page=2, 목록 맨 위로 부드럽게 올라감 (칩 위치 ${r.topY}px)`);
       await page.click('#pager a[data-p="3"]'); await page.waitForTimeout(200); r = await info(page);
-      C.ok(r.visible === 3 && r.cur === '3' && r.dis === '›' && r.url === '/guide/?page=3', `${vk} 노트 목록: 마지막 3페이지는 3개, ›가 흐림`);
+      C.ok(r.visible === 4 && r.cur === '3' && r.dis === '›' && r.url === '/guide/?page=3', `${vk} 노트 목록: 마지막 3페이지는 4개, ›가 흐림`);
       await page.goBack(); await page.waitForTimeout(200); r = await info(page);
       C.ok(r.cur === '2' && r.visible === 10 && r.url === '/guide/?page=2', `${vk} 노트 목록: 뒤로가기하면 2페이지`);
       await page.goBack(); await page.waitForTimeout(200); r = await info(page);
@@ -248,7 +248,7 @@ for (const [vk, w] of [['PC 1300', 1300], ['PC 1024', 1024], ['태블릿 768', 7
       await page.goForward(); await page.waitForTimeout(200); r = await info(page);
       C.ok(r.cur === '2', `${vk} 노트 목록: 앞으로가기하면 다시 2페이지`);
       await page.goto(srv.base + '/guide/?page=3'); await page.waitForTimeout(300); r = await info(page);
-      C.ok(r.cur === '3' && r.visible === 3, `${vk} 노트 목록: 새로고침/직접 열어도 같은 페이지(3페이지)`);
+      C.ok(r.cur === '3' && r.visible === 4, `${vk} 노트 목록: 새로고침/직접 열어도 같은 페이지(3페이지)`);
       await page.goto(srv.base + '/guide/?page=9'); await page.waitForTimeout(300); r = await info(page);
       C.ok(r.cur === '3' && r.url === '/guide/?page=3', `${vk} 노트 목록: 없는 페이지 번호는 마지막 페이지로 바로잡음`);
       const cats = await page.evaluate(() => [...document.querySelectorAll('.chips a')].map((a) => a.dataset.cat));
@@ -290,8 +290,8 @@ for (const [vk, w] of [['PC 1300', 1300], ['PC 1024', 1024], ['태블릿 768', 7
     await page.goto(srv.base + '/guide/');
     const html = await (await fetch(srv.base + '/guide/')).text();
     const shown = await page.locator('#posts .post:visible').count(), pagerVisible = await page.locator('#pager:visible').count();
-    C.ok(shown === 23 && pagerVisible === 0, `자바스크립트 꺼짐: 노트 글 23개가 모두 보이고 페이지 번호는 숨김 (${shown}개)`);
-    C.ok((html.match(/<li class="post"/g) || []).length === 23, 'HTML 안에 글 링크 23개가 모두 있음(화면에서만 숨김)');
+    C.ok(shown === 24 && pagerVisible === 0, `자바스크립트 꺼짐: 노트 글 24개가 모두 보이고 페이지 번호는 숨김 (${shown}개)`);
+    C.ok((html.match(/<li class="post"/g) || []).length === 24, 'HTML 안에 글 링크 24개가 모두 있음(화면에서만 숨김)');
     await ctx.close();
   }
   sBig.close(); sCat.close(); fs.rmSync(tmp, { recursive: true, force: true });
