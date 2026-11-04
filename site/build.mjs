@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { gaId, gaSnippet } from './analytics.mjs';
 import { appFontHead, preloadTags, FONT_CSS_LINK } from './fonts.mjs';
 import { exampleGalleryLine } from './examples.mjs';
-import { OG_IMAGE, ogImageUrl, THEME_COLOR, NAVER_VERIFY, ORIGIN, SITE_NAME, footerMetaHtml, appSiteInfoLine } from './site-meta.mjs';
+import { OG_IMAGE, ogImageUrl, THEME_COLOR, NAVER_VERIFY, ORIGIN, SITE_NAME, footerMetaHtml, appSiteInfoLine, adsenseSnippet } from './site-meta.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 // 처음 온 사람용 소개 화면 조각(site/intro.html): <!--@HEAD--> 아래는 머리(글꼴·CSS·판단 스크립트), <!--@BODY--> 아래는 본문
@@ -43,6 +43,7 @@ const head = [
   `<meta property="og:image" content="${ogImageUrl}"><meta property="og:image:type" content="image/png"><meta property="og:image:width" content="${OG_IMAGE.width}"><meta property="og:image:height" content="${OG_IMAGE.height}"><meta property="og:image:alt" content="${OG_IMAGE.alt}"><meta property="og:image:secure_url" content="${ogImageUrl}"><link rel="image_src" href="${ogImageUrl}">`,
   `<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="${SITE_NAME}"><meta name="twitter:description" content="분야와 내 이야기만 입력하면 인스타툰 기획·대본·컷 구성까지 정리해 주는 도구."><meta name="twitter:image" content="${ogImageUrl}"><meta name="twitter:image:alt" content="${OG_IMAGE.alt}">`,
   gaSnippet(gaId(), { content_group: '인스타툰 제작 도구' }), // 측정 ID가 설정돼 있을 때만 삽입
+  adsenseSnippet(), // 애드센스 게시자 ID가 있을 때만 삽입
 ].filter(Boolean).join(NL) + NL;
 // 머리(<head>)와 본문(<body>)을 명시적으로 나눈다: 브라우저는 알아서 처리하지만, 미리보기를 만드는 프로그램(카카오톡 등)이 머리 끝을 못 찾지 않게
 const out = head + src.replace('<a class="skip" href="#main">', () => '</head>\n<body>\n<a class="skip" href="#main">') + '\n</body>\n</html>\n';

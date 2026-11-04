@@ -12,7 +12,7 @@ const P = (t) => `<p>${inline(t)}</p>`;
 const UL = (...a) => `<ul>${a.map((x) => `<li>${inline(x)}</li>`).join('')}</ul>`;
 const S = (id, h, ...body) => `<section><h2 id="${id}">${esc(h)}</h2>${body.join('')}</section>`;
 const TBL = (head_, ...rows) => `<div class="tbl"><table><thead><tr>${head_.map((x) => `<th scope="col">${inline(x)}</th>`).join('')}</tr></thead><tbody>${rows.map((r) => `<tr>${r.map((x) => `<td>${inline(x)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
-const UPDATED = '2026-10-24';
+const UPDATED = '2026-11-04';
 
 const contactBlock = contactParts()
   ? `<p>문의: <a href="${esc(contactParts().href)}">${esc(contactParts().text)}</a></p>`
@@ -77,10 +77,10 @@ export const pages = [
         P('자동 프로그램(봇)이 무료 체험을 남용하지 못하게 하려고 Cloudflare Turnstile을 사용하며, 이 과정에서 Cloudflare가 접속 정보를 처리할 수 있습니다.')),
       S('image', '4. 이미지 생성', P('이 사이트는 그림을 직접 생성하지 않습니다. 사용자가 프롬프트를 복사해 ChatGPT 등 외부 서비스에 붙여 넣는 경우 그 서비스의 개인정보 처리 방침이 적용됩니다.')),
       S('external', '5. 외부 리소스 요청', P('화면 글꼴은 이 사이트에서 직접 제공하므로 글꼴을 위해 외부 서버에 접속하지 않습니다. 다만 기능에 따라 브라우저가 다음 외부 서버에서 스크립트를 불러옵니다. 이 과정에서 사용자의 IP 주소, 브라우저 정보 등이 해당 서비스 제공자에게 전달될 수 있습니다.'),
-        UL(...(cfg.ga ? ['googletagmanager.com·google-analytics.com: 방문 통계(Google Analytics 4, 아래 "방문 통계" 항목 참고)'] : []), 'cdnjs.cloudflare.com: 압축 파일 생성(JSZip) 스크립트', 'challenges.cloudflare.com: 무료 체험을 쓸 때만 불러오는 자동 프로그램(봇) 확인(Turnstile)')),
+        UL(...(siteInfo.adsensePublisherId ? ['pagead2.googlesyndication.com: Google AdSense 사이트 확인·광고(아래 "광고" 항목 참고)'] : []), ...(cfg.ga ? ['googletagmanager.com·google-analytics.com: 방문 통계(Google Analytics 4, 아래 "방문 통계" 항목 참고)'] : []), 'cdnjs.cloudflare.com: 압축 파일 생성(JSZip) 스크립트', 'challenges.cloudflare.com: 무료 체험을 쓸 때만 불러오는 자동 프로그램(봇) 확인(Turnstile)')),
       S('hosting', '6. 호스팅과 접속 기록', P('이 사이트는 Cloudflare를 통해 제공됩니다. 호스팅 서비스는 서비스 제공과 보안을 위해 접속 로그(IP 주소, 요청 시각, 브라우저 정보 등)를 처리할 수 있으며, 운영자는 이 로그를 사용자 식별 목적으로 사용하지 않습니다. 구체적인 처리 방식은 호스팅 제공자의 정책을 따릅니다.')),
       gaParagraph(),
-      S('ads', '7. 광고', P(`현재(${UPDATED} 기준) 이 사이트에는 광고가 게재되어 있지 않으며, 광고를 위한 쿠키나 스크립트도 사용하지 않습니다.`),
+      S('ads', '7. 광고', P(siteInfo.adsensePublisherId ? `현재(${UPDATED} 기준) 이 사이트는 Google AdSense 사이트 확인·검토를 위해 모든 페이지에 AdSense 스크립트(pagead2.googlesyndication.com)를 불러옵니다. 검토가 끝나 광고 게재가 시작되기 전까지는 광고가 표시되지 않으며, 게재를 시작하면 시작 날짜를 이 항목에 적습니다. 이 스크립트를 불러올 때 Google이 접속 정보를 처리하거나 쿠키를 사용할 수 있습니다.` : `현재(${UPDATED} 기준) 이 사이트에는 광고가 게재되어 있지 않으며, 광고를 위한 쿠키나 스크립트도 사용하지 않습니다.`),
         P('향후 Google AdSense 등 광고를 게재하면 다음이 적용되며, 게재를 시작하는 날짜를 이 항목에 적습니다.'),
         UL('Google을 포함한 제3자 광고 공급업체는 쿠키를 사용해 사용자의 이 사이트 및 인터넷의 다른 사이트 방문 기록을 바탕으로 광고를 게재할 수 있습니다. Google이 파트너 사이트의 정보를 사용하는 방법은 [Google 안내](https://policies.google.com/technologies/partner-sites)에서 확인할 수 있습니다.', '사용자는 [Google 광고 설정](https://adssettings.google.com)에서 개인 맞춤 광고를 해제할 수 있고, [www.aboutads.info](https://www.aboutads.info)에서 일부 제3자 공급업체의 개인 맞춤 광고 쿠키를 해제할 수 있습니다.', '유럽경제지역(EEA)·영국·스위스 방문자에게는 광고를 위한 쿠키 사용 전에 필요한 동의를 받는 절차를 함께 제공합니다.'),
         P('광고는 사용자가 입력한 이야기, 사진, API 키를 사용하지 않으며, 제작 도구 화면의 입력 내용은 광고 요청에 포함되지 않도록 운영합니다.')),
