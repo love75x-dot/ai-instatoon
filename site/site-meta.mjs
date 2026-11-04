@@ -17,6 +17,10 @@ if (siteInfo.contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(siteInfo.contact
 if (siteInfo.contactUrl && !/^https:\/\/[^\s"'<>]+$/.test(siteInfo.contactUrl)) throw new Error('site-info.json contactUrl은 https:// 로 시작하는 주소여야 해요');
 if (siteInfo.adsensePublisherId && !/^pub-\d{10,20}$/.test(siteInfo.adsensePublisherId)) throw new Error('site-info.json adsensePublisherId는 pub-숫자 형식');
 
+// 애드센스 사이트 연결 코드: 게시자 ID가 site-info.json에 있을 때만 모든 페이지 <head>에 넣는다(없으면 빈 문자열).
+export const adsenseSnippet = () => siteInfo.adsensePublisherId
+  ? `<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-${siteInfo.adsensePublisherId}" crossorigin="anonymous"></script>`
+  : '';
 export const ORIGIN = 'https://www.ai-instatoon.com';
 export const SITE_NAME = '인스타툰 연재실';
 export const THEME_COLOR = '#ffffff';
