@@ -16,6 +16,7 @@
     "https://www.ai-instatoon.com/guide/instagram-facebook-content/",
     "https://www.ai-instatoon.com/guide/instatoon-troubleshooting/",
     "https://www.ai-instatoon.com/guide/instatoon-art-style-guide/",
+    "https://www.ai-instatoon.com/guide/banchan-store-instatoon-case/",
     "https://www.ai-instatoon.com/guide/convenience-store-instatoon-case/",
     "https://www.ai-instatoon.com/about/",
     "https://www.ai-instatoon.com/privacy/",
@@ -24,6 +25,7 @@
   "robotsTxt": "User-agent: *\nAllow: /\n\nSitemap: https://www.ai-instatoon.com/sitemap.xml\n",
   "guideDirs": [
     "ai-instatoon-review-checklist",
+    "banchan-store-instatoon-case",
     "convenience-store-instatoon-case",
     "customer-questions-to-content",
     "gemini-api-key-setup-guide",
@@ -151,6 +153,13 @@
       "ogUrl": "https://www.ai-instatoon.com/guide/instatoon-art-style-guide/",
       "robots": "index,follow",
       "title": "인스타툰 그림체 13가지 비교: 웹툰 테마 고르는 법 | 인스타툰 연재실"
+    },
+    "/guide/banchan-store-instatoon-case/": {
+      "status": 200,
+      "canonical": "https://www.ai-instatoon.com/guide/banchan-store-instatoon-case/",
+      "ogUrl": "https://www.ai-instatoon.com/guide/banchan-store-instatoon-case/",
+      "robots": "index,follow",
+      "title": "반찬가게 인스타툰 사례: 그림 프롬프트와 결과 비교 | 인스타툰 연재실"
     },
     "/guide/convenience-store-instatoon-case/": {
       "status": 200,

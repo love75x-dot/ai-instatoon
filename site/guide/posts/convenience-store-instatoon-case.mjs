@@ -14,7 +14,7 @@ export default {
   desc: '운영자가 AI 그림 도구로 만든 편의점 알바생 인스타툰 6장을 장마다 뜯어보고, 시간 자막으로 짠 구성, 다시 만든 그림, 확인하다 찾은 앞치마 차이와 고치는 방법을 정리한 실제 사례입니다.',
   card: '실제 6장 구성, 다시 만든 그림, 확인 중 찾은 실수',
   lead: '이 글은 가상의 예시가 아니라 이 사이트를 만든 운영자가 실제로 만든 인스타툰 한 편을 다룹니다. 첫 화면에도 실린 "편의점 알바생" 6장이에요. 이야기가 어떻게 짜였는지, 만들면서 무엇을 다시 만들었는지, 다 만든 뒤 확인하다가 무엇을 찾았는지를 그림과 함께 그대로 적었습니다.',
-  related: ['instatoon-storytelling', 'ai-instatoon-review-checklist', 'instatoon-character-consistency', 'what-is-instatoon'],
+  related: ['banchan-store-instatoon-case', 'instatoon-storytelling', 'ai-instatoon-review-checklist', 'instatoon-character-consistency'],
   summary: [
     '6장은 "한가함 → 바쁨 → 휴식 → 손님 몰림 → 아쉬움 → 공감 요청" 순서이고, 장마다 시간 자막을 달아 흐름을 잡았다.',
     '첫 버전에는 실제 편의점 로고와 상품명이 들어가 있어서 로고 없는 그림으로 전부 다시 만들었다.',
@@ -61,6 +61,6 @@ export default {
       p('글자와 숫자 확인 항목 전체는 [[ai-instatoon-review-checklist|AI 인스타툰 확인 목록]]에 있습니다.')),
     sec('이 사례에서 가져갈 것',
       ul('시간 자막만 잘 달아도 대사를 줄이면서 이야기의 흐름을 만들 수 있다.', '반전은 바로 앞 장을 가장 밝게 만들 때 커진다.', '그림 AI 결과는 "얼굴이 같은가"만 보지 말고 옷, 소품, 숫자, 로고까지 장마다 나란히 놓고 비교한다.', '이야기가 손님이 아니라 일하는 사람의 하루여도 공감 소재가 된다. 가게 직원의 일상도 좋은 소재다.'),
-      p('같은 방식으로 만든 다른 업종 사례도 이어서 정리할 예정이에요. 직접 해 보려면 [[how-to-use-instatoon-room|인스타툰 연재실 사용 방법]]부터 보세요.')),
+      p('그림 프롬프트와 결과를 한 컷씩 비교한 사례는 [[banchan-store-instatoon-case|반찬가게 사장님 인스타툰 6컷]]에서 이어서 볼 수 있어요. 직접 해 보려면 [[how-to-use-instatoon-room|인스타툰 연재실 사용 방법]]부터 보세요.')),
   ],
 };
