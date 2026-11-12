@@ -110,7 +110,7 @@ export default [
   desc: 'AI가 만든 인스타툰도 사람이 최종 검토해야 합니다. 사실관계, 상호명, 가격, 이미지 속 글자, 저작권, 광고 표현까지 게시 전 확인할 항목을 정리했습니다.',
   card: '사실관계·가격·글자·저작권·광고 표현 확인 목록',
   lead: 'AI는 초안을 빠르게 만들어 주지만, 그 결과를 책임지는 것은 게시하는 사람입니다. AI가 생성한 결과도 사람이 최종 검토해야 해요. 특히 아래 일곱 가지는 눈으로 직접 확인하는 습관을 들이세요.',
-  related: ['instagram-content-copyright', 'instatoon-character-consistency', 'store-story-to-instatoon', 'what-is-instatoon'],
+  related: ['instagram-content-copyright', 'instatoon-character-consistency', 'convenience-store-instatoon-case', 'what-is-instatoon'],
   summary: ['AI 결과는 초안이며 게시 책임은 사람에게 있다.', '사실, 상호명, 가격, 이미지 속 글자는 원본과 직접 대조한다.', '저작권·광고 표현은 확실하지 않으면 쓰지 않는다.', '최종 게시 전 체크리스트를 매번 같은 순서로 확인한다.'],
   sections: [
     sec('AI 결과를 그대로 사용하면 안 되는 이유',

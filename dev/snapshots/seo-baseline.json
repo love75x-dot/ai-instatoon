@@ -16,6 +16,7 @@
     "https://www.ai-instatoon.com/guide/instagram-facebook-content/",
     "https://www.ai-instatoon.com/guide/instatoon-troubleshooting/",
     "https://www.ai-instatoon.com/guide/instatoon-art-style-guide/",
+    "https://www.ai-instatoon.com/guide/convenience-store-instatoon-case/",
     "https://www.ai-instatoon.com/about/",
     "https://www.ai-instatoon.com/privacy/",
     "https://www.ai-instatoon.com/terms/"
@@ -23,6 +24,7 @@
   "robotsTxt": "User-agent: *\nAllow: /\n\nSitemap: https://www.ai-instatoon.com/sitemap.xml\n",
   "guideDirs": [
     "ai-instatoon-review-checklist",
+    "convenience-store-instatoon-case",
     "customer-questions-to-content",
     "gemini-api-key-setup-guide",
     "how-to-use-instatoon-room",
@@ -149,6 +151,13 @@
       "ogUrl": "https://www.ai-instatoon.com/guide/instatoon-art-style-guide/",
       "robots": "index,follow",
       "title": "인스타툰 그림체 13가지 비교: 웹툰 테마 고르는 법 | 인스타툰 연재실"
+    },
+    "/guide/convenience-store-instatoon-case/": {
+      "status": 200,
+      "canonical": "https://www.ai-instatoon.com/guide/convenience-store-instatoon-case/",
+      "ogUrl": "https://www.ai-instatoon.com/guide/convenience-store-instatoon-case/",
+      "robots": "index,follow",
+      "title": "편의점 알바생 인스타툰 사례: 6장 구성과 올리기 전 확인 | 인스타툰 연재실"
     },
     "/about/": {
       "status": 200,

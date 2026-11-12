@@ -13,7 +13,7 @@ export default {
   desc: '평범한 하루와 손님 질문, 실수담에서 인스타툰 소재를 고르는 기준과, 그 소재를 상황·문제·전개·결론의 4컷으로 짜고 8컷과 시리즈로 늘리는 방법을 예시와 점검표로 정리했습니다.',
   card: '소재 고르는 기준, 4컷 역할, 8컷·시리즈로 늘리기',
   lead: '이야기가 떠오르지 않는 건 소재가 없어서가 아니라 "이게 소재가 될까?" 하고 미리 걸러 내기 때문인 경우가 많습니다. 이 글은 하루 중 이야기가 될 만한 순간을 고르는 기준부터, 그 순간을 4컷에 담는 방법, 더 긴 이야기와 시리즈로 늘리는 방법까지 한 번에 정리합니다.',
-  related: ['what-is-instatoon', 'customer-questions-to-content', 'store-story-to-instatoon', 'instatoon-art-style-guide'],
+  related: ['what-is-instatoon', 'convenience-store-instatoon-case', 'customer-questions-to-content', 'store-story-to-instatoon'],
   summary: [
     '좋은 소재에는 의외성, 공감, 쓸모 중 두 가지가 겹쳐 있다.',
     '4컷은 상황 → 문제 → 전개 → 결론으로 역할을 나누고, 메시지는 하나만 둔다.',
