@@ -17,6 +17,7 @@
     "https://www.ai-instatoon.com/guide/instatoon-troubleshooting/",
     "https://www.ai-instatoon.com/guide/instatoon-art-style-guide/",
     "https://www.ai-instatoon.com/guide/banchan-store-instatoon-case/",
+    "https://www.ai-instatoon.com/guide/burger-store-instatoon-case/",
     "https://www.ai-instatoon.com/guide/convenience-store-instatoon-case/",
     "https://www.ai-instatoon.com/about/",
     "https://www.ai-instatoon.com/privacy/",
@@ -26,6 +27,7 @@
   "guideDirs": [
     "ai-instatoon-review-checklist",
     "banchan-store-instatoon-case",
+    "burger-store-instatoon-case",
     "convenience-store-instatoon-case",
     "customer-questions-to-content",
     "gemini-api-key-setup-guide",
@@ -160,6 +162,13 @@
       "ogUrl": "https://www.ai-instatoon.com/guide/banchan-store-instatoon-case/",
       "robots": "index,follow",
       "title": "반찬가게 인스타툰 사례: 그림 프롬프트와 결과 비교 | 인스타툰 연재실"
+    },
+    "/guide/burger-store-instatoon-case/": {
+      "status": 200,
+      "canonical": "https://www.ai-instatoon.com/guide/burger-store-instatoon-case/",
+      "ogUrl": "https://www.ai-instatoon.com/guide/burger-store-instatoon-case/",
+      "robots": "index,follow",
+      "title": "수제버거 인스타툰 사례: 캐릭터 시트 먼저, 6장 한 번에 | 인스타툰 연재실"
     },
     "/guide/convenience-store-instatoon-case/": {
       "status": 200,

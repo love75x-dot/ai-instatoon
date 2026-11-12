@@ -15,7 +15,7 @@ export default {
   desc: '인스타툰 연재실이 만든 그림 프롬프트를 그림 AI에 넣어 받은 반찬가게 사장님 인스타툰 6컷을 프롬프트와 한 컷씩 대조해, 그대로 나온 것과 어긋난 시간 순서·장면·맞춤법을 정리한 실제 사례입니다.',
   card: '실제 프롬프트와 6컷 대조, 맞은 것과 어긋난 것',
   lead: '이 글은 운영자가 인스타툰 연재실로 직접 만든 "반찬가게 사장님" 인스타툰 한 편을 다룹니다. 사이트가 만들어 준 그림 프롬프트를 그림 AI에 넣어 받은 6컷을, 그 프롬프트와 한 컷씩 나란히 놓고 비교했어요. 무엇이 적은 그대로 나왔고, 무엇이 어긋났으며, 어긋난 것 중 어떤 건 그림 AI가 아니라 대본에서 시작됐는지까지 적었습니다.',
-  related: ['convenience-store-instatoon-case', 'instatoon-character-consistency', 'ai-instatoon-review-checklist', 'instatoon-storytelling'],
+  related: ['burger-store-instatoon-case', 'convenience-store-instatoon-case', 'instatoon-character-consistency', 'ai-instatoon-review-checklist'],
   summary: [
     '캐릭터 시트를 먼저 만들고 매 컷 첨부하는 방식으로, 머리·옷·스카프·귀걸이가 6컷 내내 같게 나왔다.',
     '따옴표 안에 준 제목·대사·자막·효과음은 6컷 모두 글자 그대로 들어갔다.',
@@ -68,6 +68,6 @@ export default {
       warn('실존 인물과 닮게 그린 그림을 가게 홍보에 쓰면 초상·퍼블리시티 문제가 생길 수 있어요. 자세한 확인 항목은 [[instagram-content-copyright|저작권 확인 가이드]]에 있습니다.')),
     sec('올리기 전 최종 점검',
       check('자막의 시간이 1컷부터 끝까지 순서대로인가(이 편은 1컷과 6컷이 어긋남)', '대사의 뜻이 그림과 맞는가(4컷 "세 분"과 비어 있는 그릇)', '따옴표 안 글자가 그대로 나왔고 깨진 글자가 없는가(통과)', '주인공의 머리·옷·소품이 컷마다 같은가(통과)', '맞춤법을 일부러 바꾼 곳이 있다면 의도한 것인가("제꺼예요")', '실제 가게 이름, 상표, 실존 인물의 이름이 그림에 없는가(통과)'),
-      p('그림을 받기 전에는 대본을, 받은 뒤에는 그림을 확인하는 두 단계가 필요합니다. 인스타툰 연재실 2단계의 "그림 그리기 전에 확인" 목록이 첫 단계를, [[ai-instatoon-review-checklist|AI 인스타툰 확인 목록]]이 둘째 단계를 돕습니다. 캐릭터 시트를 만들고 첨부하는 방법은 [[instatoon-character-consistency|캐릭터 일관성 유지하기]]에 정리했어요.')),
+      p('그림을 받기 전에는 대본을, 받은 뒤에는 그림을 확인하는 두 단계가 필요합니다. 인스타툰 연재실 2단계의 "그림 그리기 전에 확인" 목록이 첫 단계를, [[ai-instatoon-review-checklist|AI 인스타툰 확인 목록]]이 둘째 단계를 돕습니다. 캐릭터 시트를 만들고 첨부하는 방법은 [[instatoon-character-consistency|캐릭터 일관성 유지하기]]에, 주인공을 세 단계로 고정하고 6장을 한 번에 요청한 사례는 [[burger-store-instatoon-case|수제버거 사장님 인스타툰]]에 정리했어요.')),
   ],
 };
