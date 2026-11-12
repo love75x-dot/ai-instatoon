@@ -19,11 +19,11 @@ const contactBlock = contactParts()
   : P('문의 수단은 운영자가 확정되는 대로 이 페이지에 게시합니다. 아직 게시되지 않았으므로 현재는 이 사이트를 통한 문의 접수 경로가 없습니다.');
 const operatorLine = siteInfo.operatorName ? P(`운영: ${siteInfo.operatorName}`) : '';
 
-function page({ slug, title, metaTitle, desc, h1, lead, sections }) {
+function page({ slug, title, metaTitle, desc, h1, lead, sections, updated = UPDATED }) {
   const u = `${ORIGIN}/${slug}/`;
   const crumbs = { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [
     { '@type': 'ListItem', position: 1, name: '홈', item: ORIGIN + '/' }, { '@type': 'ListItem', position: 2, name: h1, item: u }] };
-  const webpage = { '@context': 'https://schema.org', '@type': 'WebPage', name: h1, url: u, description: desc, inLanguage: 'ko', dateModified: UPDATED };
+  const webpage = { '@context': 'https://schema.org', '@type': 'WebPage', name: h1, url: u, description: desc, inLanguage: 'ko', dateModified: updated };
   return head({ title: `${metaTitle} | ${SITE}`, desc, canonical: u, type: 'website', body: bodyAttr('info', slug), ga: { content_group: '사이트 안내' }, extra: ld(webpage) + ld(crumbs) })
     + header('') + `
 <main id="main" class="wrap">
@@ -31,7 +31,7 @@ function page({ slug, title, metaTitle, desc, h1, lead, sections }) {
 <article class="article">
 <h1>${esc(h1)}</h1>
 <p class="lead">${inline(lead)}</p>
-<p class="meta">최종 업데이트 <time datetime="${UPDATED}">${UPDATED}</time></p>
+<p class="meta">최종 업데이트 <time datetime="${updated}">${updated}</time></p>
 ${sections.join('\n')}
 </article>
 </main>
@@ -44,15 +44,17 @@ const gaParagraph = () => cfg.ga
 
 export const pages = [
   { slug: 'about', title: '소개', build: () => page({
-    slug: 'about', h1: '인스타툰 연재실 소개', metaTitle: '인스타툰 연재실 소개: 내 이야기를 인스타툰으로',
-    desc: '인스타툰 연재실이 누구를 위해 무엇을 하는 도구인지, 가이드 글을 어떻게 만들고 관리하는지, 이용 전에 알아둘 한계를 소개합니다.',
+    slug: 'about', updated: '2026-11-12', h1: '인스타툰 연재실 소개', metaTitle: '인스타툰 연재실 소개: 내 이야기를 인스타툰으로',
+    desc: '인스타툰 연재실이 누구를 위해 무엇을 하는 도구인지, 왜 만들었는지, 가이드 글을 어떻게 만들고 관리하는지, 이용 전에 알아둘 한계를 소개합니다.',
     lead: '인스타툰 연재실은 브랜드·매장 운영자, 프리랜서, 크리에이터, 홍보 담당자가 내 이야기를 4~10컷 인스타툰으로 만들 수 있도록 돕는 웹 도구와 가이드를 제공하는 사이트입니다.',
     sections: [
-      S('what', '무엇을 하는 도구인가', P('분야 하나만 고르면 내가 겪은 일을 바탕으로 대본, 컷 구성, 게시물 캡션, 해시태그, 첫 댓글의 초안을 만들어 줍니다. 한 달 연재표 기획, 완성 그림을 세로 영상과 스토리 이미지로 만드는 기능, 편마다 반응을 기록하는 기능, 댓글 답글 초안 도우미도 있습니다.'),
+      S('what', '무엇을 하는 도구인가', P('분야 하나만 고르면 내가 겪은 일을 바탕으로 대본, 컷 구성, 게시물 캡션, 해시태그, 첫 댓글의 초안을 만들어 줍니다. 한 달 연재표 기획, 주인공·조연 캐릭터를 저장해 다음 편에 다시 쓰는 기능, 가게의 말투와 고정 해시태그를 한 번만 적어 두는 "내 가게 설정"도 있습니다.'),
         P('이 도구는 **그림을 대신 그려 주지 않습니다.** 컷별 그림 프롬프트를 정리해 주면 사용자가 ChatGPT 같은 외부 이미지 도구에서 그림을 만들고, 완성 그림은 다시 이 도구에 올려 저장합니다. 사용 순서는 [[how-to-use-instatoon-room|사용법 글]]에서 설명합니다.')),
+      S('maker', '만든 사람 이야기', P('저는 가게를 운영하는 사장님이 아니라, 이 도구를 만드는 사람입니다. "가게나 개인을 알리려면 어떻게 해야 할까, 매출을 늘리려면 무엇을 해야 할까"를 고민하던 중에 인스타툰 강의를 들었고, 인스타툰을 조금 더 쉽고 편하게 만들 수 있는 도구가 있으면 좋겠다는 생각으로 이 사이트를 직접 만들게 됐습니다.'),
+        P('지금도 계속 고치고 기능을 더하고 있습니다. 만들면서 직접 그려 본 인스타툰은 [[convenience-store-instatoon-case|편의점 알바생]], [[banchan-store-instatoon-case|반찬가게 사장님]], [[burger-store-instatoon-case|수제버거 사장님]] 사례 글에 만든 과정과 실수까지 그대로 적어 두었습니다. 더 많은 분이 부담 없이 써 보셨으면 좋겠습니다.')),
       S('who', '누구를 위한 것인가', P('디자인이나 마케팅을 전문으로 하지 않는 운영자와 창작자를 기준으로 만들었습니다. 매장, 프리랜서, 온라인 쇼핑몰, 회사, 개인 크리에이터 등 업종과 분야를 가리지 않습니다.')),
       S('editorial', '가이드 글은 어떻게 만들고 관리하나', P('인스타툰 노트는 인스타툰 제작과 브랜드·SNS 운영에 대한 일반적인 설명입니다. 글은 AI 도구의 도움을 받아 작성한 초안을 바탕으로 하며, 다음 원칙으로 관리합니다.'),
-        UL('근거를 확인하지 못한 통계, 검색량, 매출·방문 증가율은 쓰지 않습니다.', '예시로 든 브랜드와 사례는 글에서 "가상"이라고 표시합니다. 실제 고객 사례나 후기를 지어내지 않습니다.', 'Instagram, Facebook, Meta Business Suite 같은 외부 서비스의 기능은 자주 바뀌므로 단정하지 않고 공식 도움말 확인을 안내합니다.', '법률·광고·저작권 관련 내용은 일반적인 정보이며 법률 자문이 아닙니다.', '글을 고치면 최종 업데이트 날짜를 바꿉니다.'),
+        UL('근거를 확인하지 못한 통계, 검색량, 매출·방문 증가율은 쓰지 않습니다.', '예시로 든 브랜드와 사례는 글에서 "가상"이라고 표시합니다. 실제 고객 사례나 후기를 지어내지 않습니다. 사례 글은 운영자가 직접 만든 인스타툰과 그때 쓴 프롬프트만 다루고, 확인하지 못한 과정은 쓰지 않습니다.', 'Instagram, Facebook, Meta Business Suite 같은 외부 서비스의 기능은 자주 바뀌므로 단정하지 않고 공식 도움말 확인을 안내합니다.', '법률·광고·저작권 관련 내용은 일반적인 정보이며 법률 자문이 아닙니다.', '글을 고치면 최종 업데이트 날짜를 바꿉니다.'),
         P(contactParts() ? '잘못된 내용이나 오래된 내용을 발견하면 아래 문의 이메일로 알려 주세요. 확인한 뒤 글을 고치고 최종 업데이트 날짜를 바꿉니다.' : '잘못된 내용이나 오래된 내용을 발견하면 아래 문의 수단으로 알려 주세요. 문의 수단이 아직 게시되지 않은 동안에는 접수가 어렵습니다.')),
       S('limits', '이용 전에 알아둘 한계', UL('AI가 만든 대본과 문구는 초안입니다. 가격, 시간, 상호명, 효능·과장 표현은 사용자가 직접 확인해야 합니다.', '그림의 품질과 캐릭터 일관성은 사용자가 쓰는 외부 이미지 도구에 따라 달라집니다.', '작업 내용은 사용자의 브라우저에 저장되므로 브라우저 데이터를 지우면 사라질 수 있습니다. 백업 저장 기능을 사용하세요.', '이 도구로 만든 콘텐츠가 매출이나 팔로워 증가를 가져온다고 보장하지 않습니다.')),
       S('contact', '운영자와 문의', operatorLine, contactBlock, P('관련 문서: [[/privacy/|개인정보처리방침]] · [[/terms/|이용안내]]')),
