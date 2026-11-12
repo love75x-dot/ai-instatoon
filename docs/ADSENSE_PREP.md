@@ -61,3 +61,20 @@
 - **2026-11-04 14:20 (KST)**: ai-instatoon.com 애드센스 승인 검토 요청 (운영자가 AdSense 화면에서 요청, 화면의 "요청 시간" 기준).
 - 기존 애드센스 계정(게시자 ID pub-2273275362244186, 예전에 다른 도메인으로 신청한 이력 있음)에 사이트를 추가한 것.
 - 결과가 오면 여기에 날짜와 결과(승인/거절 사유 원문)를 적을 것.
+
+## 2026-11-12 검토 결과와 글 합치기
+- **결과**: 거절 — "가치가 별로 없는 콘텐츠"(정책 위반: 가치가 별로 없는 콘텐츠). 운영자 화면 캡처 기준.
+- 진단(추정, Google이 사유를 자세히 밝히지 않음): 24편 중 13편이 업종만 바꾼 일반 SNS 마케팅 글이라 서로 비슷함, 글이 짧고 9/25~10/1에 몰아서 공개됨, 직접 써 본 사례가 적음, 새 사이트라 방문이 적음.
+- 이번 작업(브랜치 `content-merge`): 비슷한 글 15편을 5편으로 합침(24편 → 14편). 옛 주소 10개는 `site/_redirects`에서 301로 합친 글로 보냄.
+
+| 합친 글(주소 유지) | 흡수한 옛 주소(301) |
+|---|---|
+| `what-is-instatoon` 인스타툰이란? 첫 한 편까지 | `how-to-make-instatoon` |
+| `instatoon-storytelling` 스토리 짜는 법(소재~4컷·8컷) | `4-panel-instatoon` |
+| `small-business-instagram-content` 업종별 소재 | `restaurant-`, `cafe-`, `service-business-instagram-content`, `new-store-instagram-marketing` |
+| `instagram-post-structure` 게시물 한 개 완성하기 | `instagram-caption-writing`, `small-business-instagram-start`, `instagram-reels-vs-feed` |
+| `instagram-facebook-content` 두 채널 + Meta Business Suite | `meta-business-suite-guide` |
+
+- 합친 글은 `site/guide/posts/`로 옮기고 공개일은 원래 날짜 그대로, 수정일 2026-11-12. 남은 articles-3·4 글은 공개일을 직접 적어 고정(목록 순서가 바뀌어도 날짜가 바뀌지 않게).
+- `dev/snapshots/seo-baseline.json`: 없어진 10개 주소만 빠지고 나머지 19개 주소·canonical·robots는 그대로임을 비교 확인.
+- 다음 할 일: 운영자 자료로 실제 사례 글 3편(편의점·반찬가게·수제버거), 소개 페이지에 운영자 이야기(가게 없이 도구를 만드는 사람), 2~4주 꾸준히 갱신하고 인스타그램으로 실제 방문이 생긴 뒤 재검토 요청.

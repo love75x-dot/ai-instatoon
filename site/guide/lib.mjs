@@ -32,6 +32,8 @@ export const sec = (h, ...blocks) => ({ h, blocks });
 export const gallery = () => ({ t: 'gallery' });
 // 웹툰 테마 샘플 그림 묶음(사이트의 /assets/samples/<key>.jpg). items: [[key, 이름, 한 줄 설명], ...]
 export const themes = (...items) => ({ t: 'themes', v: items });
+// 사례 글의 컷 그림 묶음(사이트의 /assets/cases/<file>-400.webp·-800.webp, 가로 400 기준 세로 h). items: [[file, 굵은 제목, 설명], ...]
+export const cuts = (note, h, ...items) => ({ t: 'cuts', note, h, v: items });
 
 export const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 // 본문 인라인: **굵게**, [[slug|텍스트]] 내부 링크
@@ -60,6 +62,8 @@ function block(b) {
     }
     case 'themes':
       return `<figure class="gal"><div class="gal-g">${b.v.map(([k, n, d]) => `<figure class="gal-f"><img src="/assets/samples/${esc(k)}.jpg" width="360" height="360" loading="lazy" decoding="async" alt="${esc(n)} 테마 샘플 그림"><figcaption><b>${esc(n)}</b>${esc(d)}</figcaption></figure>`).join('')}</div><figcaption class="gal-n">샘플은 모두 AI로 만든 그림이에요. 같은 테마라도 쓰는 그림 도구와 장면에 따라 결과가 달라져요.</figcaption></figure>`;
+    case 'cuts':
+      return `<figure class="gal"><div class="gal-g">${b.v.map(([f, n, d]) => `<figure class="gal-f"><img src="/assets/cases/${esc(f)}-400.webp" srcset="/assets/cases/${esc(f)}-400.webp 400w, /assets/cases/${esc(f)}-800.webp 800w" sizes="(min-width:721px) 220px, 46vw" width="400" height="${b.h}" loading="lazy" decoding="async" alt="${esc(n)}: ${esc(d)}"><figcaption><b>${esc(n)}</b>${esc(d)}</figcaption></figure>`).join('')}</div><figcaption class="gal-n">${inline(b.note)}</figcaption></figure>`;
     default: throw new Error('unknown block ' + b.t);
   }
 }

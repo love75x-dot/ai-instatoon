@@ -70,7 +70,7 @@ ok(!/<li class="post"[^>]* hidden/.test(hub), '허브 HTML에서 글 항목이 �
 ok(/<nav class="pager" id="pager"[^>]* hidden>/.test(hub), '허브 페이지 번호 자리는 기본 hidden');
 ok(hub.includes('<link rel="canonical" href="' + ORIGIN + '/guide/">'), '허브 canonical은 /guide/ 그대로(?page= 주소는 canonical로 /guide/를 가리킴)');
 ok(articles.some((a) => a.image) || !hub.includes('<img '), '허브 목록에 그림 없음(image 지정 글이 없을 때)');
-ok(!/<img /.test((await get('/guide/how-to-make-instatoon/')).text), '글 페이지 상단에 그림 없음(image 지정 글 제외)');
+ok(!/<img /.test((await get('/guide/what-is-instatoon/')).text), '글 페이지 상단에 그림 없음(image 지정 글 제외)');
 for (const u of ['/', ...pages]) { const t = (await get(u)).text.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g, ''); ok(!t.includes('콘텐츠 가이드'), `${u} 화면에 옛 이름(콘텐츠 가이드) 남음`); }
 // 공통 머리말: "메인으로" 버튼 없음, 로고는 첫 화면(/)으로, 검정 "인스타툰 만들기" 버튼 하나
 // 공통 머리말: "메인으로" 버튼 없음, 로고는 첫 화면(/)으로, 노트 목록은 검정 "인스타툰 만들기"만, 나머지는 보조 "인스타툰 노트" + 검정 "인스타툰 만들기"

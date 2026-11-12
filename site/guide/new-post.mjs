@@ -28,7 +28,7 @@ export default {
   // order: 1, // 선택: 같은 날짜 글 사이 순서(클수록 위)
   card: 'TODO 허브 카드에 보일 한 줄',
   lead: 'TODO 검색자의 질문에 바로 답하는 도입부',
-  related: ['what-is-instatoon', 'how-to-make-instatoon', 'store-story-to-instatoon'], // 실제로 관련 있는 글 3~4개로 교체
+  related: ['what-is-instatoon', 'instatoon-storytelling', 'store-story-to-instatoon'], // 실제로 관련 있는 글 3~4개로 교체
   summary: ['TODO', 'TODO', 'TODO'],
   sections: [
     sec('TODO 첫 번째 H2', p('TODO')),

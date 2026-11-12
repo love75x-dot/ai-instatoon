@@ -58,7 +58,7 @@ const ok = (c, m) => { if (!c) { fail++; console.log('[FAIL]', m); } else consol
 
   // 2) 모바일 가로 스크롤 없음
   const m = await mk({ width: 390, height: 800 });
-  for (const u of ['/', '/guide/', '/guide/what-is-instatoon/', '/guide/restaurant-instagram-content/', '/about/', '/privacy/', '/terms/']) {
+  for (const u of ['/', '/guide/', '/guide/what-is-instatoon/', '/guide/small-business-instagram-content/', '/about/', '/privacy/', '/terms/']) {
     const r = await m.goto(base + u); await m.waitForTimeout(300);
     const w = await m.evaluate(() => [document.documentElement.scrollWidth, window.innerWidth]);
     if (r.status() === 404) { console.log('[SKIP]', u, '아직 없음'); continue; }

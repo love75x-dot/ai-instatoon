@@ -97,7 +97,7 @@ const vis = (page, sel) => page.evaluate((s) => { const e = document.querySelect
 }
 // 휴대폰 "툰 만들기"
 for (const [vk, vp, want] of [['휴대폰 390', MOB, '툰 만들기'], ['PC 1300', PC, '인스타툰 만들기']]) {
-  const { page } = await open(vp, withKey, '/guide/how-to-make-instatoon/');
+  const { page } = await open(vp, withKey, '/guide/what-is-instatoon/');
   const t = await page.evaluate(() => { const b = document.querySelector('.hnav .hb.pri'); return { text: b.innerText.split(String.fromCharCode(10)).join('').trim(), h: b.getBoundingClientRect().height, ov: document.documentElement.scrollWidth - innerWidth }; });
   C.ok(t.text === want && t.h === 40 && t.ov <= 1, `${vk} 노트 머리말의 주 버튼 글자: "${t.text}"`);
   await page.close();

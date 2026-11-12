@@ -24,7 +24,7 @@ for (const [vk, vp] of Object.entries(VP)) {
     await page.evaluate(`(${fn.toString()})(); save(); render();`); await page.waitForTimeout(250);
     await page.screenshot({ path: path.join(out, `${vk}-${n}.jpg`), fullPage: true, type: 'jpeg', quality: 70 });
   }
-  for (const [n, u] of [['08-콘텐츠가이드목록', '/guide/'], ['09-가이드글', '/guide/how-to-make-instatoon/']]) {
+  for (const [n, u] of [['08-콘텐츠가이드목록', '/guide/'], ['09-가이드글', '/guide/what-is-instatoon/']]) {
     await page.goto(srv.base + u); await page.waitForTimeout(250);
     await page.screenshot({ path: path.join(out, `${vk}-${n}.jpg`), fullPage: true, type: 'jpeg', quality: 70 });
   }
