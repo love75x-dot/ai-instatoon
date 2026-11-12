@@ -1,0 +1,22 @@
+# 영구 이동(301): 2026-11-12 비슷한 노트 글을 합치면서 없어진 옛 주소를 합친 글로 보낸다.
+# 손으로 관리하는 원본. site/build.mjs가 deploy/_redirects로 복사한다(deploy/는 git에 두지 않는다).
+/guide/how-to-make-instatoon/ /guide/what-is-instatoon/ 301
+/guide/how-to-make-instatoon /guide/what-is-instatoon/ 301
+/guide/4-panel-instatoon/ /guide/instatoon-storytelling/ 301
+/guide/4-panel-instatoon /guide/instatoon-storytelling/ 301
+/guide/instagram-caption-writing/ /guide/instagram-post-structure/ 301
+/guide/instagram-caption-writing /guide/instagram-post-structure/ 301
+/guide/small-business-instagram-start/ /guide/instagram-post-structure/ 301
+/guide/small-business-instagram-start /guide/instagram-post-structure/ 301
+/guide/instagram-reels-vs-feed/ /guide/instagram-post-structure/ 301
+/guide/instagram-reels-vs-feed /guide/instagram-post-structure/ 301
+/guide/restaurant-instagram-content/ /guide/small-business-instagram-content/ 301
+/guide/restaurant-instagram-content /guide/small-business-instagram-content/ 301
+/guide/cafe-instagram-content/ /guide/small-business-instagram-content/ 301
+/guide/cafe-instagram-content /guide/small-business-instagram-content/ 301
+/guide/service-business-instagram-content/ /guide/small-business-instagram-content/ 301
+/guide/service-business-instagram-content /guide/small-business-instagram-content/ 301
+/guide/new-store-instagram-marketing/ /guide/small-business-instagram-content/ 301
+/guide/new-store-instagram-marketing /guide/small-business-instagram-content/ 301
+/guide/meta-business-suite-guide/ /guide/instagram-facebook-content/ 301
+/guide/meta-business-suite-guide /guide/instagram-facebook-content/ 301

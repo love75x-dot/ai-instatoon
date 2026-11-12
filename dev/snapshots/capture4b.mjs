@@ -32,7 +32,7 @@ for (const [vk, vp] of Object.entries(VP)) {
       await shot(h.page, `${vk}-${n}.jpg`, { clip }); await h.page.close();
     }
   }
-  for (const [n, u] of [['16-노트목록', '/guide/'], ['17-노트글', '/guide/how-to-make-instatoon/']]) {
+  for (const [n, u] of [['16-노트목록', '/guide/'], ['17-노트글', '/guide/what-is-instatoon/']]) {
     const h = await newPage(browser, srv.base, { viewport: vp, ls: { 'instatoon.helpSeen': '1' } }); await h.page.goto(srv.base + u); await h.page.waitForTimeout(400);
     await shot(h.page, `${vk}-${n}-맨위.jpg`, { clip: { x: 0, y: 0, width: vp.width, height: 260 } });
     await h.page.click('#menuBtn'); await h.page.waitForTimeout(450); await shot(h.page, `${vk}-${n}-메뉴열림.jpg`); await h.page.close();

@@ -6,8 +6,6 @@ import { ORIGIN, DATE, cfg, url, renderArticle, renderHub, render404 } from './l
 import { validate } from './validate.mjs';
 import { gaId } from '../analytics.mjs';
 import { pages, siteInfo } from './pages.mjs';
-import a1 from './articles-1.mjs';
-import a2 from './articles-2.mjs';
 import a3 from './articles-3.mjs';
 import a4 from './articles-4.mjs';
 
@@ -19,9 +17,9 @@ for (const f of fs.existsSync(postsDir) ? fs.readdirSync(postsDir).filter((x) =>
   const m = (await import(pathToFileURL(path.join(postsDir, f)).href)).default;
   posts.push(...[].concat(m));
 }
-// 기존 20편은 고정 순서, 새 글은 공개일 순으로 뒤에 붙는다.
+// articles-3·4의 글은 고정 순서, posts/의 글은 공개일 순으로 뒤에 붙는다(2026-11-12 글 합치기로 articles-1·2는 posts/로 옮김).
 posts.sort((x, y) => String(x.published).localeCompare(String(y.published)) || x.slug.localeCompare(y.slug));
-export const articles = [...a1, ...a2, ...a3, ...a4, ...posts];
+export const articles = [...a3, ...a4, ...posts];
 cfg.ga = gaId();
 const dep = path.join(here, '..', '..', 'deploy');
 

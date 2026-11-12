@@ -47,7 +47,7 @@ import { root } from '../lib/harness.mjs';
 const blockOf = (html) => (html.split('\r\n').join('\n').match(/\/\* HEADER:BEGIN[\s\S]*?\/\* HEADER:END \*\//) || [''])[0];
 const appCss = blockOf(fs.readFileSync(path.join(root, 'deploy', 'index.html'), 'utf8')), noteCss = blockOf(fs.readFileSync(path.join(root, 'deploy', 'guide', 'index.html'), 'utf8'));
 C.ok(appCss.length > 200 && appCss === noteCss, '머리말 CSS 블록이 홈과 노트에서 글자까지 같음');
-const HPAGES = [['홈', '/'], ['노트 목록', '/guide/'], ['노트 글', '/guide/how-to-make-instatoon/'], ['소개', '/about/'], ['개인정보', '/privacy/'], ['이용안내', '/terms/'], ['404', '/없는-주소/']];
+const HPAGES = [['홈', '/'], ['노트 목록', '/guide/'], ['노트 글', '/guide/what-is-instatoon/'], ['소개', '/about/'], ['개인정보', '/privacy/'], ['이용안내', '/terms/'], ['404', '/없는-주소/']];
 const headProbe = () => {
   const box = (el) => { const r = el.getBoundingClientRect(); return { x: Math.round(r.left * 10) / 10, y: Math.round(r.top * 10) / 10, w: Math.round(r.width * 10) / 10, h: Math.round(r.height * 10) / 10, r: Math.round((window.innerWidth - r.right) * 10) / 10 }; };
   const tb = document.querySelector('.topbar'), brand = tb.querySelector('.brand'), mark = brand.querySelector('.mark'), name = brand.querySelector('b'), menu = tb.querySelector('#menuBtn');
@@ -178,7 +178,7 @@ for (const [vk, w] of [['PC 1300', 1300], ['PC 1024', 1024], ['태블릿 768', 7
 }
 { // 인스타툰 노트 페이지의 ☰ 메뉴 + 주소로 들어오기(#month #vault #backup #help)
   for (const [vk, vp] of [['휴대폰 390', { width: 390, height: 800 }], ['PC 1300', { width: 1300, height: 800 }]]) {
-    for (const [name, u, curText] of [['노트 목록', '/guide/', '인스타툰 노트'], ['노트 글', '/guide/how-to-make-instatoon/', '인스타툰 노트'], ['개인정보', '/privacy/', null], ['404', '/없는-주소/', null]]) {
+    for (const [name, u, curText] of [['노트 목록', '/guide/', '인스타툰 노트'], ['노트 글', '/guide/what-is-instatoon/', '인스타툰 노트'], ['개인정보', '/privacy/', null], ['404', '/없는-주소/', null]]) {
       const { page, errors } = await newPage(browser, srv.base, { viewport: vp, ls: { 'instatoon.helpSeen': '1' } });
       await page.goto(srv.base + u); await page.waitForTimeout(250);
       const closed = await page.evaluate(() => ({ w: document.querySelector('#menuWrap').hidden, mb: document.querySelector('#menuBtn').getBoundingClientRect().height }));
