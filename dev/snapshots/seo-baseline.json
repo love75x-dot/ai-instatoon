@@ -21,7 +21,8 @@
     "https://www.ai-instatoon.com/guide/convenience-store-instatoon-case/",
     "https://www.ai-instatoon.com/about/",
     "https://www.ai-instatoon.com/privacy/",
-    "https://www.ai-instatoon.com/terms/"
+    "https://www.ai-instatoon.com/terms/",
+    "https://www.ai-instatoon.com/contact/"
   ],
   "robotsTxt": "User-agent: *\nAllow: /\n\nSitemap: https://www.ai-instatoon.com/sitemap.xml\n",
   "guideDirs": [
@@ -197,6 +198,13 @@
       "ogUrl": "https://www.ai-instatoon.com/terms/",
       "robots": "index,follow",
       "title": "이용안내: 서비스 범위와 이용 시 유의사항 | 인스타툰 연재실"
+    },
+    "/contact/": {
+      "status": 200,
+      "canonical": "https://www.ai-instatoon.com/contact/",
+      "ogUrl": "https://www.ai-instatoon.com/contact/",
+      "robots": "index,follow",
+      "title": "문의하기: 오류 제보, 글 수정 요청, 사용 문의 | 인스타툰 연재실"
     }
   }
 }

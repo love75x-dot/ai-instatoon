@@ -238,7 +238,7 @@ export const header = (cur) => `<a class="skip" href="#main">본문 바로가기
 <nav class="hnav" aria-label="주요 메뉴">${cur === 'hub' ? '' : '<a class="hb hb-note" href="/guide/" aria-label="인스타툰 노트"><span class="hp">인스타툰&nbsp;</span>노트</a>'}<a class="hb pri" href="/" data-track="cta" data-loc="header" aria-label="인스타툰 만들기"><span class="hp">인스타</span>툰 만들기</a><button type="button" class="menubtn" id="menuBtn" aria-label="메뉴 열기" aria-haspopup="dialog" aria-expanded="false" aria-controls="menuPanel"><span aria-hidden="true">☰</span></button></nav>
 </header></div>${menuHtml(cur)}<script>${MENU_JS}</script>`;
 
-export const footer = `<footer><div class="wrap"><nav class="nav" aria-label="푸터 메뉴"><a href="/guide/">인스타툰 노트</a><a href="/" data-track="cta" data-loc="footer">인스타툰 만들기</a><a href="/about/">소개</a><a href="/privacy/">개인정보처리방침</a><a href="/terms/">이용안내</a><a href="/sitemap.xml">사이트맵</a></nav>
+export const footer = `<footer><div class="wrap"><nav class="nav" aria-label="푸터 메뉴"><a href="/guide/">인스타툰 노트</a><a href="/" data-track="cta" data-loc="footer">인스타툰 만들기</a><a href="/about/">소개</a><a href="/privacy/">개인정보처리방침</a><a href="/terms/">이용안내</a><a href="/contact/">문의</a><a href="/sitemap.xml">사이트맵</a></nav>
 <p>© ${SITE} · 이 사이트의 가이드는 일반적인 정보 제공을 위한 것이며, 서비스 기능과 정책은 각 서비스의 공식 안내에서 확인해 주세요.</p>
 <p class="fmeta">${footerMetaHtml()}</p></div></footer>`;
 
