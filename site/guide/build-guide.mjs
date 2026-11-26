@@ -6,6 +6,7 @@ import { ORIGIN, DATE, cfg, url, renderArticle, renderHub, render404 } from './l
 import { validate } from './validate.mjs';
 import { gaId } from '../analytics.mjs';
 import { pages, siteInfo } from './pages.mjs';
+import { buildPromptsPage } from './prompts-page.mjs';
 import a3 from './articles-3.mjs';
 import a4 from './articles-4.mjs';
 
@@ -37,6 +38,8 @@ fs.rmSync(path.join(dep, 'guide'), { recursive: true, force: true });
 write('guide/index.html', renderHub(articles));
 articles.forEach((a, i) => write(`guide/${a.slug}/index.html`, renderArticle(a, articles, i)));
 for (const pg of pages) write(`${pg.slug}/index.html`, pg.build());
+// 인스타툰 프롬프트 페이지 시안(noindex, sitemap 제외). 정식으로 열 때 sitemap·메뉴에 연결한다.
+write('prompts/index.html', buildPromptsPage());
 // ads.txt: 실제 게시자 ID(site-info.json)가 있을 때만 생성한다. 없으면 만들지 않는다(가짜 ID 금지).
 fs.rmSync(path.join(dep, 'ads.txt'), { force: true });
 if (siteInfo.adsensePublisherId) write('ads.txt', `google.com, ${siteInfo.adsensePublisherId}, DIRECT, f08c47fec0942fa0
