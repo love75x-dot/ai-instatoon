@@ -62,12 +62,16 @@ const CSS = `
 .pw .fx p{margin:0;font-size:14px;color:var(--ink-2);line-height:1.6}
 .pw .more{background:var(--sunken);border-radius:18px;padding:16px 18px;margin-top:22px}
 .pw .more a{font-weight:700}
+.pw .tabs{display:flex;gap:8px;margin:8px 0 0}
+.pw .tab{flex:1;border:1px solid var(--line-2);background:var(--bg);color:var(--ink);border-radius:12px;padding:10px;font:inherit;font-weight:700;font-size:15px;cursor:pointer;min-height:44px;line-height:1.3}
+.pw .tab small{display:block;font-weight:400;font-size:13px;color:var(--muted)}
+.pw .tab.on{border:2px solid var(--ink);background:var(--sunken)}
 .pw .preview{background:var(--accent);color:var(--accent-ink);border-radius:12px;padding:10px 14px;font-size:14px;margin:16px 0 0}
 `;
 
 const JS = `(function(){
-var KEY='prompt-page-v1', F=['name','type','cust','tone','who','looks','keep','ratio','cuts','memo','planN','story'];
-var D={name:'',type:'',cust:'',tone:'친근한 존댓말',who:'',looks:'',keep:'',ratio:'3:4',cuts:'6',memo:'',planN:'4',story:''};
+var KEY='prompt-page-v1', F=['name','type','cust','tone','who','looks','keep','ratio','cuts','memo','planN','story','script'];
+var D={name:'',type:'',cust:'',tone:'친근한 존댓말',who:'',looks:'',keep:'',ratio:'3:4',cuts:'6',memo:'',planN:'4',story:'',script:''};
 var R={'1:1':'1:1 정사각형 비율(1080×1080px)','4:5':'4:5 세로 비율(1080×1350px)','3:4':'3:4 세로 비율(1080×1440px)'};
 var ART=${JSON.stringify(ART)}, LETTER=${JSON.stringify(LETTER)}, FIXES=${JSON.stringify(FIXES)};
 var v={}; try{ v=JSON.parse(localStorage.getItem(KEY)||'{}')||{}; }catch(e){ v={}; }
@@ -82,14 +86,15 @@ function P(){ var r=R[g('ratio','3:4')]||R['3:4'], n=g('cuts','6'), keep=g('keep
  sheet: '인스타툰 주인공 캐릭터 시트를 만들어 주세요.\\n주인공: '+who()+(keep?'\\n절대 바뀌면 안 되는 것: '+keep:'')+'\\n그림체: '+ART+'\\n흰 배경 한 장에 정면 전신, 옆모습, 웃는 얼굴, 놀란 얼굴 4가지를 나란히 그려 주세요.\\n글자, 숫자, 이름표, 나이·역할 같은 설명 라벨은 넣지 마세요.',
  script: '너는 한국 인스타툰 작가야. 아래 이야기로 인스타툰 '+n+'컷 대본을 써 줘.\\n'+shop()+'\\n[주인공] '+who()+'\\n[있었던 일] '+g('story','(가게에서 있었던 일을 한두 줄로)')+'\\n\\n규칙:\\n- 메시지는 하나. 1컷은 제목으로 읽을 이유를 주고, 마지막 컷은 행동 1가지만 부탁해.\\n- 컷마다: 구도, 장면(그림에서 눈에 보여야 할 상태로), 제목(있을 때만, 두 줄 이내), 대사(누가, 어떤 말풍선으로), 효과음, 시간·장소 자막.\\n- 대사는 한 말풍선에 두 줄 안쪽. \"전화받으며\" 같은 지시문은 대사 따옴표 안에 넣지 말고 장면에 써.\\n- 자막의 시간은 1컷부터 순서대로, 표기는 \"오후 3시\"처럼 한 가지로.\\n- 가격·날짜 같은 사실은 내가 준 것만 쓰고, 없으면 넣지 마.\\n- '+g('tone','친근한 존댓말')+'로.\\n- 그림은 아직 그리지 말고 대본 표만 보여 줘. 내가 고칠 수 있게.',
  draw: '좋아요, 이 대본대로 그림을 그릴 거예요. 첨부한 이미지가 주인공 캐릭터예요.\\n\\n[그림 규칙 - 모든 컷 똑같이]\\n1. 주인공의 얼굴, 머리 모양, 옷, 체형, 그림체를 첨부 이미지와 똑같이 유지해 주세요.'+(keep?' 특히 \"'+keep+'\"은(는) 모든 컷에서 꼭 지켜 주세요.':'')+'\\n2. 그림체: '+ART+'\\n3. 배경: '+g('type','가게')+' 공간. 배경은 연한 회색 톤으로 단순하게, 인물과 중요한 소품만 컬러로.\\n4. 모든 컷은 반드시 '+r+'. 컷마다 비율이 달라지면 안 돼요. 제목이 있는 컷은 윗부분 4분의 1을 제목 자리로 비워 두세요.\\n5. 그림 바깥에 검은 테두리 선은 넣지 말고 화면을 끝까지 채워 주세요.\\n\\n'+LETTER+'\\n\\n한 번에 한 컷씩만 그려 주세요. 지금 1컷을 그리고, 제가 \"다음\"이라고 하면 다음 컷을 그려 주세요.',
+ batch: '[작업]\\n아래 내용으로 인스타툰 '+n+'장을 순서대로, 한 장씩 따로 만들어 주세요.\\n\\n[공통 설정]\\n- 비율: '+r+', '+n+'장 모두 똑같이. 제목이 있는 장은 윗부분 4분의 1을 제목 자리로 비워 두세요. 그림 바깥에 검은 테두리 선은 넣지 마세요.\\n- 그림체: '+ART+'\\n  선: 굵고 깔끔한 검은 외곽선, 굵기 일정 / 색: 부드러운 단색 채색, 볼에 분홍 볼터치 / 그림자: 거의 없이 은은한 단색 음영만\\n  쓰지 말 것: 사실적 비율, 가는 선, 순정만화풍 반짝이 눈, 3D 질감\\n- 배경: '+g('type','가게')+' 공간. 배경은 연한 회색 톤으로 단순하게, 인물과 중요한 소품만 컬러로.\\n- 등장인물: [주인공] '+who()+'\\n    첨부: 1번 (②에서 받은 캐릭터 그림)'+(keep?'\\n    절대 유지: '+keep:'')+'\\n- 글자: 아래 [장별 내용]에 따옴표로 적은 문구만, 한 글자도 바꾸지 말고 한글 그대로 정확히 넣어 주세요. 그 밖의 글자·영어·이름표는 넣지 마세요.\\n  · 제목: 위쪽 가운데, 굵고 둥근 검은 고딕 제목체에 두꺼운 흰 외곽선. 강조 단어 아래 부드러운 노란 형광펜.\\n  · 말풍선: 흰 둥근 말풍선, 검은 테두리, 검은 둥근 고딕체. 꼬리는 말하는 사람 입 쪽으로 짧게(속마음은 뭉게구름, 외침은 뾰족한 폭발형, 속삭임은 점선, 떨림은 물결 테두리).\\n  · 효과음: 빨간 굵은 글씨, 흰 외곽선, 살짝 기울임. 소리 나는 곳 옆에 그림의 일부로.\\n  · 자막: 흰 네모 칸에 검은 테두리, 검은 고딕체, 컷 왼쪽 모서리.\\n  · 글씨체·글자 크기·말풍선 모양은 '+n+'장 모두 똑같이.\\n\\n[장별 내용]\\n'+g('script','(여기에 3-1에서 받은 대본을 붙여 넣으세요. 장마다 장면, 제목, 대사, 효과음, 자막)')+'\\n\\n[마무리]\\n- 모든 장에서 인물의 얼굴·머리 모양·옷·체형을 첨부 이미지와 똑같이 유지하세요.\\n- 첨부 이미지는 얼굴·머리·옷·체형을 참고하는 용도예요. 그림체는 [공통 설정]을 우선하세요.\\n- '+n+'장 모두 같은 그림체와 같은 비율로 그려 주세요.\\n- 같은 대사·효과음을 한 장 안에서 두 번 쓰지 마세요.\\n- 대본에 괄호로 적힌 지시문은 그림으로만 표현하고 글자로 쓰지 마세요.',
  caption: '위 인스타툰을 인스타그램에 올릴 거예요. 캡션과 해시태그를 써 주세요.\\n- 첫 두 줄에 읽을 이유를 주고, 대본의 이야기와 맞게.\\n- 손님에게 도움이 되는 정보 1~2줄, 마지막에 부탁 1가지.\\n- '+g('tone','친근한 존댓말')+'로, 이모지는 2개 이하.\\n- 해시태그는 업종·지역·주제를 섞어 8개 안쪽, 내용과 상관없는 인기 태그는 빼고.\\n- 가게: '+g('name','(가게 이름)')+', '+g('type','(업종)')+'. 내가 알려 주지 않은 가격·효과나 \"최고\" 같은 표현은 쓰지 마세요.',
  fixes: FIXES.map(function(f){ return f[1].replace('{ratio}',r); })
  }; }
-function up(){ save(); var p=P(); ['plan','sheet','script','draw','caption'].forEach(function(k){ var el=document.getElementById('p-'+k); if(el) el.textContent=p[k]; }); p.fixes.forEach(function(t,i){ var el=document.getElementById('p-fix'+i); if(el) el.textContent=t; }); }
+function up(){ save(); var p=P(); ['plan','sheet','script','draw','batch','caption'].forEach(function(k){ var el=document.getElementById('p-'+k); if(el) el.textContent=p[k]; }); p.fixes.forEach(function(t,i){ var el=document.getElementById('p-fix'+i); if(el) el.textContent=t; }); }
 function copy(t,b){ function ok(){ b.classList.add('done'); var o=b.getAttribute('data-l'); b.textContent='복사했어요'; setTimeout(function(){ b.classList.remove('done'); b.textContent=o; },1600); }
  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(ok,function(){ fb(t); ok(); }); } else { fb(t); ok(); } }
 function fb(t){ var ta=document.createElement('textarea'); ta.value=t; ta.setAttribute('readonly',''); ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); }catch(e){} document.body.removeChild(ta); }
-document.addEventListener('click',function(e){ var b=e.target.closest('[data-cp]'); if(!b) return; var el=document.getElementById(b.getAttribute('data-cp')); if(el) copy(el.textContent,b); });
+document.addEventListener('click',function(e){ var t=e.target.closest('[data-tab]'); if(t){ var k=t.getAttribute('data-tab'); document.querySelectorAll('[data-tab]').forEach(function(x){ var on=x===t; x.classList.toggle('on',on); x.setAttribute('aria-selected',on?'true':'false'); }); document.querySelectorAll('[data-pane]').forEach(function(p){ p.hidden=p.getAttribute('data-pane')!==k; }); return; } var b=e.target.closest('[data-cp]'); if(!b) return; var el=document.getElementById(b.getAttribute('data-cp')); if(el) copy(el.textContent,b); });
 up();
 })();`;
 
@@ -111,7 +116,7 @@ export function buildPromptsPage() {
 <ol class="flow">
 <li><b>① 기획</b>이번 달 뭐 올리지?</li>
 <li><b>② 캐릭터</b>매번 같은 얼굴로</li>
-<li><b>③ 인스타툰</b>대본 → 그림</li>
+<li><b>③ 인스타툰</b>대본 → 그림(한 컷씩·한 번에)</li>
 <li><b>④ 올릴 글</b>캡션·해시태그</li>
 </ol>
 
@@ -150,12 +155,17 @@ ${field('planN', '소재 개수', '', { sel: [['4', '4개 (주 1회)'], ['8', '8
 
 <section class="card">
 <h2><span class="num">3</span>인스타툰: 대본 받고, 한 컷씩 그리기</h2>
-<p class="d">같은 대화창에서 두 문장을 차례로 붙여 넣어요. 대본을 먼저 고치고 그림을 받으면 실수가 확 줄어요.</p>
+<p class="d">대본을 먼저 받아 고치고, 그다음 그림을 받아요. 대본 단계에서 고치면 그림을 다시 뽑는 일이 확 줄어요.</p>
 <div class="grid">${field('story', '있었던 일 <small>(한두 줄)</small>', '예: 브레이크타임에 손님이 문을 흔들고 전화까지 했다', { wide: true, area: true })}</div>
 <div class="step"><b>3-1. 대본 요청</b><pre id="p-script"></pre>${btn('p-script')}</div>
 <ul class="hint"><li>나온 대본에서 자막의 시간 순서, 숫자, 괄호만 따로 읽어 보세요. <a href="/guide/banchan-store-instatoon-case/">반찬가게 사례</a>에서 실제로 걸린 곳이에요.</li></ul>
-<div class="step"><b>3-2. 그림 시작 (②에서 받은 캐릭터 그림을 첨부하고 붙여 넣기)</b><pre id="p-draw"></pre>${btn('p-draw')}</div>
-<ul class="hint"><li>1컷이 나오면 "다음"이라고만 보내면 다음 컷을 그려요.</li></ul>
+<p class="d" style="margin:16px 0 0"><b>3-2. 그림 받기</b> · 쓰는 도구에 맞게 하나만 고르세요.</p>
+<div class="tabs" role="tablist"><button type="button" role="tab" class="tab on" data-tab="one" aria-selected="true">한 컷씩<small>ChatGPT · 제미나이</small></button><button type="button" role="tab" class="tab" data-tab="all" aria-selected="false">한 번에 여러 컷<small>젠스파크</small></button></div>
+<div class="tp" data-pane="one"><div class="step"><b>②에서 받은 캐릭터 그림을 첨부하고, 대본을 받은 같은 대화창에 붙여 넣기</b><pre id="p-draw"></pre>${btn('p-draw')}</div>
+<ul class="hint"><li>1컷이 나오면 "다음"이라고만 보내면 다음 컷을 그려요. 컷마다 바로 확인하고 고칠 수 있어요.</li></ul></div>
+<div class="tp" data-pane="all" hidden><div class="grid">${field('script', '3-1에서 받은 대본 붙여 넣기', '예: 1장 - 장면: …, 제목: "…", 대사: "…", 자막: "…"', { wide: true, area: true })}</div>
+<div class="step"><b>젠스파크 이미지 만들기에 캐릭터 그림을 1번으로 첨부하고 붙여 넣기</b><pre id="p-batch"></pre>${btn('p-batch')}</div>
+<ul class="hint"><li>한 번 붙여 넣으면 여러 장을 한꺼번에 받아요. <a href="/guide/burger-store-instatoon-case/">수제버거 사례</a> 6장이 이 방식이에요.</li><li>마음에 안 드는 장은 "3장만 다시 그려 주세요"처럼 따로 요청하세요.</li><li>대본에 괄호 지시문이 있으면 그림에 글자로 들어갈 수 있어요. 붙여 넣기 전에 대사 속 괄호를 지워 주세요.</li></ul></div>
 </section>
 
 <section class="card">
