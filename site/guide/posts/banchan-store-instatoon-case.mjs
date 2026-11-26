@@ -15,7 +15,7 @@ export default {
   desc: '인스타툰 연재실이 만든 그림 프롬프트를 그림 AI에 넣어 받은 반찬가게 사장님 인스타툰 6컷을 프롬프트와 한 컷씩 대조해, 그대로 나온 것과 어긋난 시간 순서·장면·맞춤법을 정리한 실제 사례입니다.',
   card: '실제 프롬프트와 6컷 대조, 맞은 것과 어긋난 것',
   lead: '이 글은 운영자가 인스타툰 연재실로 직접 만든 "반찬가게 사장님" 인스타툰 한 편을 다룹니다. 사이트가 만들어 준 그림 프롬프트를 그림 AI에 넣어 받은 6컷을, 그 프롬프트와 한 컷씩 나란히 놓고 비교했어요. 무엇이 적은 그대로 나왔고, 무엇이 어긋났으며, 어긋난 것 중 어떤 건 그림 AI가 아니라 대본에서 시작됐는지까지 적었습니다.',
-  related: ['burger-store-instatoon-case', 'convenience-store-instatoon-case', 'instatoon-character-consistency', 'ai-instatoon-review-checklist'],
+  related: ['chatgpt-instatoon-prompt', 'burger-store-instatoon-case', 'convenience-store-instatoon-case', 'instatoon-character-consistency'],
   summary: [
     '캐릭터 시트를 먼저 만들고 매 컷 첨부하는 방식으로, 머리·옷·스카프·귀걸이가 6컷 내내 같게 나왔다.',
     '따옴표 안에 준 제목·대사·자막·효과음은 6컷 모두 글자 그대로 들어갔다.',

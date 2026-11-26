@@ -19,6 +19,7 @@
     "https://www.ai-instatoon.com/guide/banchan-store-instatoon-case/",
     "https://www.ai-instatoon.com/guide/burger-store-instatoon-case/",
     "https://www.ai-instatoon.com/guide/convenience-store-instatoon-case/",
+    "https://www.ai-instatoon.com/guide/chatgpt-instatoon-prompt/",
     "https://www.ai-instatoon.com/about/",
     "https://www.ai-instatoon.com/privacy/",
     "https://www.ai-instatoon.com/terms/",
@@ -29,6 +30,7 @@
     "ai-instatoon-review-checklist",
     "banchan-store-instatoon-case",
     "burger-store-instatoon-case",
+    "chatgpt-instatoon-prompt",
     "convenience-store-instatoon-case",
     "customer-questions-to-content",
     "gemini-api-key-setup-guide",
@@ -177,6 +179,13 @@
       "ogUrl": "https://www.ai-instatoon.com/guide/convenience-store-instatoon-case/",
       "robots": "index,follow",
       "title": "편의점 알바생 인스타툰 사례: 6장 구성과 올리기 전 확인 | 인스타툰 연재실"
+    },
+    "/guide/chatgpt-instatoon-prompt/": {
+      "status": 200,
+      "canonical": "https://www.ai-instatoon.com/guide/chatgpt-instatoon-prompt/",
+      "ogUrl": "https://www.ai-instatoon.com/guide/chatgpt-instatoon-prompt/",
+      "robots": "index,follow",
+      "title": "ChatGPT 인스타툰 프롬프트: 3단 구조와 실제로 고친 점 | 인스타툰 연재실"
     },
     "/about/": {
       "status": 200,
