@@ -45,12 +45,12 @@ for (const [i, u] of pages.entries()) {
   console.log(`[${status === 200 ? 'PASS' : 'FAIL'}] ${u}  (${title?.length}자 title, ${h.replace(/<style[\s\S]*?<\/style>|<script[\s\S]*?<\/script>|<[^>]+>/g, '').length}자)`);
 }
 // 소개/개인정보/이용안내 페이지
-for (const u of ['/about/', '/privacy/', '/terms/']) {
+for (const u of ['/about/', '/privacy/', '/terms/', '/contact/']) {
   const { status, text: h } = await get(u);
   ok(status === 200, `${u} HTTP ${status}`);
   ok(h.includes(`<link rel="canonical" href="${ORIGIN}${u}">`) && (h.match(/<h1[ >]/g) || []).length === 1, `${u} canonical/H1`);
   ok(h.includes('content="index,follow"') && h.includes('<title>'), `${u} robots/title`);
-  ok(h.includes('href="/privacy/"') && h.includes('href="/terms/"') && h.includes('href="/about/"'), `${u} 푸터 링크`);
+  ok(h.includes('href="/privacy/"') && h.includes('href="/terms/"') && h.includes('href="/about/"') && h.includes('href="/contact/"'), `${u} 푸터 링크`);
   console.log(`[PASS] ${u}`);
 }
 // 허브 → 모든 글 링크
@@ -81,7 +81,7 @@ const nf = fs.readFileSync(path.join(dep, '404.html'), 'utf8'); ok(!/>메인으�
 ok((await get('/')).text.includes('href="/guide/"'), '메인에 /guide/ 링크 없음');
 // sitemap
 const sm = (await get('/sitemap.xml')).text; const locs = [...sm.matchAll(/<loc>(.*?)<\/loc>/g)].map((m) => m[1]);
-for (const u of ['/', ...pages, '/about/', '/privacy/', '/terms/']) ok(locs.includes(ORIGIN + u), `sitemap 누락 ${u}`);
+for (const u of ['/', ...pages, '/about/', '/privacy/', '/terms/', '/contact/']) ok(locs.includes(ORIGIN + u), `sitemap 누락 ${u}`);
 for (const l of locs) ok((await get(l.replace(ORIGIN, ''))).status === 200, `sitemap URL 응답 이상 ${l}`);
 console.log(`sitemap: ${locs.length}개 URL`);
 // robots
