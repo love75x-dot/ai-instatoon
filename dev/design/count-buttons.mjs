@@ -13,7 +13,7 @@ for (const [name, dir] of Object.entries(dirs)) {
   const srv = await serve(dir);
   for (const [vk, vp] of [['휴대폰 390', { width: 390, height: 844 }], ['PC 1300', { width: 1300, height: 900 }]]) {
     const { page } = await newPage(browser, srv.base, { viewport: vp, ls: { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST' } });
-    await page.goto(srv.base + '/'); await page.waitForTimeout(500);
+    await page.goto(srv.base + '/make/'); await page.waitForTimeout(500);
     const n = await page.evaluate(() => {
       const root = document.querySelector('.wrap'), skip = '.gfoot,.faq,.galslot,#help,#tour,#keySheet,.dock';
       const els = [...root.querySelectorAll('button, a[href], summary, input:not([type=hidden]), textarea, select')].filter((e) => !e.closest(skip) && !e.closest('[hidden]') && !(() => { let d = e.closest('details'); while (d) { if (!d.open && !(e.tagName === 'SUMMARY' && e.parentElement === d)) return true; d = d.parentElement && d.parentElement.closest('details'); } return false; })() && e.getClientRects().length > 0 && getComputedStyle(e).visibility !== 'hidden');

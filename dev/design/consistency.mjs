@@ -11,7 +11,7 @@ const PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJA
 
 const fresh = async () => {
   const { page, errors } = await newPage(browser, srv.base, { viewport: { width: 1000, height: 900 }, ls: { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST' } });
-  await page.goto(srv.base + '/'); await page.waitForTimeout(500);
+  await page.goto(srv.base + '/make/'); await page.waitForTimeout(500);
   // 보리당 예시: 두 번째 주인공(p2) 켜 둔 상태, 보관함·기준 이미지 없음
   await page.evaluate((PNG) => { S = demoState('bakery'); S.demo = false; S.mode = 'one'; S.step = 'post'; S.info.p2.on = true; S.info.art = 'chibi'; delete S.info.refArt; delete S.info.themeOk; delete S.info.link; setRef(0, null); setRef(1, null); save(); render(); }, PNG);
   await page.waitForTimeout(300);

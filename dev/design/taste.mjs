@@ -19,7 +19,7 @@ async function open({ cfg, key, reply }) {
     return r.fulfill({ status: x.s, contentType: 'application/json', body: JSON.stringify(x.b) });
   });
   await page.route(/generativelanguage\.googleapis\.com\/v1beta\/models\/[^:]+:generateContent/, (r) => { reqs.gem++; return r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify(toon) }] } }] }) }); });
-  await page.goto(srv.base + '/'); await page.waitForTimeout(600);
+  await page.goto(srv.base + '/make/'); await page.waitForTimeout(600);
   await page.evaluate(() => { S = demoState('bakery'); S.demo = false; S.mode = 'one'; S.step = 'input'; S.toon = null; S.series = []; save(); render(); });
   await page.waitForTimeout(150);
   return { ...h, reqs };
@@ -141,7 +141,7 @@ for (const [label, cfg] of [['맛보기 꺼짐', { ok: true, taste: false, sitek
   const h = await newPage(browser, srv.base, { viewport: { width: 360, height: 740 }, ls: { 'instatoon.helpSeen': '1' } });
   await h.page.addInitScript(() => { window.turnstile = { render(el, o) { setTimeout(() => o.callback('T'), 30); return 'w'; }, remove() {} }; });
   await h.page.route('**/api/ai/config', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ON) }));
-  await h.page.goto(srv.base + '/'); await h.page.waitForTimeout(600);
+  await h.page.goto(srv.base + '/make/'); await h.page.waitForTimeout(600);
   await h.page.evaluate(() => { S = demoState('bakery'); S.demo = false; S.mode = 'one'; S.step = 'input'; S.toon = null; save(); render(); });
   await h.page.click('#makeBtn'); await h.page.waitForTimeout(300);
   C.ok(await h.page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1 && document.querySelector('#tasteSheet .sheet-in').scrollWidth <= document.querySelector('#tasteSheet .sheet-in').clientWidth + 1), '휴대폰: 맛보기 시트가 가로로 넘치지 않음');

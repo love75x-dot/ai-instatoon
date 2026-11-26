@@ -24,7 +24,7 @@ const srv = await serve(); const browser = await launch();
 for (const [name, vp] of [['PC', { width: 1300, height: 900 }], ['휴대폰', { width: 390, height: 800 }]]) {
   const { page, errors } = await newPage(browser, srv.base, { viewport: vp, ls: { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST' }, freeze: false });
   const reqs = []; page.on('request', (r) => { if (/\/assets\/examples\/.+\.webp/.test(r.url())) reqs.push(r.url()); });
-  await page.goto(srv.base + '/'); await page.waitForTimeout(1500);
+  await page.goto(srv.base + '/make/'); await page.waitForTimeout(1500);
   C.ok(reqs.length === 0 && await page.locator('.exg-f').count() === 0 && await page.locator('#exGal').count() === 0, `${name}: 홈에는 예시 그림 요청 0, "이런 인스타툰이 나와요" 미리보기 접힘·그림 칸도 없음`);
   await page.evaluate(() => toggleHelp(true)); await page.waitForTimeout(800); // 갤러리는 ☰ 도움말 안에만 있음
   const g = await page.evaluate(() => { const gr = document.querySelector('#help .hex .exg-g'); const imgs = [...document.querySelectorAll('#help .hex img')]; const cs = getComputedStyle(gr); return { n: imgs.length, attrs: imgs.every((i) => i.width && i.height && i.loading === 'lazy' && i.decoding === 'async' && i.alt.length > 20 && /360w.*720w/.test(i.getAttribute('srcset'))), disp: cs.display, cols: cs.gridTemplateColumns.split(' ').length, scroll: gr.scrollWidth > gr.clientWidth + 2, page: document.documentElement.scrollWidth <= innerWidth + 1, fw: Math.round(imgs[0].getBoundingClientRect().width), left: Math.round(imgs[0].getBoundingClientRect().left) }; });
@@ -57,7 +57,7 @@ for (const [name, vp] of [['PC', { width: 1300, height: 900 }], ['휴대폰', { 
 // 사용 방법 안 갤러리: 열기 전에는 그림 요청이 0, 열면 6장이 지연 로딩으로 나옴
 { const { page } = await newPage(browser, srv.base, { viewport: { width: 1300, height: 900 }, ls: { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST' }, freeze: false });
   const r = []; page.on('request', (x) => { if (/\/assets\/examples\/.+\.webp/.test(x.url())) r.push(x.url()); });
-  await page.goto(srv.base + '/'); await page.waitForTimeout(2500);
+  await page.goto(srv.base + '/make/'); await page.waitForTimeout(2500);
   C.ok(r.length === 0, '사용 방법을 열지 않으면 첫 화면에서 예시 그림 요청이 0');
   await page.evaluate(() => toggleHelp(true)); await page.waitForTimeout(800);
   C.ok(await page.locator('#help .exg-f').count() === 6 && await page.locator('#help [data-act="exDemo"]').count() === 1 && await page.locator('#help img[loading="lazy"]').count() === 6, '사용 방법 안 "이렇게 나와요"가 그림 갤러리(6장, 지연 로딩)로 바뀌고 체험 링크는 1개');

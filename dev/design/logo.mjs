@@ -26,7 +26,7 @@ const same = (a, b, tol = 0.6) => Math.abs(a - b) <= tol;
 for (const [vk, w, h] of VPS) {
   // 소개 화면(처음 온 사람)
   const intro = await newPage(browser, srv.base, { intro: true, viewport: { width: w, height: h } });
-  await intro.page.goto(srv.base + '/'); await intro.page.waitForTimeout(700);
+  await intro.page.goto(srv.base + '/make/'); await intro.page.waitForTimeout(700);
   const I = await intro.page.evaluate(introProbe);
   // 같은 브라우저에서 [시작하기] → 작업 화면
   await intro.page.click('#intro .in-top [data-intro="start"]'); await intro.page.waitForTimeout(700);

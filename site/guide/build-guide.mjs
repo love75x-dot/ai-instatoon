@@ -38,8 +38,8 @@ fs.rmSync(path.join(dep, 'guide'), { recursive: true, force: true });
 write('guide/index.html', renderHub(articles));
 articles.forEach((a, i) => write(`guide/${a.slug}/index.html`, renderArticle(a, articles, i)));
 for (const pg of pages) write(`${pg.slug}/index.html`, pg.build());
-// 인스타툰 프롬프트 페이지 시안(noindex, sitemap 제외). 정식으로 열 때 sitemap·메뉴에 연결한다.
-write('prompts/index.html', buildPromptsPage());
+// 첫 화면(/) = 인스타툰 프롬프트 페이지. 기존 도구 페이지는 site/build.mjs가 deploy/make/에 쓴다.
+write('index.html', buildPromptsPage());
 // ads.txt: 실제 게시자 ID(site-info.json)가 있을 때만 생성한다. 없으면 만들지 않는다(가짜 ID 금지).
 fs.rmSync(path.join(dep, 'ads.txt'), { force: true });
 if (siteInfo.adsensePublisherId) write('ads.txt', `google.com, ${siteInfo.adsensePublisherId}, DIRECT, f08c47fec0942fa0
@@ -54,7 +54,7 @@ write('404.html', render404());
 write('robots.txt', `User-agent: *\nAllow: /\n\nSitemap: ${ORIGIN}/sitemap.xml\n`);
 const lastmod = Object.fromEntries(articles.map((a) => [url(a.slug), a.modified || a.published || DATE]));
 const newest = articles.map((a) => a.modified || a.published || DATE).sort().pop();
-const urls = [ORIGIN + '/', ORIGIN + '/guide/', ...articles.map((a) => url(a.slug)), ...pages.map((pg) => `${ORIGIN}/${pg.slug}/`)];
+const urls = [ORIGIN + '/', ORIGIN + '/make/', ORIGIN + '/guide/', ...articles.map((a) => url(a.slug)), ...pages.map((pg) => `${ORIGIN}/${pg.slug}/`)];
 write('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u) => `  <url><loc>${u}</loc><lastmod>${lastmod[u] || newest}</lastmod></url>`).join('\n')}\n</urlset>\n`);
 console.log(`GA4: ${cfg.ga || '미설정(측정 ID 없음 - 스크립트 미삽입)'}`);
 console.log(`가이드 생성 완료: 허브 1 + 글 ${articles.length} + sitemap(${urls.length}) + robots + 404`);

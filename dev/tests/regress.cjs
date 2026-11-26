@@ -33,7 +33,7 @@ const ok = (c, m) => { if (!c) { fail++; console.log('[FAIL]', m); } else consol
   // 1) 데스크톱: 메인 로딩, 업종 선택, 대본 생성, 3단계
   const p = await mk({ width: 1300, height: 1000 });
   await p.addInitScript(() => { if (!sessionStorage.getItem('x')) { sessionStorage.setItem('x', 1); localStorage.clear(); localStorage.setItem('instatoon.key', 'TEST'); localStorage.setItem('instatoon.helpSeen', '1'); } });
-  const r0 = await p.goto(base + '/'); await p.waitForTimeout(800);
+  const r0 = await p.goto(base + '/make/'); await p.waitForTimeout(800);
   ok(r0.status() === 200, '메인 200');
   ok(await p.locator('a[href="/guide/"]').count() >= 2, '메인에 콘텐츠 가이드 링크(상단+하단)');
   ok(await p.locator('footer.gfoot a[href="/about/"], footer.gfoot a[href="/privacy/"]').count() >= 2, '메인 하단에 소개/개인정보 링크');

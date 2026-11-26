@@ -34,7 +34,7 @@ const SCREENS = [
 ];
 for (const [vk, vp] of VPS) {
   const { page, errors } = await newPage(browser, srv.base, { viewport: vp, ls: { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST' } });
-  await page.goto(srv.base + '/'); await page.waitForTimeout(500);
+  await page.goto(srv.base + '/make/'); await page.waitForTimeout(500);
   const rep = async (name) => {
     const r = await page.evaluate(probe, SKIP);
     C.ok(r.overflow <= 1, `${vk}px ${name}: 가로로 넘치지 않음${r.overflow > 1 ? ' (' + r.overflow + 'px)' : ''}`);
@@ -57,7 +57,7 @@ for (const [vk, vp] of VPS) {
   await page.evaluate(() => openBackupWin()); await page.waitForTimeout(500); await rep('내 작업 저장·불러오기');
   await page.keyboard.press('Escape'); await page.waitForTimeout(250);
   await page.evaluate(() => { try { document.querySelector('#backupWin,[id*="backup"]')?.remove?.(); } catch (_) {} });
-  await page.goto(srv.base + '/'); await page.waitForTimeout(500);
+  await page.goto(srv.base + '/make/'); await page.waitForTimeout(500);
   await page.evaluate(() => openVault({})); await page.waitForTimeout(500); await rep('내 캐릭터(보관함)');
   C.ok(!errors.length, `${vk}px: 페이지 오류 없음${errors[0] ? ' ← ' + errors[0].slice(0, 100) : ''}`);
   await page.context().close();

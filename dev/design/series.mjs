@@ -8,7 +8,7 @@ const srv = await serve(); const browser = await launch();
 const withKey = { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST' };
 const h = await newPage(browser, srv.base, { viewport: { width: 1300, height: 900 }, ls: withKey });
 const { page, errors } = h;
-await page.goto(srv.base + '/'); await page.waitForTimeout(500);
+await page.goto(srv.base + '/make/'); await page.waitForTimeout(500);
 
 // 가짜 AI: 매번 컷 6개와 memory를 돌려준다(n번째마다 줄거리가 다름). null이면 memory 없이.
 await page.evaluate(() => {
@@ -72,7 +72,8 @@ await page.evaluate(() => { window.__noMem = false; });
 // 화면: 기본 접힘 → 열기 → 수정 → 지우기
 await page.evaluate(() => { S.step = 'input'; save(); render(); });
 await page.waitForTimeout(200);
-await page.evaluate(() => { document.querySelector('#moreAll').open = true; }); await page.waitForTimeout(100);
+await page.evaluate(() => { document.querySelector('#moreAll').open = true; }); await page.waitForTimeout(100);
+
 C.ok(await page.locator('#serBox').count() === 1 && await page.locator('#serBox').evaluate((d) => !d.open), '연재 기억 목록이 있고 기본은 접혀 있음');
 C.ok(/20편 저장/.test(await page.locator('#serBox summary').innerText()), '접힌 줄에 저장된 편 수가 보임');
 await page.locator('#serBox summary').click(); await page.waitForTimeout(100);

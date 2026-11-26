@@ -7,7 +7,7 @@ import { serve, launch, newPage, checker, root } from '../lib/harness.mjs';
 
 const C = checker();
 const dep = (p) => fs.readFileSync(path.join(root, 'deploy', p), 'utf8');
-const pages = { 앱홈: dep('index.html'), 노트목록: dep('guide/index.html'), 노트글: dep('guide/instatoon-troubleshooting/index.html'), 개인정보: dep('privacy/index.html'), '404': dep('404.html') };
+const pages = { 앱홈: dep('make/index.html'), 노트목록: dep('guide/index.html'), 노트글: dep('guide/instatoon-troubleshooting/index.html'), 개인정보: dep('privacy/index.html'), '404': dep('404.html') };
 
 // ─── 외부 글꼴 서버를 쓰지 않음 ───
 for (const [n, h] of Object.entries(pages)) C.ok(!/cdn\.jsdelivr\.net|fonts\.googleapis\.com|fonts\.gstatic\.com/.test(h.replace(/https:\/\/generativelanguage\.googleapis\.com/g, '')), `${n}: jsDelivr·Google Fonts 주소가 없음`);
@@ -53,7 +53,7 @@ const { page, errors } = await newPage(browser, srv.base, { viewport: { width: 3
 const got = new Set(), pgot = new Set(), warns = [];
 page.on('response', (r) => { const m = r.url().match(/\/assets\/fonts\/introsquare\/([^/?]+\.woff2)/); if (m) got.add(m[1]); const p = r.url().match(/\/assets\/fonts\/pretendard\/([^/?]+\.woff2)/); if (p) pgot.add(p[1]); });
 page.on('console', (m) => { if (/preload/i.test(m.text())) warns.push(m.text()); });
-await page.goto(srv.base + '/'); await page.waitForTimeout(3500);
+await page.goto(srv.base + '/make/'); await page.waitForTimeout(3500);
 C.ok(INTRO.every((n) => got.has(n)), `앱 홈에서 preload한 IntroSquare ${INTRO.length}개를 모두 실제로 받아 씀`);
 C.ok(!warns.length, 'preload했지만 안 쓰였다는 브라우저 경고가 없음' + (warns[0] ? ' ← ' + warns[0].slice(0, 100) : ''));
 const ext = await page.evaluate(() => performance.getEntriesByType('resource').map((e) => e.name).filter((u) => /jsdelivr|fonts\.g/.test(u)));

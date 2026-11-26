@@ -8,7 +8,7 @@ import { serve, launch, newPage, checker, root } from '../lib/harness.mjs';
 
 const C = checker();
 const dep = (p) => fs.readFileSync(path.join(root, 'deploy', p), 'utf8');
-const home = dep('index.html'), guide = dep('guide/index.html'), trouble = dep('guide/instatoon-troubleshooting/index.html');
+const home = dep('make/index.html'), guide = dep('guide/index.html'), trouble = dep('guide/instatoon-troubleshooting/index.html');
 
 // ─── 푸터 한 줄 (빌드가 채움) ───
 const dateRe = /마지막 업데이트 (\d{4}-\d{2}-\d{2})/;
@@ -52,7 +52,7 @@ for (const [name, html] of [['앱 홈', home], ['노트 목록', guide], ['노�
   C.ok(/name="theme-color" content="#ffffff"/.test(html) && /rel="manifest" href="\/manifest\.webmanifest"/.test(html), `${name}: theme-color·manifest 링크`);
 }
 C.ok(fs.existsSync(path.join(root, 'deploy', 'assets', 'og', 'og-default.png')) && !/og-default/.test(home + guide + trouble), '이전 공유 이미지(og-default.png)는 파일로 남아 있고, 페이지는 모두 새 이미지(og-v2.png)를 가리킴');
-C.ok(/og:title/.test(home) && /og:description/.test(home) && /og:url" content="https:\/\/www\.ai-instatoon\.com\/"/.test(home), '카카오톡·인스타 DM 미리보기에 쓰는 og:title·description·url');
+C.ok(/og:title/.test(home) && /og:description/.test(home) && /og:url" content="https:\/\/www\.ai-instatoon\.com\/make\/"/.test(home), '카카오톡·인스타 DM 미리보기에 쓰는 og:title·description·url');
 const man = JSON.parse(dep('manifest.webmanifest'));
 C.ok(man.name && man.short_name && man.start_url === '/' && man.display === 'standalone' && man.icons.length >= 2 && man.icons.every((i) => fs.existsSync(path.join(root, 'deploy', i.src))), 'manifest: 이름·시작 주소·standalone·아이콘 파일 있음');
 C.ok(!/serviceWorker/.test(home + guide) && !fs.existsSync(path.join(root, 'deploy', 'sw.js')), '서비스 워커는 없음(홈 화면 추가용 manifest만)');
@@ -66,7 +66,7 @@ const srv = await serve(); const browser = await launch();
 const sizes = {};
 for (const [name, vp] of [['PC', { width: 1300, height: 900 }], ['태블릿', { width: 820, height: 900 }], ['휴대폰', { width: 390, height: 800 }]]) {
   const { page, errors } = await newPage(browser, srv.base, { viewport: vp, ls: { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST' }, freeze: false });
-  await page.goto(srv.base + '/'); await page.waitForTimeout(900);
+  await page.goto(srv.base + '/make/'); await page.waitForTimeout(900);
   if (name === 'PC') {
     // 본문 바로가기: 첫 Tab이 바로가기 링크, 누르면 #main으로
     await page.keyboard.press('Tab');

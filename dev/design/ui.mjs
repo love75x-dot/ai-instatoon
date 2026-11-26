@@ -8,7 +8,7 @@ const LS = { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST' };
 
 for (const [vk, vp] of [['PC 1300', { width: 1300, height: 900 }], ['휴대폰 390', { width: 390, height: 844 }]]) {
   const { page, errors } = await newPage(browser, srv.base, { viewport: vp, ls: LS });
-  await page.goto(srv.base + '/'); await page.waitForTimeout(500);
+  await page.goto(srv.base + '/make/'); await page.waitForTimeout(500);
   // 1) 순서: 제목 → 캐릭터 → 어떤 가게예요? → 있었던 일 → 웹툰 테마 → 대본 만들기 → 더 자세히
   const o = await page.evaluate(() => {
     const top = (sel) => { const e = document.querySelector(sel); return e ? Math.round(e.getBoundingClientRect().top + scrollY) : -1; };
@@ -42,7 +42,7 @@ for (const [vk, vp] of [['PC 1300', { width: 1300, height: 900 }], ['휴대폰 3
 // 내 가게 설정: 브랜드 프로필이 여기로 옮겨졌고 값이 프롬프트에 그대로 쓰임
 {
   const { page, errors } = await newPage(browser, srv.base, { viewport: { width: 390, height: 844 }, ls: LS });
-  await page.goto(srv.base + '/'); await page.waitForTimeout(400);
+  await page.goto(srv.base + '/make/'); await page.waitForTimeout(400);
   await page.click('#main [data-shop="settings"]'); await page.waitForTimeout(250);
   const s = await page.evaluate(() => { const w = document.getElementById('shopSheet'); return { open: !!w && !w.hidden, title: w && w.querySelector('h2').textContent, ids: ['pf-bio', 'pf-voice', 'pf-banned', 'pf-tags', 'pf-cta', 'pf-loc', 'pf-collab'].every((i) => !!document.getElementById(i)), logo: !!w.querySelector('[data-act="logoUp"]'), ov: document.documentElement.scrollWidth - innerWidth }; });
   C.ok(s.open && s.title === '내 가게 설정' && s.ids && s.logo && s.ov <= 1, '내 가게 설정: 로고·소개·말투·쓰면 안 되는 말·해시태그·예약 안내·위치·함께 태그할 계정이 그대로 있음');
@@ -57,7 +57,7 @@ for (const [vk, vp] of [['PC 1300', { width: 1300, height: 900 }], ['휴대폰 3
 // 보관함 편집(새로 만들기)의 접힌 "고급" 안에 사진·고정 캐릭터 이미지·고정 문구
 {
   const { page, errors } = await newPage(browser, srv.base, { viewport: { width: 1300, height: 900 }, ls: LS });
-  await page.goto(srv.base + '/'); await page.waitForTimeout(400);
+  await page.goto(srv.base + '/make/'); await page.waitForTimeout(400);
   await page.click('.cast [data-v="newslot"][data-ref="m0"]'); await page.waitForTimeout(250);
   const a = await page.evaluate(() => { const d = document.getElementById('vAdv'); return { has: !!d, open: d && d.open, photo: !!(d && d.querySelector('[data-photo]')), ref: !!(d && d.querySelector('[data-refup]')), lock: !!(d && d.querySelector('[data-lock]')), sum: d && d.querySelector('summary').textContent.trim() }; });
   C.ok(a.has && !a.open && a.sum === '고급' && a.photo && a.ref && a.lock, '"새로 만들기" 편집 화면: 접힌 "고급" 안에 사진으로 캐릭터 만들기·고정 캐릭터 이미지·고정 문구');
@@ -72,7 +72,7 @@ for (const [vk, vp] of [['PC 1300', { width: 1300, height: 900 }], ['휴대폰 3
 {
   const old = { step: 'input', info: { type: '빵집', name: '옛 가게', role: '사장님', gender: '여성', age: '40대', looks: '짧은 단발, 동그란 안경', cast: '단골 할머니(흰 파마머리)', target: '퇴근길 직장인', action: '프로필 링크에서 예약', kind: 'ad', story: '있었던 일' }, toon: null };
   const { page, errors } = await newPage(browser, srv.base, { viewport: { width: 390, height: 844 }, ls: { ...LS, 'instatoonRoom.v4': JSON.stringify(old) } });
-  await page.goto(srv.base + '/'); await page.waitForTimeout(500);
+  await page.goto(srv.base + '/make/'); await page.waitForTimeout(500);
   const r = await page.evaluate(() => ({ legacy: (document.querySelector('.cast .lk-legacy') || {}).textContent, oldCast: [...document.querySelectorAll('.cast .lk-legacy')].map((e) => e.textContent).join('|'), info: infoBlock(), kept: S.info.cast === '단골 할머니(흰 파마머리)' && S.info.target === '퇴근길 직장인' && S.info.action === '프로필 링크에서 예약' }));
   C.ok(/이 작업의 캐릭터 · 40대 여성 사장님/.test(r.oldCast) && /옛 조연 메모 · 단골 할머니/.test(r.oldCast), '옛 작업: 직접 입력한 주인공은 "이 작업의 캐릭터" 한 줄, 조력자 메모는 "옛 조연 메모" 한 줄로 보임');
   C.ok(r.kept && /읽었으면 하는 사람\(고객\): 퇴근길 직장인/.test(r.info) && /독자가 할 행동: 프로필 링크에서 예약/.test(r.info) && /외모: 짧은 단발, 동그란 안경/.test(r.info), '옛 작업: 읽는 사람·할 행동·외모 값이 지워지지 않고 대본 요청에 그대로 들어감');
@@ -88,7 +88,7 @@ for (const [vk, vp] of [['PC 1300', { width: 1300, height: 900 }], ['휴대폰 3
 // ☰ 도움말(사용 방법+문제 해결 합침)
 {
   const { page, errors } = await newPage(browser, srv.base, { viewport: { width: 1300, height: 900 }, ls: LS });
-  await page.goto(srv.base + '/'); await page.waitForTimeout(400);
+  await page.goto(srv.base + '/make/'); await page.waitForTimeout(400);
   await page.evaluate(() => toggleHelp(true)); await page.waitForTimeout(200);
   C.ok(await page.evaluate(() => { const h = document.getElementById('help'); return h.querySelector('h2').textContent === '도움말' && !!h.querySelector('a[href="/guide/instatoon-troubleshooting/"]') && /막힐 때/.test(h.textContent) && /내 가게 설정/.test(h.textContent) && !/브랜드 프로필/.test(h.textContent) && !/인스타툰 만들기/.test(h.textContent); }), '도움말: 제목 "도움말", 막힐 때 링크, "내 가게 설정" 안내가 들어 있고 옛 이름(브랜드 프로필·인스타툰 만들기)은 없음');
   // 2·3단계: 단계 이름 줄과 회색 설명이 줄어듦

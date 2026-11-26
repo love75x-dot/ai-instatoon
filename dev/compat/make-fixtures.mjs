@@ -13,7 +13,7 @@ const write = (n, o) => fs.writeFileSync(path.join(dir, n), JSON.stringify(o, nu
 
 const srv = await serve(); const browser = await launch();
 const { page, errors } = await newPage(browser, srv.base);
-await page.goto(srv.base + '/'); await page.waitForTimeout(500);
+await page.goto(srv.base + '/make/'); await page.waitForTimeout(500);
 
 // 1) 현재 형식 전체 localStorage (보리당 작업 + 사진·기준 이미지·샘플·복사 표시·설정·관리자 키)
 const ls = await page.evaluate(({ PNG, JPG }) => {
@@ -49,7 +49,7 @@ Object.assign(legacy.toon, { kit: { x: 1 }, pre: { y: 1 }, postedAt: '2026-09-01
 write('ls-legacy-v4.json', { 'instatoonRoom.v4': JSON.stringify(legacy) });
 
 // 4) 백업 파일 (현재 앱의 "백업 저장"이 실제로 만든 파일)
-await page.goto(srv.base + '/'); // 새로 시작
+await page.goto(srv.base + '/make/'); // 새로 시작
 await page.evaluate(async (ls) => {
   localStorage.clear(); Object.entries(ls).forEach(([k, v]) => localStorage.setItem(k, v));
   S = load(); charRef = localStorage.getItem('instatoon.charRef'); extraRefs[1] = localStorage.getItem('instatoon.charRef2');
@@ -62,7 +62,7 @@ const b = JSON.parse(fs.readFileSync(bp, 'utf8')); b.savedAt = '2026-10-13T00:00
 // 5) 위 데이터를 현재 코드로 불러왔을 때의 기대값 (S 와 프롬프트)
 const snap = async (name, seed) => {
   const { page: p, errors: er } = await newPage(browser, srv.base, { ls: seed });
-  await p.goto(srv.base + '/'); await p.waitForTimeout(500);
+  await p.goto(srv.base + '/make/'); await p.waitForTimeout(500);
   const r = await p.evaluate(() => ({ S: JSON.parse(JSON.stringify(S)), prompts: { setup: setupPrompt(), cuts: cuts().map((c, i) => cutPrompt(c, i)), end: endPrompt(), sheets: peopleIdx().map((k) => sheetPrompt(k)) } }));
   if (er.length) throw new Error(name + ' 오류: ' + er[0]);
   return r;

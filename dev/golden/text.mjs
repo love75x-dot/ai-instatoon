@@ -10,7 +10,7 @@ const file = path.join(root, 'dev', 'golden', 'text.json');
 const update = process.argv.includes('--update');
 const srv = await serve(); const browser = await launch();
 const { page, errors } = await newPage(browser, srv.base);
-await page.goto(srv.base + '/'); await page.waitForTimeout(600);
+await page.goto(srv.base + '/make/'); await page.waitForTimeout(600);
 
 const result = await page.evaluate(async () => {
   const out = {}; let got = null;

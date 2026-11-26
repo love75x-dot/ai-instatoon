@@ -8,7 +8,7 @@ import { checker, root } from '../lib/harness.mjs';
 
 const C = checker();
 const dep = (p) => fs.readFileSync(path.join(root, 'deploy', p), 'utf8');
-const pagesOf = () => ({ 앱홈: dep('index.html'), 노트목록: dep('guide/index.html'), 노트글: dep('guide/how-to-use-instatoon-room/index.html'), 개인정보: dep('privacy/index.html'), 소개: dep('about/index.html') });
+const pagesOf = () => ({ 앱홈: dep('make/index.html'), 노트목록: dep('guide/index.html'), 노트글: dep('guide/how-to-use-instatoon-room/index.html'), 개인정보: dep('privacy/index.html'), 소개: dep('about/index.html') });
 const build = (env) => spawnSync(process.execPath, ['site/build.mjs'], { cwd: root, env: { ...process.env, GA_MEASUREMENT_ID: '', ...env }, encoding: 'utf8' });
 const GA = /googletagmanager\.com|google-analytics\.com|gtag\(/;
 

@@ -1,4 +1,4 @@
-// 인스타툰 프롬프트 페이지(/prompts/) — 시안. 빈칸만 채우면 GPT·제미나이·젠스파크에 붙여 넣을 프롬프트가 완성된다.
+// 인스타툰 프롬프트 페이지(첫 화면 /) — 2026-11-26부터 사이트 첫 화면. 기존 도구는 /make/. 빈칸만 채우면 GPT·제미나이·젠스파크에 붙여 넣을 프롬프트가 완성된다.
 // 그림 규칙·글자 규칙·다시 요청 문장은 site/index.html(인스타툰 연재실 3단계)에 있는 실제 문장을 옮겼다(귀여운 2~3등신 테마 기준).
 // 입력값은 이 브라우저의 localStorage에만 저장하고, 어디로도 보내지 않는다(AI 호출 없음).
 import { ORIGIN, SITE, head, header, footer, esc } from './lib.mjs';
@@ -66,6 +66,7 @@ const CSS = `
 .pw .tab{flex:1;border:1px solid var(--line-2);background:var(--bg);color:var(--ink);border-radius:12px;padding:10px;font:inherit;font-weight:700;font-size:15px;cursor:pointer;min-height:44px;line-height:1.3}
 .pw .tab small{display:block;font-weight:400;font-size:13px;color:var(--muted)}
 .pw .tab.on{border:2px solid var(--ink);background:var(--sunken)}
+.pw .preview a{font-weight:700}
 .pw .preview{background:var(--accent);color:var(--accent-ink);border-radius:12px;padding:10px 14px;font-size:14px;margin:16px 0 0}
 `;
 
@@ -96,22 +97,22 @@ function copy(t,b){ function ok(){ b.classList.add('done'); var o=b.getAttribute
 function fb(t){ var ta=document.createElement('textarea'); ta.value=t; ta.setAttribute('readonly',''); ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); }catch(e){} document.body.removeChild(ta); }
 document.addEventListener('click',function(e){ var t=e.target.closest('[data-tab]'); if(t){ var k=t.getAttribute('data-tab'); document.querySelectorAll('[data-tab]').forEach(function(x){ var on=x===t; x.classList.toggle('on',on); x.setAttribute('aria-selected',on?'true':'false'); }); document.querySelectorAll('[data-pane]').forEach(function(p){ p.hidden=p.getAttribute('data-pane')!==k; }); return; } var b=e.target.closest('[data-cp]'); if(!b) return; var el=document.getElementById(b.getAttribute('data-cp')); if(el) copy(el.textContent,b); });
 up();
+try{ if(localStorage.getItem('instatoonRoom.v4')){ var rs=document.getElementById('resume'); if(rs) rs.hidden=false; } }catch(e){}
 })();`;
 
 const btn = (id, label = '복사하기') => `<button type="button" class="cp" data-cp="${id}" data-l="${esc(label)}">${esc(label)}</button>`;
 const field = (k, label, ph, opt = {}) => `<div class="${opt.wide ? 'wide' : ''}"><label for="f-${k}">${label}</label>${opt.area ? `<textarea id="f-${k}" placeholder="${esc(ph)}"></textarea>` : opt.sel ? `<select id="f-${k}">${opt.sel.map(([v, t]) => `<option value="${v}">${t}</option>`).join('')}</select>` : `<input id="f-${k}" placeholder="${esc(ph)}" autocomplete="off">`}</div>`;
 
 export function buildPromptsPage() {
-  const u = `${ORIGIN}/prompts/`;
+  const u = `${ORIGIN}/`;
   const title = `인스타툰 프롬프트: GPT·제미나이에 붙여 넣는 기획·캐릭터·그림 문장 | ${SITE}`;
   const desc = '빈칸만 채우면 ChatGPT, 제미나이, 젠스파크에 그대로 붙여 넣을 인스타툰 프롬프트가 완성돼요. 한 달 기획, 주인공 캐릭터 고정, 대본과 그림, 올릴 글, 결과가 이상할 때 다시 요청하는 문장까지.';
   return head({ title, desc, canonical: u, type: 'website', body: ' data-page-type="prompts"', extra: `<style>${CSS}</style>` })
-    .replace('<meta name="robots" content="index,follow">', '<meta name="robots" content="noindex">')
     + header('prompts') + `
 <main id="main" class="pw">
-<p class="preview">시안 미리보기예요. 아직 메뉴와 검색에는 연결하지 않았어요.</p>
 <h1>GPT·제미나이에 그대로 붙여 넣는<br>인스타툰 프롬프트</h1>
 <p class="sub">우리 가게 정보만 한 번 적으면, 기획부터 캐릭터 고정, 그림, 올릴 글까지 복사해서 쓰는 문장이 완성돼요.</p>
+<p class="preview" id="resume" hidden>이전에 만들던 작업이 있어요. <a href="/make/">자세하게 만들기에서 이어서 하기 →</a></p>
 <div class="badges"><span>로그인 없음</span><span>키 필요 없음</span><span>횟수 제한 없음</span><span>ChatGPT · 제미나이 · 젠스파크</span></div>
 <ol class="flow">
 <li><b>① 기획</b>이번 달 뭐 올리지?</li>
@@ -182,7 +183,7 @@ ${field('planN', '소재 개수', '', { sel: [['4', '4개 (주 1회)'], ['8', '8
 
 <div class="more">
 <p style="margin:0 0 6px"><b>이 프롬프트로 만든 실제 결과</b>: <a href="/guide/convenience-store-instatoon-case/">편의점 알바생</a> · <a href="/guide/banchan-store-instatoon-case/">반찬가게 사장님</a> · <a href="/guide/burger-store-instatoon-case/">수제버거 사장님</a></p>
-<p style="margin:0">컷별로 꼼꼼하게 고치고 싶다면 <a href="/">자세하게 만들기(기존 인스타툰 연재실)</a>를 쓰세요.</p>
+<p style="margin:0">컷별로 꼼꼼하게 고치고 싶다면 <a href="/make/">자세하게 만들기</a>(입력하면 사이트 안에서 대본을 만들고 컷별로 고치는 기존 인스타툰 연재실)를 쓰세요.</p>
 </div>
 </main>
 ` + footer + `\n<script>${JS}</script>\n</body>\n</html>\n`;

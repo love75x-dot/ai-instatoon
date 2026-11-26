@@ -229,8 +229,8 @@ if(e.key==='Tab'){var a=[].slice.call(w.querySelectorAll('.mi'));if(!a.length)re
 
 /* ☰ 메뉴: 홈(site/index.html)과 항목·순서가 같다. #shopSlot은 4d(가게 전환)가 채울 빈 자리. */
 const menuHtml = (cur) => `<div class="mwrap" id="menuWrap" hidden><div class="mbg"></div><nav class="mpanel" id="menuPanel" role="dialog" aria-modal="true" aria-label="메뉴"><div id="shopSlot" hidden></div>
-<ul><li><a class="mi" href="/">웹툰 만들기</a></li><li><a class="mi" href="/#month">한 달 기획</a></li><li><a class="mi" href="/#vault">내 캐릭터</a></li><li><a class="mi" href="/guide/"${cur === 'hub' || cur === 'guide' ? ' aria-current="page"' : ''}>인스타툰 노트</a></li><li><a class="mi" href="/#intro">소개</a></li></ul><hr>
-<ul><li><a class="mi" href="/#backup">내 작업 저장 · 불러오기</a></li><li><a class="mi" href="/#help">도움말</a></li></ul></nav></div>`;
+<ul><li><a class="mi" href="/">인스타툰 프롬프트</a></li><li><a class="mi" href="/make/">웹툰 만들기</a></li><li><a class="mi" href="/make/#month">한 달 기획</a></li><li><a class="mi" href="/make/#vault">내 캐릭터</a></li><li><a class="mi" href="/guide/"${cur === 'hub' || cur === 'guide' ? ' aria-current="page"' : ''}>인스타툰 노트</a></li><li><a class="mi" href="/make/#intro">소개</a></li></ul><hr>
+<ul><li><a class="mi" href="/make/#backup">내 작업 저장 · 불러오기</a></li><li><a class="mi" href="/make/#help">도움말</a></li></ul></nav></div>`;
 
 export const header = (cur) => `<a class="skip" href="#main">본문 바로가기</a>
 <div class="hwrap"><header class="topbar">
@@ -415,7 +415,7 @@ ${anchors}
 ${posts.map(item).join('\n')}
 </ul>
 <nav class="pager" id="pager" aria-label="페이지 이동" hidden></nav>
-<section class="bcta"><div><b>직접 만들어 보고 싶다면</b><span>내 이야기를 입력하면 대본과 컷 구성까지 정리해 드려요.</span></div><a class="btn pri big" href="/" data-track="cta" data-loc="hub_hero">인스타툰 만들어보기</a></section>
+<section class="bcta"><div><b>직접 만들어 보고 싶다면</b><span>빈칸만 채우면 GPT·제미나이에 붙여 넣을 인스타툰 프롬프트가 완성돼요.</span></div><a class="btn pri big" href="/" data-track="cta" data-loc="hub_hero">인스타툰 만들어보기</a></section>
 </main>
 ` + footer + `
 ${trackJs}

@@ -29,7 +29,7 @@ const MODELS = {
 // 1) 보리당 예시로 앱이 실제로 보내는 요청 문장을 뽑는다(원래 판·짧은 판)
 const srv = await serve(); const browser = await launch();
 const { page } = await newPage(browser, srv.base);
-await page.goto(srv.base + '/'); await page.waitForTimeout(600);
+await page.goto(srv.base + '/make/'); await page.waitForTimeout(600);
 const prompts = await page.evaluate(async () => {
   let got = null; const real = ask; ask = async (p) => { got = p; throw { code: 'stub' }; };
   const grab = async () => { got = null; await makeToon(); return got; };

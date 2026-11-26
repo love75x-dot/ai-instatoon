@@ -10,7 +10,7 @@ const VP = { m: { width: 390, height: 844 }, t: { width: 768, height: 1000 }, pc
 const TASTE = (on) => JSON.stringify({ ok: true, taste: on, sitekey: on ? 'S' : '', perDay: { make: 1, month: 1 } });
 const shot = (page, name, o = {}) => page.screenshot({ path: path.join(out, name), type: 'jpeg', quality: 72, ...o });
 for (const [vk, vp] of Object.entries(VP)) {
-  const mk = async (ls = { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST' }) => { const h = await newPage(browser, srv.base, { viewport: vp, ls }); await h.page.route('**/api/ai/config', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: TASTE(true) })); await h.page.goto(srv.base + '/'); await h.page.waitForTimeout(500); return h.page; };
+  const mk = async (ls = { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST' }) => { const h = await newPage(browser, srv.base, { viewport: vp, ls }); await h.page.route('**/api/ai/config', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: TASTE(true) })); await h.page.goto(srv.base + '/make/'); await h.page.waitForTimeout(500); return h.page; };
   let page = await mk();
   await page.evaluate(() => { S = demoState('bakery'); S.demo = false; S.mode = 'one'; S.step = 'input'; save(); render(); }); await page.waitForTimeout(300);
   await shot(page, `${vk}-10-홈-맨위.jpg`);
@@ -28,7 +28,7 @@ for (const [vk, vp] of Object.entries(VP)) {
     const clip = { x: 0, y: 0, width: vp.width, height: 260 };
     for (const [n, on, key] of [['18-키줄-맛보기켜짐', true, false], ['19-키줄-맛보기꺼짐', false, false], ['20-키줄-연결됨', true, true]]) {
       const h = await newPage(browser, srv.base, { viewport: vp, ls: key ? { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST' } : { 'instatoon.helpSeen': '1' } });
-      await h.page.route('**/api/ai/config', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: TASTE(on) })); await h.page.goto(srv.base + '/'); await h.page.waitForTimeout(700);
+      await h.page.route('**/api/ai/config', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: TASTE(on) })); await h.page.goto(srv.base + '/make/'); await h.page.waitForTimeout(700);
       await shot(h.page, `${vk}-${n}.jpg`, { clip }); await h.page.close();
     }
   }

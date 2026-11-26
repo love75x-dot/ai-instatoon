@@ -12,7 +12,7 @@ const full = JSON.parse(fs.readFileSync(path.join(root, 'dev', 'compat', 'fixtur
 { const st = JSON.parse(full['instatoonRoom.v4']); delete st.demo; delete st.demoKey; full['instatoonRoom.v4'] = JSON.stringify(st); } // 체험 중이 아닌 보통 작업으로
 const SEEN = { 'instatoon.helpSeen': '1' };
 const withKey = { ...SEEN, 'instatoon.key': 'TEST' };
-const open = async (vp, ls, url = '/') => { const h = await newPage(browser, srv.base, { viewport: vp, ls }); await h.page.goto(srv.base + url); await h.page.waitForTimeout(350); return h; };
+const open = async (vp, ls, url = '/make/') => { const h = await newPage(browser, srv.base, { viewport: vp, ls }); await h.page.goto(srv.base + url); await h.page.waitForTimeout(350); return h; };
 const setState = (page, fn) => page.evaluate(`(${fn.toString()})(); save(); render();`);
 const PC = { width: 1300, height: 900 }, MOB = { width: 390, height: 844 };
 const vis = (page, sel) => page.evaluate((s) => { const e = document.querySelector(s); return !!e && !e.closest('[hidden]') && getComputedStyle(e).display !== 'none' && e.getClientRects().length > 0; }, sel);

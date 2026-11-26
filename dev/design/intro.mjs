@@ -12,7 +12,7 @@ const preN = (p, k = "introsquare") => p.evaluate((d) => document.querySelectorA
 // 1) 처음 온 사람: 소개가 보이고 앱은 숨겨짐, 가로 스크롤 없음
 {
   const { page, errors } = await newPage(browser, srv.base, { intro: true, viewport: M });
-  await page.goto(srv.base + '/'); await page.waitForTimeout(600);
+  await page.goto(srv.base + '/make/'); await page.waitForTimeout(600);
   ok(await introOn(page) && await vis(page, '#intro h1') && !await vis(page, '#main'), '처음 온 사람: 소개 화면이 보이고 만들기 화면은 숨겨져요');
   ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), '390px: 가로 스크롤 없음');
   ok(await preN(page, 'pretendard') === 0 && await preN(page) === 2, '처음 온 사람: 소개 글꼴 2개(400·800)만 미리 불러오고 Pretendard는 안 불러와요(성능)');
@@ -24,14 +24,14 @@ const preN = (p, k = "introsquare") => p.evaluate((d) => document.querySelectorA
   await page.reload(); await page.waitForTimeout(600);
   ok(!await introOn(page) && await vis(page, '#main'), '저장 전 새로고침해도 소개로 안 튕겨요');
   // #intro 링크로 다시 보기
-  await page.goto(srv.base + '/#intro'); await page.waitForTimeout(500);
+  await page.goto(srv.base + '/make/#intro'); await page.waitForTimeout(500);
   ok(await introOn(page), '#intro 주소로 소개를 다시 볼 수 있어요');
   ok(errors.length === 0, '콘솔 오류 없음 ' + errors.join('|').slice(0, 120));
 }
 // 2) 업종 칩: 업종 미리 선택
 {
   const { page } = await newPage(browser, srv.base, { intro: true, viewport: M });
-  await page.goto(srv.base + '/'); await page.waitForTimeout(500);
+  await page.goto(srv.base + '/make/'); await page.waitForTimeout(500);
   await page.click('#intro .in-chip[data-ind="카페"]'); await page.waitForTimeout(400);
   ok(await page.evaluate(() => document.querySelector('[data-ind="카페"]')?.getAttribute('aria-pressed') === 'true'), '업종 칩 "카페" → 만들기 화면에 카페가 골라져 있어요');
 }
@@ -39,7 +39,7 @@ const preN = (p, k = "introsquare") => p.evaluate((d) => document.querySelectorA
 {
   const st = { step: 'input', info: { type: '카페', name: '보리당', story: '있었던 일' } };
   const { page } = await newPage(browser, srv.base, { intro: true, viewport: M, ls: { 'instatoonRoom.v4': JSON.stringify(st) } });
-  await page.goto(srv.base + '/'); await page.waitForTimeout(800);
+  await page.goto(srv.base + '/make/'); await page.waitForTimeout(800);
   ok(!await introOn(page) && await vis(page, '#main'), '재방문자: 소개 없이 작업 화면');
   ok(await preN(page) === 3 && await preN(page, 'pretendard') === 0, '재방문자: 앱 글꼴 IntroSquare 3개(400·700·800)를 미리 불러와요');
   await page.click('#menuBtn'); await page.waitForTimeout(300);
@@ -52,7 +52,7 @@ const preN = (p, k = "introsquare") => p.evaluate((d) => document.querySelectorA
 {
   const { page } = await newPage(browser, srv.base, { intro: true, viewport: M });
   const cfg = JSON.parse((await import('node:fs')).readFileSync(new URL('../../site/intro.config.json', import.meta.url), 'utf8')), on = cfg.convenienceStore === true;
-  await page.goto(srv.base + '/'); await page.waitForTimeout(500);
+  await page.goto(srv.base + '/make/'); await page.waitForTimeout(500);
   ok(await page.evaluate(() => [...document.querySelectorAll('#intro .in-tab')].map((t) => t.dataset.story + ':' + t.getAttribute('aria-selected')).join()) === (on ? 'cvs:false,banchan:true,burger:false' : 'banchan:true,burger:false'), '예시 탭 구성과 처음 선택(반찬가게)이 설정(편의점 ' + (on ? '켜짐' : '꺼짐') + ')과 맞아요');
   ok(await page.evaluate(() => document.querySelectorAll('#intro .in-card').length) === (on ? 3 : 2), '첫 화면 피드 카드 수가 설정과 맞아요');
   await page.click('#intro .in-tab[data-story="burger"]'); await page.click('#in-next');

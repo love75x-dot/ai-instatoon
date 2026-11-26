@@ -8,7 +8,7 @@ const C = checker();
 const srv = await serve(); const browser = await launch();
 const PC = { width: 1300, height: 900 };
 const withKey = { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST' };
-const open = async (vp = PC) => { const h = await newPage(browser, srv.base, { viewport: vp, ls: withKey, freeze: false }); await h.page.goto(srv.base + '/'); await h.page.waitForTimeout(500); return h; };
+const open = async (vp = PC) => { const h = await newPage(browser, srv.base, { viewport: vp, ls: withKey, freeze: false }); await h.page.goto(srv.base + '/make/'); await h.page.waitForTimeout(500); return h; };
 const helpers = `
   window.mk = (n, seed) => { const u = new Uint8Array(n); let x = seed; for (let i = 0; i < n; i++) { x = (x * 1103515245 + 12345) & 0x7fffffff; u[i] = x >> 16; } u[0] = 0x89; return new Blob([u], { type: 'image/png' }); };
   window.im = (n, seed, size) => ({ blob: mk(size, seed), name: n, type: 'image/png', size });

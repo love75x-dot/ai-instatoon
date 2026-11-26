@@ -45,10 +45,10 @@ for (const [i, u] of pages.entries()) {
   console.log(`[${status === 200 ? 'PASS' : 'FAIL'}] ${u}  (${title?.length}자 title, ${h.replace(/<style[\s\S]*?<\/style>|<script[\s\S]*?<\/script>|<[^>]+>/g, '').length}자)`);
 }
 // 소개/개인정보/이용안내 페이지
-for (const u of ['/about/', '/privacy/', '/terms/', '/contact/']) {
+for (const u of ['/about/', '/privacy/', '/terms/', '/contact/', '/make/']) {
   const { status, text: h } = await get(u);
   ok(status === 200, `${u} HTTP ${status}`);
-  ok(h.includes(`<link rel="canonical" href="${ORIGIN}${u}">`) && (h.match(/<h1[ >]/g) || []).length === 1, `${u} canonical/H1`);
+  ok(h.includes(`<link rel="canonical" href="${ORIGIN}${u}">`) && (u === '/make/' || (h.match(/<h1[ >]/g) || []).length === 1), `${u} canonical/H1`); // /make/(기존 도구 화면)는 단계마다 제목이 바뀌어 H1 개수는 보지 않는다
   ok(h.includes('content="index,follow"') && h.includes('<title>'), `${u} robots/title`);
   ok(h.includes('href="/privacy/"') && h.includes('href="/terms/"') && h.includes('href="/about/"') && h.includes('href="/contact/"'), `${u} 푸터 링크`);
   console.log(`[PASS] ${u}`);

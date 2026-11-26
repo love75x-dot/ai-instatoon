@@ -8,7 +8,7 @@ const h = await newPage(browser, srv.base, { viewport: { width: 1300, height: 90
 const { page, errors } = h;
 const okBody = { candidates: [{ content: { parts: [{ text: JSON.stringify({ title: '제목', tone: '', cuts: [{ role: '장면', shot: '미디엄샷', title: '', highlight: '', sub: '', bubble: '사장님: 안녕', bubbleSpeaker: '사장님', bubbleType: '말', caption: '', direction: '가게 안', alt: '' }] }) }] } }] };
 await page.route(/generativelanguage\.googleapis\.com\/v1beta\/models\/[^:]+:generateContent/, (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(okBody) }));
-await page.goto(srv.base + '/'); await page.waitForTimeout(500);
+await page.goto(srv.base + '/make/'); await page.waitForTimeout(500);
 await page.evaluate(() => { S = demoState('bakery'); S.demo = false; S.mode = 'one'; S.step = 'input'; S.toon = null; S.info.story = '지켜야 하는 이야기'; save(); });
 const gen = (keep) => page.evaluate(async (k) => { document.getElementById('st-make') || document.body.insertAdjacentHTML('beforeend', '<div id="st-make"></div>'); if (k) aiKeep = true; try { await makeToon(); } catch (e) {} return aiCalls; }, !!keep);
 
