@@ -9,7 +9,7 @@ const C = checker();
 const srv = await serve(); const browser = await launch();
 const PC = { width: 1300, height: 900 }, MOB = { width: 390, height: 844 };
 const withKey = { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST' };
-const open = async (vp, ls = withKey) => { const h = await newPage(browser, srv.base, { viewport: vp, ls }); await h.page.goto(srv.base + '/'); await h.page.waitForTimeout(350); return h; };
+const open = async (vp, ls = withKey) => { const h = await newPage(browser, srv.base, { viewport: vp, ls }); await h.page.goto(srv.base + '/make/'); await h.page.waitForTimeout(350); return h; };
 const setup = (page, fn) => page.evaluate(`(${fn.toString()})(); save(); render();`);
 const demoEdit = () => { S = demoState('bakery'); S.demo = false; S.step = 'edit'; S.mode = 'one'; openCut = 0; };
 const cut = (page, i) => page.locator(`.cut[data-cut="${i}"]`);

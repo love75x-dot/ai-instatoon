@@ -23,7 +23,7 @@ await page.route(/generativelanguage\.googleapis\.com\/v1beta\/models\/[^:]+:gen
   calls.gemini.push(JSON.parse(r.request().postData() || '{}'));
   return r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify(toon) }] } }] }) });
 });
-await page.goto(srv.base + '/'); await page.waitForTimeout(500);
+await page.goto(srv.base + '/make/'); await page.waitForTimeout(500);
 await page.evaluate(() => { document.body.insertAdjacentHTML('beforeend', '<div id="st-make"></div><div id="st-review"></div>'); });
 const fresh = () => page.evaluate(() => { S = demoState('bakery'); S.demo = false; S.mode = 'one'; S.step = 'input'; S.toon = null; S.series = []; save(); });
 
@@ -89,7 +89,7 @@ C.ok(calls.gemini.length === 1 && calls.claude.length === 0, 'Gemini로 되돌�
 
 // 9) 운영자 키가 사이트 코드·배포 파일에 들어 있지 않음
 const html = await page.content();
-C.ok(!/sk-ant-test-key/.test((await (await fetch(srv.base + '/')).text())), '배포되는 사이트 코드에는 운영자 키가 없음');
+C.ok(!/sk-ant-test-key/.test((await (await fetch(srv.base + '/make/')).text())), '배포되는 사이트 코드에는 운영자 키가 없음');
 
 C.ok(errors.length === 0, '페이지 오류 없음: ' + errors.slice(0, 3).join(' | '));
 await browser.close(); srv.close();

@@ -27,7 +27,7 @@ const probe = () => {
 };
 for (const [vk, vp] of [['모바일 390', { width: 390, height: 844 }], ['PC 1300', { width: 1300, height: 900 }]]) {
   const { page, errors } = await newPage(browser, srv.base, { viewport: vp, ls: { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST' } });
-  await page.goto(srv.base + '/'); await page.waitForTimeout(400);
+  await page.goto(srv.base + '/make/'); await page.waitForTimeout(400);
   for (const [name, fn] of SCREENS) {
     await page.evaluate(`(${fn.toString()})(); save(); render();`); await page.waitForTimeout(150);
     const r = await page.evaluate(probe);
@@ -45,9 +45,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { root } from '../lib/harness.mjs';
 const blockOf = (html) => (html.split('\r\n').join('\n').match(/\/\* HEADER:BEGIN[\s\S]*?\/\* HEADER:END \*\//) || [''])[0];
-const appCss = blockOf(fs.readFileSync(path.join(root, 'deploy', 'index.html'), 'utf8')), noteCss = blockOf(fs.readFileSync(path.join(root, 'deploy', 'guide', 'index.html'), 'utf8'));
+const appCss = blockOf(fs.readFileSync(path.join(root, 'deploy', 'make', 'index.html'), 'utf8')), noteCss = blockOf(fs.readFileSync(path.join(root, 'deploy', 'guide', 'index.html'), 'utf8'));
 C.ok(appCss.length > 200 && appCss === noteCss, '머리말 CSS 블록이 홈과 노트에서 글자까지 같음');
-const HPAGES = [['홈', '/'], ['노트 목록', '/guide/'], ['노트 글', '/guide/what-is-instatoon/'], ['소개', '/about/'], ['개인정보', '/privacy/'], ['이용안내', '/terms/'], ['404', '/없는-주소/']];
+const HPAGES = [['홈', '/make/'], ['노트 목록', '/guide/'], ['노트 글', '/guide/what-is-instatoon/'], ['소개', '/about/'], ['개인정보', '/privacy/'], ['이용안내', '/terms/'], ['404', '/없는-주소/']];
 const headProbe = () => {
   const box = (el) => { const r = el.getBoundingClientRect(); return { x: Math.round(r.left * 10) / 10, y: Math.round(r.top * 10) / 10, w: Math.round(r.width * 10) / 10, h: Math.round(r.height * 10) / 10, r: Math.round((window.innerWidth - r.right) * 10) / 10 }; };
   const tb = document.querySelector('.topbar'), brand = tb.querySelector('.brand'), mark = brand.querySelector('.mark'), name = brand.querySelector('b'), menu = tb.querySelector('#menuBtn');
@@ -83,7 +83,7 @@ for (const [vk, vp] of [['모바일 390', { width: 390, height: 844 }], ['태블
   for (const n of ['노트 글', '소개', '개인정보', '이용안내', '404']) C.ok(res[n].btns.map((b) => b.kind).join() === (vp.width <= 480 ? '주' : '보조,주'), `${vk} ${n} 머리말: ${vp.width <= 480 ? '주 "인스타툰 만들기"만(좁은 화면에서는 "인스타툰 노트" 버튼을 ☰ 메뉴로 넘김)' : '보조 "인스타툰 노트" → 주 "인스타툰 만들기"'}`);
 }
 // ---- 4b: 머리말 로고 …… [저장 상태] [인스타툰 노트] [☰], ☰ 메뉴(오른쪽에서 열림), 모드 탭 없음. 로고 위치·높이는 dev/design/logo.mjs 가 소개 화면과 맞는지 잰다 ----
-const MENU_ITEMS = '웹툰 만들기,한 달 기획,내 캐릭터,인스타툰 노트,소개,내 작업 저장 · 불러오기,도움말';
+const MENU_ITEMS = '인스타툰 프롬프트,웹툰 만들기,한 달 기획,내 캐릭터,인스타툰 노트,소개,내 작업 저장 · 불러오기,도움말';
 const homeProbe = () => {
   const vis = (el) => !!el && getComputedStyle(el).display !== 'none' && el.getBoundingClientRect().width > 0;
   const tb = document.querySelector('.topbar'), h = (el) => Math.round(el.getBoundingClientRect().height * 10) / 10;
@@ -98,7 +98,7 @@ const homeProbe = () => {
 };
 for (const [vk, w] of [['PC 1300', 1300], ['PC 1024', 1024], ['태블릿 768', 768], ['휴대폰 390', 390], ['휴대폰 320', 320]]) {
   const { page, errors } = await newPage(browser, srv.base, { viewport: { width: w, height: 800 }, ls: { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST' } });
-  await page.goto(srv.base + '/'); await page.waitForTimeout(300);
+  await page.goto(srv.base + '/make/'); await page.waitForTimeout(300);
   const r = await page.evaluate(homeProbe);
   C.ok(r.menuBtn && r.menuRightOfNote && r.sameRow, `${vk} 홈: ☰ 버튼이 "인스타툰 노트" 오른쪽 끝에 높이 40px로 있고 같은 줄`);
   C.ok(r.oldHeader === 0 && r.modes === 0, `${vk} 홈: 옛 도구 버튼·⋯ 메뉴·모드 탭이 없음 (옛 요소 ${r.oldHeader}개, 모드 탭 ${r.modes}개)`);
@@ -114,7 +114,7 @@ for (const [vk, w] of [['PC 1300', 1300], ['PC 1024', 1024], ['태블릿 768', 7
     return { open: document.querySelector('#menuWrap').classList.contains('on'), expanded: document.querySelector('#menuBtn').getAttribute('aria-expanded'), items: items.map((e) => e.textContent.trim()).join(','), inView: rc.left >= -1 && rc.right <= window.innerWidth + 1 && rc.top >= 0 && rc.bottom <= window.innerHeight + 1,
       slotFirst: p.firstElementChild === ss, slotHidden: !ss.hidden && /^내 가게s*▾$/.test(ss.textContent.trim()), cur: cur && cur.textContent.trim(), curColor: cs && cs.color, curLine: cs && cs.borderLeftWidth + ' ' + cs.borderLeftStyle, others: items.filter((e) => e !== cur).every((e) => getComputedStyle(e).color !== getComputedStyle(cur).color), focus: document.activeElement && document.activeElement.className, bodyLock: document.body.classList.contains('menu-open'), panelW: Math.round(rc.width), sheetOpen: document.body.classList.contains('sheet-open') };
   });
-  C.ok(m.open && m.expanded === 'true' && m.items === MENU_ITEMS && m.inView, `${vk} 홈: ☰를 누르면 오른쪽에서 메뉴가 열리고 항목 7개가 순서대로 (${m.items})`);
+  C.ok(m.open && m.expanded === 'true' && m.items === MENU_ITEMS && m.inView, `${vk} 홈: ☰를 누르면 오른쪽에서 메뉴가 열리고 항목 8개가 순서대로 (${m.items})`);
   C.ok(m.slotFirst && m.slotHidden, `${vk} 홈: 메뉴 맨 위 #shopSlot에 가게 줄("내 가게 ▾")이 있음(4d)`);
   C.ok(m.cur === '웹툰 만들기' && m.curColor === 'rgb(17, 17, 17)' && m.curLine === '2px solid' && m.others, `${vk} 홈: 지금 보는 항목은 검정 글씨 + 왼쪽 얇은 선, 나머지는 회색 (${m.cur})`);
   C.ok(m.panelW <= 300 && m.bodyLock, `${vk} 홈: 메뉴 폭 ${m.panelW}px, 열려 있는 동안 뒤 화면 스크롤 잠김`);
@@ -149,7 +149,7 @@ for (const [vk, w] of [['PC 1300', 1300], ['PC 1024', 1024], ['태블릿 768', 7
 }
 { // 저장 상태(머리말 오른쪽)
   const { page } = await newPage(browser, srv.base, { viewport: { width: 1300, height: 800 }, ls: { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST' } });
-  await page.goto(srv.base + '/'); await page.waitForTimeout(400);
+  await page.goto(srv.base + '/make/'); await page.waitForTimeout(400);
   C.ok(await page.evaluate(() => document.querySelector('#saveStat').hidden), '새 브라우저(저장된 것 없음): 저장 상태는 아직 안 보임');
   await page.evaluate(() => { S.info.type = '빵집'; save(); }); await page.waitForTimeout(250);
   const s1 = await page.evaluate(() => { const b = document.querySelector('#saveStat'); return { hidden: b.hidden, state: b.dataset.state, text: b.textContent.replace(/\s+/g, ' ').trim(), color: getComputedStyle(b).color, h: b.getBoundingClientRect().height, left: b.getBoundingClientRect().right <= document.querySelector('.hnav > a.hb').getBoundingClientRect().left }; });
@@ -162,14 +162,14 @@ for (const [vk, w] of [['PC 1300', 1300], ['PC 1024', 1024], ['태블릿 768', 7
   C.ok(await page.evaluate(() => !document.querySelector('#bkWin').hidden), 'PC 홈: 저장 상태를 누르면 백업 저장·불러오기 창이 열림');
   await page.close();
   const m = await newPage(browser, srv.base, { viewport: { width: 390, height: 800 }, ls: { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST' } });
-  await m.page.goto(srv.base + '/'); await m.page.waitForTimeout(400); await m.page.evaluate(() => { S.info.type = '빵집'; save(); }); await m.page.waitForTimeout(250);
+  await m.page.goto(srv.base + '/make/'); await m.page.waitForTimeout(400); await m.page.evaluate(() => { S.info.type = '빵집'; save(); }); await m.page.waitForTimeout(250);
   const t = await m.page.evaluate(() => { const b = document.querySelector('#saveStat'); const vt = [...b.children].filter((c) => getComputedStyle(c).display !== 'none' && c.getBoundingClientRect().width > 0).map((c) => c.textContent.trim()).join(''); return { vt, ov: document.documentElement.scrollWidth - innerWidth }; });
   C.ok(t.vt === '✓' && t.ov <= 1, `휴대폰 홈: 저장 상태는 ✓만 보임 (${t.vt}), 넘침 없음`);
   await m.page.close();
 }
 { // 새 기기 줄 삭제: 홈에는 "백업 불러오기" 줄이 없고, 불러오기는 ☰ "내 작업 저장 · 불러오기"에만 남음. "어떤 가게예요?" 안내 한 줄은 그대로.
   const { page } = await newPage(browser, srv.base, { viewport: { width: 390, height: 800 }, ls: { 'instatoon.helpSeen': '1' } });
-  await page.goto(srv.base + '/'); await page.waitForTimeout(500);
+  await page.goto(srv.base + '/make/'); await page.waitForTimeout(500);
   C.ok(await page.evaluate(() => !document.querySelector('#newDev') && !/백업 불러오기/.test(document.querySelector('#main').textContent)), '새 기기: 홈에 "백업 불러오기" 줄이 없음');
   C.ok(await page.evaluate(() => !document.querySelector('#makeHint').hidden && /"어떤 가게예요\?"를 먼저 골라 주세요/.test(document.querySelector('#makeHint').textContent)), '가게(업종)가 비었을 때: 폼 안에 "어떤 가게예요?를 먼저 골라 주세요" 한 줄 안내');
   await page.evaluate(() => { S.info.type = '카페'; save(); }); await page.waitForTimeout(150);
@@ -184,7 +184,7 @@ for (const [vk, w] of [['PC 1300', 1300], ['PC 1024', 1024], ['태블릿 768', 7
       const closed = await page.evaluate(() => ({ w: document.querySelector('#menuWrap').hidden, mb: document.querySelector('#menuBtn').getBoundingClientRect().height }));
       await page.click('#menuBtn'); await page.waitForTimeout(350);
       const o = await page.evaluate(() => { const p = document.querySelector('#menuPanel'), items = [...p.querySelectorAll('.mi')], cur = p.querySelector('[aria-current="page"]'); return { items: items.map((e) => e.textContent.trim()).join(','), hrefs: items.map((e) => e.getAttribute('href')).join(','), cur: cur && cur.textContent.trim(), slot: p.firstElementChild.id === 'shopSlot' && p.firstElementChild.hidden, on: document.querySelector('#menuWrap').classList.contains('on') }; });
-      C.ok(closed.w && closed.mb === 40 && o.on && o.items === MENU_ITEMS && o.hrefs === '/,/#month,/#vault,/guide/,/#intro,/#backup,/#help' && o.slot && (o.cur || null) === curText, `${vk} ${name}: ☰ 메뉴가 홈과 같은 항목·순서로 열리고 링크가 맞음 (현재 표시: ${o.cur || '없음'})`);
+      C.ok(closed.w && closed.mb === 40 && o.on && o.items === MENU_ITEMS && o.hrefs === '/,/make/,/make/#month,/make/#vault,/guide/,/make/#intro,/make/#backup,/make/#help' && o.slot && (o.cur || null) === curText, `${vk} ${name}: ☰ 메뉴가 홈과 같은 항목·순서로 열리고 링크가 맞음 (현재 표시: ${o.cur || '없음'})`);
       await page.keyboard.press('Escape'); await page.waitForTimeout(300);
       C.ok(await page.evaluate(() => document.querySelector('#menuWrap').hidden), `${vk} ${name}: Esc로 메뉴가 닫힘`);
       await page.click('#menuBtn'); await page.waitForTimeout(300); await page.mouse.click(6, 500); await page.waitForTimeout(300);
@@ -196,7 +196,7 @@ for (const [vk, w] of [['PC 1300', 1300], ['PC 1024', 1024], ['태블릿 768', 7
   const routes = [['#month', () => S.mode === 'month'], ['#backup', () => !!document.querySelector('#bkWin') && !document.querySelector('#bkWin').hidden], ['#vault', () => !!document.querySelector('#vaultSheet') && !document.querySelector('#vaultSheet').hidden], ['#help', () => !!document.querySelector('#tour')]];
   for (const [h, fn] of routes) {
     const { page, errors } = await newPage(browser, srv.base, { viewport: { width: 1300, height: 800 }, ls: { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST' } });
-    await page.goto(srv.base + '/' + h); await page.waitForTimeout(700);
+    await page.goto(srv.base + '/make/' + h); await page.waitForTimeout(700);
     C.ok(await page.evaluate(fn), `주소 /${h}로 들어오면 해당 화면이 바로 열림`) ; C.ok(!errors.length, `/${h}: 페이지 오류 없음${errors[0] ? ' ← ' + errors[0] : ''}`);
     await page.close();
   }
@@ -205,7 +205,7 @@ for (const [vk, w] of [['PC 1300', 1300], ['PC 1024', 1024], ['태블릿 768', 7
   for (const mode of ['reels', 'stats']) {
     const st = { step: 'input', mode, info: { type: '빵집', name: '옛 가게' }, toon: { title: '옛 편', cuts: [], reel: { caption: '옛 릴스 글', hashtags: '#a', comment: '' } }, history: [{ hid: '1', title: '옛 편', stats: { like: 3, save: 2 } }], reuse: { sec: 4 } };
     const { page, errors } = await newPage(browser, srv.base, { viewport: { width: 1300, height: 800 }, ls: { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST', 'instatoonRoom.v4': JSON.stringify(st) } });
-    await page.goto(srv.base + '/'); await page.waitForTimeout(600);
+    await page.goto(srv.base + '/make/'); await page.waitForTimeout(600);
     const r = await page.evaluate(() => ({ mode: S.mode, home: !!document.querySelector('#makeBtn'), reel: S.toon.reel.caption, like: S.history[0].stats.like, reuse: S.reuse.sec, block: /지난 편 반응/.test(statsBlock()) }));
     C.ok(r.mode === 'one' && r.home && r.reel === '옛 릴스 글' && r.like === 3 && r.reuse === 4 && r.block && !errors.length, `옛 작업(mode=${mode}): 오류 없이 홈으로 열리고 릴스 글·반응 기록·한 달 기획용 반응 요약이 그대로`);
     await page.close();
@@ -299,7 +299,7 @@ for (const [vk, w] of [['PC 1300', 1300], ['PC 1024', 1024], ['태블릿 768', 7
 { // 4b 수정: 본문 폭을 위쪽 줄(API 키 줄·단계 탭)과 맞추고, PC·태블릿에서는 1단계 입력칸을 2열로
   for (const [vk, vp] of [['PC 1300', { width: 1300, height: 900 }], ['태블릿 768', { width: 768, height: 1000 }], ['휴대폰 390', { width: 390, height: 844 }]]) {
     const { page, errors } = await newPage(browser, srv.base, { viewport: vp, ls: { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST' } });
-    await page.goto(srv.base + '/'); await page.waitForTimeout(500);
+    await page.goto(srv.base + '/make/'); await page.waitForTimeout(500);
     const edges = () => page.evaluate(() => { const r = (el) => { const b = el.getBoundingClientRect(); return [Math.round(b.left), Math.round(b.right)]; }; const side = document.querySelector('#side'), main = document.querySelector('#main'), key = document.querySelector('#keyBox'), steps = document.querySelector('#steps');
       const m = r(main), sv = side && !side.hidden && getComputedStyle(side).display !== 'none' && side.getBoundingClientRect().width > 0 ? r(side) : null; return { key: r(key), steps: r(steps), body: [m[0], sv ? Math.max(m[1], sv[1]) : m[1]], ov: document.documentElement.scrollWidth - innerWidth }; });
     const same = (e, label) => C.ok(Math.abs(e.body[0] - e.key[0]) <= 1 && Math.abs(e.body[1] - e.key[1]) <= 1 && (e.steps[1] === e.steps[0] || (Math.abs(e.steps[0] - e.key[0]) <= 1 && Math.abs(e.steps[1] - e.key[1]) <= 1)) && e.ov <= 1, `${vk} ${label}: 본문 왼쪽·오른쪽 끝이 위쪽 줄(API 키 줄·단계 탭)과 같음 (본문 ${e.body} / 위쪽 ${e.key})`);
@@ -339,7 +339,7 @@ for (const [vk, w] of [['PC 1300', 1300], ['PC 1024', 1024], ['태블릿 768', 7
   }
 }
 { // 3단계: 한 편을 끝냈을 때 "이 편까지 백업 저장" 안내를 편마다 한 번 (4b)
-  const open1 = async () => { const h = await newPage(browser, srv.base, { viewport: { width: 1300, height: 900 }, ls: { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST' } }); await h.page.goto(srv.base + '/'); await h.page.waitForTimeout(400);
+  const open1 = async () => { const h = await newPage(browser, srv.base, { viewport: { width: 1300, height: 900 }, ls: { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST' } }); await h.page.goto(srv.base + '/make/'); await h.page.waitForTimeout(400);
     await h.page.evaluate(() => { S = demoState('bakery'); S.demo = false; S.mode = 'one'; S.step = 'post'; S.toon.pics = []; delete S.toon.bkAsk; save(); render(); }); await h.page.waitForTimeout(250); return h; };
   const addAll = (page) => page.evaluate(async () => { const mk = () => new Promise((res) => { const c = document.createElement('canvas'); c.width = c.height = 8; c.getContext('2d').fillStyle = '#888'; c.getContext('2d').fillRect(0, 0, 8, 8); c.toBlob(res, 'image/png'); }); const fs = []; for (let i = 0; i < cuts().length; i++) fs.push(new File([await mk()], `${i + 1}.png`, { type: 'image/png' })); await addPics(fs, 'toon'); });
   const a = await open1();

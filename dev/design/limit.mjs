@@ -17,7 +17,7 @@ await page.route(/generativelanguage\.googleapis\.com\/v1beta\/models\/[^:]+:gen
   const step = plan.shift() || { s: 200, b: okBody };
   return r.fulfill({ status: step.s, contentType: 'application/json', body: JSON.stringify(step.b) });
 });
-await page.goto(srv.base + '/'); await page.waitForTimeout(500);
+await page.goto(srv.base + '/make/'); await page.waitForTimeout(500);
 await page.evaluate(() => { S = demoState('bakery'); S.demo = false; S.mode = 'one'; S.step = 'input'; S.toon = null; S.info.story = '지켜야 하는 이야기'; save(); });
 const run = async () => page.evaluate(async () => { try { await makeToon(); return { ok: true, n: cuts().length, st: document.querySelector('#st-make')?.textContent || '' }; } catch (e) { return { ok: false, e: String(e && e.message || e) }; } });
 const stMsg = () => page.evaluate(() => document.querySelector('#st-make')?.textContent || '');

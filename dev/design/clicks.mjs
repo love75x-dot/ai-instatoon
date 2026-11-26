@@ -8,7 +8,7 @@ const LS = { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST' };
 
 for (const [vk, vp] of [['PC 1300', { width: 1300, height: 900 }], ['휴대폰 390', { width: 390, height: 844 }]]) {
   const { page, errors } = await newPage(browser, srv.base, { viewport: vp, ls: LS });
-  await page.goto(srv.base + '/'); await page.waitForTimeout(500);
+  await page.goto(srv.base + '/make/'); await page.waitForTimeout(500);
 
   // 1) 웹툰 테마: 전부 눌러서 선택·요약줄 이름/썸네일·프롬프트가 바뀌는지
   await page.click('#artsBox summary'); await page.waitForTimeout(150);
@@ -80,7 +80,7 @@ for (const [vk, vp] of [['PC 1300', { width: 1300, height: 900 }], ['휴대폰 3
 // 4) 내 가게 설정: 홈의 "내 가게 설정 ›" → 창이 열리고, 안의 버튼(목록으로, 닫기)이 눌림
 {
   const { page, errors } = await newPage(browser, srv.base, { viewport: { width: 390, height: 844 }, ls: LS });
-  await page.goto(srv.base + '/'); await page.waitForTimeout(400);
+  await page.goto(srv.base + '/make/'); await page.waitForTimeout(400);
   await page.click('#main [data-shop="settings"]'); await page.waitForTimeout(250);
   C.ok(await page.evaluate(() => { const w = document.getElementById('shopSheet'); return !!w && !w.hidden && w.querySelector('h2').textContent === '내 가게 설정'; }), '내 가게 설정 › 눌림 → 설정 창 열림');
   await page.fill('#pf-voice', '다정한 존댓말'); await page.waitForTimeout(100);

@@ -25,7 +25,7 @@ const srv = await serve(); const browser = await launch();
 
 async function loaded(seed, opts = {}) {
   const h = await newPage(browser, srv.base, { ...opts, ls: { ...SEEN, ...seed } });
-  await h.page.goto(srv.base + '/'); await h.page.waitForTimeout(500);
+  await h.page.goto(srv.base + '/make/'); await h.page.waitForTimeout(500);
   return h;
 }
 const snapshot = (page) => page.evaluate(() => ({ S: JSON.parse(JSON.stringify(S)), prompts: { setup: setupPrompt(), cuts: cuts().map((c, i) => cutPrompt(c, i)), end: endPrompt(), sheets: peopleIdx().map((k) => sheetPrompt(k)) } }));

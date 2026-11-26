@@ -1,6 +1,7 @@
 {
   "sitemapLocs": [
     "https://www.ai-instatoon.com/",
+    "https://www.ai-instatoon.com/make/",
     "https://www.ai-instatoon.com/guide/",
     "https://www.ai-instatoon.com/guide/store-story-to-instatoon/",
     "https://www.ai-instatoon.com/guide/customer-questions-to-content/",
@@ -51,6 +52,13 @@
       "status": 200,
       "canonical": "https://www.ai-instatoon.com/",
       "ogUrl": "https://www.ai-instatoon.com/",
+      "robots": "index,follow",
+      "title": "인스타툰 프롬프트: GPT·제미나이에 붙여 넣는 기획·캐릭터·그림 문장 | 인스타툰 연재실"
+    },
+    "/make/": {
+      "status": 200,
+      "canonical": "https://www.ai-instatoon.com/make/",
+      "ogUrl": "https://www.ai-instatoon.com/make/",
       "robots": "index,follow",
       "title": "인스타툰 연재실"
     },

@@ -6,7 +6,7 @@ import { serve, launch, newPage, checker } from '../lib/harness.mjs';
 const C = checker();
 const srv = await serve(); const browser = await launch();
 const { page: pg, errors } = await newPage(browser, srv.base, { viewport: { width: 1300, height: 900 }, ls: { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST' }, freeze: false });
-await pg.goto(srv.base + '/'); await pg.waitForTimeout(600);
+await pg.goto(srv.base + '/make/'); await pg.waitForTimeout(600);
 
 // 옛 작업: 에피소드 흐름 칸에 내용을 적어 둔 상태
 await pg.evaluate(() => { S = demoState('bakery'); S.demo = false; S.mode = 'one'; S.step = 'input'; S.info.kind = 'daily';

@@ -8,7 +8,7 @@ const C = checker();
 const srv = await serve(); const browser = await launch();
 const PC = { width: 1300, height: 900 }, MOB = { width: 390, height: 844 };
 const withKey = { 'instatoon.helpSeen': '1', 'instatoon.key': 'TEST' };
-const open = async (vp, ls = withKey) => { const h = await newPage(browser, srv.base, { viewport: vp, ls }); await h.page.goto(srv.base + '/'); await h.page.waitForTimeout(500); return h; };
+const open = async (vp, ls = withKey) => { const h = await newPage(browser, srv.base, { viewport: vp, ls }); await h.page.goto(srv.base + '/make/'); await h.page.waitForTimeout(500); return h; };
 const png = (n, seed) => { const b = crypto.randomBytes(n); b[0] = 0x89; b[1] = 0x50; b[2] = 0x4e; b[3] = 0x47; return b; };
 
 for (const [vk, vp] of [['PC 1300', PC], ['휴대폰 390', MOB]]) {
@@ -120,7 +120,7 @@ for (const [vk, vp] of [['PC 1300', PC], ['휴대폰 390', MOB]]) {
   C.ok(r.same && r.n === 3 && r.noLink, '옛 작업(주인공 3명 + 조연 글): 열어서 1단계를 그려도 데이터가 한 글자도 안 바뀌고 새 필드가 생기지 않음');
   C.ok(r.noVaultTxt && /^첨부한 이미지는 순서대로 1번 주인공\(/.test(r.attach) && r.rule7, '옛 작업: 보관함 문장이 하나도 끼어들지 않음(첨부 줄·조연 7번 규칙 그대로)');
   // 저장소를 못 쓰는 브라우저(IndexedDB 없음)에서도 앱이 멀쩡하고 보관함은 안내만
-  const h = await newPage(browser, srv.base, { viewport: MOB, ls: withKey, noIDB: true }); await h.page.goto(srv.base + '/'); await h.page.waitForTimeout(500);
+  const h = await newPage(browser, srv.base, { viewport: MOB, ls: withKey, noIDB: true }); await h.page.goto(srv.base + '/make/'); await h.page.waitForTimeout(500);
   await h.page.evaluate(() => openVault({})); await h.page.waitForTimeout(150);
   C.ok(await h.page.locator('#vaultSheet').innerText().then((t) => /보관함을 쓸 수 없어요/.test(t)) && h.errors.length === 0, 'IndexedDB가 없으면 보관함은 안내만 하고 앱은 정상 동작');
   C.ok(errors.length === 0, `옛 작업: 페이지 오류 없음 ${errors.slice(0, 2)}`);

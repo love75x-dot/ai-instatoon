@@ -7,7 +7,7 @@ import { pathToFileURL } from 'node:url';
 import { launch, checker, root } from '../lib/harness.mjs';
 
 const C = checker();
-const file = fs.readFileSync(path.join(root, 'site', 'instatoon.html'), 'utf8'), dep = fs.readFileSync(path.join(root, 'deploy', 'index.html'), 'utf8');
+const file = fs.readFileSync(path.join(root, 'site', 'instatoon.html'), 'utf8'), dep = fs.readFileSync(path.join(root, 'deploy', 'make', 'index.html'), 'utf8');
 C.ok(!/["'(]\/assets\//.test(file) && /["'(]assets\//.test(file), '파일 버전에는 절대 주소(/assets/)가 없고 상대 주소(assets/…)만 있음');
 C.ok(/(src|href)="\/assets\//.test(dep) && !/(src|href)="assets\//.test(dep) && !/url\(assets\//.test(dep), '배포 버전은 절대 주소(/assets/…) 그대로(상대 주소 없음)');
 

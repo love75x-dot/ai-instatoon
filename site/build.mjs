@@ -37,9 +37,9 @@ const head = [
   '<meta name="description" content="분야와 내 이야기만 입력하면 인스타툰 기획·대본·컷 구성까지 정리해 주는 도구. 인스타툰 제작 가이드도 함께 제공합니다.">',
   '<meta name="robots" content="index,follow">',
   `<meta name="theme-color" content="${THEME_COLOR}">${NAVER_VERIFY}<link rel="manifest" href="/manifest.webmanifest">`,
-  '<link rel="canonical" href="https://www.ai-instatoon.com/">',
+  '<link rel="canonical" href="https://www.ai-instatoon.com/make/">',
   '<meta property="og:type" content="website"><meta property="og:site_name" content="인스타툰 연재실"><meta property="og:locale" content="ko_KR">',
-  '<meta property="og:title" content="인스타툰 연재실"><meta property="og:description" content="분야와 내 이야기만 입력하면 인스타툰 기획·대본·컷 구성까지 정리해 주는 도구."><meta property="og:url" content="https://www.ai-instatoon.com/">',
+  '<meta property="og:title" content="인스타툰 연재실"><meta property="og:description" content="분야와 내 이야기만 입력하면 인스타툰 기획·대본·컷 구성까지 정리해 주는 도구."><meta property="og:url" content="https://www.ai-instatoon.com/make/">',
   `<meta property="og:image" content="${ogImageUrl}"><meta property="og:image:type" content="image/png"><meta property="og:image:width" content="${OG_IMAGE.width}"><meta property="og:image:height" content="${OG_IMAGE.height}"><meta property="og:image:alt" content="${OG_IMAGE.alt}"><meta property="og:image:secure_url" content="${ogImageUrl}"><link rel="image_src" href="${ogImageUrl}">`,
   `<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="${SITE_NAME}"><meta name="twitter:description" content="분야와 내 이야기만 입력하면 인스타툰 기획·대본·컷 구성까지 정리해 주는 도구."><meta name="twitter:image" content="${ogImageUrl}"><meta name="twitter:image:alt" content="${OG_IMAGE.alt}">`,
   gaSnippet(gaId(), { content_group: '인스타툰 제작 도구' }), // 측정 ID가 설정돼 있을 때만 삽입
@@ -56,7 +56,9 @@ console.log('JS 문법 OK');
 fs.writeFileSync(path.join(here, 'instatoon.html'), out.replace(/(["'(])\/assets\//g, '$1assets/'));
 const dep = path.join(here, '..', 'deploy');
 fs.mkdirSync(dep, { recursive: true });
-fs.writeFileSync(path.join(dep, 'index.html'), out);
+// 2026-11-26: 첫 화면(/)은 인스타툰 프롬프트 페이지(guide/prompts-page.mjs), 기존 도구는 /make/ 로 옮김
+fs.mkdirSync(path.join(dep, 'make'), { recursive: true });
+fs.writeFileSync(path.join(dep, 'make', 'index.html'), out);
 for (const f of ['favicon.svg', 'favicon.ico', 'favicon-32x32.png', 'apple-touch-icon.png']) fs.copyFileSync(path.join(here, f), path.join(dep, f));
 // 이미지(샘플 그림·공유 이미지·아이콘)와 홈 화면 추가용 manifest
 fs.cpSync(path.join(here, 'assets'), path.join(dep, 'assets'), { recursive: true, filter: (p) => { const q = p.split(path.sep).join('/'); return !q.includes('/examples/src') && (cvsOn || !/\/intro\/ex-cvs/.test(q)); } }); // 예시 그림 원본(examples/src)은 배포에 넣지 않는다. 샘플 그림·공유 이미지·아이콘·글꼴(assets/fonts)
@@ -65,6 +67,6 @@ fs.copyFileSync(path.join(here, 'manifest.webmanifest'), path.join(dep, 'manifes
 fs.copyFileSync(path.join(here, '_headers'), path.join(dep, '_headers'));
 // 영구 이동 주소(합친 글의 옛 주소 → 새 주소, 301): 원본은 site/_redirects
 fs.copyFileSync(path.join(here, '_redirects'), path.join(dep, '_redirects'));
-console.log('instatoon.html, deploy/index.html, deploy/favicon.* · apple-touch-icon.png · assets/ · manifest · _headers · _redirects 생성 완료');
+console.log('instatoon.html, deploy/make/index.html, deploy/favicon.* · apple-touch-icon.png · assets/ · manifest · _headers · _redirects 생성 완료');
 
 await import('./guide/build-guide.mjs');

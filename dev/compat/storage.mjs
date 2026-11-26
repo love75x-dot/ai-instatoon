@@ -23,7 +23,7 @@ const DATA = (k) => k.startsWith('instatoon') && !k.startsWith('instatoon.storag
 const info = (page) => page.evaluate(() => ({ mode: kv.mode, state: kv.state, flag: localStorage.getItem('instatoon.storage.verified'), lsData: Object.keys(localStorage).filter((k) => k.startsWith('instatoon') && !k.startsWith('instatoon.storage.')), S: JSON.parse(JSON.stringify(S)) }));
 const idbDump = (page) => page.evaluate(() => new Promise((res) => { const r = indexedDB.open('instatoonStore', 1); r.onsuccess = () => { const q = r.result.transaction('kv').objectStore('kv').getAll(); q.onsuccess = () => { const o = {}; q.result.forEach((x) => { o[x.k] = x.v; }); res(o); }; }; r.onerror = () => res(null); }));
 const meta = (d) => (d && d.__meta ? JSON.parse(d.__meta) : null);
-const boot = async (opts = {}, url = '/') => { const h = await newPage(browser, srv.base, opts); await h.page.goto(srv.base + url); await h.page.waitForTimeout(700); return h; };
+const boot = async (opts = {}, url = '/make/') => { const h = await newPage(browser, srv.base, opts); await h.page.goto(srv.base + url); await h.page.waitForTimeout(700); return h; };
 const reload = async (page) => { await page.evaluate(() => kv.flush()); await page.waitForTimeout(250); await page.reload(); await page.waitForTimeout(700); };
 const prompts = (page) => page.evaluate(() => ({ setup: setupPrompt(), cuts: cuts().map((c, i) => cutPrompt(c, i)), end: endPrompt(), sheets: peopleIdx().map((k) => sheetPrompt(k)) }));
 const seedKeys = Object.keys(ls).filter(DATA);
@@ -89,7 +89,7 @@ const seedKeys = Object.keys(ls).filter(DATA);
 {
   const init = () => { const p = IDBObjectStore.prototype.put; IDBObjectStore.prototype.put = function (v, k) { if (sessionStorage.getItem('__corrupt') && v && v.k === 'instatoonRoom.v4') v = { k: v.k, v: v.v.slice(0, -5) }; return p.call(this, v, k); }; };
   const h = await newPage(browser, srv.base, { ls }); await h.page.addInitScript(init); await h.page.addInitScript(() => { if (!sessionStorage.getItem('__seeded2')) { sessionStorage.setItem('__seeded2', '1'); sessionStorage.setItem('__corrupt', '1'); } });
-  await h.page.goto(srv.base + '/'); await h.page.waitForTimeout(800);
+  await h.page.goto(srv.base + '/make/'); await h.page.waitForTimeout(800);
   const i = await info(h.page);
   C.ok(i.mode === 'ls' && i.state === 'failed' && i.flag === null, `복사본이 원본과 다르면 이전을 실패 처리하고 기존 저장소로 계속 동작 (모드 ${i.mode}, 상태 ${i.state})`);
   C.ok(seedKeys.every((k) => i.lsData.includes(k)) && !missing(exp.full.S, i.S) && !h.errors.length, '실패해도 원본 데이터와 화면은 그대로이고 오류 없음');
@@ -103,7 +103,7 @@ const seedKeys = Object.keys(ls).filter(DATA);
 {
   const init = () => { let n = 0; const p = IDBObjectStore.prototype.put; IDBObjectStore.prototype.put = function (v, k) { if (sessionStorage.getItem('__abort') && ++n === 2) throw new DOMException('중단', 'DataError'); return p.call(this, v, k); }; };
   const h = await newPage(browser, srv.base, { ls }); await h.page.addInitScript(init); await h.page.addInitScript(() => { if (!sessionStorage.getItem('__seeded3')) { sessionStorage.setItem('__seeded3', '1'); sessionStorage.setItem('__abort', '1'); } });
-  await h.page.goto(srv.base + '/'); await h.page.waitForTimeout(800);
+  await h.page.goto(srv.base + '/make/'); await h.page.waitForTimeout(800);
   const i = await info(h.page), d = await idbDump(h.page);
   C.ok(i.mode === 'ls' && Object.keys(d || {}).length === 0 && seedKeys.every((k) => i.lsData.includes(k)) && !missing(exp.full.S, i.S), '이전 도중 중단되면 새 저장소에는 반쪽 데이터가 남지 않고(트랜잭션 취소) 원본·화면은 그대로');
   await h.page.evaluate(() => sessionStorage.removeItem('__abort')); await h.page.reload(); await h.page.waitForTimeout(900);
@@ -117,7 +117,7 @@ const seedKeys = Object.keys(ls).filter(DATA);
   const mkPage = async () => { const p = await ctx.newPage(); p.on('pageerror', (e) => errs.push(e.message)); await p.route('**/*', (r) => (r.request().url().startsWith(srv.base) ? r.continue() : r.fulfill({ status: 200, body: '' }))); return p; };
   const p0 = await mkPage(); await p0.goto(srv.base + '/guide/'); await p0.evaluate((seed) => { localStorage.clear(); Object.entries(seed).forEach(([k, v]) => localStorage.setItem(k, v)); }, ls);
   const a = await mkPage(), b = await mkPage();
-  await Promise.all([a.goto(srv.base + '/'), b.goto(srv.base + '/')]); await a.waitForTimeout(1200);
+  await Promise.all([a.goto(srv.base + '/make/'), b.goto(srv.base + '/make/')]); await a.waitForTimeout(1200);
   const ia = await info(a), ib = await info(b), d = await idbDump(a), m = meta(d);
   C.ok(ia.mode === 'idb' && ib.mode === 'idb' && ['verified', 'cleaned'].includes(m.state) && m.tries === 1, `탭 두 개가 동시에 열려도 한 번만 안전하게 이전됨 (탭A ${ia.state}, 탭B ${ib.state}, 시도 ${m.tries}번)`);
   C.ok(Object.keys(d).filter((k) => k !== '__meta').length === seedKeys.length && !missing(exp.full.S, ia.S) && !missing(exp.full.S, ib.S) && !errs.length, '두 탭 모두 작업이 그대로이고 항목 누락·중복·오류 없음' + (errs[0] ? ' ← ' + errs[0] : ''));
@@ -126,7 +126,7 @@ const seedKeys = Object.keys(ls).filter(DATA);
 // 8) IndexedDB 없음 / 열기 실패 → 기존 저장소 그대로
 for (const [label, opts, init] of [['IndexedDB 없음', { noIDB: true }, null], ['IndexedDB 열기 실패', {}, () => { indexedDB.open = () => { const r = {}; setTimeout(() => r.onerror && r.onerror(new Event('error')), 0); return r; }; }]]) {
   const h = await newPage(browser, srv.base, { ls, ...opts }); if (init) await h.page.addInitScript(init);
-  await h.page.goto(srv.base + '/'); await h.page.waitForTimeout(800);
+  await h.page.goto(srv.base + '/make/'); await h.page.waitForTimeout(800);
   const i = await info(h.page);
   C.ok(i.mode === 'ls' && i.flag === null && seedKeys.every((k) => i.lsData.includes(k)) && !missing(exp.full.S, i.S) && !h.errors.length, `${label}: 기존 저장소(localStorage)로 그대로 동작, 원본 변화·오류 없음`);
   await h.page.evaluate(() => { S.info.name = 'LS저장'; save(); }); await h.page.reload(); await h.page.waitForTimeout(700);
@@ -151,7 +151,7 @@ for (const [label, opts, init] of [['IndexedDB 없음', { noIDB: true }, null], 
 {
   const h = await newPage(browser, srv.base, { ls: { 'instatoon.helpSeen': '1' } });
   await h.page.addInitScript(() => { const p = IDBObjectStore.prototype.put; IDBObjectStore.prototype.put = function (v, k) { if (sessionStorage.getItem('__werr') && v && v.k === 'instatoonRoom.v4') throw new DOMException('quota', 'QuotaExceededError'); return p.call(this, v, k); }; });
-  await h.page.goto(srv.base + '/'); await h.page.waitForTimeout(700);
+  await h.page.goto(srv.base + '/make/'); await h.page.waitForTimeout(700);
   await h.page.evaluate(() => { sessionStorage.setItem('__werr', '1'); S = demoState('bakery'); S.demo = false; save(); kv.flush(); });
   await h.page.waitForTimeout(400);
   C.ok(await h.page.evaluate(() => /저장하지 못했어요/.test(document.querySelector('#savedTxt').textContent)), '새 저장소 쓰기가 실패하면 "저장하지 못했어요"로 알려 줌');
@@ -195,7 +195,7 @@ for (const [label, init, want, txt] of [
   ['요청 중 오류', () => { const s = navigator.storage; s.persisted = () => Promise.resolve(false); s.persist = () => Promise.reject(new Error('오류')); }, 'unsupported', /지원하지 않아요/],
 ]) {
   const h = await newPage(browser, srv.base, { ls }); const pops = []; h.page.on('dialog', (dlg) => { pops.push(dlg.type()); dlg.dismiss(); }); await h.page.addInitScript(init);
-  await h.page.goto(srv.base + '/'); await h.page.waitForTimeout(900);
+  await h.page.goto(srv.base + '/make/'); await h.page.waitForTimeout(900);
   await h.page.evaluate(() => toggleHelp(true)); await h.page.waitForTimeout(200);
   const r = await h.page.evaluate(() => ({ persist: kv.persist, state: kv.state, text: document.querySelector('#kvInfo').textContent, visibleDialog: !!document.querySelector('dialog[open]'), toast: document.querySelector('#toast').classList.contains('show') && /보호/.test(document.querySelector('#toast').textContent) }));
   C.ok(r.persist === want && txt.test(r.text) && r.state === 'verified' && !pops.length && !r.visibleDialog && !r.toast && !h.errors.length, `저장 보호 요청(${label}): "저장소 상태"에만 조용히 표시(${r.persist}), 팝업·오류 없이 이전·동작 정상`);

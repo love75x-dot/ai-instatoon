@@ -18,7 +18,7 @@ const seed = `(async () => {
 const open = async (vp = PC) => {
   const h = await newPage(browser, srv.base, { viewport: vp, ls: withKey, freeze: false });
   await h.ctx.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: srv.base });
-  await h.page.goto(srv.base + '/'); await h.page.waitForTimeout(500); await h.page.evaluate(seed); await h.page.waitForTimeout(400); return h;
+  await h.page.goto(srv.base + '/make/'); await h.page.waitForTimeout(500); await h.page.evaluate(seed); await h.page.waitForTimeout(400); return h;
 };
 // Windows 크롬은 클립보드에서 줄바꿈을 CRLF로 돌려주므로 LF로 맞춰 비교한다
 const clip = (pg) => pg.evaluate(async () => (await navigator.clipboard.readText()).replace(/\r\n/g, '\n'));
